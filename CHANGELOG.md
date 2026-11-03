@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Draft hardware requirements HW-001..009 and mechanical requirements MECH-001..006 with test case stubs TC-201..209 and TC-301..306 (no CAD work done; values in brackets are proposals).
 - Goldfish readiness pass recorded in RV-001: verdict NO-GO with ranked blockers; plan 02 header and ARCH note brought up to date.
 - Draft key-management document (`docs/regulatory/technical-file/05-cybersecurity/key-management.md`): key inventory, signing rules, production steps, rotation and recovery; owner review pending.
 - Draft requirements SYS-043 (secure boot and flash encryption), SYS-044 (SBOM), SYS-045 (vulnerability handling, 5-year support), SYS-046 (recovery of locked units), SW-001..004 (input limits, session limit, fuzz tests, image confirmation) with test case stubs TC-043..046 and TC-101..104; SYS-026 now says what the 25 % margin refers to.
