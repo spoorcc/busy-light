@@ -9,7 +9,7 @@ Process rules: `docs/process/README.md`.
 
 ### SW-001 Input limits of the extractor and mapper
 
-- **Statement:** The extractor and mapper shall accept at most [8] KiB of input text per message, a path depth of at most [8], a path length of at most [64] characters and at most [16] table rows per source, and shall reject anything larger with an error, without crashing or waiting.
+- **Statement:** The extractor and mapper shall accept at most [8] KiB of input text per message, a path depth of at most [8], a path length of at most [64] characters, a document nesting of at most [32] levels (also in parts that are skipped), numbers as 32-bit integers or decimals with at most [6] fractional digits (numbers with an exponent are not accepted as a target), and at most [16] table rows per source, and shall reject anything larger with an error, without crashing or waiting.
 - **Rationale:** Bounded input keeps memory and time bounded (ADR-0005 item 3). Oversize input from a source that the user or a network peer controls must not stop the device.
 - **Parent:** SYS-005, SYS-008
 - **Acceptance criteria:** For every limit, an input one unit over the limit is rejected with a named error and an input at the limit is accepted. The run time on the maximum input is at most [50] ms on the target (measured in spike 7.1). No allocation from the heap happens during extraction.
