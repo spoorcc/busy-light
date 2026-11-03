@@ -68,5 +68,26 @@ The owner approved the move from the v4.2.0 pin to `v4.5.0` (newest release; no 
 4. **SYS-012:** the driver allows 5 clients. Either our code enforces one client, or a small driver change is needed (a DEV record).
 5. **Plan 03 A2:** the pinned release is now v4.5.0; the second run on a newer release is no longer needed.
 
-## Still not done
+## Still not done (as of Pass 2; see Pass 3)
 No `west update` (hal_espressif and the blobs not fetched), no build, no check of the PSA crypto setting for TLS, no read of the MCUboot Espressif port's Kconfig for swap mode and key count, no run of any sample. These need the full workspace; `west update` downloads several hundred MB, so I did not run it without asking.
+
+## Pass 3: full workspace at v4.5.0 (2026-11-03)
+A west workspace was created in the session scratchpad from the committed manifest (`de34f23`, Zephyr `v4.5.0`) and updated with a project filter (Zephyr, hal_espressif, mcuboot, mbedtls, hostap, psa-arch-tests; shallow; about 890 MB). The Wi-Fi binary blobs were not fetched. No toolchain (Zephyr SDK) is installed, so nothing was built.
+
+| Item | Finding | Class | Effect |
+|------|---------|-------|--------|
+| TLS library | The bundled Mbed TLS is version **4.1.1**, and Zephyr's Mbed TLS Kconfig is written in terms of `PSA_WANT_*` options | in source | TLS in v4.5.0 is PSA-based. The legacy `mbedtls_*` crypto API is gone from Mbed TLS 4. E5 and the key code must use PSA keys (this also decides how the device key is stored, ADR-0008) |
+| MCUboot version and swap modes | MCUboot 2.5.0 (`725d63c`). Zephyr offers swap using scratch, move, offset, overwrite-only, direct XIP (with revert) and others | in source | Swap using move or offset needs no scratch partition and is the better fit for 4 MB; the choice and its time are E9 / E2 |
+| Keys in the bootloader | The Espressif MCUboot port compiles in **one** public key (`bootutil_key_cnt = 1`, one entry chosen by the signature type) | in source | **ADR-0007's "backup release key in the bootloader if MCUboot supports several keys" is not supported by this port as it stands.** A second key needs a local change to `keys.c` (a DEV record) or a different recovery plan. With secure boot on, the bootloader cannot be changed over the air, so a lost or leaked release key means a hardware recall. This raises the importance of the key-management rules and may justify E (the Espressif bootloader), which was not checked for multiple keys |
+| Signature algorithm in the port | `CONFIG_ESP_SIGN_EC256`, `CONFIG_ESP_SIGN_RSA`, `CONFIG_ESP_SIGN_ED25519`; the C3 default file mentions `root-ec-p256.pem` and `CONFIG_SECURE_BOOT_V2_ENABLED` | in source | EC256 is a first-class option in the port |
+| Zephyr sysbuild | The C3 board makes MCUboot the default bootloader | in source | Consistent with Pass 2 |
+
+## What Pass 3 changes
+**Applied on 2026-11-03 on the owner's instruction** to ADR-0004, ADR-0006, ADR-0007, ADR-0008 and the key-management document (all still Proposed or Draft): items 1 to 5 of the Pass 2 list, items 6 and 7 below (6 as decided), and item 8 (swap-mode comparison in the ADR-0007 stage 2 checklist). Original wording of the proposals:
+
+6. **ADR-0007 item 2 and the key-management document:** the backup release key cannot sit in the bootloader without a local patch. **Decided by the owner on 2026-11-03: no patch; a lost or leaked release key means a recall of locked units.** ADR-0007, the key-management document and RISK-006 are updated.
+7. **ADR-0008:** the device key and certificate code must be written against PSA (Mbed TLS 4); the key record design (atomic record, checksum) stays, but key import/export uses PSA key attributes.
+8. **E9:** compare swap using move and offset first (no scratch partition).
+
+## Still not done
+No build (no SDK), no blobs, no run, no check of the Espressif-framework bootloader (option E) for multiple keys, no check that `ESP_FLASH_ENCRYPTION` plus the generic `boot/zephyr` MCUboot path is the one Zephyr uses for the C3 (the port in `boot/espressif` is the one that holds the key array shown above). The workspace is not kept in the repository.

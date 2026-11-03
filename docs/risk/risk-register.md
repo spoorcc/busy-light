@@ -68,7 +68,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Fleet cannot be fixed, or a hostile image is accepted
 - **Severity (1-5):** 5  **Likelihood (1-5):** 2  **Initial risk:** 10
 - **Mitigated by:** SYS-029, ARCH-010
-- **Residual risk (after mitigation):** Key-management document (G8) must exist before any unit leaves the owner. Backup key if MCUboot supports it.
+- **Residual risk (after mitigation):** Key-management document (G8) must exist before any unit leaves the owner. Owner decision 2026-11-03: accepted. The Espressif MCUboot port holds one key, so a lost or leaked release key means a recall of locked units. Two encrypted copies in separate places and a yearly test reduce the likelihood.
 - **Verified by:** TC-029
 - **Status:** Open
 
