@@ -42,7 +42,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 ### RISK-004 Brown-out reset when Wi-Fi peak and LED peak coincide
 
 - **Hazard / failure mode:** Random resets under load
-- **Cause:** Shared 500 mA budget; transmit peaks
+- **Cause:** Shared 500 mA budget; transmit peaks (paper budget 7.5: with the ESP32-C3-MINI-1 TX peak of 350 mA at 3.3 V, about 454 mA are used on the 3.3 V rail in the worst case, leaving 46 mA (LDO) or 148 mA (buck at 85 %) of the 500 mA for the LEDs; see `spike-7-5-power-budget-paper.md`)
 - **Effect:** Unit restarts, ring dark or frozen
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** SYS-020, SYS-027, ARCH-001, ARCH-014

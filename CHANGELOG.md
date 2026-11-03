@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added
+- Spike 7.5 paper power budget with datasheet sources: at 500 mA the Wi-Fi TX peak leaves 46 mA (LDO) to 148 mA (buck) for 16 LEDs; USB current-limit decision added to the owner guide.
 - Spike 7.1 E12 and E2b follow-up (build only): WPA2-Enterprise costs about +70 KB flash and +6 KB static RAM; the step-7 jump is flash padding; TLS heap can be reduced in builds that link.
 - Draft vulnerability handling and disclosure process (`05-cybersecurity/vulnerability-handling.md`); contact and legal entity open.
 - Owner review guide (`docs/plans/04-owner-review-guide.md`): approvals waiting, open decisions with recommendations, findings so far, side effects.
