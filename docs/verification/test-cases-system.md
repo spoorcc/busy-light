@@ -342,3 +342,90 @@
 - **Expected result / pass criteria:** see acceptance criteria of SYS-037
 - **Automated:** TBD
 - **Evidence:** TBD
+
+
+### TC-038 Wi-Fi range
+
+- **Verifies:** SYS-038
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-038
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-039 Web password rules
+
+- **Verifies:** SYS-039
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-039
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-040 Push request format
+
+- **Verifies:** SYS-040
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-040
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-041 Factory reset scope
+
+- **Verifies:** SYS-041
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-041
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-042 Stable device name
+
+- **Verifies:** SYS-042
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-042
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-043 Secure boot and flash encryption
+
+- **Verifies:** SYS-043
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-043
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-044 Software bill of materials
+
+- **Verifies:** SYS-044
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-044
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-045 Vulnerability handling and support period
+
+- **Verifies:** SYS-045
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-045
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-046 Recovery of a locked unit
+
+- **Verifies:** SYS-046
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-046
+- **Automated:** TBD
+- **Evidence:** TBD
+

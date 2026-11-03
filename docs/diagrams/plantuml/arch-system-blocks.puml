@@ -18,8 +18,8 @@ rectangle "Busy light (ESP32-C3 module, Zephyr)" {
   component "ARCH-004\nButton" as btn
 }
 
-user --> web : HTTP, config and\ncertificate upload
-jenkins --> src : HTTP POST status\n(token)
+user --> web : HTTPS on the LAN,\nHTTP in the access point;\nconfig and certificate upload
+jenkins --> src : HTTPS POST status\n(token)
 src --> jenkins : REST poll\n(HTTPS, basic auth)
 net --> lan : Wi-Fi, SNTP
 src --> map : raw value

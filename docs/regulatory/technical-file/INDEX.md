@@ -18,7 +18,7 @@ after placing on the market *(verify per act; CRA: longer if support period is l
 | 04 | Test reports: EMC, safety, radio, EMF, environmental; pre-compliance and accredited | `04-standards-and-testing/`, `docs/verification/reports/` | Open |
 | 05 | **SBOM** (machine-readable, e.g. SPDX/CycloneDX) per release | `05-cybersecurity/sbom/` | Open |
 | 05 | Vulnerability handling process + coordinated disclosure policy + contact; `security.txt` | `05-cybersecurity/` | Open |
-| 05 | Security update mechanism & support period; secure-by-default configuration; update test evidence | `05-cybersecurity/` | Open |
+| 05 | Security update mechanism & support period; secure-by-default configuration; update test evidence | `05-cybersecurity/` (key management: `05-cybersecurity/key-management.md`, Draft) | Open |
 | 05 | Evidence of conformity with CRA Annex I essential requirements; reporting procedure to CSIRT/ENISA | `05-cybersecurity/` | Open |
 | 06 | User instructions & safety information (Annex II CRA etc.), languages, installation, end-of-support date | `06-user-information-and-labelling/` | Open |
 | 06 | Labelling: type/batch/serial, manufacturer name+postal address, CE mark, WEEE symbol, ratings; label drawing | `06-user-information-and-labelling/` | Open |
