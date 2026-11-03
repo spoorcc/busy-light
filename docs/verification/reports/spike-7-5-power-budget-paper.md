@@ -404,3 +404,24 @@ These are proposals for the owner. I changed no requirement.
 - USB-IF specification text itself (U1 to U9 are from TI documents and snippets). VBUS tolerance (U10).
 - Real regulator efficiency, regulator quiescent current, and the current of the data buffer and other 3.3 V loads. They are not in the numbers.
 - Real behaviour of the product. Nothing here is measured. The bench test with a USB power meter (TC-020, TC-204) is still required.
+
+## 8. Addendum 2026-11-04: higher USB limits (owner decision: allow more if the source advertises it)
+Same script (`power_budget.py` as in section 3, unchanged), limit changed to 900 mA and 1350 mA (1500 mA minus the [10] % margin of SYS-020). Inputs and their "not found" gaps are the same as above. Worst case: TX 11b peak, 20 % margin, `i_cpu` 28 mA.
+
+| USB limit | Supply | Left for LEDs (mA) | Per LED (mA) | Full-white fraction A (WS2812C-2020) | B (SK6812MINI-E) | C (3535, range from the not-found `i_ch`) |
+|-----------|--------|--------------------|--------------|------------------|----|----|
+| 500 | LDO | 46.4 | 2.90 | 16 % | 5 % | 5..13 % |
+| 500 | buck 85 % | 147.8 | 9.24 | 58 % | 23 % | 21..55 % |
+| 900 | LDO | 446.4 | 27.90 | 100 % | 75 % | 69..100 % |
+| 900 | buck 85 % | 547.8 | 34.24 | 100 % | 92 % | 85..100 % |
+| 1350 | LDO | 896.4 | 56.03 | 100 % | 100 % | 100 % |
+| 1350 | buck 85 % | 997.8 | 62.36 | 100 % | 100 % | 100 % |
+
+(Fractions are capped at 100 %: 16 LEDs at full white need about 250 mA for variant A and about 590 mA for variant B at the datasheet currents, so a source that advertises 1.5 A never forces the limiter to dim.)
+
+Reading:
+- With a source that advertises at least 1.5 A the LED budget is not the constraint for any of the three LED types. The limiter is a safety net there.
+- The **default case (500 mA)** still decides the minimum design: only 5 to 23 % of full white for variant B with a buck at 500 mA, so any brightness target in SYS-001 must say at which source the target applies.
+- A source that advertises 900 mA (USB 3 default) gives full white for variant A and 75 to 92 % for variant B. The decision on SYS-020 uses the advertised value, so 900 mA is covered by the same rule.
+- Proposal for SYS-001 (not applied to the requirement text beyond the rationale note): state the brightness criterion at two operating points, the default source (500 mA) and a source advertising 1.5 A.
+- Not covered: the 5 V path losses (cable drop), the input capacitor inrush at a higher limit, thermal rise at the higher dissipation (RISK-005), and connector and track ratings (HW-003).

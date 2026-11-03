@@ -27,7 +27,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 ### SYS-001 Status indicator ring
 
 - **Statement:** The device shall show its status on a ring of [16] RGB LEDs, each LED controlled individually for colour and brightness.
-- **Rationale:** The ring is the only display; individual control allows levels and animations.
+- **Rationale:** The ring is the only display; individual control allows levels and animations. The brightness figure depends on the current that the source allows (SYS-020): at the default 500 mA the paper power budget leaves 5 to 58 % of full white depending on LED type, on a source that advertises 1.5 A the limiter does not dim (`spike-7-5-power-budget-paper.md`, section 8). The figure is therefore to be agreed at two operating points: the default source and a source advertising 1.5 A.
 - **Parent:** NEED-003
 - **Acceptance criteria:** Each LED can be set to any of 256 levels per colour channel, independently of the others (before the current limit of SYS-020 scales the frame), and with all LEDs at the status brightness the ring gives a luminous intensity of at least [to be set from the bench measurement in spike 7.5; working value 100 mcd per LED] measured at 0.5 m, and a person with normal colour vision can name the state colour at 2 m in 300 lux room light.
 - **Verification method:** Test
