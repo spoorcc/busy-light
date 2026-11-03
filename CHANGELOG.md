@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added
+- Spike 7.1 E1 build record: hello_world and Wi-Fi shell build for `esp32c3_devkitm` with Zephyr v4.5.0 and SDK 1.0.1 (build only; nothing flashed or run); default 4 MB flash layout and default signing key noted.
 - Desk-survey findings applied to the Proposed ADR-0004, 0006, 0007, 0008 and the key-management draft: SPI LED route, radio-first rule for keys and passphrases, PSA key handling, one-client access point, RSA-3072 secure-boot key vs EC256 release key, flash `write-block-size` and swap-mode checks.
 - Owner decision recorded: a lost or leaked release key means a recall of locked units (no second key in the bootloader); ADR-0007, key-management document and RISK-006 updated.
 - Spike 7.1 E0 pass 2: Zephyr v4.5.0 source read (AP+STA in the driver, WPA2-Enterprise mapped to the Espressif blob, SPI LED route, hardware random source needs the radio on, EC256 signing fits secure boot plus encryption).
