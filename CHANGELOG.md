@@ -15,6 +15,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ### Added
 - Owner input recorded: read USB-C CC with the ADC (ADR-0009) and have a hardware current limit; draft HW-010 and TC-210; ADR-0004 item 4 updated.
+- ADR-0010 (Proposed): hardware current limit on the USB input, recommends TPS2553 with a firmware-switched limit resistor (HW-010).
 - Draft RISK-024..026 from ADR-0009; ADR-0009 summarised in the owner guide.
 - Draft ADR-0009 (Proposed): USB-C power input and detection of the advertised source current; ADC read of the CC lines recommended, dedicated CC IC as fallback; cap value and ADC-or-IC choice left to the owner (SYS-020, HW-003).
 - Power budget addendum for 900 and 1350 mA limits; SYS-001 rationale notes that the brightness figure depends on the source's current.
