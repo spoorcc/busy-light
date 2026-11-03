@@ -106,6 +106,8 @@ Scores 0 to 5, my judgement from the evidence above. The weighted sums were comp
 Reading: A leads B by 9 points. That is inside my scoring error. A wins on cost, parts and area. B wins on margin, safe fallback and firmware effort. The decision therefore depends on the spike in "Verification", not on the table. E scores high because it does nothing and is excluded by the gate. It is also the fallback of A (firmware stays at [500] mA).
 
 ## Decision
+**Owner input of 2026-11-04: read the CC lines with the ADC (option A), and have a hardware current limit.** This ADR stays Proposed until the owner sets Accepted. The cap value ([1500] mA) was not answered and stays a working value. The hardware current limit is described in HW-010 (Draft): a current-limited load switch in the VBUS path whose limit starts at the default [500] mA in hardware and is raised by the firmware only after it has read a higher advertisement, so a wrong read cannot overload a source that advertises 500 mA unless the firmware also raises the limit.
+
 Recommend **A**: read both CC lines with two ADC1 inputs, no divider, with these rules. The owner decides; two points are open (marked **OPEN**).
 1. **CC termination:** two 5.1 kohm resistors to ground on CC1 and CC2, the only load on the CC lines (HW-003). Each CC line also goes to one ADC1 pin through a series resistor and an ESD diode or clamp sized in design. The series resistor must not shift the bands (value checked in the spike).
 2. **Pins:** two of GPIO0, GPIO1, GPIO3 (ADC1, not strapping, not USB). Final choice in the schematic, together with the LED data and button pins.

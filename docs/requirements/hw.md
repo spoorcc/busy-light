@@ -124,3 +124,15 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Must
 - **Status:** Draft
 
+### HW-010 Hardware current limit on the USB input
+
+- **Statement:** The board shall limit the current taken from the USB-C connector in hardware, with a current-limited load switch in the VBUS path whose limit is [500] mA at power-up and can be raised by the firmware, in steps, up to the allowed maximum of SYS-020 only after the advertised current has been read.
+- **Rationale:** Owner decision of 2026-11-04. A firmware-only limiter (ADR-0004) cannot protect a source that advertises little if the firmware fails or misreads the CC lines (RISK-003, RISK-025). The hardware limit is the backstop that does not depend on the firmware at start-up.
+- **Parent:** SYS-020
+- **Acceptance criteria:** With the firmware stopped (held in reset), the input current cannot exceed [500] mA plus the tolerance of the limit part, also with a short circuit on the LED supply. After the firmware has read an advertisement of 1.5 A it can raise the limit, and the input current can then reach the advertised value minus the margin. The limit part has an over-temperature and short-circuit behaviour that is stated in its datasheet (kept in `hw/datasheets/`). The added voltage drop and cost are within the budget of SYS-021 (cost of the part is stated in the BOM).
+- **Verification method:** Test
+- **Verified by:** TC-210
+- **Category:** Safety
+- **Regulatory:** EN 62368-1 *(verify)*
+- **Priority:** Must
+- **Status:** Draft

@@ -137,3 +137,11 @@
 - **Automated:** TBD
 - **Evidence:** TBD
 
+### TC-210 Hardware current limit on the USB input
+
+- **Verifies:** HW-010
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of HW-010
+- **Automated:** TBD
+- **Evidence:** TBD
