@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-002, NEED-018, SYS-003, SYS-004, SYS-016, SYS-031, SYS-034, SYS-035, SYS-026, ADR-0002; design doc `docs/plans/02-system-design.md` (section 4.8, gap G3)
 
 ## Context and problem
@@ -11,7 +11,7 @@ from Jenkins. The owner stated that the LAN can be shared with untrusted users (
 traffic and replay it. The device has no clock until SNTP succeeds (SYS-031), so any scheme that needs correct time cannot be the only protection.
 The device also has little RAM: an HTTPS server and an HTTPS client (Jenkins poll) can run at the same time (SYS-026).
 Not known yet (spike 7.1 on ESP32-C3): free RAM with two TLS sessions, time to create a key pair, and whether Zephyr's HTTP server accepts TLS sockets
-in the pinned revision.
+(in source at v4.5.0, E0 pass 2).
 
 ## Decision criteria
 | Criterion | Weight (1-5) | Source requirement |
@@ -88,7 +88,7 @@ Details fixed by this decision:
 - New risks (to add to the risk register): RAM exhaustion with two TLS sessions; private key stored unencrypted in flash on prototypes (see ADR-0007 for protection later);
   weak random source at first start (key quality); a device that answers on port 80 on the LAN by mistake; certificate lifetime logic for user certificates without a clock.
 - Requirements created or changed: SYS-034 and SYS-035 stay as drafted. SW-level requirements to be derived: listener binding per interface, key generation, fingerprint display,
-  TLS session limit. SYS-004 and SYS-016 should be read as "over the transport of SYS-034" (wording check in the next requirements pass).
+  TLS session limit (SW-002). SYS-004 and SYS-016 should be read as "over the transport of SYS-034" (wording check in the next requirements pass).
 
 ## Verification and revisit
 - Spike 7.1: measure free RAM with a TLS server session and a TLS client session open, and the time to create a P-256 key on the ESP32-C3. Decision stands if at least the SYS-026 margin remains; if not, revisit toward B for push plus C for the web interface with a one-session limit.

@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-014, NEED-010, SYS-021, SYS-022, SYS-023, SYS-028, ADR-0002; design doc `docs/plans/02-system-design.md` (section 4.3, spike 7.2)
 
 ## Context and problem
@@ -78,7 +78,7 @@ I do not recommend the final choice yet because the data is missing. If the owne
 - Positive: no redesign if A passes; known fallback if it fails; one board in both cases.
 - **Negative / trade-offs accepted:** the layout of the first board waits for the spike; the spike needs a mock ring (a few days, a few euros); B adds a manual step and cost.
 - New risks (to add to risk register): antenna detuning by LEDs or housing material; loose or wrong antenna in B; approval invalid if the antenna differs from the filed list; keep-out violated by a later layout change.
-- Requirements created or changed: a possible HW requirement for the keep-out and a range requirement (SYS-001 has no distance figure; **gap**: a range figure such as "10 m through one wall" must be set by the owner).
+- Requirements created or changed: a possible HW requirement for the keep-out and a range requirement (see SYS-038, HW-005 (working defaults)).
 
 ## Verification and revisit
 Spike 7.2 report in `docs/verification/`; the criterion above. Revisit when: first prototype range test fails, the housing material or ring diameter changes, the platform changes (ADR-0002), or the volume passes about 1000 units per year (then reconsider C).

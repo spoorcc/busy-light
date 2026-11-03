@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-004, NEED-006, NEED-007, SYS-004, SYS-005, SYS-006, SYS-007, SYS-008, SYS-009, SYS-025, SYS-026, SYS-032; design doc `docs/plans/02-system-design.md` (section 4.9)
 
 ## Context and problem
@@ -79,7 +79,7 @@ Open point for the owner: should push accept an arbitrary Jenkins notification b
 - Positive: small and deterministic; fuzz-friendly; one place for limits; no new language to secure.
 - **Negative / trade-offs accepted:** no field combination or arithmetic; the Jenkins preset has a special rule; a "done of total" progress level cannot be shown without a sender-side calculation; users who want more must wait for B.
 - New risks (to add to risk register): path syntax misunderstood by users; oversize or deep JSON causing silent truncation; number parsing error at edges (overflow, locale); preset filter not supported by an older Jenkins.
-- Requirements created or changed: SYS-008 is extended in a later pass by the level scaling and the path syntax limits (SYS-006 mentions "configured path"); new SW requirements for the limits above and for the interface of item 1. A requirement for the push body format (item 7) is missing and must be drafted.
+- Requirements created or changed: SYS-008 is extended in a later pass by the level scaling and the path syntax limits (SYS-006 mentions "configured path"); new SW requirements for the limits above and for the interface of item 1. SYS-040 and SW-001 exist.
 
 ## Verification and revisit
 - Unit tests on the PC for the extractor and mapper: normal cases, missing key, wrong type, depth and size limits, 10 000 random and mutated inputs without crash or hang (SYS-005, SYS-025). Coverage figure recorded when code exists.

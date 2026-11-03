@@ -71,4 +71,6 @@ Blockers, with the resolution state:
 Not checked by the goldfish: no build, no `west`, no diagram check, and SYS-038..046 were not read one by one.
 
 ## Outcome
+Since this record: ADR-0007 was set back to Proposed (item 4) and edited; hw.md (HW-001..009) and mech.md (MECH-001..006) now exist.
+
 **Approved with actions** (readiness verdict NO-GO). The design is coherent and the alternatives are real, but nothing in it is yet verified. Actions: the owner decisions above; the requirements pass; risk-register entries; ARCH registration; `regulatory-check`; the key-management document; spikes 7.1, 7.2, 7.3, 7.4 and 7.5. Only the owner sets `Approved` on the plan.

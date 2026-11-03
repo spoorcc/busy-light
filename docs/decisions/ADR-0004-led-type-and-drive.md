@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-003, NEED-009, NEED-010, NEED-014, SYS-001, SYS-011, SYS-020, SYS-021, SYS-022, SYS-027, SYS-028, SYS-032, ADR-0002, ADR-0003; design doc `docs/plans/02-system-design.md` (sections 4.4, G4, G10, G11, G14, spikes 7.3 and 7.5)
 
 ## Context and problem
@@ -10,7 +10,7 @@ The ring has 16 RGB LEDs, each controlled for colour and brightness (SYS-001), e
 The total current from the USB-C supply is limited to [500] mA (SYS-020), and the Wi-Fi radio uses a large share of that during transmit peaks (G4, to verify in the datasheet). The LED share may be only about 150-250 mA (estimate), a fraction of full white (about 0.9-1 A for 16 LEDs, estimate).
 The processor runs Wi-Fi and TLS at the same time, so interrupts can delay software timing.
 
-Not known (spikes 7.3 and 7.5): whether a 3.3 V data signal drives the chosen 5 V LED reliably at room and at high temperature; the real current draw of Wi-Fi peaks; how bright the ring must be (SYS-001 says "visible at 2 m in office light" but gives no measurable figure, gap G4); the thermal margin inside a printed shell (G10); photobiological safety (G11, EN 62471).
+Not known (spikes 7.3 and 7.5): whether a 3.3 V data signal drives the chosen 5 V LED reliably at room and at high temperature; the real current draw of Wi-Fi peaks; how bright the ring must be (brightness is set in SYS-001, working value, from spike 7.5); the thermal margin inside a printed shell (G10); photobiological safety (G11, EN 62471).
 
 ## Decision criteria
 | Criterion | Weight (1-5) | Source requirement |
@@ -61,13 +61,13 @@ Choose **A** with these design rules; items marked (7.3) or (7.5) are confirmed 
 4. **Hardware backstop (open):** a USB-side current-limited load switch is an extra part that would limit the total to a fixed value even if firmware fails. Decide after 7.5: required if the analysis shows that a firmware fault could exceed the USB-C source limit or a connector rating.
 5. **Power-up and reset state:** the pull-down holds the data line low at reset; the firmware sends an all-dark frame as its first action (SYS-011) and a frame that matches the real state only after the state is known. **Known gap (RV-001, finding 4):** LEDs hold their last frame while powered. A pull-down does not darken them. During a hang, a watchdog reset, the bootloader, or an image swap (many seconds, no LED driver) the ring keeps showing the old state, for example green. SYS-011 cannot be met in that window. Options: (a) accept and document, (b) a switch on the LED supply that the bootloader or a hardware timer opens, (c) a bootloader LED hook. Decision belongs to the owner; (a) is the default until 7.5 and the swap-time measurement are done.
 6. **Part choice:** pick the specific 2020 or 3535 part from the shop's current list during design, with a second source of the same footprint noted in the BOM. The part number is not fixed in this ADR.
-7. **Brightness requirement:** replace "visible at 2 m in office light" with a measured figure (luminous intensity or illuminance at 2 m) after the owner agrees on it. This is a requirement gap (G4).
+7. **Brightness requirement:** set in SYS-001 (working value, from spike 7.5).
 
 ## Consequences
 - Positive: one LED part type; low cost; hardware timing; firmware limiter testable on the PC.
 - **Negative / trade-offs accepted:** current limiting is a software safety function until item 4 is decided; one extra part (buffer) may be needed; LED maximum brightness is limited by the shared USB budget; the dark current of 16 LEDs (about 16 mA, estimate) is always drawn.
 - New risks (to add to risk register): stale colour held by the LEDs during hang, reset or image swap; firmware fault drives LEDs above the budget; 3.3 V data marginal at temperature; first LED fails and the chain goes dark; thermal softening of printed housing; photobiological limit exceeded at full white; brown-out reset when Wi-Fi peak and LED peak coincide.
-- Requirements created or changed: SYS-001 needs a measurable brightness figure; SYS-020 acceptance criteria stay; new HW requirements for the data buffer, pull-down and series resistor; new SW requirement for the current limiter; analysis files in `hw/sim/`.
+- Requirements created or changed: SYS-001 now has a measurable brightness figure (working value); SYS-020 acceptance criteria stay; HW-002 (buffer, pull-down, series resistor) and HW-001 exist; new SW requirement for the current limiter; analysis files in `hw/sim/`.
 
 ## Verification and revisit
 - Spike 7.3: ngspice and a breadboard test of the data level at 5 V and at a lowered supply, over the temperature range available.

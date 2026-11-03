@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-009, NEED-012, NEED-014, NEED-015, NEED-017, SYS-021, SYS-022, SYS-023, SYS-026, SYS-029, SYS-030, SYS-036, SYS-037; design doc `docs/plans/02-system-design.md` (sections 4.2, 4.2a, 4.2b, 4.12-4.14)
 
 ## Context and problem
@@ -27,7 +27,7 @@ the real price at 10 and at 1000 units (spike 7.4). Owner decision, round 6: ESP
 ## Alternatives considered
 ### A. ESP32-C3 module (for example ESP32-C3-MINI-1, 4 MB flash)
 One chip, Wi-Fi 4 2.4 GHz, 400 KB RAM (from memory, verify), USB serial and debug in the chip. Upstream Zephyr: production-ready since 4.0, station plus AP listed in the 4.0 notes. Module price about EUR 2-3 (estimate). QEMU (Espressif fork, no Wi-Fi) and `native_sim` for the PC.
-Cons: Wi-Fi is Espressif's binary library; Zephyr documentation and samples thinner than Nordic's; WPA2-Enterprise in Zephyr unconfirmed; no 5 GHz.
+Cons: Wi-Fi is Espressif's binary library; Zephyr documentation and samples thinner than Nordic's; ESP32 driver maps EAP types to the Espressif blob (E0 pass 2; untested); no 5 GHz.
 ### B. ESP32-C6 module
 Wi-Fi 6, 802.15.4, more RAM (from memory). Slightly dearer; Zephyr Wi-Fi support newer. Same family and tools, so it is the natural step up if C3 RAM proves too small.
 ### C. nRF5340 + nRF7002 (Fanstel WT02x40x single module, or two modules)
@@ -71,4 +71,4 @@ if the free RAM after the spike is below 25 %, if the 1000-unit quote shows the 
 
 ## Critical review notes
 Strongest objection: Zephyr is important to the owner and nRF is the best-documented Zephyr Wi-Fi platform, so choosing ESP32 trades support quality for price. Answer: both are in mainline; the evidence for a gap is documentation and samples, not missing features (not yet measured);
-spike 7.1 tests exactly the features we need, and the hardware layer keeps the nRF option open. If the spike shows missing features, fallback order is the owner's decision (plan 02, section 10, question 2).
+spike 7.1 tests exactly the features we need, and the hardware layer keeps the nRF option open. If the spike shows missing features, fallback per owner round 7: write the missing feature and upstream it (plan 02 section 10).

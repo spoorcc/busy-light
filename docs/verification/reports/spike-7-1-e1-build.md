@@ -54,4 +54,4 @@ Derived (arithmetic on the numbers above, not measured): the two slots take 3.5 
 ## Next steps (not done)
 1. Run part of E1 on the dev kit: flash, join a WPA2 network, drive a 16-LED ring with the SPI `ws2812` driver (needs the owner's hardware and approval of plan 03).
 2. E2a on paper with the defaults above; E2b after the product-like image exists.
-3. Rebuild with `CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256` and a spike key to check size and the E11a questions.
+3. Rebuild with `CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256` and a spike key to check size and the E11a questions. Done in the E11a record.

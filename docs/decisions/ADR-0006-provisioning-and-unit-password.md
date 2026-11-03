@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-001, NEED-016, NEED-019, SYS-012, SYS-013, SYS-023, SYS-034, SYS-035, ADR-0002, ADR-0008; design doc `docs/plans/02-system-design.md` (sections 4.5, 4.6)
 
 ## Context and problem
@@ -13,7 +13,7 @@ Two decisions in one ADR because they depend on each other: the channel (how the
 Forces: no app (NEED-016); the first 10 units are made by the owner, later units perhaps by others from the open files, so the production step must be documented and repeatable
 (SYS-023); WPA2 must stay possible (owner round 1); secure-boot fuses are not used on prototypes (owner round 2), so secrets in flash are readable by someone with the board in hand.
 
-Not known: whether the pinned Zephyr revision gives a soft AP with WPA2-PSK and a DNS responder for a captive portal on ESP32-C3 (spike 7.1); how phones behave when the AP has no Internet.
+Not known: whether the pinned Zephyr revision gives a soft AP with WPA2-PSK and a DNS responder for a captive portal on ESP32-C3 (spike 7.1; E0 pass 2: WPA2-PSK AP is in source (driver limit 5 clients, one-client rule is ours); the DNS responder is custom code); how phones behave when the AP has no Internet.
 
 ## Decision criteria
 | Criterion | Weight (1-5) | Source requirement |
@@ -78,13 +78,13 @@ Choose **V1 + W1b**, with V3 as the production and recovery path.
 9. **Provisioning state machine** (to specify in the SW requirements): AP up, user submits credentials, the device tests the join, on failure it stays in AP mode and shows the failure on the ring, on success it stops the AP. Spike 7.1 must show whether the AP and station can run together; if not, the test join closes the AP and reopens it on failure.
 10. Certificate upload inside the AP may fail in the restricted browser that phones open for captive portals (no file picker). The page therefore also accepts pasted PEM text, and the spike tests one iPhone and one Android phone.
 
-Open point for the owner: the **web interface login password** (SYS-016) on the LAN. This ADR assumes it is chosen by the user during first setup and stored hashed (not the same as the AP passphrase). A requirement for this is missing and must be drafted.
+Open point for the owner: the **web interface login password** (SYS-016) on the LAN. This ADR assumes it is chosen by the user during first setup and stored hashed (not the same as the AP passphrase). SYS-039 exists.
 
 ## Consequences
 - Positive: no app; secrets protected by the Wi-Fi layer; no password list in the file system; works with the camera app on phones.
 - **Negative / trade-offs accepted:** the label can be lost or photographed; any person who sees the label can join the AP when the user starts it; production needs a step per unit (about 1 minute, estimate) and a label printer; the passphrase is stored in plain flash on prototypes (no secure boot yet), so physical access with a programmer reads it.
 - New risks (to add to risk register): passphrase leaked by label photo; weak random source at production; passphrase lost on a flash erase; phone auto-join behaviour; captive-portal failure on some phones; leftover test passphrase in a released image.
-- Requirements created or changed: SYS-013 acceptance criteria stay; new SYS for the web login password; new SW requirements for the unit-secret store, the USB production command and the AP start rules; TC-013 gets a "radio capture" procedure.
+- Requirements created or changed: SYS-013 acceptance criteria stay; SYS-039 exists for the web login password; new SW requirements for the unit-secret store, the USB production command and the AP start rules; TC-013 gets a "radio capture" procedure.
 
 ## Verification and revisit
 - TC-012 and TC-013 on at least two phone types (one iOS, one Android) in spike 7.1, including the QR join.

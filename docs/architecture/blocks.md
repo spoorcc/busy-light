@@ -1,6 +1,6 @@
 # Architecture blocks
 
-- **Status:** Draft (proposed in `docs/plans/02-system-design.md` section 4; not approved by the owner)
+- **Status:** Draft (proposed in `docs/plans/02-system-design.md` section 3; not approved by the owner)
 
 The numbers 006 to 009 are skipped on purpose: they are reserved for hardware and mechanical blocks not yet identified (for example test fixture, label). Block diagram: [arch-system-blocks.puml](../diagrams/plantuml/arch-system-blocks.puml). Interfaces, budgets and failure behaviour are added when the requirements are approved.
 

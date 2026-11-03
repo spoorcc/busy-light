@@ -28,12 +28,12 @@ Slot size S = (4096 - bootloader - sys - storage - other) / 2, and the SYS-026 w
 | Storage 128 KiB | 64 | 64 | 128 | 0 | 1920 | 1440 |
 | `sys` dropped (if virtual eFuses and NVS are not needed) | 64 | 0 | 192 | 0 | 1920 | 1440 |
 
-**Break-even:** the application image must be at most about **1344 KiB (1.31 MiB)** in the default layout and about **1416 KiB (1.38 MiB)** with the free space reclaimed, if the 75 % rule of SYS-026 is kept. The measured Wi-Fi shell image is 693 KiB (709 780 B), so the shell sample uses 39.6 % of the default slot.
+**Break-even:** the application image must be at most about **1344 KiB (1.31 MiB)** in the default layout and about **1416 KiB (1.38 MiB)** with the free space reclaimed, if the 75 % rule of SYS-026 is kept. The measured Wi-Fi shell image is 693 KiB (709 780 B), so the shell sample uses 38.7 % of the default slot.
 
 ## Scenarios (image sizes are estimates from ADR-0007, not measurements)
 | Image size | % of default slot (1792 KiB) | % of reclaimed slot (1888 KiB) | Meets 75 %? |
 |------------|-----------------------------|--------------------------------|-------------|
-| 710 KB (Wi-Fi shell, measured) | 39.6 | 37.6 | yes |
+| 693 KiB (Wi-Fi shell, measured) | 38.7 | 36.7 | yes |
 | 1024 KiB | 57.1 | 54.2 | yes |
 | 1200 KiB | 67.0 | 63.6 | yes |
 | 1344 KiB | 75.0 | 71.2 | limit in the default layout |

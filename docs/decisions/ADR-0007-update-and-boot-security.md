@@ -2,8 +2,8 @@
 
 - **Status:** Proposed (owner set back from Accepted on 2026-11-03 after goldfish review RV-001; revised the same day for the owner's wish for secure boot and flash encryption; downgrade policy and offline release key remain confirmed by the owner; only the owner sets Accepted)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** Ben Spoor (owner); goldfish review not yet run
-- **Related:** NEED-017, NEED-018, SYS-023, SYS-024, SYS-026, SYS-027, SYS-029, SYS-030, SYS-034, ADR-0002, ADR-0006, ADR-0008; design doc `docs/plans/02-system-design.md` (sections 4.7, G6, G8)
+- **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
+- **Related:** NEED-017, NEED-018, SYS-023, SYS-024, SYS-026, SYS-027, SYS-029, SYS-030, SYS-034, SYS-043, SYS-044, SYS-046, ADR-0002, ADR-0006, ADR-0008; design doc `docs/plans/02-system-design.md` (sections 4.7, G6, G8)
 
 ## Context and problem
 The owner requires firmware updates over the network (NEED-017). A bad or hostile image must not run (signature check), a power cut or a bad image must not brick the unit
@@ -11,7 +11,7 @@ The owner requires firmware updates over the network (NEED-017). A bad or hostil
 Owner decisions so far: the first 10 units are prototypes and stay internal. Round 2 said secure boot with fuses comes later with the door open. On 2026-11-03 the owner said security is important and wants secure boot and flash encryption (product may be sold later, EU only, support period 5 years). This revision follows that input.
 Flash is 4 MB on the ESP32-C3 module (ADR-0002), and SYS-026 asks for 25 % free space. A Zephyr image with Wi-Fi, TLS and the web server may need 1.0-1.5 MB (estimate, spike 7.1), so two slots fill most of the flash. Paper budget E2a (`docs/verification/reports/spike-7-1-e2a-flash-budget.md`): the break-even image is about 1.31 MiB in the default 4 MB layout and about 1.38 MiB with the unused areas reclaimed; the 1.5 MB upper estimate does not fit at 75 %. The real size comes from E2b.
 
-Not known: image size and slot layout (spike 7.1); whether MCUboot runs on the ESP32-C3 in the pinned Zephyr revision with the needed options (signature type, test/confirm, swap mode); whether the bootloader can hold more than one public key.
+Not known: image size and slot layout (spike 7.1); whether MCUboot runs on the ESP32-C3 in the pinned Zephyr revision with the needed options (signature type, test/confirm, swap mode).
 
 ## Decision criteria
 | Criterion | Weight (1-5) | Source requirement |
@@ -71,7 +71,7 @@ A and C tie because C is A plus extra steps: the tie is honest. The protection r
 
 ## Decision
 Choose **C, staged**: build A first (stage 1), prove the eFuse procedure on sacrificial boards (stage 2), and enable secure boot and flash encryption before any unit leaves the owner (stage 3). E is the fallback if MCUboot cannot be made to work with the chip's secure boot.
-1. Bootloader MCUboot; images signed with ECDSA P-256 / SHA-256 (algorithm to confirm in spike 7.1). Slot layout and sizes come from the spike 7.1 flash budget table (gap G6). Decision needed if two slots plus 25 % margin do not fit in 4 MB: options are a smaller image (drop features), an 8 MB module, or a differential update. This ADR does not choose among them.
+1. Bootloader MCUboot; images signed with ECDSA P-256 / SHA-256 (algorithm to confirm in spike 7.1). Slot layout and sizes come from the spike 7.1 flash budget table (gap G6). Decision needed if two slots plus 25 % margin do not fit in 4 MB: options are a smaller image (drop features), an 8 MB module (ESP32-C3-WROOM-02-N8, larger module, new board outline; RV-001 item 3), or a differential update. This ADR does not choose among them.
 2. **Keys.** (Stage 3 adds the secure-boot key, item 7.) From day 1 every image is signed. The development key is generated in the repository tooling, marked in the image header by a distinct key ID, and never used for a release. The release key is generated and kept offline by the owner (hardware token or encrypted offline medium). The Espressif MCUboot port holds exactly one public key (desk survey E0, Pass 3), so there is no backup key in the bootloader. **Owner decision of 2026-11-03: a lost or leaked release key means a recall of the locked units; no local patch for a second key.** The risk is reduced by keeping two encrypted copies of the same release key in separate places and testing the copies every year (key-management document). The key-management document (G8) must exist before any unit leaves the owner.
 3. **Confirmation rule.** A new image confirms itself after its main loop, watchdog and web server have run without fault for [30] s. It does **not** wait for Wi-Fi to connect, because a changed network would otherwise cause a revert loop.
 4. **Upload.** Through the web interface over TLS and the web login (ADR-0008), streamed into the secondary slot without a full image in RAM; a size limit equal to the slot; rate-limited; the file is signature-checked again by the bootloader. A failed or interrupted upload leaves the running image untouched.
@@ -86,7 +86,7 @@ Choose **C, staged**: build A first (stage 1), prove the eFuse procedure on sacr
    - Stage 2: write the fuse procedure and run it on sacrificial boards, including an encrypted update and a power cut during the first encrypted boot. Spike 7.1 shows that MCUboot, the chip's secure boot and encrypted flash work together in the pinned revision *(not verified yet)*. If not, switch to E.
    - Stage 3: before any unit is given to anyone else, the production procedure sets secure boot, flash encryption and the lock of download mode and JTAG *(verify the exact eFuse list)*. Which units are exempt (internal prototypes) is recorded per serial number.
    - The secure-boot signing key is a second offline key. The key-management document (G8) covers it, the MCUboot release key and the flash-encryption key policy (device-generated key never leaves the chip is preferred (documented as possible in the MCUboot Espressif readme; not tested)).
-   - After stage 3 the claims in SYS-034 and SYS-035 can extend to physical access for those units. USB recovery (SYS-023) then needs a defined path that does not weaken the lock; this is a requirement still to write.
+   - After stage 3 the claims in SYS-034 and SYS-035 can extend to physical access for those units. USB recovery (SYS-023) then needs a defined path that does not weaken the lock; see SYS-046.
 8. **Pull update (B)** is a later increment behind the same slots.
 
 ## Consequences
@@ -103,7 +103,7 @@ Choose **C, staged**: build A first (stage 1), prove the eFuse procedure on sacr
 - Revisit when: image plus margin does not fit, MCUboot cannot be built on this platform (then E), the sacrificial-board test fails (then E), the eFuse list or recovery limits change SYS-023, or a downgrade attack is shown to matter for the CRA argument.
 
 ## Critical review notes
-Strongest objection: "Without secure boot, a signature check is bypassed by anyone who can write flash, so the signed update gives a false sense of security."
+First objection: "Without secure boot, a signature check is bypassed by anyone who can write flash, so the signed update gives a false sense of security."
 Answer: true for stage 1, and stage 1 is for the internal prototypes only. Stage 3 closes the gap before any unit leaves the owner. The technical file states which units are in which stage.
-Third objection: "One eFuse mistake bricks a unit; a batch of units can be lost." Answer: that is why stage 2 exists and why the procedure is scripted and run on sacrificial boards first (RISK-022).
 Second objection: "Two 1.5 MB slots in a 4 MB flash leaves no room for the 25 % margin." Answer: probably true; this is flagged as an open decision pending the spike, with three named options, not hidden.
+Third objection: "One eFuse mistake bricks a unit; a batch of units can be lost." Answer: that is why stage 2 exists and why the procedure is scripted and run on sacrificial boards first (RISK-022).

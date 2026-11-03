@@ -111,7 +111,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Cause:** Small RAM, TLS buffers, JSON and web buffers
 - **Effect:** Web interface or push unavailable
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
-- **Mitigated by:** SYS-026, SYS-027, ARCH-016, ARCH-017
+- **Mitigated by:** SYS-026, SYS-027, SW-002, ARCH-016, ARCH-017
 - **Residual risk (after mitigation):** Needs measured heap with two sessions (spike 7.1) and a limit on concurrent sessions.
 - **Verified by:** TC-026
 - **Status:** Open
@@ -199,7 +199,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Cause:** Parsers on untrusted input
 - **Effect:** Denial of service on a shared network
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
-- **Mitigated by:** SYS-005, SYS-027, ARCH-012, ARCH-013, ARCH-016
+- **Mitigated by:** SYS-005, SYS-027, SW-003, ARCH-012, ARCH-013, ARCH-016
 - **Residual risk (after mitigation):** Limits per ADR-0005; fuzz targets to be written as SW requirements.
 - **Verified by:** TC-005
 - **Status:** Open

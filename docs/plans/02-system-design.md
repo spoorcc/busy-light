@@ -4,8 +4,8 @@
 - **Date:** 2026-11-03  **Owner:** Ben Spoor
 - **Area:** project (cross-domain: sw, hw, mech)
 - **Requirements addressed:** SYS-001 to SYS-046 and SW-001 to SW-004 (all Draft), NEED-001 to NEED-019
-- **EGM review record:** [RV-001](../reviews/RV-001-system-design-goldfish.md) (comprehension and antagonistic passes; readiness pass not yet run)
-- **Round log:** owner rounds 2 to 7 are folded in (rounds 2, 3, 5, 6 in sections 1a-1d; round 7 in section 10). **Current platform: ESP32-C3 (round 6).** Text about nRF and RW612 in 4.2 to 4.2b, 4.14 and 7.6 is kept as the record of alternatives and for a later battery version; it is not the current plan. ADR drafts exist: ADR-0002 to ADR-0006 and ADR-0008 are Proposed, ADR-0007 was accepted and then set back to Proposed by the owner after review RV-001 (2026-11-03)
+- **EGM review record:** [RV-001](../reviews/RV-001-system-design-goldfish.md) (comprehension, three antagonistic passes and a readiness pass (NO-GO) were run, see RV-001)
+- **Round log:** owner rounds 2 to 7 are folded in (rounds 2, 3, 5, 6 in sections 1a-1d; round 7 in section 10); no round 4 is recorded (round 4 = the single-module nRF/STM/Renesas questions in 4.2b). **Current platform: ESP32-C3 (round 6).** Text about nRF and RW612 in 4.2 to 4.2b, 4.14 and 7.6 is kept as the record of alternatives and for a later battery version; it is not the current plan. ADR drafts exist: ADR-0002 to ADR-0006 and ADR-0008 are Proposed, ADR-0007 was accepted and then set back to Proposed by the owner after review RV-001 (2026-11-03)
 - **Nothing in this document is a decision.** Decisions are made in ADRs (section 8). Scores are first-pass judgement
   and must be replaced by evidence from the spikes in section 7. Cost, RAM, flash and current figures are **estimates
   from memory, not quotes or measurements**.
@@ -35,7 +35,7 @@ Out of scope: detailed schematics, firmware module design, housing shape, user m
 | Question | Owner answer | Effect |
 |----------|--------------|--------|
 | Platform | **nRF** | Option b: nRF now. The EUR 20 limit must be replaced by a new figure (open, question 1). ADR-0002 now compares nRF hosts (section 4.2a). Spike 7.6 becomes the main platform spike |
-| Push stale timeout | Not relevant now, for later | SYS-033 stays as a Draft with priority Could, marked deferred. G2 stays open for a later release |
+| Push stale timeout | Not relevant now, for later | superseded: SYS-033 is Must for push-only (RV-001 item 1). G2 stays open for a later release |
 | WPA2-Enterprise | Do not add hardware limits that rule it out | New SYS-036 (headroom). Drives the choice of host chip and flash/RAM margin |
 | Browser warning | Accepted at first | SYS-034 unchanged |
 | Own certificate and key | Yes, the user can load them | New SYS-035 |
@@ -74,7 +74,7 @@ market"; confirm with `regulatory-check`, this is guidance, not legal advice).
 ![The ESP32-C3 module runs network, web, source, mapping and display blocks that move a status from Jenkins to the 16 LEDs.](../diagrams/generated/plantuml/arch-system-blocks.svg)
 
 *Figure: proposed blocks. Source: [arch-system-blocks.puml](../diagrams/plantuml/arch-system-blocks.puml). The `ARCH-` IDs are proposed
-and are registered in `docs/architecture/` only after review.*
+and are registered as Draft in `docs/architecture/blocks.md`.*
 
 **Data flow.** A source adapter (push listener or poller) produces a raw value. The mapping block turns it into a state
 (or a level) with the user's table. An arbiter keeps the newest valid update and the age of the data. The display engine
@@ -102,6 +102,8 @@ cheap. Adding a source (NEED-007) means adding one adapter that registers itself
 | ARCH-017 | Security services (credentials, token, cert store, TLS) | SW | SYS-004, 013, 016, 030 |
 | ARCH-018 | Settings store | SW | SYS-019 |
 | ARCH-019 | Diagnostics (log, shell, self-test, identity) | SW | SYS-023, 024 |
+
+See `blocks.md` for the current mapping.
 
 ## 4. Alternatives considered
 
@@ -148,7 +150,7 @@ Weights come from the drivers. Scores 1-5 (5 best) are judgement and unverified.
   mode loses low-power mode on an nRF54 part; open question.
 - What nRF genuinely gives: first-class Zephyr support, a hardware key store and secure boot path that suit the "allow for secure boot later" decision,
   a better route to the battery variant (NEED-015), and long-term support. These are real benefits for a regulated-style project (CRA).
-- **Superseded by the owner (round 3): nRF is chosen.** The ESP32-C3 recommendation is withdrawn; ESP32-C3 stays only as a fallback if the nRF spike (7.6) fails. See 4.2a for the host chip.
+- **Superseded by the owner (round 3): nRF is chosen.** The ESP32-C3 recommendation is withdrawn; ESP32-C3 stays only as a fallback if the nRF spike (7.6) fails. See 4.2a for the host chip. Superseded again by round 6: ESP32-C3 is the platform (ADR-0002).
 
 Reading: P1 leads, but the gap to P2 (10 points) is mostly "Zephyr readiness" and cost. If a spike shows C6 Wi-Fi support in
 Zephyr is equally mature, P2 becomes a serious option (Wi-Fi 6 and 802.15.4 give a future path). P6 has the best Zephyr
@@ -233,7 +235,7 @@ must stay evenly spaced (SYS-028). USB-C shell and button also need edge space.
 | T3 Bare SoC plus chip antenna | Own RF section | Smallest, cheapest parts | RF matching and tuning need lab equipment; module certification does not carry over (RED effort); highest risk at 10 units |
 | T4 Two stacked boards | Ring board above compute board | Antenna and LEDs in separate layers | Second PCB, connector, thickness; cost |
 
-**Reopened by round 3.** Two modules (host and nRF7002) plus an external flash chip need much more area than one ESP32 module in the 30 mm free centre, and
+**Reopened by round 3.** (nRF-era record; current order is in ADR-0003: A, then B, then D.) Two modules (host and nRF7002) plus an external flash chip need much more area than one ESP32 module in the 30 mm free centre, and
 each module has its own antenna keep-out. I have not found the dimensions in the sources, so T1 is unproven. The higher cost limit makes T4 (stacked boards) more
 acceptable than before. Order of attempts: T1 with the real module outlines in KiCad, then T4, then a housing up to 58 mm (the top of the SYS-028 tolerance).
 
@@ -298,7 +300,7 @@ This is the most important open security choice because SYS-016 and SYS-004 send
 clear. Recommendation: **X4 with X3 on the LAN.** Inside the provisioning access point the page is plain HTTP, protected by the
 WPA2 unit passphrase. On the LAN, both the web page and the push endpoint use HTTPS with a key pair that the device creates at
 first start (SYS-034). The page shows the certificate fingerprint. Jenkins pins that fingerprint (for example `curl --pinnedpubkey`)
-so that no public CA is needed. Letting the user load their own certificate and key is a later increment (NEED-018, second reading).
+so that no public CA is needed. SYS-035: the user can load a certificate chain and key (through the AP or the authenticated interface).
 Costs accepted: a browser warning at first use (hurts NEED-016, to be handled in the manual and by showing the fingerprint),
 and TLS server plus TLS client in RAM at the same time. Spike 7.1 must measure that RAM use on the ESP32-C3.
 
@@ -413,7 +415,7 @@ The ranking does not change, but the ESP32 lead grows. Scores are judgement.
 |-------|---------|--------|----------------|
 | L0 unit | `native_sim`, ztest | `core/` logic, parsers, mapping, arbiter, current limiter, animation frames | Hardware |
 | L1 component | `native_sim` with host sockets | HTTPS server and client, token and password checks, fuzzing (SYS-005), certificate upload, TLS with a test CA | Radio, real heap and timing |
-| L2 firmware-in-simulator | Renode, QEMU or Wokwi, if the platform has a model | Boot, settings, button timing, LED frame capture, power-cut injection for the settings layer (SYS-019). A real MCUboot swap and ESP32 flash behaviour (partial erase, alignment) are **not** shown by `native_sim` or QEMU; they need a power-cut rig on real hardware (RV-001) | Wi-Fi, RF |
+| L2 firmware-in-simulator | Renode or QEMU, if the platform has a model | Boot, settings, button timing, LED frame capture, power-cut injection for the settings layer (SYS-019). A real MCUboot swap and ESP32 flash behaviour (partial erase, alignment) are **not** shown by `native_sim` or QEMU; they need a power-cut rig on real hardware (RV-001) | Wi-Fi, RF |
 | L3 hardware-in-the-loop | Dev kit on a bench PC or CI runner, one per candidate platform | Wi-Fi, SoftAP and phone provisioning, range, current, LED drive timing, OTA over the air | Nothing: this is the ground truth |
 
 New requirement drafted: SYS-037 (simulation). For a CI hardware-in-the-loop runner an ESP32 dev kit costs about EUR 10; nRF7002 kits cost about EUR 60-70 each (section 7.6).
@@ -433,29 +435,29 @@ hardware-in-the-loop rig early.
 | # | Finding | Severity | Proposal |
 |---|---------|----------|----------|
 | G1 | NEED-004 asks for **levels** but no SYS requirement showed one | High | **Closed by owner answer: SYS-032 drafted** (needs owner approval) |
-| G2 | SYS-010 detects stale data only for polls. With push only, a Jenkins that stops sending leaves the ring green forever | High | SYS-033 drafted with 5 min. **New problem:** Jenkins sends events only at build start and end, so a quiet Jenkins is normal for hours. A 5 min timeout works only if the sender also sends a heartbeat (for example a cron job every minute), or if the device polls. Owner must accept the heartbeat (question 2) |
+| G2 | SYS-010 detects stale data only for polls. With push only, a Jenkins that stops sending leaves the ring green forever | High | SYS-033 drafted with 5 min. **New problem:** Jenkins sends events only at build start and end, so a quiet Jenkins is normal for hours. A 5 min timeout works only if the sender also sends a heartbeat (for example a cron job every minute), or if the device polls. SYS-033 (Must) with the heartbeat of SYS-040 |
 | G3 | SYS-016 and SYS-004 send password and token in clear (section 4.8) | High | SYS-034 drafted (TLS on the LAN); ADR-0008 to confirm |
 | G4 | Power: 16 LEDs at full white are about 0.9-1 A (estimate). SYS-020 limits **total** to 500 mA, and Wi-Fi transmit peaks use a large part of it (verify in datasheet). The LED share may be only about 150-250 mA, a few tens of percent of full white | High | Power budget analysis in `hw/sim/` before SYS-001's "visible at 2 m" is accepted; make brightness a measured requirement |
 | G5 | SYS-023 self-test "checks the LEDs", but no sensor sees them | Medium | Define as "operator confirms by eye", or add an optical sensor (cost) |
-| G6 | SYS-029 two slots plus SYS-026 25 % free: slot size and image size are not budgeted | Medium | Flash and RAM budget table from spike 7.1 |
+| G6 | SYS-029 two slots plus SYS-026 25 % free: slot size and image size are not budgeted | Medium | Flash and RAM budget table from spike 7.1. Paper budget done: `spike-7-1-e2a-flash-budget.md` (break-even about 1.31 MiB at the 75 % rule); measured budget E2b pending |
 | G7 | SYS-031: no NTP on isolated networks makes private-CA HTTPS impossible | Medium | Time from the browser as fallback (4.10) |
-| G8 | Update-signing key plan, loss and rotation | High (process) | Risk entry and key-management document before first release |
+| G8 | Update-signing key plan, loss and rotation | High (process) | Risk entry and key-management document before first release; draft exists: `docs/regulatory/technical-file/05-cybersecurity/key-management.md`, RISK-006 |
 | G9 | SYS-017: short press switches the ring off; an off ring hides a failing build | Low | Owner accepted. Suggest (not decided): a failure or stale state while off shows one dim LED |
 | G10 | Thermal: up to about 2.5 W inside a 53 mm printed shell (PLA softens near 55-60 C, estimate) | Medium | Thermal analysis, material choice in `mech/analysis/` |
 | G11 | Photobiological safety of a bright LED ring (EN 62471) not assessed | Medium | Part of regulatory check, with LED selection |
-| G12 | WPA2-Enterprise and captive-portal networks (common in companies running Jenkins) are not supported by the plan. Shared networks make this more likely to matter | Medium | Owner question 3. Not tested for either SoC; needs a spike item |
+| G12 | WPA2-Enterprise and captive-portal networks (common in companies running Jenkins) are not supported by the plan. Shared networks make this more likely to matter | Medium | See SYS-036, E12 |
 | G13 | Push address needs a stable name (for example mDNS) so Jenkins does not break when the IP changes | Low | Draft a requirement for a host name |
 | G14 | 3.3 V data to a 5 V LED may fail the input threshold | Medium | Level check in 7.3 |
-| G15 | A host module plus a Wi-Fi module plus flash must fit the ring centre (T1). **Smaller if the single Fanstel module (14 x 18.5-25 mm) is used** | High | Place real outlines in KiCad (owner makes CAD changes); fall back to T4 or up to 58 mm |
-| G16 | nRF Connect SDK is Nordic's Zephyr fork; SoftAP, enterprise Wi-Fi and the Wi-Fi firmware blob licence may differ from upstream Zephyr | Medium | ADR on west manifest (NCS or upstream), licence check for NEED-012 |
-| G17 | WPA2-Enterprise EAP-TLS has open user reports of failure on NCS 2.9/3.0 | Medium | Include an enterprise build in spike 7.6 to measure size; not a first-release feature |
+| G15 | A host module plus a Wi-Fi module plus flash must fit the ring centre (T1). **Smaller if the single Fanstel module (14 x 18.5-25 mm) is used** | High | Place real outlines in KiCad (owner makes CAD changes); fall back to T4 or up to 58 mm. nRF-era, superseded by round 6 |
+| G16 | nRF Connect SDK is Nordic's Zephyr fork; SoftAP, enterprise Wi-Fi and the Wi-Fi firmware blob licence may differ from upstream Zephyr | Medium | ADR on west manifest (NCS or upstream), licence check for NEED-012. nRF-era, superseded by round 6 |
+| G17 | WPA2-Enterprise EAP-TLS has open user reports of failure on NCS 2.9/3.0 | Medium | Include an enterprise build in spike 7.6 to measure size; not a first-release feature. nRF-era, superseded by round 6 |
 
 ## 6. Non-functional view (checklist, process section 5)
 - **Testability:** `core/` runs on host; endpoint fuzz on `native_sim`; target shell over USB gives self-test (`selftest`, `identity`); test pads for 3V3, GND, reset and boot select.
 - **Auditability:** version, git describe and hardware revision reported (SYS-024); signed images; reproducible build pinned by the west manifest.
 - **Safety:** current limiter in `core/` with unit tests; watchdog (SYS-027); state unknown at start (SYS-011); thermal and photobiological analysis (G10, G11).
 - **Security:** attack surface is the web server, the push listener and the update upload; each gets a size limit, rate limit and fuzz test; secrets are never logged; open items G3, G8.
-- **Resources:** budgets are unknown until spike 7.1 (G6). **Estimate only:** a Zephyr image with Wi-Fi, TLS and web server may need 1.0-1.5 MB flash; this is the key feasibility question for a 4 MB part with two slots.
+- **Resources:** budgets are unknown until spike 7.1 (G6). **Estimate only:** a Zephyr image with Wi-Fi, TLS and web server may need 1.0-1.5 MB flash; this is the key feasibility question for a 4 MB part with two slots. Paper budget done: `spike-7-1-e2a-flash-budget.md` (break-even about 1.31 MiB at the 75 % rule); measured budget E2b pending.
 - **Regulatory (guidance, not legal advice):** a radio is intentionally emitted, so RED applies; cybersecurity essential requirements (RED delegated act and EN 18031 family, CRA) shape G3, G8 and the update support period. A pre-certified module helps the radio argument but the finished device still needs its own tests. Update `docs/regulatory/compliance-matrix.md` when choices are accepted. No claim of compliance is made.
 - **Cost (hypothesis, not a quote):** module about EUR 2-3, 16 LEDs about EUR 1-2.5, other parts about EUR 1, bare board and assembly fees spread over 10 about EUR 5-9, shipping and tax about EUR 2-4. Add about EUR 0.3 per board for the new EU duty (one line of EUR 3 over 10 boards, if a single customs line). That sums to roughly EUR 11-19 for the ESP32-C3 design: inside the limit but with little margin. With the nRF host that was chosen in round 3 and superseded in round 6 (H2: nRF5340 module about USD 10, nRF7002 module about EUR 5.4, external flash about EUR 0.3-0.5, more LED and board area) the estimate is roughly EUR 25-35, above the old limit of EUR 20. A real quote is gate 7.4.
 
@@ -463,25 +465,25 @@ hardware-in-the-loop rig early.
 Spikes live on branches `spike/*` and are never merged. Hardware changes need the owner to edit CAD files.
 | # | Question | Method | Result goes to |
 |---|----------|--------|----------------|
-| 7.1 (main, first) | Does Zephyr on ESP32-C3 give soft-AP with WPA2, HTTP server, TLS poll with a user CA, MCUboot with signed swap, and how much flash and RAM does it use? | Dev kit, `west build`, measure `size` and heap. **Gate with numbers (RV-001):** per-slot image size and flash left against the paper budget (two slots, bootloader, settings, certificates, passphrase, web files, 25 % margin, EAP headroom); free heap with TLS server, TLS client and an update upload at once; AP and station together or not; no corrupted LED frames during Wi-Fi traffic and an update; time of a TLS push handshake; ECDSA key creation time; MCUboot swap time. If the budget fails: smaller image, a larger-flash module (no official 8 MB ESP32-C3-MINI-1 found; ESP32-C3-WROOM-02-N8 is bigger, see ADR-0007 note in RV-001), or a different platform. Effort cap per missing Zephyr feature: [2] weeks, then escalate to the owner | ADR-0002, 0007, 0008 |
+| 7.1 (main, first) | Does Zephyr on ESP32-C3 give soft-AP with WPA2, HTTP server, TLS poll with a user CA, MCUboot with signed swap, and how much flash and RAM does it use? | Dev kit, `west build`, measure `size` and heap. **Gate with numbers (RV-001):** per-slot image size and flash left against the paper budget (two slots, bootloader, settings, certificates, passphrase, web files, 25 % margin, EAP headroom); free heap with TLS server, TLS client and an update upload at once; AP and station together or not; no corrupted LED frames during Wi-Fi traffic and an update; time of a TLS push handshake; ECDSA key creation time; MCUboot swap time. If the budget fails: smaller image, a larger-flash module (no official 8 MB ESP32-C3-MINI-1 found; ESP32-C3-WROOM-02-N8 is bigger, see RV-001 item 3), or a different platform. Effort cap per missing Zephyr feature: [2] weeks, then escalate to the owner | ADR-0002, 0007, 0008 |
 | 7.2 | Does the module's antenna work in the centre of an LED ring? | Test board or dev module with a mock ring: signal strength at fixed distances versus a bare module | ADR-0003 |
 | 7.3 | Does 3.3 V data drive the chosen LED at 5 V and at a lowered supply? | ngspice and a breadboard test | ADR-0004 |
-| 7.4 | Real cost of a draft BOM at 10 units, and whether the module and nRF parts are in the shop library | Identical-spec quotes from JLCPCB Economic and PCBWay, landed at your address | SYS-021, ADR-0002, section 4.11 |
+| 7.4 | Real cost of a draft BOM at 10 units, and whether the module are in the shop library | Identical-spec quotes from JLCPCB Economic and PCBWay, landed at your address | SYS-021, ADR-0002, section 4.11 |
 | 7.5 | Power budget: Wi-Fi peak plus LEDs on a USB source | Spreadsheet or script in `hw/sim/`, then bench measurement | G4, SYS-020 |
-| 7.6 (later: battery version or if 7.1 fails) | Does the platform fit? Candidates: Fanstel WT02P40P/E40E (nRF5340 + nRF7002 in one module) and an NXP RW612 module (u-blox IRIS-W106). On nRF5340 DK plus nRF7002 EK first, then nRF54L15 DK plus nRF7002 EB II: SoftAP with WPA2, station, HTTPS server and HTTPS client together, user CA and own certificate, MCUboot with external flash, and a build with EAP-TLS. Compare upstream Zephyr with the nRF Connect SDK | Two kits (about EUR 60-70 each), `west build`, measure flash, RAM, free heap | ADR-0002, 0007, 0008, SYS-036 |
+| 7.6 (later: battery version only) | Does the platform fit? Candidates: Fanstel WT02P40P/E40E (nRF5340 + nRF7002 in one module) and an NXP RW612 module (u-blox IRIS-W106). On nRF5340 DK plus nRF7002 EK first, then nRF54L15 DK plus nRF7002 EB II: SoftAP with WPA2, station, HTTPS server and HTTPS client together, user CA and own certificate, MCUboot with external flash, and a build with EAP-TLS. Compare upstream Zephyr with the nRF Connect SDK | Two kits (about EUR 60-70 each), `west build`, measure flash, RAM, free heap | ADR-0002, 0007, 0008, SYS-036 |
 
 ## 8. Plan of record (what follows this document)
 1. Owner answers the open questions in section 10 and approves or edits SYS-032, SYS-033 and SYS-034 (all Draft).
 2. Draft ADRs, in this order (drafted 2026-11-03; ADR-0002 platform, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007 and ADR-0008 are all Proposed; ADR-0007 was set back from Accepted by the owner after RV-001), each with the alternatives above: ADR-0002 platform, ADR-0003 antenna and board topology, ADR-0008 transport protection, ADR-0006 provisioning and unit password, ADR-0007 update and boot security, ADR-0005 mapping model, ADR-0004 LED drive. ADR numbers are proposed; ADR-0001 exists.
-3. Draft the remaining requirements from section 5 (G4 brightness, G13 host name) with skill `write-requirements`; owner approves. SYS-032 to SYS-034 are already drafted.
-4. Write `docs/risk/risk-register.md` entries (key loss, thermal, current limiter, AP password handling, RAM exhaustion, antenna).
-5. Register ARCH elements in `docs/architecture/`, then write HW/SW/MECH requirements and increment plans (03 and later). Only then does implementation start.
+3. Done (2026-11-03): remaining requirements from section 5 drafted (SYS-001 brightness, SYS-042 host name); owner approval is open. SYS-032 to SYS-034 are already drafted.
+4. Done (2026-11-03): `docs/risk/risk-register.md` entries RISK-001..022 written.
+5. Done (2026-11-03): ARCH-001..019 registered; HW-001..009, SW-001..004 and MECH-001..006 written. Open: owner approvals and increment plans (03 and later). Only then does implementation start.
 
 Order of build increments (indicative, for planning): (1) `core/` library and host tests; (2) display engine and LED driver on a dev kit; (3) network manager, web server, provisioning; (4) sources; (5) update path; (6) custom board; (7) housing.
 
 ## 9. Review status
 Section 10 has no open question that blocks the ADRs or spike 7.1, and the ADR drafts exist, so the Goldfish protocol is run now.
-The comprehension pass was run on 2026-11-03; it matched the intended design but found stale nRF-era text and inconsistent counts, now corrected. The antagonistic and readiness passes follow.
+The comprehension pass was run on 2026-11-03; it matched the intended design but found stale nRF-era text and inconsistent counts, now corrected. The antagonistic and readiness passes were run; see RV-001.
 A readiness pass on this system-level design may return NO-GO for implementation by design; that result is recorded, not hidden. Record: [RV-001](../reviews/RV-001-system-design-goldfish.md). The antagonistic pass found 2 Critical issues that the plan did not state (flash fit, false-green); see the record for resolutions and the open owner decisions.
 
 ## 10. Open questions for the owner

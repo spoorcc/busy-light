@@ -3,7 +3,7 @@
 - **Status:** Draft (author's survey; not reviewed by a goldfish or the owner)
 - **Date:** 2026-11-03
 - **Plan:** `docs/plans/03-spike-7-1-zephyr-esp32c3.md`, experiment E0
-- **Method:** two passes. Pass 1: web search and page fetches of public documentation. Pass 2 (this report's section "Pass 2"): shallow clones of Zephyr `v4.5.0` and the pinned MCUboot revision (`725d63c9`) read with `grep`. Nothing was built, no `west update` was run (the hal_espressif module and the Wi-Fi blobs were not fetched), no hardware was used. Every line is **"documented"** (a page says so) or **"not found"** (my searches did not show it). "Not found" does not mean "missing". Documentation pages can lag the code, and the pages read were mostly the `latest` tree or mirrors, not exactly v4.2.0.
+- **Method:** three passes. Pass 1: web search and page fetches of public documentation. Pass 2 (this report's section "Pass 2"): shallow clones of Zephyr `v4.5.0` and the pinned MCUboot revision (`725d63c9`) read with `grep`. Nothing was built, no `west update` was run (the hal_espressif module and the Wi-Fi blobs were not fetched), no hardware was used. Every line is **"documented"** (a page says so) or **"not found"** (my searches did not show it). "Not found" does not mean "missing". Documentation pages can lag the code, and the pages read were mostly the `latest` tree or mirrors, not exactly v4.2.0.
 - **Evidence class:** documentation and source read, not built, not measured. Nothing here replaces a build and a test.
 
 ## Results
@@ -41,7 +41,7 @@ These were proposals. Status on 2026-11-03: all applied to the Proposed ADRs and
 4. **Flash encryption with MCUboot on the C3** has a documented upstream failure (issue 1866) and a bootloader size limit (issue 1262). Raise RISK-009 and RISK-022 and keep E (the Espressif bootloader) as a live fallback, as ADR-0007 already does.
 5. **Captive portal DNS** is custom code, not a Zephyr feature.
 
-## Not done and not claimed
+## Not done and not claimed (superseded by Pass 2 and 3)
 No clone of the Zephyr tree, no Kconfig symbol checked in v4.2.0, no build, no look at the current state of the two MCUboot issues, no check of Zephyr's PSA crypto setting. These are the next E0 steps once the tree is cloned (`west init -l sw && west update`) and are done by reading, not by purchase.
 
 ## Pass 2: Zephyr v4.5.0 source read (2026-11-03)

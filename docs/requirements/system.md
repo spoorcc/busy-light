@@ -22,7 +22,7 @@ Entries follow `docs/templates/requirement.md`. The non-functional checklist (`d
 | A8 | Button functions in SYS-017 are proposals; short press on/off confirmed by owner 2026-11-03 | SYS-017 |
 
 ## Not yet specified (waiting for owner decisions)
-Open items are listed in `docs/plans/02-system-design.md` section 9 and in `docs/reviews/RV-001-system-design-goldfish.md`. Answered since the first draft: support period (SYS-045), transport protection (SYS-034, ADR-0008), device certificate (SYS-035), unit password (SYS-013), regulatory scope (`docs/regulatory/applicability.md`).
+Open items are listed in `docs/plans/02-system-design.md` section 10 and in `docs/reviews/RV-001-system-design-goldfish.md`. Answered since the first draft: support period (SYS-045), transport protection (SYS-034, ADR-0008), device certificate (SYS-035), unit password (SYS-013), regulatory scope (`docs/regulatory/applicability.md`).
 
 ### SYS-001 Status indicator ring
 
