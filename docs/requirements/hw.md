@@ -100,10 +100,10 @@ Process rules: `docs/process/README.md`.
 
 ### HW-008 Shop manufacturability
 
-- **Statement:** All parts shall be surface-mounted on one side, available in the chosen shop's parts list, and the board outline, drill and trace rules shall meet the shop's published limits.
+- **Statement:** All parts shall be surface-mounted on one side, available in the chosen shop's parts list, and the board outline, drill and trace rules shall meet the shop's published limits. The Wi-Fi module shall be a chip revision of at least v0.3, so that secure boot v2 is supported.
 - **Rationale:** SYS-022: no hand soldering. SYS-021: the extended-part fees depend on the choice.
 - **Parent:** SYS-022, SYS-021
-- **Acceptance criteria:** The shop's design check accepts the files; every BOM line shows stock and price (spike 7.4); the number of extended parts is stated in the BOM.
+- **Acceptance criteria:** The shop's design check accepts the files; every BOM line shows stock and price (spike 7.4); the number of extended parts is stated in the BOM; the BOM or the module datasheet names a chip revision of at least v0.3.
 - **Verification method:** Inspection
 - **Verified by:** TC-208
 - **Category:** Manufacturability

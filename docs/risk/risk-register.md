@@ -244,6 +244,6 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Lost unit; for a batch, a lost batch or units that cannot be fixed in the field
 - **Severity (1-5):** 4  **Likelihood (1-5):** 3  **Initial risk:** 12
 - **Mitigated by:** SYS-029, ARCH-010
-- **Residual risk (after mitigation):** Procedure proven on sacrificial boards first; first 10 prototypes without eFuse steps; production step scripted and checked. The staged plan is in ADR-0007; the owner decides after spike 7.1.
+- **Residual risk (after mitigation):** Possible rehearsal with virtual eFuses (Zephyr `ESP32_EFUSE_VIRTUAL`, untested); module revision at least v0.3; procedure proven on sacrificial boards first; first 10 prototypes without eFuse steps; production step scripted and checked. The staged plan is in ADR-0007; the owner decides after spike 7.1.
 - **Verified by:** TC-029
 - **Status:** Open
