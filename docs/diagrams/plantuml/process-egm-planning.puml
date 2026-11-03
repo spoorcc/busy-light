@@ -1,0 +1,24 @@
+@startuml process-egm-planning
+title Planning with the Elephant-Goldfish Model
+actor Developer
+participant "Elephant\n(long-context session)" as E
+participant "Goldfish\n(stateless reviewer)" as G
+database "docs/plans/NN-title.md" as D
+
+== Brainstorm (no code) ==
+Developer <-> E : interview, trade-offs, challenge assumptions
+== Draft ==
+E -> D : write design doc
+== Review ==
+E -> G : design doc path only
+G --> E : 1. comprehension check (explain back)
+note right of G : Mismatch means the doc is ambiguous
+E -> G : design doc path only (several reviewers)
+G --> E : 2. antagonistic review findings
+E -> D : resolve each finding (fix or reject with reason)
+E -> G : design doc path only
+G --> E : 3. implementation readiness: GO / NO-GO
+== Approve ==
+E -> Developer : result and open questions
+Developer -> D : set status Approved
+@enduml

@@ -1,0 +1,9 @@
+{
+  "name": "busy-light-diagram-tools",
+  "private": true,
+  "description": "Pinned diagram renderers. PlantUML is installed separately (see docs/standards/diagrams.md).",
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0",
+    "wavedrom-cli": "3.2.0"
+  }
+}

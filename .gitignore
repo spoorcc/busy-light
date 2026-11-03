@@ -1,0 +1,34 @@
+# West workspace (fetched by `west update`)
+/zephyr/
+/modules/
+/bootloader/
+/tools/
+/.west/
+build/
+build-*/
+
+# KiCad
+hw/kicad/**/*-backups/
+hw/kicad/**/*.kicad_prl
+hw/kicad/**/fp-info-cache
+hw/kicad/**/_autosave-*
+hw/kicad/**/*.bak
+hw/kicad/**/*.lck
+hw/kicad/**/*-rescue.*
+
+# FreeCAD
+*.FCStd1
+*.FCBak
+mech/**/*.FCBak
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+__pycache__/
+
+# Claude local-only
+.claude/settings.local.json
+
+# Generated diagram renders and node tooling
+scripts/diagrams/node_modules/

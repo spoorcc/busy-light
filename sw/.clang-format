@@ -1,0 +1,6 @@
+BasedOnStyle: LLVM
+IndentWidth: 8
+UseTab: Always
+BreakBeforeBraces: Linux
+ColumnLimit: 100
+# Align with Zephyr: copy zephyr/.clang-format after `west update`.

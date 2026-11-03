@@ -1,0 +1,13 @@
+# West manifest. Initialise the workspace from the repo root with:
+#   west init -l sw && west update
+manifest:
+  self:
+    path: sw
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.2.0   # pin a release; bump deliberately
+      import: true

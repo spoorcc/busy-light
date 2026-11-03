@@ -1,0 +1,11 @@
+---
+# CERT C + bug-finding baseline. MISRA is checked separately (see docs/standards/coding-sw.md).
+Checks: >
+  -*,
+  cert-*,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
+  bugprone-*,
+  clang-analyzer-*
+WarningsAsErrors: '*'
+HeaderFilterRegex: '^.*/sw/(app|drivers|lib)/.*'

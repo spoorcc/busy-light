@@ -1,0 +1,10 @@
+# FreeCAD files are zip archives; treat as binary (consider Git LFS if they grow)
+*.FCStd binary
+*.step  -diff
+*.stl   binary
+*.png   binary
+*.pdf   binary
+
+# Generated diagrams: never edit by hand (see docs/standards/diagrams.md)
+docs/diagrams/generated/** linguist-generated=true
+*.svg -diff
