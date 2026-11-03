@@ -1,0 +1,424 @@
+# System Requirements
+
+- **Status:** Draft
+- **Version:** 0.1
+- **Owner:** Ben Spoor
+- **Scope:** first release: Jenkins status pushed to the device and fetched from a REST API (decision of the owner, 2026-11-03).
+
+Values in [square brackets] depend on the assumptions below and are not yet agreed. Nothing here is Approved.
+
+Entries follow `docs/templates/requirement.md`. The non-functional checklist (`docs/process/README.md` section 5) is not complete yet: open items are security update path, regulatory scope, environmental limits and EMC.
+
+## Working assumptions (owner has not confirmed; change them here first)
+| ID | Assumption | Affects |
+|----|------------|---------|
+| A1 | Ring has 16 individually addressable RGB LEDs (confirmed) | SYS-001, SYS-020 |
+| A2 | Powered from USB-C 5 V only (confirmed); battery may come in a later redesign (NEED-015) and must not be made hard; no mains inside | SYS-018 |
+| A3 | Device is used on a local network (LAN) only; no cloud service | SYS-003, SYS-004 |
+| A4 | Cost target: EUR 10-20 per assembled PCB with components; housing is 3D printed and excluded; first order is 10 units (all confirmed). Assumed, not confirmed: the figure is the total landed cost of the order (parts, PCB, assembly, set-up fees, shipping, import tax) divided by 10 | SYS-021 |
+| A5 | First users are makers; less technical users later (confirmed, NEED-016) | SYS-012, SYS-013 |
+| A6 | Ring is read from desk distance (about 1 to 3 m). Housing size: about 53 mm, halfway between a table-tennis ball (40 mm) and a tennis ball (about 67 mm) (NEED-014) | SYS-001 |
+| A7 | The device shows one status at a time (one logical channel) | SYS-002, SYS-008 |
+| A8 | Button functions in SYS-015 are proposals | SYS-015 |
+
+## Not yet specified (waiting for owner decisions)
+Support period for updates; transport protection for the push endpoint and the web interface (plain HTTP with token, or HTTPS with a device
+certificate); whether the user also loads the device's own certificate and key (NEED-018); how the unit password reaches the user; Wi-Fi security modes
+(WPA2/WPA3); regulatory scope (`docs/regulatory/applicability.md`).
+
+### SYS-001 Status indicator ring
+
+- **Statement:** The device shall show its status on a ring of [16] RGB LEDs, each LED controlled individually for colour and brightness.
+- **Rationale:** The ring is the only display; individual control allows levels and animations.
+- **Parent:** NEED-003
+- **Acceptance criteria:** Each LED can be set to any of 256 levels per colour channel, independently of the others, and the ring is visible at 2 m in office light.
+- **Verification method:** Test
+- **Verified by:** TC-001
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-002 Status model
+
+- **Statement:** The device shall support the states unknown, building, success, unstable, failure and aborted, and show each with a configurable colour and animation (steady, blink, pulse or rotate).
+- **Rationale:** Jenkins results map to these states; a common model keeps later sources simple.
+- **Parent:** NEED-004
+- **Acceptance criteria:** Each state has a default appearance and the user can change colour and animation for each state; the state is clearly distinguishable from every other state.
+- **Verification method:** Test
+- **Verified by:** TC-002
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-003 Push input
+
+- **Statement:** The device shall accept a status event as an HTTP POST request at a documented endpoint on the local network and update the ring within [1] s of receiving a valid event.
+- **Rationale:** Jenkins pushes build status when a build starts and ends.
+- **Parent:** NEED-005
+- **Acceptance criteria:** 95 % of valid events update the ring within 1 s of receipt (measured at the ring).
+- **Verification method:** Test
+- **Verified by:** TC-003
+- **Category:** Performance
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-004 Push authentication
+
+- **Statement:** The device shall reject push events that do not carry the valid access token, shall answer them with an error status, and shall not change the ring because of them.
+- **Rationale:** Anyone on the network could otherwise set a false status.
+- **Parent:** NEED-005
+- **Acceptance criteria:** 100 % of requests without a valid token are rejected with HTTP 401 and cause no state change. The token has at least 128 bits of randomness and can be replaced by the user.
+- **Verification method:** Test
+- **Verified by:** TC-004
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-005 Push robustness
+
+- **Statement:** The device shall reject malformed, oversized (more than [1] KiB) or rate-exceeding push requests without crashing or changing state.
+- **Rationale:** An open listener must not be a way to crash the device.
+- **Parent:** NEED-005
+- **Acceptance criteria:** A fuzz test of at least [10 000] requests causes no reset, no hang and no state change.
+- **Verification method:** Test
+- **Verified by:** TC-005
+- **Category:** Robustness
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-006 REST polling
+
+- **Statement:** The device shall poll a configured REST endpoint at an interval that the user sets between [5] s and [3600] s (default [30] s), and extract a status value from the JSON response with a configured path.
+- **Rationale:** The device fetches Jenkins status itself when push is not possible.
+- **Parent:** NEED-006
+- **Acceptance criteria:** The device polls at the set interval (tolerance 10 %) and extracts the configured field from a JSON response.
+- **Verification method:** Test
+- **Verified by:** TC-006
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-007 Jenkins preset
+
+- **Statement:** The device shall provide a preset for the Jenkins job JSON API (fields building and result) with HTTP basic authentication (user name and API token), so that the user only enters the base address, job and credentials.
+- **Rationale:** Jenkins is the first use case.
+- **Parent:** NEED-006
+- **Acceptance criteria:** With the preset, a Jenkins build that is running, successful, unstable, failed or aborted is shown as the matching state within one poll interval.
+- **Verification method:** Test
+- **Verified by:** TC-007
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-008 Value mapping
+
+- **Statement:** The device shall map extracted values to states through a table that the user can edit.
+- **Rationale:** Other REST APIs use other words for status.
+- **Parent:** NEED-007
+- **Acceptance criteria:** The user can add, change and remove table rows; an unmapped value gives the state unknown.
+- **Verification method:** Test
+- **Verified by:** TC-008
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-009 Source precedence
+
+- **Statement:** When both push and poll are configured, the device shall use the most recent valid update from either source.
+- **Rationale:** The owner wants both sources.
+- **Parent:** NEED-005
+- **Acceptance criteria:** With a poll result and a push event in either order, the ring shows the state of the later one.
+- **Verification method:** Test
+- **Verified by:** TC-009
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Should
+- **Status:** Draft
+
+### SYS-010 Stale and failed data
+
+- **Statement:** If [3] successive polls fail, the device shall show a connection-error indication that differs from every status state.
+- **Rationale:** A stale green ring would mislead the user.
+- **Parent:** NEED-004
+- **Acceptance criteria:** After 3 failed polls the ring shows the error indication within one poll interval and returns to the status after the next successful poll.
+- **Verification method:** Test
+- **Verified by:** TC-010
+- **Category:** Safety
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-011 Safe start state
+
+- **Statement:** After every start or reset, the device shall show the state unknown until it has a valid update.
+- **Rationale:** A stored old status would be wrong data.
+- **Parent:** NEED-004
+- **Acceptance criteria:** After a power cycle or watchdog reset, the ring shows unknown until the first valid update.
+- **Verification method:** Test
+- **Verified by:** TC-011
+- **Category:** Safety
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-012 Provisioning access point
+
+- **Statement:** If the device has no Wi-Fi credentials, or the user requests it, the device shall start its own Wi-Fi access point with a name that contains a unique device identifier and serve the configuration web interface.
+- **Rationale:** The user needs a way to configure the device without other software.
+- **Parent:** NEED-001
+- **Acceptance criteria:** A phone can join the AP, open the interface and store Wi-Fi credentials; the device then joins the network.
+- **Verification method:** Test
+- **Verified by:** TC-012
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-013 Provisioning security
+- **Statement:** The access point shall be protected by encryption with a password that is unique to each unit, and the password shall not be derivable from information that the device broadcasts (such as its name or MAC address).
+- **Rationale:** The user types the home Wi-Fi password over this link (NEED-019). A shared or guessable password lets anyone nearby read it.
+- **Parent:** NEED-001
+- **Acceptance criteria:** In a sample of 10 units, no two units have the same password. A passive radio capture of a provisioning session does not reveal the Wi-Fi credentials. The password cannot be calculated from the SSID or MAC address. (The mechanism is a design decision, see ADR to be written.)
+- **Verification method:** Test
+- **Verified by:** TC-013
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-014 Web interface
+
+- **Statement:** The device shall serve the configuration web interface from its own storage, without needing Internet access, and the interface shall be usable on a phone screen of 360 px width.
+- **Rationale:** The device may be on a network without Internet.
+- **Parent:** NEED-002
+- **Acceptance criteria:** The interface loads with the Internet blocked and all functions of SYS-015 work on a 360 px viewport.
+- **Verification method:** Test
+- **Verified by:** TC-014
+- **Category:** Usability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-015 Configurable settings
+
+- **Statement:** The web interface shall let the user set: Wi-Fi network, device name, brightness, access token, poll source and interval, value mapping and the appearance of each state; and shall show the current state and the time of the last valid update.
+- **Rationale:** These are the functions the owner described.
+- **Parent:** NEED-002
+- **Acceptance criteria:** Each listed setting can be changed through the interface and takes effect without a manual restart.
+- **Verification method:** Test
+- **Verified by:** TC-015
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-016 Interface access control
+
+- **Statement:** Outside the provisioning access point, the device shall require a password for the web interface, set by the user during setup.
+- **Rationale:** Anyone on the LAN could otherwise change the device.
+- **Parent:** NEED-002
+- **Acceptance criteria:** Requests without valid credentials receive HTTP 401; there is no default password.
+- **Verification method:** Test
+- **Verified by:** TC-016
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-017 Button
+
+- **Statement:** The device shall have one button. A short press shall [switch the ring on or off]; a press of [3] s shall start the configuration access point; a press of [10] s shall reset to factory settings after a clear ring confirmation.
+- **Rationale:** One button controls the device (functions proposed in A8).
+- **Parent:** NEED-008
+- **Acceptance criteria:** Each press length gives its function; a press shorter than the long threshold never starts AP or reset; reset needs the confirmation pattern.
+- **Verification method:** Test
+- **Verified by:** TC-017
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-018 Device status patterns
+
+- **Statement:** The ring shall show distinct, documented patterns for: starting, access-point mode, connecting, connection lost, update in progress and reset confirmation, and these shall differ from all job states.
+- **Rationale:** The ring is the only display and must be understood without colour alone.
+- **Parent:** NEED-004
+- **Acceptance criteria:** Each pattern is documented, visually distinct in a blind comparison by 3 observers, and distinguishable by pattern when colour is ignored.
+- **Verification method:** Test
+- **Verified by:** TC-018
+- **Category:** Usability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-019 Configuration persistence
+
+- **Statement:** The device shall keep its settings across power loss, and a power loss during a settings write shall not corrupt them.
+- **Rationale:** Users do not want to configure again after a power cut.
+- **Parent:** NEED-002
+- **Acceptance criteria:** After 1000 random power cuts during writes the device starts with a valid configuration (the old or the new one) every time.
+- **Verification method:** Test
+- **Verified by:** TC-019
+- **Category:** Reliability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-020 Power
+
+- **Statement:** The device shall operate from a USB-C 5 V supply and shall limit its total current to [500] mA by limiting LED brightness.
+- **Rationale:** A standard USB port must be able to power it.
+- **Parent:** NEED-003
+- **Acceptance criteria:** With all LEDs set to full white the supply current stays at or below the limit; the device does not reset.
+- **Verification method:** Test
+- **Verified by:** TC-020
+- **Category:** Safety
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-021 Unit cost
+- **Statement:** The landed cost of one assembled PCB including all components (parts, PCB, assembly, set-up fees, shipping and import tax; not the housing) shall not exceed EUR [20] for an order of 10 units, with EUR [10] to [15] as the target.
+- **Rationale:** This is the owner's cost target (A4) for the first order. At 10 units, fixed shop fees are a large part of the cost, so they are counted.
+- **Parent:** NEED-009
+- **Acceptance criteria:** A real quote from the chosen prototype shop, with BOM and shipping to the delivery address, gives a total order cost divided by 10 that is at or below the limit.
+- **Verification method:** Analysis
+- **Verified by:** TC-021
+- **Category:** Cost
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-022 Orderable from a prototype shop
+
+- **Statement:** The PCB design shall be orderable with assembly from a prototype shop using only parts that the shop offers, with all parts surface-mounted on one side, so that no hand soldering is needed (this includes the USB-C connector, the button and the Wi-Fi module).
+- **Rationale:** The owner will order from a prototype shop.
+- **Parent:** NEED-010
+- **Acceptance criteria:** The shop's design check accepts the files, every BOM line is available in the shop's parts list, and the assembled board needs no manual soldering before the first power-up.
+- **Verification method:** Inspection
+- **Verified by:** TC-022
+- **Category:** Manufacturability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-023 Programming and test access
+
+- **Statement:** The device shall be programmable and testable through the USB-C connector, and shall have a production self-test mode that checks the LEDs, the button and the Wi-Fi radio.
+- **Rationale:** Low-cost production needs fast, fixture-light testing.
+- **Parent:** NEED-010
+- **Acceptance criteria:** A new board can be programmed and self-tested using only the USB-C cable; the self-test result is reported to the host; the per-unit password (SYS-013) can be created and recorded in the same production step.
+- **Verification method:** Demonstration
+- **Verified by:** TC-023
+- **Category:** Testability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-024 Version and build identity
+
+- **Statement:** The device shall report its firmware version, build identifier and hardware revision in the web interface and in its logs, and builds shall be reproducible from the tagged source.
+- **Rationale:** Auditors and users must know exactly what runs on the device.
+- **Parent:** NEED-011
+- **Acceptance criteria:** Two builds of the same tag give identical binaries; the reported identity matches the tag.
+- **Verification method:** Test
+- **Verified by:** TC-024
+- **Category:** Auditability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-025 Host-testable logic
+
+- **Statement:** The device logic (status model, mapping, parsing, state machines) shall run in automated tests on a host computer without the target hardware.
+- **Rationale:** Fast, repeatable evidence without hardware.
+- **Parent:** NEED-011
+- **Acceptance criteria:** The test suite runs in CI on a host build and covers every requirement that has a logic part.
+- **Verification method:** Test
+- **Verified by:** TC-025
+- **Category:** Testability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-026 Resource margin
+
+- **Statement:** The firmware shall leave at least [25] % of flash and RAM free in the release build.
+- **Rationale:** Margin for updates and security fixes.
+- **Parent:** NEED-011
+- **Acceptance criteria:** The release build report shows the free flash and RAM above the limit.
+- **Verification method:** Analysis
+- **Verified by:** TC-026
+- **Category:** Maintainability
+- **Regulatory:** TBD
+- **Priority:** Should
+- **Status:** Draft
+
+### SYS-027 Fault recovery
+
+- **Statement:** If the firmware hangs, the device shall restart by itself within [10] s.
+- **Rationale:** An unattended indicator must recover.
+- **Parent:** NEED-011
+- **Acceptance criteria:** A forced hang in a test build causes a restart within 10 s, and the device then shows the state unknown (SYS-011).
+- **Verification method:** Test
+- **Verified by:** TC-027
+- **Category:** Reliability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-028 Size
+- **Statement:** The largest outer dimension of the finished device shall be [53] mm, with a tolerance of [plus or minus 5] mm.
+- **Rationale:** The owner wants the size halfway between a table-tennis ball (40 mm) and a tennis ball (about 67 mm) (NEED-014).
+- **Parent:** NEED-014
+- **Acceptance criteria:** A measurement of the printed housing with the PCB fitted gives a largest dimension from 48 mm to 58 mm. The 16 LEDs are evenly spaced on a ring of at least [38] mm diameter inside the housing.
+- **Verification method:** Inspection
+- **Verified by:** TC-028
+- **Category:** Mechanical
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-029 Firmware update over the network
+- **Statement:** The device shall install a new firmware image received over the network through the web interface, shall accept the image only if its signature is valid, and shall keep the previous image so that it returns to it if the new image fails to start.
+- **Rationale:** Required by the owner (NEED-017). Unsigned updates would let anyone replace the firmware.
+- **Parent:** NEED-017
+- **Acceptance criteria:** A correctly signed image installs and runs. An image with a wrong signature or a changed byte is rejected and the device keeps running. A power loss at any point of the update leaves a working device (tested at least [100] times). A new image that does not confirm itself is replaced by the previous one within [60] s. Settings are kept.
+- **Verification method:** Test
+- **Verified by:** TC-029
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-030 User-supplied trust certificates
+- **Statement:** The user shall be able to upload, list and remove CA certificates in the configuration web interface, including during provisioning in access point mode, and the device shall store them permanently and check the certificate of every HTTPS server that it connects to against the user-supplied certificates [and the built-in public CA certificates].
+- **Rationale:** The Jenkins server may use a certificate from a private authority (NEED-018). The owner wants to upload the required certificates during provisioning. Adding a trust certificate changes whom the device trusts, so the upload is allowed only through the password-protected access point (SYS-013) or the password-protected interface (SYS-016).
+- **Parent:** NEED-018
+- **Acceptance criteria:** In access point mode, before the device has any network connection, a certificate file in PEM format can be uploaded; a file that is not a valid certificate, or that exceeds [8] KiB or [4] certificates in total, is rejected with a clear message. Uploaded certificates are still present after a restart and after a firmware update. With the company CA added, polling an HTTPS server with a certificate from that CA works. With a certificate from an unknown CA, the poll fails and the connection-error indication of SYS-010 shows. Removing the CA stops the poll from working. Certificate checks cannot be switched off silently (a switch, if allowed, needs a clear warning in the interface).
+- **Verification method:** Test
+- **Verified by:** TC-030
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-031 Time for certificate checks
+- **Statement:** The device shall get the current time from a network time server (configurable) and shall not accept an HTTPS server certificate while it has no valid time.
+- **Rationale:** Certificate validity needs the time, and the device has no battery-backed clock.
+- **Parent:** NEED-018
+- **Acceptance criteria:** After a start without time, HTTPS polls wait for the time and then work. The device shows the connection-error indication if time is not available. The time server address can be set.
+- **Verification method:** Test
+- **Verified by:** TC-031
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
