@@ -1,0 +1,40 @@
+@startuml arch-system-blocks
+title Busy light - proposed blocks (draft)
+left to right direction
+
+actor "User\n(phone browser)" as user
+node "Jenkins server" as jenkins
+node "Wi-Fi router\nand time server" as lan
+
+rectangle "Busy light (ESP32-C3 module, Zephyr)" {
+  component "ARCH-016\nWeb server and\nconfig API" as web
+  component "ARCH-015\nNetwork manager\n(station, AP, SNTP)" as net
+  component "ARCH-012\nSource adapters\n(push, poll)" as src
+  component "ARCH-013\nMapping and\nstatus model" as map
+  component "ARCH-014\nDisplay engine\n(current limit)" as disp
+  database "ARCH-018\nSettings store" as store
+  component "ARCH-010\nBootloader and\nfirmware update" as boot
+  component "ARCH-003\nLED ring\n(16 RGB)" as led
+  component "ARCH-004\nButton" as btn
+}
+
+user --> web : HTTP, config and\ncertificate upload
+jenkins --> src : HTTP POST status\n(token)
+src --> jenkins : REST poll\n(HTTPS, basic auth)
+net --> lan : Wi-Fi, SNTP
+src --> map : raw value
+map --> disp : state or level
+disp --> led : 16 pixel values
+btn --> net : long press: start AP
+btn --> disp : short press: on/off
+web --> store : read/write
+net ..> store : credentials
+web --> boot : signed image upload
+
+legend right
+  Solid arrow: data or control flow.
+  Dashed arrow: reads stored data.
+  Security services (ARCH-017) and
+  diagnostics (ARCH-019) not drawn.
+endlegend
+@enduml

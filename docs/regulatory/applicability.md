@@ -14,7 +14,7 @@
 | Processes personal data? | TBD | GDPR, RED 3(3)(e) |
 | Light output (LED power, visible to eyes) | **RGB LED ring** (owner, 2026-11-03). Power and optics TBD | EN 62471 photobiological safety |
 | Target markets (EU only? UK, US, other) | TBD | UKCA, FCC/ISED etc. out of scope until stated |
-| Sold commercially or purely community/open-source hardware? | TBD | "Placing on the market" triggers manufacturer duties; CRA open-source steward rules |
+| Sold commercially or purely community/open-source hardware? | **Later: about 1000 units per year (owner, 2026-11-03).** The first 10 units are prototypes for the owner, not placed on the market | "Placing on the market" triggers manufacturer duties; CRA open-source steward rules |
 | Expected product lifetime | TBD | CRA support period (default >= 5 years unless shorter lifetime) |
 
 ## 2. Legislation matrix

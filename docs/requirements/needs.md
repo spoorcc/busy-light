@@ -25,11 +25,13 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Status:** Draft
 
 ### NEED-004 Show levels and status from external data
+- **Clarified (owner, 2026-11-03):** Level mode is in the first release (SYS-032).
 - **Statement:** The device indicates levels or status that follow external data. Examples: busy light, Jenkins agent or build indicator, "all kinds of other things".
 - **Open points:** What are the first two or three concrete use cases that must work at launch? What does "level" look like (fill the ring like a gauge)? What does "status" look like (colour, blink, animation)?
 - **Status:** Draft
 
 ### NEED-005 Receive pushed events (first source: Jenkins)
+- **Clarified (owner, 2026-11-03):** The network can be shared with other users. The 5 min stale timeout for push (SYS-033) is not in the first release (owner, 2026-11-03).
 - **Statement:** The device can receive events and act on them. First release: Jenkins pushes the build status to the device.
 - **Open points:** Who is allowed to send events (token)? Is the device always on the same network as Jenkins? Transport protection (plain HTTP or HTTPS)?
 - **Status:** Draft
@@ -53,6 +55,8 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Statement:** The cost of one PCB including components is at most EUR 10 to 20.
 - **Clarified (owner, 2026-11-03):** The EUR 10-20 is per assembled PCB including components. The housing is 3D printed and is not part of this figure.
 - **Clarified (owner, 2026-11-03):** The first order is 10 units.
+- **Clarified (owner, 2026-11-03):** Later production is planned at about 1000 units per year. Cost must then be judged at that volume (see plan 02, section 4.12); the first order of 10 is a prototype run.
+- **Update (owner, 2026-11-03):** Platform ESP32-C3 chosen (plan 02, round 6). The EUR 20 limit stays; the nRF platform is a later option for the battery version.
 - **Open points:** Do shipping, import tax and set-up fees count in the per-board figure (this document assumes yes: total cost of the order divided by 10)? Is EUR 10 the target and EUR 20 the limit? Does the USB power supply count (assumed no)?
 - **Status:** Draft
 
@@ -95,6 +99,7 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Statement:** The user can add certificates to the device.
 - **Source:** Product owner, 2026-11-03.
 - **Clarified (owner, 2026-11-03):** The user uploads the required certificates through the configuration web site while the device is in access point mode during provisioning (and, as assumed here, later as well).
+- **Clarified (owner, 2026-11-03):** The user can also load the device's own certificate and key (SYS-035). Browser warnings at first use are accepted.
 - **Open points:** Which certificates: trust anchors (CA certificates) so that the device accepts the user's HTTPS servers, such as a Jenkins server with a company certificate? Or also a certificate and key for the device's own HTTPS server? This document assumes the first; the second is open.
 - **Status:** Draft
 

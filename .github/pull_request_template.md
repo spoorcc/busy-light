@@ -23,6 +23,7 @@ What and why. Link requirement/ADR IDs:
 - [ ] Regulatory: applicability inputs unchanged (or `applicability.md` updated); `Regulatory:` fields, compliance matrix and technical-file index updated; SBOM refreshed if dependencies changed
 - [ ] User-visible change: `docs/user/` updated to `docs/standards/writing.md`; `check_docs_style.py` passes; procedure usability TC added
 - [ ] Diagrams are code (`docs/standards/diagrams.md`); `scripts/build_diagrams.sh --check` passes
+- [ ] `CHANGELOG.md` updated under `[Unreleased]` (user-visible or release-relevant change)
 - [ ] Docs updated; version/identity strings updated if applicable
 
 ## Review type

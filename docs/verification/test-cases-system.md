@@ -282,3 +282,63 @@
 - **Expected result / pass criteria:** see acceptance criteria of SYS-031
 - **Automated:** TBD
 - **Evidence:** TBD
+
+
+### TC-032 Level display
+
+- **Verifies:** SYS-032
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-032
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-033 Push liveness
+
+- **Verifies:** SYS-033
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-033
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-034 LAN transport protection
+
+- **Verifies:** SYS-034
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-034
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-035 User-supplied device certificate
+
+- **Verifies:** SYS-035
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-035
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-036 Headroom for WPA2-Enterprise
+
+- **Verifies:** SYS-036
+- **Level:** Analysis
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-036
+- **Automated:** TBD
+- **Evidence:** TBD
+
+
+### TC-037 Firmware runs in PC simulation
+
+- **Verifies:** SYS-037
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-037
+- **Automated:** TBD
+- **Evidence:** TBD

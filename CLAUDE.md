@@ -35,7 +35,8 @@ Run like a regulated-company project. **Read `docs/process/README.md` before doi
 11. **Evidence over claims.** Report test/build results exactly as observed. Never claim something is verified
    without recorded evidence; say what was not run.
 12. Never hand-edit `.kicad_*` or `.FCStd` files; ask the user to make CAD changes. Do not commit build output.
-13. Commit only when asked. Do not rewrite history on `main`.
+13. Add an entry to `CHANGELOG.md` (Keep a Changelog, section `[Unreleased]`) for every user-visible or release-relevant change.
+14. Commit only when asked. Do not rewrite history on `main`.
 
 ## Layout
 `docs/` (process, requirements, architecture, decisions, risk, verification, reviews, plans, templates),

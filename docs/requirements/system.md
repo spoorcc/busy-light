@@ -14,12 +14,12 @@ Entries follow `docs/templates/requirement.md`. The non-functional checklist (`d
 |----|------------|---------|
 | A1 | Ring has 16 individually addressable RGB LEDs (confirmed) | SYS-001, SYS-020 |
 | A2 | Powered from USB-C 5 V only (confirmed); battery may come in a later redesign (NEED-015) and must not be made hard; no mains inside | SYS-018 |
-| A3 | Device is used on a local network (LAN) only; no cloud service | SYS-003, SYS-004 |
-| A4 | Cost target: EUR 10-20 per assembled PCB with components; housing is 3D printed and excluded; first order is 10 units (all confirmed). Assumed, not confirmed: the figure is the total landed cost of the order (parts, PCB, assembly, set-up fees, shipping, import tax) divided by 10 | SYS-021 |
+| A3 | Device is used on a local network (LAN) only; no cloud service. The LAN may be shared with other, untrusted users (owner, 2026-11-03) | SYS-003, SYS-004, SYS-034 |
+| A4 | Cost target: EUR 10-20 per assembled PCB with components; housing is 3D printed and excluded; first order is 10 units (all confirmed). Later volume: about 1000 units per year (owner, 2026-11-03), which may need a second cost requirement at that volume. Assumed, not confirmed: the figure is the total landed cost of the order (parts, PCB, assembly, set-up fees, shipping, import tax) divided by 10 | SYS-021 |
 | A5 | First users are makers; less technical users later (confirmed, NEED-016) | SYS-012, SYS-013 |
 | A6 | Ring is read from desk distance (about 1 to 3 m). Housing size: about 53 mm, halfway between a table-tennis ball (40 mm) and a tennis ball (about 67 mm) (NEED-014) | SYS-001 |
 | A7 | The device shows one status at a time (one logical channel) | SYS-002, SYS-008 |
-| A8 | Button functions in SYS-015 are proposals | SYS-015 |
+| A8 | Button functions in SYS-017 are proposals; short press on/off confirmed by owner 2026-11-03 | SYS-017 |
 
 ## Not yet specified (waiting for owner decisions)
 Support period for updates; transport protection for the push endpoint and the web interface (plain HTTP with token, or HTTPS with a device
@@ -287,7 +287,7 @@ certificate); whether the user also loads the device's own certificate and key (
 
 ### SYS-021 Unit cost
 - **Statement:** The landed cost of one assembled PCB including all components (parts, PCB, assembly, set-up fees, shipping and import tax; not the housing) shall not exceed EUR [20] for an order of 10 units, with EUR [10] to [15] as the target.
-- **Rationale:** This is the owner's cost target (A4) for the first order. At 10 units, fixed shop fees are a large part of the cost, so they are counted.
+- **Rationale:** This is the owner's cost target (A4) for the first order. Platform ESP32-C3 chosen by the owner on 2026-11-03 (plan 02, round 6); estimated EUR 11-19 per board, not yet quoted. At 10 units, fixed shop fees are a large part of the cost, so they are counted.
 - **Parent:** NEED-009
 - **Acceptance criteria:** A real quote from the chosen prototype shop, with BOM and shipping to the delivery address, gives a total order cost divided by 10 that is at or below the limit.
 - **Verification method:** Analysis
@@ -419,6 +419,84 @@ certificate); whether the user also loads the device's own certificate and key (
 - **Verification method:** Test
 - **Verified by:** TC-031
 - **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-032 Level display
+
+- **Statement:** The device shall show a level between 0 % and 100 % as a filled arc of the ring, starting at a fixed LED, with the last lit LED set in proportion to the remainder.
+- **Rationale:** The owner wants levels as well as states in the first release (NEED-004, owner answer 2026-11-03).
+- **Parent:** NEED-004
+- **Acceptance criteria:** For input levels 0, 25, 50, 75 and 100 % the ring lights 0, 4, 8, 12 and 16 LEDs fully; for 50 % plus half of one LED step (53.1 %) the ninth LED is lit at about half brightness; a step of 1/16 of the range (6.25 %) is visible as a change. The user can set the colour and the value range (minimum and maximum) per source.
+- **Verification method:** Test
+- **Verified by:** TC-032
+- **Category:** Functional
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-033 Push liveness
+
+- **Statement:** [Deferred to a later release, owner 2026-11-03: not in the first release.] When push is the only configured source, the device shall show the stale indication of SYS-010 if it has received no valid push event or heartbeat for [5] min.
+- **Rationale:** Without it, a stopped Jenkins leaves the last state on the ring (gap G2, owner answer 2026-11-03: 5 min). Jenkins sends events only when a build starts or ends, so the sender must also send a heartbeat.
+- **Parent:** NEED-005
+- **Acceptance criteria:** After 5 min (tolerance 10 s) without a valid request the ring shows the stale indication; the next valid request restores the state. A documented heartbeat request keeps the state without changing it.
+- **Verification method:** Test
+- **Verified by:** TC-033
+- **Category:** Safety
+- **Regulatory:** TBD
+- **Priority:** Could
+- **Status:** Draft
+
+### SYS-034 LAN transport protection
+
+- **Statement:** Outside the provisioning access point, the device shall serve the web interface and accept push events only over TLS with a key pair that the device creates itself, and shall show the certificate fingerprint in the web interface.
+- **Rationale:** The LAN may be shared with untrusted users (owner answer 2026-11-03), so the web password and the push token must not travel in clear text (gap G3). The mechanism is a design decision (ADR-0008).
+- **Parent:** NEED-002
+- **Acceptance criteria:** A plain HTTP request to the web interface or push endpoint on the LAN gets no data and no credentials are accepted; the fingerprint shown equals that of the certificate served; the private key cannot be read through any interface; a new key pair is created after a factory reset.
+- **Verification method:** Test
+- **Verified by:** TC-034
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-035 User-supplied device certificate
+
+- **Statement:** The device shall let the user upload a certificate chain and private key for the device's own HTTPS server, shall use them instead of the self-created pair, and shall return to a self-created pair on request.
+- **Rationale:** Owner answer 2026-11-03 (NEED-018, second reading): the user may load the device's own certificate. A company can then use its own CA for the web interface and the push endpoint. Browser warnings at first use are accepted (SYS-034).
+- **Parent:** NEED-018
+- **Acceptance criteria:** A PEM chain of at most [8] KiB and its matching key can be uploaded only through the password-protected interface or the provisioning access point; a key that does not match, or an invalid file, is rejected with a clear message; the key cannot be read back through any interface; the new certificate is served after the next connection and its fingerprint is shown; the data survives restart and firmware update; a factory reset removes it.
+- **Verification method:** Test
+- **Verified by:** TC-035
+- **Category:** Security
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-036 Headroom for WPA2-Enterprise
+
+- **Statement:** The hardware platform and the firmware design shall keep enough flash, RAM and certificate storage, and a Wi-Fi chip with supplicant support, so that WPA2-Enterprise (EAP-TLS and PEAP) can be added later without a hardware change.
+- **Rationale:** Owner answer 2026-11-03: the design must not add hardware limits that rule out WPA2-Enterprise. Risk with ESP32-C3: the chip supports it in Espressif's own SDK, but support in the Zephyr driver is unconfirmed (spike 7.1). Shared company networks often need it. The feature itself is not in the first release.
+- **Parent:** NEED-001
+- **Acceptance criteria:** The Wi-Fi chip documentation states support for WPA2-Enterprise in station mode. The release build report shows free flash and RAM of at least the size that a spike build with EAP-TLS enabled adds ([to be measured]), on top of the margin of SYS-026. The settings store has room for a client certificate and key.
+- **Verification method:** Analysis
+- **Verified by:** TC-036
+- **Category:** Maintainability
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-037 Firmware runs in PC simulation
+
+- **Statement:** The application firmware (everything above the hardware abstraction layer) shall build and run on a host computer in a simulator with simulated LED ring, button, network interface and persistent storage, and shall allow a test to cut power at a chosen moment.
+- **Rationale:** Owner wish 2026-11-03: simulate as much as possible on the PC. It gives repeatable tests without hardware, including power-loss tests that are hard to do on a bench (SYS-019, SYS-029). Wi-Fi radio behaviour is not simulated; it is verified on hardware.
+- **Parent:** NEED-011
+- **Acceptance criteria:** One command builds and starts the simulation in CI; a test can press the button, send push events through the network interface, read the 16 LED values, and cut and restore power at [1000] random points; the ring output of a scripted test is compared with expected frames. The list of what the simulation does not cover (radio, RF, timing of real LED drive) is documented.
+- **Verification method:** Test
+- **Verified by:** TC-037
+- **Category:** Testability
 - **Regulatory:** TBD
 - **Priority:** Must
 - **Status:** Draft
