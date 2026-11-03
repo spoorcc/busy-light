@@ -35,7 +35,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Brown-out, hot ring, overloaded USB source
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** SYS-020, ARCH-014, ARCH-001
-- **Residual risk (after mitigation):** Hardware backstop is open (ADR-0004 item 4) and is decided after spike 7.5.
+- **Residual risk (after mitigation):** Hardware backstop is open (ADR-0004 item 4) and is decided after spike 7.5. Owner decision 2026-11-04: a higher current is allowed when the source advertises it (up to [1500] mA, SYS-020), so a limiter fault now overloads a source that advertises more: the backstop question is more important and the limiter budget must follow the CC reading with the safe default of [500] mA.
 - **Verified by:** TC-020
 - **Status:** Open
 

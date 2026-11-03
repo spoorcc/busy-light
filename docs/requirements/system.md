@@ -272,10 +272,10 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 
 ### SYS-020 Power
 
-- **Statement:** The device shall operate from a USB-C 5 V supply and shall limit its total current to [500] mA by limiting LED brightness.
-- **Rationale:** A standard USB port must be able to power it.
+- **Statement:** The device shall operate from a USB-C 5 V supply. It shall limit its total current to [500] mA by limiting LED brightness, and shall allow up to the current that the source advertises on the USB-C CC lines (at most [1500] mA) when the source advertises more than the default.
+- **Rationale:** A standard USB port must be able to power it. Owner decision of 2026-11-04: allow a higher current if the source advertises it. At 500 mA the Wi-Fi transmit peak leaves only 46 to 148 mA for the LEDs (`docs/verification/reports/spike-7-5-power-budget-paper.md`). The default (500 mA) applies whenever no higher current is advertised or the advertised value cannot be read.
 - **Parent:** NEED-003
-- **Acceptance criteria:** With all LEDs set to full white the supply current stays at or below the limit; the device does not reset.
+- **Acceptance criteria:** With all LEDs set to full white the supply current stays at or below the limit that applies. On a source that advertises the default current (including a USB-C to USB-A cable), the limit is [500] mA. On a source that advertises 1.5 A, the limit is the advertised value minus a margin of [10] %. If the advertised value cannot be read, the limit is [500] mA. The limit is set within [1] s of connection. The device does not reset in any of these cases.
 - **Verification method:** Test
 - **Verified by:** TC-020
 - **Category:** Safety

@@ -7,7 +7,7 @@
 
 ## Context and problem
 The ring has 16 RGB LEDs, each controlled for colour and brightness (SYS-001), evenly spaced on a ring of at least 38 mm (SYS-028), on one side of the board, assembled by a prototype shop (SYS-022), for a total board cost of EUR 10-20 (SYS-021).
-The total current from the USB-C supply is limited to [500] mA (SYS-020), and the Wi-Fi radio uses a large share of that during transmit peaks (G4, to verify in the datasheet). The LED share may be only about 150-250 mA (estimate), a fraction of full white (about 0.9-1 A for 16 LEDs, estimate).
+The total current from the USB-C supply is limited to [500] mA by default and to the current that the source advertises on the CC lines, at most [1500] mA, when the source advertises more (SYS-020, owner decision 2026-11-04), and the Wi-Fi radio uses a large share of that during transmit peaks (G4, to verify in the datasheet). The LED share may be only about 150-250 mA (estimate), a fraction of full white (about 0.9-1 A for 16 LEDs, estimate).
 The processor runs Wi-Fi and TLS at the same time, so interrupts can delay software timing.
 
 Not known (spikes 7.3 and 7.5): whether a 3.3 V data signal drives the chosen 5 V LED reliably at room and at high temperature; the real current draw of Wi-Fi peaks; how bright the ring must be (brightness is set in SYS-001, working value, from spike 7.5); the thermal margin inside a printed shell (G10); photobiological safety (G11, EN 62471).

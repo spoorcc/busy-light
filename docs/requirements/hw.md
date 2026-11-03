@@ -35,10 +35,10 @@ Process rules: `docs/process/README.md`.
 
 ### HW-003 USB-C power input
 
-- **Statement:** The board shall take 5 V from a USB-C connector as a sink, with the two CC pull-down resistors of 5.1 kohm, ESD protection on VBUS and the data lines, and a design input current of at most [500] mA.
-- **Rationale:** SYS-020 sets the supply and the current limit. Without CC resistors some USB-C chargers deliver no power.
+- **Statement:** The board shall take 5 V from a USB-C connector as a sink, with the two CC pull-down resistors of 5.1 kohm, ESD protection on VBUS and the data lines, and a design input current of at most [1500] mA (the source-advertised maximum of SYS-020). The board shall let the firmware read the advertised current: each CC line goes to a processor analogue input (through a divider if the input range needs it), or a CC sensing component reports the advertised current. The 5.1 kohm resistors are the only load on the CC lines.
+- **Rationale:** SYS-020 sets the supply and the current limit and (owner, 2026-11-04) allows a higher current if the source advertises it, which the firmware can only know if it can read the CC voltage. Without CC resistors some USB-C chargers deliver no power. Connector, track and fuse ratings must cover the highest allowed current.
 - **Parent:** SYS-020
-- **Acceptance criteria:** The schematic shows CC1 and CC2 each with a 5.1 kohm resistor to ground, an ESD device on VBUS, D+ and D-, and the power budget in `hw/sim/` shows the worst-case input current at or below the limit. A prototype powers up from a USB-C to USB-A cable and from a USB-C charger.
+- **Acceptance criteria:** The schematic shows CC1 and CC2 each with a 5.1 kohm resistor to ground, an ESD device on VBUS, D+ and D-, and the power budget in `hw/sim/` shows the worst-case input current at or below the limit. The schematic shows the CC read path. The connector, tracks and any protection device are rated for at least [1500] mA with a margin (calculation in `hw/sim/`). A prototype powers up from a USB-C to USB-A cable and from a USB-C charger, and the firmware reports the advertised current of three different sources (default, 1.5 A, 3 A) within the tolerance of the CC voltage bands.
 - **Verification method:** Test
 - **Verified by:** TC-203
 - **Category:** Safety
