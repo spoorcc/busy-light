@@ -86,7 +86,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 ### RISK-008 Image does not fit two slots with margin
 
 - **Hazard / failure mode:** Cannot build or update
-- **Cause:** 4 MB flash, 1.0 to 1.5 MB image estimate (paper budget E2a: break-even about 1.31 MiB at the 75 % rule; real size from E2b)
+- **Cause:** 4 MB flash, 1.0 to 1.5 MB image estimate (paper budget E2a: break-even about 1.31 MiB at the 75 % rule; size ladder E2b: a throw-away image with Wi-Fi, TLS server and client, JSON, DHCP, LED and settings is 792 KB signed, 43 % of the default slot, a lower bound without the web page, update and EAP code)
 - **Effect:** Redesign: smaller image, larger flash or different update scheme
 - **Severity (1-5):** 4  **Likelihood (1-5):** 4  **Initial risk:** 16
 - **Mitigated by:** SYS-026, SYS-029, ARCH-010
@@ -108,7 +108,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 ### RISK-010 RAM exhaustion with two TLS sessions
 
 - **Hazard / failure mode:** Handshake fails or device resets under concurrent requests
-- **Cause:** Small RAM, TLS buffers, JSON and web buffers
+- **Cause:** Small RAM, TLS buffers, JSON and web buffers (size ladder E2b: static RAM is 285 KB of 360 KB used in the throw-away image; the TLS server alone adds about 75 KB, mostly its 60 000 B mbedTLS heap; run-time heap use unknown)
 - **Effect:** Web interface or push unavailable
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** SYS-026, SYS-027, SW-002, ARCH-016, ARCH-017
