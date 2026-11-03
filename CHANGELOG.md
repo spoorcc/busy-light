@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added
+- Spike 7.1 E2a paper flash budget: default 4 MB layout leaves 128 KiB unassigned; image limit at 75 % of a slot is about 1.31 MiB (1.38 MiB with unused areas reclaimed).
 - Chip revision >= v0.3 (secure boot) added to HW-008 and ADR-0007; virtual-eFuse rehearsal noted in ADR-0007 and RISK-022.
 - Spike 7.1 E11a partial record: ECDSA P-256 build works (bootloader 5 KB smaller than RSA-2048); virtual eFuse option and ESP32-C3 revision >= v0.3 requirement for secure boot found in source; secure boot and encryption not yet built.
 - Spike 7.1 E1 build record: hello_world and Wi-Fi shell build for `esp32c3_devkitm` with Zephyr v4.5.0 and SDK 1.0.1 (build only; nothing flashed or run); default 4 MB flash layout and default signing key noted.
