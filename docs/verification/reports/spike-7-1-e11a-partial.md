@@ -28,7 +28,7 @@ Reading: ECDSA P-256 signing builds with no change other than the two options, a
 | Secure boot options | The HAL's bootloader Kconfig has the secure-boot, signed-on-boot and flash-encryption symbols. I did not find how to set them from a Zephyr sysbuild (`SB_CONFIG` or an MCUboot overlay) | unknown | Next step: find the supported way (MCUboot Espressif readme, the `west espressif` tooling) and try a build with the options on |
 
 ## What this changes
-**Applied in the next commit (autonomous session, 2026-11-03):** items 1 to 3 below are written into ADR-0007 (Proposed), HW-008 (Draft) and RISK-022. Original proposals:
+**Applied in commit `b16755d` (2026-11-03):** items 1 to 3 below are written into ADR-0007 (Proposed), HW-008 (Draft) and RISK-022. Original proposals:
 1. **ADR-0007:** add (a) the chip revision condition (at least v0.3) to stage 2 and to the module purchase; (b) the virtual-eFuse option as the first rehearsal path in stage 2, to be verified; (c) a note that the official flash-encryption sample does not cover the C3.
 2. **HW-008 / spike 7.4:** the BOM must name a module revision that supports secure boot (at least v0.3).
 3. **RISK-022:** note the virtual-eFuse option as a possible mitigation (unverified).

@@ -4,16 +4,16 @@
 - **Related:** ADR-0006, ADR-0007, ADR-0008, SYS-013, SYS-029, SYS-034, SYS-035, SYS-043, SYS-046, RISK-006, RISK-007, RISK-012, RISK-022
 - **Scope:** every secret that the project creates, stores or uses. Values and key material are never stored in this repository.
 
-Parts marked *(verify)* depend on the ESP32-C3 documentation or on spike 7.1 and are not yet checked.
+Parts marked *(verify)* depend on the ESP32-C3 documentation or on spike 7.1 and are not yet checked. "Lost" in this document means all copies of a key are lost; one copy that cannot be accounted for counts as a possible leak.
 
 ## 1. Inventory
 | Key / secret | Purpose | Lives where | Created by | Who can read it | Loss means |
 |--------------|---------|-------------|------------|-----------------|------------|
-| Image release key (ECDSA P-256, MCUboot) | Signs release images | Offline: hardware token or encrypted offline medium | Owner | Owner only | No more updates for released units, unless a backup key exists (RISK-006) |
+| Image release key (ECDSA P-256, MCUboot) | Signs release images | Offline: hardware token or encrypted offline medium | Owner | Owner only | Loss of all copies: no more updates for locked units, so a recall (accepted by the owner, 2026-11-03; RISK-006) |
 | Release key backup copies (same key, not a second key) | Restore the release key if one copy is lost | Two encrypted copies in two separate places | Owner | Owner only | Loss of all copies = recall of locked units (accepted by the owner, 2026-11-03) |
 | Development image key | Signs development builds | Developer machine, marked by a distinct key ID | Build tooling | Developers | Nothing in the field (it is never in a release, RISK-007) |
 | Secure-boot key (chip secure boot v2, RSA-3072 on the ESP32-C3) | Signs the first-stage bootloader; its digest is in eFuse | Offline, like the release key | Owner | Owner only | New bootloader cannot be installed on locked units |
-| Flash-encryption key | Encrypts flash content | Inside the chip (eFuse), never leaves it | The chip, at first locked boot *(verify)* | Nobody | Not recoverable by design; units must be reflashed only through the signed path (SYS-046) |
+| Flash-encryption key | Encrypts flash content | Inside the chip (eFuse), never leaves it | The chip, at first locked boot (documented in the MCUboot Espressif readme; not tested) | Nobody | Not recoverable by design; units must be reflashed only through the signed path (SYS-046) |
 | Unit passphrase (80 bit) | Protects the provisioning access point (ADR-0006) | Secrets partition of the unit; also on the label | The unit, from its hardware random generator | Owner who holds the label; the unit; physical presence over USB | Label lost: read over USB with the button held |
 | Device TLS key and certificate | Identity for HTTPS on the LAN (ADR-0008) | Secrets partition of the unit | The unit | The unit only | Factory reset creates a new key; pins change (SYS-041, RISK-016) |
 | Web login password hash | Access to the web interface (SYS-039) | Settings area | User, at first setup | The unit | User resets by factory reset |
@@ -21,7 +21,7 @@ Parts marked *(verify)* depend on the ESP32-C3 documentation or on spike 7.1 and
 
 ## 2. Which key signs what
 1. **Stage 1 (internal prototypes):** the development key signs all images. No eFuse is set. These units never leave the owner.
-2. **Stage 3 (units for others):** the secure-boot key signs the bootloader. The release key signs each application image. The bootloader holds the public part of the release key only (one key in the Espressif port).
+2. **Stage 3 (units for others):** the secure-boot key signs the bootloader. The release key signs each application image. The ROM holds the digest of the secure-boot key (in eFuse). MCUboot holds the public part of the release key only (one key in the Espressif port).
 3. A release build fails if it is signed with the development key ID. A development build is refused by a locked unit.
 4. The first image on a new unit is flashed over USB with the production signing path (section 5). Later images come over the network.
 

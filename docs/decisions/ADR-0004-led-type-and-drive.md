@@ -26,7 +26,7 @@ Not known (spikes 7.3 and 7.5): whether a 3.3 V data signal drives the chosen 5 
 ## Alternatives considered
 
 ### A. Single-wire addressable RGB LED, 2020 or 3535 package (WS2812 or SK6812 type)
-One data line through all 16 LEDs; one part type; common in shop libraries; the Zephyr `led_strip` API exists with SPI-based and (for the Espressif parts) RMT-based drivers (to verify for the pinned revision).
+One data line through all 16 LEDs; one part type; common in shop libraries; the Zephyr `led_strip` API has an SPI-based driver (`worldsemi,ws2812-spi`, in source at v4.5.0); no RMT driver for the C3 was found (desk survey E0).
 Cons: the data timing is tight (about 1.25 us per bit; to confirm in the datasheet); the data input threshold is typically 0.7 x the LED supply, i.e. about 3.5 V at 5 V, above a 3.3 V output (G14); no hardware current limit; each LED draws about 1 mA when dark (estimate, 16 mA total).
 
 ### B. Clocked addressable LED (APA102 type, also 2020 variants)

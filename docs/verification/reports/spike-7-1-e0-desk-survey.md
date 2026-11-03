@@ -7,6 +7,8 @@
 - **Evidence class:** documentation and source read, not built, not measured. Nothing here replaces a build and a test.
 
 ## Results
+**Pass 1 rows refer to Zephyr v4.2.0 and to documentation pages. The v4.5.0 source findings in Pass 2 and Pass 3 take precedence where they differ** (WPA2-Enterprise, virtual eFuses, AP+STA).
+
 | Item | Finding | Class | Effect |
 |------|---------|-------|--------|
 | Board name | `esp32c3_devkitm` (Espressif, SoC esp32c3). Partition file `partitions_0x0_default_4M.dtsi`, so a 4 MB layout. Needs `west blobs fetch hal_espressif` for the Wi-Fi and Bluetooth binary blobs | documented ([board page, 4.2.0](https://docs.zephyrproject.org/4.2.0/boards/espressif/esp32c3_devkitm/doc/index.html)) | Use this board name in E1. The blobs are a licence and SBOM item (RISK-020, SYS-044) |
@@ -25,14 +27,14 @@
 | Key count | The page shows one signing key per image and one for the bootloader. No total limit stated | not found | Whether a backup release key can be added is open. The key-management document keeps it marked *(verify)* |
 | Flash encryption | Development mode (reversible, debugging allowed) and release mode (permanent; first boot encrypts flash and burns eFuses). Device-generated or host-generated key. **OTA images must be sent as plaintext** (the device encrypts on write). With encryption on, `CONFIG_ESP_MCUBOOT_ERASE_PROGRESSIVELY` must be off | documented (MCUboot docs) | Matches ADR-0007 (device encrypts on write). The "device-generated key never leaves the chip" preference is documented as possible. Dev mode cannot show the locked state, as RV-002 said |
 | Download mode | `CONFIG_SECURE_DISABLE_ROM_DL_MODE` removes UART download mode. `CONFIG_SECURE_ENABLE_SECURE_ROM_DL_MODE` limits it to basic flash read, write and erase. Both irreversible after first full boot | documented | The secure download mode is a candidate for SYS-046 recovery. Still to decide in the eFuse procedure |
-| Known problem | MCUboot issue 1866: `boot_request_upgrade()` silently fails on Zephyr v3.5.0 with MCUboot v2.0.0 on the ESP32-C3 when flash encryption is on; works without. A maintainer wrote that virtual eFuses are not supported on Zephyr for Espressif chips ([issue](https://github.com/mcu-tools/mcuboot/issues/1866)). Status today not checked | documented (old) | A direct risk to ADR-0007 stage 3. E11b must test an upgrade request with encryption on the pinned versions. Also the missing virtual eFuses means that development rehearsals cannot be done in software |
+| Known problem | MCUboot issue 1866: `boot_request_upgrade()` silently fails on Zephyr v3.5.0 with MCUboot v2.0.0 on the ESP32-C3 when flash encryption is on; works without. A maintainer wrote that virtual eFuses are not supported on Zephyr for Espressif chips ([issue](https://github.com/mcu-tools/mcuboot/issues/1866)). Status today not checked | documented (old) | A direct risk to ADR-0007 stage 3. E11b must test an upgrade request with encryption on the pinned versions. Also the missing virtual eFuses means that development rehearsals cannot be done in software (superseded: v4.5.0 has `ESP32_EFUSE_VIRTUAL`, see the E11a record; untested) |
 | Bootloader size | With secure boot, image signing and flash encryption all enabled, the bootloader may exceed the ROM loader's size limit, depending on the signature algorithm (MCUboot issue 1262) | documented | Add to E11a and to the flash budget: bootloader size with all three on |
 | Serial recovery | Serial recovery writes straight to the primary slot, so an interrupted upload can leave an unbootable image | documented | Not a SYS-046 recovery path as it stands |
 | WPA2-Enterprise | Zephyr's hostap module has enterprise options (EAP-TLS, TTLS, PEAP) behind `WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE`. A 4.3.0 snapshot calls enterprise mode "NOT SECURE due to the lack of certificate validation", and notes stack overflow problems in enterprise mode. Nothing was found that links it to the ESP32 Wi-Fi driver, which uses Espressif's blob | documented (hostap, general); not found (ESP32) | SYS-036 (headroom for WPA2-Enterprise) is at risk: the ESP32 driver may not expose it in Zephyr at all. E12 starts with that check. Do not promise WPA2-Enterprise until it is shown |
 | Simple boot | Without MCUboot the C3 build uses "simple boot": one image, no OTA, no security features | documented (board page) | Confirms that MCUboot (or another bootloader) is a must for SYS-029 |
 
-## What this changes
-These are proposals for the owner; nothing has been edited in the ADRs.
+## What this changes (Pass 1)
+These were proposals. Status on 2026-11-03: all applied to the Proposed ADRs and the key-management draft (see "Pass 3, What Pass 3 changes"), except item 3 (WPA2-Enterprise priority), which Pass 2 reversed.
 1. **Key types.** ADR-0007 and the key-management document name only ECDSA P-256. For the secure-boot stage the bootloader key is RSA-3072. That is a second algorithm and a second key. Update both documents when the ADR is next revised.
 2. **LED driver.** ADR-0004 can say "SPI (Zephyr `ws2812-spi`)" as the only evidenced route and keep RMT as unverified.
 3. **WPA2-Enterprise (SYS-036)** is the least supported item. Suggest keeping it Draft and `Could` until E12's driver check is done.

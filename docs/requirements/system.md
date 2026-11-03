@@ -476,7 +476,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 9 and in `docs
 ### SYS-036 Headroom for WPA2-Enterprise
 
 - **Statement:** The hardware platform and the firmware design shall keep enough flash, RAM and certificate storage, and a Wi-Fi chip with supplicant support, so that WPA2-Enterprise (EAP-TLS and PEAP) can be added later without a hardware change.
-- **Rationale:** Owner answer 2026-11-03: the design must not add hardware limits that rule out WPA2-Enterprise. Risk with ESP32-C3: the chip supports it in Espressif's own SDK, but support in the Zephyr driver is unconfirmed (spike 7.1). Shared company networks often need it. The feature itself is not in the first release.
+- **Rationale:** Owner answer 2026-11-03: the design must not add hardware limits that rule out WPA2-Enterprise. Risk with ESP32-C3: the chip supports it in Espressif's own SDK (from memory), but in the Zephyr v4.5.0 source the ESP32 driver maps the EAP types to the Espressif blob (desk survey E0); flash and heap cost are not measured (E12). Shared company networks often need it. The feature itself is not in the first release.
 - **Parent:** NEED-001
 - **Acceptance criteria:** The Wi-Fi chip documentation states support for WPA2-Enterprise in station mode. The release build report shows free flash and RAM of at least the size that a spike build with EAP-TLS enabled adds ([to be measured]), on top of the margin of SYS-026. The settings store has room for a client certificate and key.
 - **Verification method:** Analysis
@@ -566,7 +566,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 9 and in `docs
 
 ### SYS-043 Secure boot and flash encryption
 
-- **Statement:** Every unit that leaves the owner's control shall run only firmware signed with the release key, and its flash content shall be encrypted, with the chip's one-time settings locked.
+- **Statement:** Every unit that leaves the owner's control shall start only a bootloader signed with the secure-boot key and run only application images signed with the release key, and its flash content shall be encrypted, with the chip's one-time settings locked.
 - **Rationale:** Owner request of 2026-11-03: security is important and the product may be sold. Without it, someone with the board and a programmer can read the device key, the token and the unit passphrase, and run other firmware. The 10 internal prototypes are exempt (staged plan in ADR-0007).
 - **Parent:** NEED-017
 - **Acceptance criteria:** On a unit prepared with the production procedure: an image signed with another key does not start; reading the flash with a programmer shows no readable secret; the download mode and the debug port cannot be used to read or write flash (checked on a sacrificial board). The record of each unit states its stage (prototype without locks, or locked).
