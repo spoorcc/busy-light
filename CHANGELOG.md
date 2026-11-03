@@ -10,7 +10,12 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ## [Unreleased]
 
+### Changed
+- Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
+
 ### Added
+- Spike 7.1 E0 pass 2: Zephyr v4.5.0 source read (AP+STA in the driver, WPA2-Enterprise mapped to the Espressif blob, SPI LED route, hardware random source needs the radio on, EC256 signing fits secure boot plus encryption).
+- Spike 7.1 E0 desk survey report (documentation only, nothing built): ROM secure boot signs the bootloader with RSA-3072, only an SPI `ws2812` route found for the LEDs, AP+STA, captive-portal DNS and WPA2-Enterprise unconfirmed on the C3.
 - Goldfish review RV-002 of plan 03 (spike 7.1); plan 03 revised: desk survey E0, split E2/E11, power experiment E14, secrets handling, kit accounting and evidence rules.
 - Draft plan 03 for spike 7.1 (Zephyr on ESP32-C3): 13 experiments with pass rules and fallbacks, shopping list, branch and report rules.
 - Draft hardware requirements HW-001..009 and mechanical requirements MECH-001..006 with test case stubs TC-201..209 and TC-301..306 (no CAD work done; values in brackets are proposals).

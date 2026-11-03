@@ -101,7 +101,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Schedule slip or platform change
 - **Severity (1-5):** 4  **Likelihood (1-5):** 3  **Initial risk:** 12
 - **Mitigated by:** SYS-025, SYS-026, ARCH-002, ARCH-010, ARCH-015
-- **Residual risk (after mitigation):** Spike 7.1 gate; effort cap of [2] weeks per missing feature; local patches need a DEV record.
+- **Residual risk (after mitigation):** Spike 7.1 gate; effort cap of [2] weeks per missing feature; local patches need a DEV record. Desk survey (E0, 2026-11-03): AP+STA, RMT LED driver, captive-portal DNS and WPA2-Enterprise on the C3 not found in the documentation; a documented MCUboot failure with flash encryption on the C3 (issue 1866). See `docs/verification/reports/spike-7-1-e0-desk-survey.md`.
 - **Verified by:** TC-037
 - **Status:** Open
 
