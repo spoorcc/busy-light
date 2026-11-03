@@ -9,7 +9,7 @@
 |------|-------|-----------------|
 | Plan 02 (system design) | `docs/plans/02-system-design.md` | Read sections 3, 8, 10 first. Approve after the owner decisions below |
 | Plan 03 (spike 7.1) | `docs/plans/03-spike-7-1-zephyr-esp32c3.md`, `docs/verification/spike-7-1-runbook.md` | Approve first: it unlocks the hardware purchase and all kit experiments |
-| ADR-0002 to ADR-0008 | `docs/decisions/` | Accept only after the spikes. ADR-0007 has a new section on the secure-boot build chain |
+| ADR-0002 to ADR-0009 | `docs/decisions/` | Accept only after the spikes. ADR-0007 has a new section on the secure-boot build chain |
 | Requirements | `docs/requirements/` (SYS-001..046, SW-001..004, HW-001..009, MECH-001..006) | Review the bracketed values; approve in groups |
 | Key management | `docs/regulatory/technical-file/05-cybersecurity/key-management.md` | Approve before any unit leaves your hands |
 

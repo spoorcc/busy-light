@@ -497,6 +497,6 @@ Round 7 (owner, 2026-11-03):
 Still open: none that block ADR-0008 or spike 7.1.
 
 ## 11. Rollout, rollback and traceability
-IDs created: `ARCH-001` to `ARCH-019` (registered as Draft in `docs/architecture/blocks.md`), proposed `ADR-0002` to `ADR-0008`, gaps G1-G17. The ARCH numbers 006 to 009 are reserved for hardware and mechanical blocks that are not yet identified (for example test fixture, label); they are skipped on purpose.
+IDs created: `ARCH-001` to `ARCH-019` (registered as Draft in `docs/architecture/blocks.md`), proposed `ADR-0002` to `ADR-0008` (ADR-0009, USB-C power input, was added later on 2026-11-04), gaps G1-G17. The ARCH numbers 006 to 009 are reserved for hardware and mechanical blocks that are not yet identified (for example test fixture, label); they are skipped on purpose.
 This document changes no controlled file other than adding two diagram files. To revert: delete this plan and the
 `arch-system-blocks` source and rendered SVG.
