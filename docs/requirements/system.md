@@ -476,7 +476,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 ### SYS-036 Headroom for WPA2-Enterprise
 
 - **Statement:** The hardware platform and the firmware design shall keep enough flash, RAM and certificate storage, and a Wi-Fi chip with supplicant support, so that WPA2-Enterprise (EAP-TLS and PEAP) can be added later without a hardware change.
-- **Rationale:** Owner answer 2026-11-03: the design must not add hardware limits that rule out WPA2-Enterprise. Risk with ESP32-C3: the chip supports it in Espressif's own SDK (from memory), but in the Zephyr v4.5.0 source the ESP32 driver maps the EAP types to the Espressif blob (desk survey E0); flash and heap cost are not measured (E12). Shared company networks often need it. The feature itself is not in the first release.
+- **Rationale:** Owner answer 2026-11-03: the design must not add hardware limits that rule out WPA2-Enterprise. Risk with ESP32-C3: the chip supports it in Espressif's own SDK (from memory), but in the Zephyr v4.5.0 source the ESP32 driver maps the EAP types to the Espressif blob (desk survey E0); build-only measurement (E12 follow-up): about +70 KB flash and +6 KB static RAM with `CONFIG_ESP32_WIFI_ENTERPRISE=y`; run-time heap use and function are not tested. Shared company networks often need it. The feature itself is not in the first release.
 - **Parent:** NEED-001
 - **Acceptance criteria:** The Wi-Fi chip documentation states support for WPA2-Enterprise in station mode. The release build report shows free flash and RAM of at least the size that a spike build with EAP-TLS enabled adds ([to be measured]), on top of the margin of SYS-026. The settings store has room for a client certificate and key.
 - **Verification method:** Analysis

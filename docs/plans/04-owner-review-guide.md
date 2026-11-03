@@ -26,12 +26,12 @@
 | 8 | Prototype eFuse steps | None on the 10 internal prototypes | Debugging; stage 2 proves the procedure first |
 | 9 | Manufacturer name and address on the label | Deferred by you; needed before the first unit goes to someone else | CRA and RED labelling |
 | 10 | Bracketed requirement values (brightness, range, intervals, limits) | Review as a group after spike 7.5 | They are the author's working values |
-| 11 | WPA2-Enterprise (SYS-036) priority | Keep Must for now; E12 measures the cost | The ESP32 driver in v4.5.0 maps EAP types to the Espressif blob |
+| 11 | WPA2-Enterprise (SYS-036) priority | Keep Must for now | The ESP32 driver in v4.5.0 maps EAP types to the Espressif blob; the build-only cost is about +70 KB flash and +6 KB static RAM (`spike-7-1-e12-e2b-followup.md`); function is untested |
 
 ## 3. What was found without hardware (all Draft reports, `docs/verification/reports/`)
 - E0: Zephyr v4.5.0 (pinned in `sw/west.yml`, with your approval) has the ESP32 Wi-Fi driver with AP+STA, WPA2-PSK soft AP, a DHCP server and an HTTP server with TLS. The captive-portal DNS is custom code. LEDs: SPI `ws2812` only.
 - E1: `hello_world` and the Wi-Fi shell build for `esp32c3_devkitm`; nothing was flashed.
-- E2a/E2b: the 75 % image limit is about 1.31 MiB; a throw-away image with Wi-Fi, TLS, JSON, DHCP, LED and settings is 792 KB signed (43 % of a slot) with 285 KB of 360 KB static RAM used. RAM looks tighter than flash.
+- E2a/E2b: the 75 % image limit is about 1.31 MiB; a throw-away image with Wi-Fi, TLS, JSON, DHCP, LED and settings is 792 KB signed (43 % of a slot) with 285 KB of 360 KB static RAM used. RAM looks tighter than flash. The signed sizes carry up to about 128 KiB of flash-mapping padding noise (follow-up report); the TLS heap can be cut by 20 to 45 KB in builds that link, run-time adequacy unknown.
 - E11a: ECDSA P-256 signing builds. Secure boot and flash encryption do not exist in the sysbuild bootloader (decision 1).
 - Facts from reviewers' memory (not verified): none are carried into requirements without a source.
 

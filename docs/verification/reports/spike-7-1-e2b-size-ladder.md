@@ -35,6 +35,8 @@
 | 7 | Settings on NVS | `settings_subsys_init`, `settings_load`, `settings_save_one`; `CONFIG_FLASH`, `FLASH_MAP`, `NVS`, `SETTINGS_NVS` |
 | 8 | PSA EC P-256 key creation | `psa_generate_key` and `psa_export_public_key` (SECP R1 256, sign/hash use) |
 
+> **Note added after the follow-up (`spike-7-1-e12-e2b-followup.md`):** the signed image sizes below include flash-mapping padding of 64 KiB steps; the +132 KB at step 7 is mostly padding (about 118 KB), real content grew about 14 KB. Compare content sizes, not signed sizes, between steps.
+
 ## Size ladder
 All values **built**. `Signed image` is `zephyr.signed.bin` in bytes.
 
