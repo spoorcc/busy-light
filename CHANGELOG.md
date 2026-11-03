@@ -14,6 +14,8 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added
+- Draft RISK-024..026 from ADR-0009; ADR-0009 summarised in the owner guide.
+- Draft ADR-0009 (Proposed): USB-C power input and detection of the advertised source current; ADC read of the CC lines recommended, dedicated CC IC as fallback; cap value and ADC-or-IC choice left to the owner (SYS-020, HW-003).
 - Power budget addendum for 900 and 1350 mA limits; SYS-001 rationale notes that the brightness figure depends on the source's current.
 - Owner decision recorded: allow a higher USB current when the source advertises it (SYS-020, HW-003, ADR-0004, RISK-003); default stays [500] mA.
 - PC prototype record for the ADR-0004 current limiter (scratchpad only): 41.7 M test frames without failure, 532 B code on rv32imc; proposals for level mode and the below-dark-current case noted in ADR-0004.

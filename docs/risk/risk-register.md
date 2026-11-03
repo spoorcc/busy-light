@@ -258,3 +258,36 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Residual risk (after mitigation):** Owner decision pending: accept a pinned ESP-IDF bootloader build, or reconsider secure boot for release 1. Stage 1 prototypes are not affected.
 - **Verified by:** TC-043
 - **Status:** Open
+
+### RISK-024 Source advertises more current than it delivers
+
+- **Hazard / failure mode:** The source advertises 1.5 A but supplies less (weak charger, long or thin cable, cable drop)
+- **Cause:** Allowed current follows the CC advertisement (SYS-020, ADR-0009)
+- **Effect:** Brown-out reset of the device, or the source shuts down
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** SYS-020, HW-003, HW-004, ARCH-001
+- **Residual risk (after mitigation):** Margin of [10] % on the advertised value; a brown-out detector that drops the limit to [500] mA after a reset (to specify)
+- **Verified by:** TC-203
+- **Status:** Open
+
+### RISK-025 CC voltage read wrongly
+
+- **Hazard / failure mode:** The advertised current is read wrongly and the device draws up to 1350 mA from a source that advertises 500 mA
+- **Cause:** ADC error, Wi-Fi noise, tolerance of Rd or Rp (ADR-0009)
+- **Effect:** Overloaded source or cable
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** SYS-020, HW-003, ARCH-001, ARCH-014
+- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is still open (ADR-0004 item 4)
+- **Verified by:** TC-203, TC-020
+- **Status:** Open
+
+### RISK-026 CC pin over-voltage damages the processor input
+
+- **Hazard / failure mode:** The CC pin sees a voltage above the processor pin rating (VCONN supply or a fault) and damages the ADC pin
+- **Cause:** CC lines connect directly to processor inputs without a divider (ADR-0009, option A)
+- **Effect:** Unit does not start or cannot read the advertised current
+- **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
+- **Mitigated by:** SYS-020, HW-003
+- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; clamp or series resistor to decide in spike 7.5
+- **Verified by:** TC-203
+- **Status:** Open
