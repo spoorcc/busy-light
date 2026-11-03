@@ -102,6 +102,14 @@ Choose **C, staged**: build A first (stage 1), prove the eFuse procedure on sacr
 - Check that the development key cannot sign a release build (release build script fails on the development key ID).
 - Revisit when: image plus margin does not fit, MCUboot cannot be built on this platform (then E), the sacrificial-board test fails (then E), the eFuse list or recovery limits change SYS-023, or a downgrade attack is shown to matter for the CRA argument.
 
+## Evidence update from spike 7.1 E11a (2026-11-03, build only)
+Record: `docs/verification/reports/spike-7-1-e11a-build-variants.md`.
+- In Zephyr v4.5.0 the bootloader that sysbuild builds for `esp32c3_devkitm` is the Zephyr-app MCUboot (`boot/zephyr`). It has **no** Kconfig symbols for the chip's secure boot v2 or flash encryption: setting them fails with "undefined symbol" (built).
+- The symbols exist only in the **standalone Espressif port** of MCUboot (`boot/espressif`), which expects an ESP-IDF-style HAL version 6.0.x. The Zephyr `hal_espressif` module (6.2.0, trimmed) cannot build it (built, failed at configure). A build against a full ESP-IDF v6.0 checkout was started and not completed.
+- Consequence for stage 3: secure boot and flash encryption need a **second bootloader build chain** (ESP-IDF checkout, pinned version, outside west and sysbuild), or Espressif's own bootloader (option E), which has the same need. The Zephyr application image would still be signed with `imgtool` (EC256) and verified by that bootloader; the flash map of the port and of the Zephyr application must match (not yet checked).
+- This lowers the score of option C relative to option A for the Zephyr-only toolchain, and makes the fallback E nearer to C than the ADR assumed. The scores above are not changed in this edit; the owner decides whether the second build chain is acceptable. **Open owner decision:** accept a pinned ESP-IDF build for the bootloader only (and allow the build to be completed in the spike), or reconsider secure boot for release 1.
+- Stage 1 (no eFuse steps) is unaffected: sysbuild MCUboot with EC256 signing, swap using offset, builds today.
+
 ## Critical review notes
 First objection: "Without secure boot, a signature check is bypassed by anyone who can write flash, so the signed update gives a false sense of security."
 Answer: true for stage 1, and stage 1 is for the internal prototypes only. Stage 3 closes the gap before any unit leaves the owner. The technical file states which units are in which stage.

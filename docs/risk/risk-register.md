@@ -101,7 +101,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Schedule slip or platform change
 - **Severity (1-5):** 4  **Likelihood (1-5):** 3  **Initial risk:** 12
 - **Mitigated by:** SYS-025, SYS-026, ARCH-002, ARCH-010, ARCH-015
-- **Residual risk (after mitigation):** Spike 7.1 gate; effort cap of [2] weeks per missing feature; local patches need a DEV record. Desk survey (E0, 2026-11-03, source read at v4.5.0): AP+STA exists in the driver (untested on the C3); an RMT LED driver is not needed (ADR-0004 uses SPI); captive-portal DNS is custom code; WPA2-Enterprise is mapped to the Espressif blob; a documented MCUboot failure with flash encryption on the C3 (issue 1866, fixed per the reporter by a `write-block-size` overlay); virtual eFuses exist in v4.5.0 (untested). See `docs/verification/reports/spike-7-1-e0-desk-survey.md`.
+- **Residual risk (after mitigation):** Spike 7.1 gate; effort cap of [2] weeks per missing feature; see RISK-023 for the secure-boot bootloader chain; local patches need a DEV record. Desk survey (E0, 2026-11-03, source read at v4.5.0): AP+STA exists in the driver (untested on the C3); an RMT LED driver is not needed (ADR-0004 uses SPI); captive-portal DNS is custom code; WPA2-Enterprise is mapped to the Espressif blob; a documented MCUboot failure with flash encryption on the C3 (issue 1866, fixed per the reporter by a `write-block-size` overlay); virtual eFuses exist in v4.5.0 (untested). See `docs/verification/reports/spike-7-1-e0-desk-survey.md`.
 - **Verified by:** TC-037
 - **Status:** Open
 
@@ -246,4 +246,15 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Mitigated by:** SYS-029, ARCH-010
 - **Residual risk (after mitigation):** Possible rehearsal with virtual eFuses (Zephyr `ESP32_EFUSE_VIRTUAL`, untested); module revision at least v0.3; procedure proven on sacrificial boards first; first 10 prototypes without eFuse steps; production step scripted and checked. The staged plan is in ADR-0007; the owner decides after spike 7.1.
 - **Verified by:** TC-029
+- **Status:** Open
+
+### RISK-023 Secure boot needs a second bootloader build chain
+
+- **Hazard / failure mode:** The chip's secure boot v2 and flash encryption cannot be enabled in the bootloader that Zephyr sysbuild builds
+- **Cause:** Zephyr v4.5.0 MCUboot (`boot/zephyr`) has no such options; they exist only in the standalone Espressif port, which needs an ESP-IDF 6.0.x HAL (spike 7.1 E11a)
+- **Effect:** A second, pinned build chain and a second toolchain in the product; the flash map of the bootloader and of the Zephyr application must match; more to audit (SBOM, SYS-044) and to keep secure (CRA)
+- **Severity (1-5):** 3  **Likelihood (1-5):** 4  **Initial risk:** 12
+- **Mitigated by:** SYS-043, SYS-044, ARCH-010
+- **Residual risk (after mitigation):** Owner decision pending: accept a pinned ESP-IDF bootloader build, or reconsider secure boot for release 1. Stage 1 prototypes are not affected.
+- **Verified by:** TC-043
 - **Status:** Open

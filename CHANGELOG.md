@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added
+- ADR-0007 evidence update and RISK-023: secure boot and flash encryption are not available in the Zephyr sysbuild MCUboot for the C3; the standalone Espressif port with a pinned ESP-IDF HAL is the only route found (owner decision pending).
 - Draft spike 7.1 runbook for the first hardware session (read-only kit checks, flashing the two E1 images, log format); not run.
 - Consistency pass over ADRs, key-management draft, SYS-036, RISK-006/008/009 and the spike reports (stale text and contradictions fixed after a fresh-reviewer check).
 - Consistency pass over plans 02/03, ADR headers and spike reports.

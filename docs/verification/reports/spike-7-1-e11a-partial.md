@@ -29,7 +29,7 @@ Reading: ECDSA P-256 signing builds with no change other than the two options, a
 
 ## What this changes
 **Applied in commit `b16755d` (2026-11-03):** items 1 to 3 below are written into ADR-0007 (Proposed), HW-008 (Draft) and RISK-022. Original proposals:
-1. **ADR-0007:** add (a) the chip revision condition (at least v0.3) to stage 2 and to the module purchase; (b) the virtual-eFuse option as the first rehearsal path in stage 2, to be verified; (c) a note that the official flash-encryption sample does not cover the C3.
+1. **ADR-0007** (note: the variants record `spike-7-1-e11a-build-variants.md` found that the virtual-eFuse rehearsal has no function in the sysbuild bootloader, because that bootloader has no secure-boot code): add (a) the chip revision condition (at least v0.3) to stage 2 and to the module purchase; (b) the virtual-eFuse option as the first rehearsal path in stage 2, to be verified; (c) a note that the official flash-encryption sample does not cover the C3.
 2. **HW-008 / spike 7.4:** the BOM must name a module revision that supports secure boot (at least v0.3).
 3. **RISK-022:** note the virtual-eFuse option as a possible mitigation (unverified).
 
