@@ -1,7 +1,7 @@
 # Contributing
 
 > **Outside code and document contributions are not accepted yet.** The contributor terms below are a draft that needs a
-> legal check first (ADR-0013, review RV-005). Issues, questions and critical reviews of the drafts are welcome now.
+> legal check first (ADR-0015, review RV-005). Issues, questions and critical reviews of the drafts are welcome now.
 
 This project follows a documented engineering process. Read these first:
 1. [`docs/process/README.md`](docs/process/README.md) -- lifecycle, gates, definition of done
@@ -15,7 +15,7 @@ Small fixes (typos, obvious bugs with an approved requirement) can skip the desi
 Open an issue to discuss larger changes before you write code.
 
 ## Licensing of contributions
-The project uses two licences (see [`LICENSE.md`](LICENSE.md) and [ADR-0013](docs/decisions/ADR-0013-licensing.md)).
+The project uses two licences (see [`LICENSE.md`](LICENSE.md) and [ADR-0015](docs/decisions/ADR-0015-licensing-corrections.md)).
 - **Code** you contribute is licensed under Apache-2.0 (section 5 of that licence applies).
 - **Documentation, hardware and mechanical files** you contribute are licensed under CC BY-NC-SA 4.0. You also grant the
   project owner a perpetual, worldwide, non-exclusive right to license your contribution to others for commercial use.

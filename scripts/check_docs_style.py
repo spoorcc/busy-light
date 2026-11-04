@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Light style check for user documentation (docs/user/**/*.md) against docs/standards/writing.md.
 
 Checks: numbered steps <= 20 words, other sentences <= 25 words, paragraphs <= 6 sentences,

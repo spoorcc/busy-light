@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Software checks. Same script locally and in CI.
 # Builds sw/app for the host (native_sim) when the west workspace can be set up, then runs Twister
 # unit tests under sw/app/tests. A missing input is reported as NOT RUN, never as a pass.

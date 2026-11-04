@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Hardware checks (ADR-0012). Same script locally and in CI.
 #   scripts/ci_hw.sh          run ERC, DRC, BOM export and the regeneration check on hw/kicad
 # Needs: kicad-cli (KiCad 10.0.x). The regeneration check needs the venv (see pyproject.toml).

@@ -1,8 +1,8 @@
 # ADR-0016: Independent hardware gate for the high current step
 
-- **Status:** Proposed (only the owner sets Accepted). If accepted, it replaces the sensing decision of ADR-0009 (option A, ADC on the CC lines) and the "hardware backstop" wording of ADR-0010.
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session; option B). Replaces the sensing decision of ADR-0009 (option A) and the hardware-backstop wording of ADR-0010. Accepted before its own goldfish review; the review follows (see Deciders / reviewers).
 - **Date:** 2026-11-04
-- **Deciders / reviewers:** Ben Spoor (owner); based on review RV-006 findings S1, S2 and S7; this ADR itself has no review yet
+- **Deciders / reviewers:** Ben Spoor (owner); based on review RV-006 findings S1, S2 and S7; this ADR itself was accepted before its own review; a goldfish review of ADR-0015 and ADR-0016 is recorded as RV-008
 - **Related:** SYS-020, HW-003, HW-010, RISK-003, RISK-024, RISK-025, RISK-029, ADR-0004, ADR-0009, ADR-0010; RV-006; `docs/verification/reports/spike-7-5-power-budget-paper.md`
 
 ## Context and problem
@@ -71,7 +71,7 @@ Scores 0 to 5, my judgement; evidence from ADR-0009 E5, E14 to E17 (read or snip
 B leads C and D by 2 points, which is inside my scoring error. Sensitivity: if the weight of "firmware can lower or hold" falls by 2, E leads (86 against 85); if the weight of "temperature range" rises by 2, C leads (101 against 99). So the table does not decide between B, C and D. The recommendation rests on evidence: B is the only option whose thresholds and outputs I read in a datasheet (E5, E14), and it removes the thin ADC margin of finding S7.
 
 ## Decision
-**Owner instruction 2026-11-04: follow the recommended option (B).** The status stays Proposed until the owner sets Accepted; HW-003 and HW-010 (Draft) are already drafted to match. The recommendation: **B, a CC detection IC with its output ANDed with the firmware GPIO.** The owner may instead accept option A (and RISK-025 stays open) or choose C or D.
+**Owner decision 2026-11-04: Accepted, option B.** HW-003 and HW-010 (Draft) are drafted to match; the checks of item 3 are still required before a part is fixed. The decision: **B, a CC detection IC with its output ANDed with the firmware GPIO.** The owner may instead accept option A (and RISK-025 stays open) or choose C or D.
 1. **Gate:** the high step switches on only if the IC reports at least 1.5 A and the firmware GPIO is high. Both must agree. The firmware can always hold or drop to the lower step.
 2. **Firmware reads the IC outputs** (two GPIO pins), not the ADC. The ADC read of ADR-0009 option A is dropped, so the 90 mV gap and the +-35 mV ADC error no longer decide the limit. A firmware misread can no longer raise the limit above the hardware reading; a wrong IC reading is the remaining failure and is covered by the vendor specification and test.
 3. **Part:** the part and its second source are decided after the checks below; no part number is fixed here. Required checks before acceptance: the CC pin ratings and VCONN behaviour, the temperature range of the actual part (the conflict of E14 and E15), the JLCPCB class and setup fee, and behaviour with a PD-capable charger.

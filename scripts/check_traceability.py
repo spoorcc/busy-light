@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Validate requirement/ADR/risk/test-case traceability under docs/.
 
 Definitions are headings starting with an ID, e.g. '### SW-012 Title'.

@@ -1,6 +1,6 @@
 # ADR-0013: Licensing of software, hardware, mechanics and documentation
 
-- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session; option F)
+- **Status:** Superseded by ADR-0015 (2026-11-04). The text below is the record at the time of acceptance and is not edited; the corrections are in ADR-0015. Originally accepted by the owner, Ben Spoor, 2026-11-04, option F.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); no goldfish review yet; not legal advice, a lawyer should check the final texts before the first commercial sale
 - **Related:** NEED-012, SYS-044, ADR-0002, ADR-0012; `docs/regulatory/applicability.md`

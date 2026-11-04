@@ -1,8 +1,8 @@
 # ADR-0015: Licensing, corrected and completed (supersedes ADR-0013 when accepted)
 
-- **Status:** Proposed (only the owner sets Accepted). ADR-0013 stays Accepted until the owner accepts this one; then ADR-0013 becomes "Superseded by ADR-0015".
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session, after the options were presented as recommendations). Supersedes ADR-0013. Accepted before its own goldfish review; the review follows (see Deciders / reviewers).
 - **Date:** 2026-11-04
-- **Deciders / reviewers:** Ben Spoor (owner); reviewed as RV-005 (goldfish review of ADR-0013, 2026-11-04); this ADR itself has no review yet. Not legal advice; the items marked LAWYER need a professional before the first outside contribution or commercial sale.
+- **Deciders / reviewers:** Ben Spoor (owner); reviewed as RV-005 (goldfish review of ADR-0013, 2026-11-04); this ADR itself was accepted before its own review; a goldfish review of ADR-0015 and ADR-0016 is recorded as RV-008. Not legal advice; the items marked LAWYER need a professional before the first outside contribution or commercial sale.
 - **Related:** NEED-012, SYS-044, RISK-020, RISK-035, RISK-036, RISK-037, RISK-038, ADR-0013, ADR-0012; RV-005; `docs/regulatory/applicability.md`
 
 ## Context and problem
@@ -53,7 +53,7 @@ Scores 0 to 5, my judgement. **F was scored by the author after the owner chose 
 Among the options that pass the corrected gate (C, D, E, F), F scores 96, D 89, E 86 and C 74. The lead of F over D is 7 points, which is inside my scoring error. F's advantage is the Zephyr criterion (weight 4, score 5) and the mature text; D's is the commercial option. The owner decided F; this table does not overturn that and does not prove it.
 
 ## Decision
-**Owner instruction 2026-11-04: follow the recommended options.** The status stays Proposed until the owner sets Accepted and the review below has been done; only items that change no licence are applied now (NEED-012 acceptance criterion, `scripts/check_license_map.py` in CI, outside contributions paused). `.claude/` stays CC BY-NC-SA 4.0 and `LICENSE.md` is unchanged until then. The owner confirms or changes each item when accepting. Items 1 and 2 restate ADR-0013; items 3 to 11 are new.
+**Owner decision 2026-11-04: Accepted with the recommended options.** All items below are applied by the change that records this acceptance, except the checks that need a lawyer (items 3, 5, 6, 7, 9, 10, 11), which are written down as the owner's position and flagged in `LICENSE.md` as not legal advice. Items 1 and 2 restate ADR-0013; items 3 to 11 are new.
 1. **Code is Apache-2.0** (firmware in `sw/`, scripts, generators, build files, CI). **Documents, hardware files, mechanics and images are CC BY-NC-SA 4.0.** (Unchanged.)
 2. **Wording:** the code is "open source"; the rest is "source-available" and not open source hardware. (Unchanged.)
 3. **Generated output.** A file produced by an Apache-2.0 generator (KiCad or FreeCAD files, rendered SVG) belongs to the design and is CC BY-NC-SA 4.0; the generator stays Apache-2.0. Code in a document (snippets, examples) is Apache-2.0 and carries an SPDX line. Diagram sources are documentation (CC BY-NC-SA 4.0). LAWYER: whether the generator licence reaches the output.
