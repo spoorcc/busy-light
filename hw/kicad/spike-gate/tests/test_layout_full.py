@@ -61,6 +61,12 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(self.pin_net[("R7", "1")], "VBUS_IC")
         self.assertEqual(self.pin_net[("R_VD", "2")], self.pin_net[("U1", "VBUS_DET")])
 
+    def test_cc_ic_symbol_has_the_datasheet_pins(self):
+        # TUSB321 datasheet SLLSEO6C section 4: 12 pins, no ADR pin; VCONN is a feature, not a pin.
+        names = {pin.name for unit in layout_full.BOXES["U1"].units for pin in unit.pins}
+        self.assertEqual(names, {"CC1", "CC2", "VDD", "GND", "PORT", "VBUS_DET", "OUT1_N", "OUT2_N",
+                                 "CURRENT_MODE", "VCONN_FAULT", "ID", "DIR"})
+
     def test_tps2553_in_the_vbus_path(self):
         self.assertEqual(self.pin_net[("U7", "1")], "VBUS_IC")
         self.assertEqual(self.pin_net[("U7", "3")], "VBUS_IC")

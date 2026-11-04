@@ -85,7 +85,8 @@ BOXES = {
         ("GND", "GND", "bottom", -2.54, "power_in"), ("PORT", "PORT", "bottom", 2.54, "passive"),
         ("CC1", "CC1", "left", 2.54, "passive"), ("CC2", "CC2", "left", 0, "passive"),
         ("7", "OUT1_N", "right", 5.08, "open_collector"), ("8", "OUT2_N", "right", 0, "open_collector"),
-        ("ADR", "ADR", "right", -5.08, "passive")], half_h=12.7),
+        ("3", "CURRENT_MODE", "right", -5.08, "passive"), ("6", "VCONN_FAULT", "right", -7.62, "open_collector"),
+        ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")], half_h=15.24),
     "U5": L.SUPERVISOR,
     "U7": L.box_symbol("TPS2553_BOX", [
         ("1", "IN", "top", -2.54, "power_in"), ("3", "EN", "top", 2.54, "input"),
@@ -357,7 +358,8 @@ def _build():
     s.pw("VBUS_IC", ("U1", "VDD"), True)
     s.pw("GND", ("U1", "GND"))
     s.pw("GND", ("U1", "PORT"), True)
-    s.nc(P("U1", "ADR"))
+    for pin in ("3", "6", "9", "11"):  # CURRENT_MODE, VCONN_FAULT, ID, DIR: DFP/VCONN/orientation features, unused (UFP)
+        s.nc(P("U1", pin))
     s.ends("VBUS_DET_N", ("R_VD", "2"), ("U1", "VBUS_DET"))
     s.pw("VBUS_IC", ("R_VD", "1"))
     o1 = P("U1", "7")
