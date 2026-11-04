@@ -85,7 +85,7 @@ The project has done a lot of thinking and some experiments, but **no product co
 | Area | State |
 |------|-------|
 | Requirements | Drafted (needs, system, software, hardware, mechanical). **None approved.** |
-| Architecture decisions | 14 decision records written. Licensing (ADR-0013) is **Accepted**; the other 13 are **Proposed**. They cover platform, LED drive, mapping model, provisioning, update and boot security, transport, USB-C power input and current limit, housing, the hardware design flow, licensing and the mounting interface. |
+| Architecture decisions | 16 decision records written. Licensing (ADR-0013) is **Accepted**; the other 15 are **Proposed** (ADR-0015 would supersede ADR-0013 after its review). They cover platform, LED drive, mapping model, provisioning, update and boot security, transport, USB-C power input and current limit, housing, the hardware design flow, licensing and the mounting interface. |
 | Risk register | Open. Each risk has a mitigation and a verification link. |
 | Reviews | Independent "goldfish" reviews recorded for the system design, the first spike plan and the hardware flow decision ([`docs/reviews/`](docs/reviews/)). |
 | Software | Zephyr 4.5.0 workspace pinned. A first build check ran. A mapping extractor and an LED current limiter were tried as **PC-only prototypes**; the results are in the reports, the code is not in `sw/`. |

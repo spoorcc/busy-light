@@ -277,7 +277,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source or cable
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** SYS-020, HW-003, ARCH-001, ARCH-014
-- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is wanted by the owner (HW-010, ADR-0004 item 4): it starts at [500] mA and is raised by the firmware after the CC read. It covers a stopped firmware and a short circuit, **not** a firmware that misreads CC and raises the limit itself (RV-006 S1); an independent decode path is an owner decision
+- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is wanted by the owner (HW-010, ADR-0004 item 4): it starts at [500] mA and is raised by the firmware after the CC read. It covers a stopped firmware and a short circuit, **not** a firmware that misreads CC and raises the limit itself (RV-006 S1); an independent decode path is proposed in ADR-0016 (owner decides)
 - **Verified by:** TC-203, TC-020
 - **Status:** Open
 

@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Review actions: spike report on the layout of the back (annular bayonet proposed; spike code on `spike/mech-back-layout`), ADR-0015 (licensing corrected and completed; would supersede ADR-0013), ADR-0016 (independent hardware gate for the high current step; recommends a CC detection IC ANDed with the firmware GPIO).
 - Goldfish reviews RV-005 (ADR-0013 licensing), RV-006 (ADR-0009 and ADR-0010 USB power) and RV-007 (ADR-0014 and the orientation and mounting requirements); RISK-035 to RISK-041; outside contributions paused until the contributor terms have a legal check; REUSE code globs extended.
 - Diagram check (`scripts/build_diagrams.sh --check`) compares structure, labels and colours, not coordinates, because text widths depend on the machine's font metrics (`scripts/svg_normalize.py`, with tests).
 - Diagrams use an explicit font (Noto Sans) and CI installs it, so box sizes do not depend on the machine's default font.
