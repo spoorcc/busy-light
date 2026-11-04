@@ -1,8 +1,8 @@
 (export 
   (version "D")
   (design
-    (source "<interactive>")
-    (date "11/04/2026 07:56 PM")
+    (source "gen_gate.py")
+    (date "11/04/2026 09:58 PM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
@@ -13,7 +13,7 @@
         (company)
         (rev)
         (date)
-        (source "<interactive>")
+        (source "../../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/060d7bcd-38f7-4774-8017-b7ce88505e2e/scratchpad/gate_v5/gen_gate.py")
         (comment
           (number "1")
           (value ""))
@@ -55,9 +55,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "Z5T80dywrI")
+          (name "SKiDL Tag") "qkTUtt8ey7")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:27"))
+          (name "SKiDL Line") "gen_gate.py:27"))
       (libsource
         (lib "power")
         (part "PWR_FLAG"))
@@ -65,7 +65,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "a6ceff3b-1bc1-586a-869d-e17650ddbefd"))
+      (tstamps "a849f2b1-5f48-5f27-a7b4-547baee1e9e6"))
     (comp
       (ref "#FLG1")
       (value "PWR_FLAG")
@@ -79,9 +79,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "m5VrMfApq2")
+          (name "SKiDL Tag") "0knnFWT1xa")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:27"))
+          (name "SKiDL Line") "gen_gate.py:27"))
       (libsource
         (lib "power")
         (part "PWR_FLAG"))
@@ -89,7 +89,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "50b8f463-07ed-55fe-91e0-9e9dabf66ecf"))
+      (tstamps "78087313-9a4d-55fd-b8f7-c9248891d32e"))
     (comp
       (ref "#FLG2")
       (value "PWR_FLAG")
@@ -103,9 +103,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "bBN8zjjmCJ")
+          (name "SKiDL Tag") "1t8a9zg6IQ")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:27"))
+          (name "SKiDL Line") "gen_gate.py:27"))
       (libsource
         (lib "power")
         (part "PWR_FLAG"))
@@ -113,10 +113,10 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "541d3202-ba4e-5383-a6ee-6798f99a7380"))
+      (tstamps "777943f0-3748-599a-a76a-9f75eb30e798"))
     (comp
       (ref "C1")
-      (value "510n X7R 10%")
+      (value "620n C0G 5%")
       (description "Unpolarized capacitor")
       (footprint "Capacitor_SMD:C_0603_1608Metric")
       (fields
@@ -127,9 +127,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "itbbi1k9mR")
+          (name "SKiDL Tag") "5ri_3WQIXj")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:56"))
+          (name "SKiDL Line") "gen_gate.py:69"))
       (libsource
         (lib "Device")
         (part "C"))
@@ -137,31 +137,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "c6e8901e-54df-5197-8188-c33927029c1b"))
-    (comp
-      (ref "D1")
-      (value "Schottky small signal")
-      (description "Diode")
-      (footprint "Diode_SMD:D_SOD-323")
-      (fields
-        (field
-          (name "Description") "Diode")
-        (field
-          (name "Footprint") "Diode_SMD:D_SOD-323")
-        (field
-          (name "Datasheet"))
-        (field
-          (name "SKiDL Tag") "z4jImNxlLy")
-        (field
-          (name "SKiDL Line") "src/gen_gate.py:57"))
-      (libsource
-        (lib "Device")
-        (part "D"))
-      (sheetpath
-        (names "/")
-        (tstamps "/"))
-      (component_classes)
-      (tstamps "a6e29797-2381-5770-b297-fb12f81c9aaa"))
+      (tstamps "d9ef1d19-93f3-553d-81a7-6689cee5fdd7"))
     (comp
       (ref "Q2")
       (value "2N7002")
@@ -175,9 +151,9 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/NDS7002A-D.PDF")
         (field
-          (name "SKiDL Tag") "o1Q7TL0FL8")
+          (name "SKiDL Tag") "t0xcbK1jnJ")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:93"))
+          (name "SKiDL Line") "gen_gate.py:99"))
       (libsource
         (lib "Transistor_FET")
         (part "2N7002"))
@@ -185,7 +161,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "17090622-0302-59be-922b-310b281e48f6"))
+      (tstamps "507c7470-39bb-5780-a23a-9f0bee4f3ca0"))
     (comp
       (ref "Q3")
       (value "2N7002")
@@ -199,9 +175,9 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/NDS7002A-D.PDF")
         (field
-          (name "SKiDL Tag") "5ddaECIilK")
+          (name "SKiDL Tag") "q8K425G2Es")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:93"))
+          (name "SKiDL Line") "gen_gate.py:99"))
       (libsource
         (lib "Transistor_FET")
         (part "2N7002"))
@@ -209,7 +185,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "640b4de0-68e2-5e1e-a002-450b678f9227"))
+      (tstamps "e6e5eaec-d9c3-5b7e-bab0-85f17e3ff9c3"))
     (comp
       (ref "R1")
       (value "100k")
@@ -223,9 +199,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "Ph6CI9RJO_")
+          (name "SKiDL Tag") "zsXxCddJkr")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:40"))
+          (name "SKiDL Line") "gen_gate.py:42"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -233,7 +209,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "2cf43eca-17ea-52d2-8f75-0955a5d58155"))
+      (tstamps "b5c16c86-d74c-58eb-a1ae-2ab787969ee3"))
     (comp
       (ref "R2")
       (value "100k")
@@ -247,9 +223,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "IcCnT4UAFs")
+          (name "SKiDL Tag") "YOzcI7n5Hs")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:87"))
+          (name "SKiDL Line") "gen_gate.py:92"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -257,7 +233,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "b51cdb5d-a151-5068-8a9a-30045c909b2d"))
+      (tstamps "fbd0bf9f-6616-5cd9-8211-77571b183306"))
     (comp
       (ref "R3")
       (value "100k")
@@ -271,9 +247,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "9xuq1zGeul")
+          (name "SKiDL Tag") "0fjUCQdq4P")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:87"))
+          (name "SKiDL Line") "gen_gate.py:92"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -281,7 +257,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "2fb4088c-e842-511b-a192-1865dfe5eb08"))
+      (tstamps "ca8a506c-c1a0-56e4-99cf-5ab8d68ffbeb"))
     (comp
       (ref "R4")
       (value "100k")
@@ -295,9 +271,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "ZJ6GOCymir")
+          (name "SKiDL Tag") "uQgzBv9MCF")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:87"))
+          (name "SKiDL Line") "gen_gate.py:92"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -305,7 +281,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "720b81be-05cc-59e4-8228-7fd9e5fb3714"))
+      (tstamps "7c8f8cea-e2cb-5f57-ade0-e8cec4e57dc2"))
     (comp
       (ref "R5")
       (value "100k")
@@ -319,9 +295,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "yjfjJYwmKU")
+          (name "SKiDL Tag") "RYa7aXBGjn")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:87"))
+          (name "SKiDL Line") "gen_gate.py:92"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -329,10 +305,10 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "c73c2792-cc24-5380-9a60-f40773cd6b66"))
+      (tstamps "2249ea6e-81ac-528f-85af-18e6ac73b79b"))
     (comp
       (ref "R6")
-      (value "1M 1%")
+      (value "150k")
       (description "Resistor")
       (footprint "Resistor_SMD:R_0603_1608Metric")
       (fields
@@ -343,9 +319,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "fTFhUI_2Oa")
+          (name "SKiDL Tag") "LGO8Dv5EZ_")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:55"))
+          (name "SKiDL Line") "gen_gate.py:72"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -353,7 +329,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "05ce1fd5-59e2-57c1-9a49-9b45966dd74f"))
+      (tstamps "2081fcb6-29db-5c8d-9b69-8957ceb7047d"))
     (comp
       (ref "R_ILIM2")
       (value "PLACEHOLDER")
@@ -367,9 +343,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "pC1jeh1pwd")
+          (name "SKiDL Tag") "Sgw47oIaJp")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:94"))
+          (name "SKiDL Line") "gen_gate.py:100"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -377,7 +353,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e55e93a7-35d1-5605-9590-b82931a1d4b5"))
+      (tstamps "b59d032f-3184-5be2-9783-9daeb364eb36"))
     (comp
       (ref "R_ILIM3")
       (value "PLACEHOLDER")
@@ -391,9 +367,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "KhBD0qvSTt")
+          (name "SKiDL Tag") "Pfd4goaiFw")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:94"))
+          (name "SKiDL Line") "gen_gate.py:100"))
       (libsource
         (lib "Device")
         (part "R"))
@@ -401,7 +377,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "57684205-e711-5a94-9efd-c57d3f18086e"))
+      (tstamps "27c3fd76-216d-587e-b98b-464351cae39e"))
     (comp
       (ref "U1")
       (value "CC_DETECT_IC_PLACEHOLDER")
@@ -415,9 +391,9 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "XkxBruSsYw")
+          (name "SKiDL Tag") "P0GilOLUI5")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:30"))
+          (name "SKiDL Line") "gen_gate.py:30"))
       (libsource
         (lib "Connector_Generic")
         (part "Conn_01x05"))
@@ -425,7 +401,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "5ec7e13d-2362-5787-b90e-22125cfee78f"))
+      (tstamps "27407a48-fbc1-5338-8b24-709be3dafe30"))
     (comp
       (ref "U2")
       (value "74LVC1G04")
@@ -439,9 +415,9 @@
         (field
           (name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74lvc1g04.pdf")
         (field
-          (name "SKiDL Tag") "Kv3eloP9KA")
+          (name "SKiDL Tag") "VSptGeIiId")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:45"))
+          (name "SKiDL Line") "gen_gate.py:47"))
       (libsource
         (lib "74xGxx")
         (part "74LVC1G04"))
@@ -449,23 +425,23 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "138727bb-b7f2-5fc3-95ce-75feedd6ae34"))
+      (tstamps "5d083630-009b-5b6f-8dc6-b2fa96e8dda0"))
     (comp
       (ref "U3")
       (value "74LVC1G11")
       (description "Single AND 3-Input Gate, Low-Voltage CMOS")
-      (footprint "Package_TO_SOT_SMD:SOT-23-5")
+      (footprint "Package_TO_SOT_SMD:SOT-23-6")
       (fields
         (field
           (name "Description") "Single AND 3-Input Gate, Low-Voltage CMOS")
         (field
-          (name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+          (name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
         (field
           (name "Datasheet") "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf")
         (field
-          (name "SKiDL Tag") "Ydnny7Vmhn")
+          (name "SKiDL Tag") "shsAhTIyaR")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:77"))
+          (name "SKiDL Line") "gen_gate.py:82"))
       (libsource
         (lib "74xGxx")
         (part "74LVC1G11"))
@@ -473,23 +449,23 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "7e3ec696-5398-5f9c-9c5e-4fdac106f225"))
+      (tstamps "124dcc98-85db-5cdc-8c1a-b13510437cbf"))
     (comp
       (ref "U4")
       (value "74LVC1G11")
       (description "Single AND 3-Input Gate, Low-Voltage CMOS")
-      (footprint "Package_TO_SOT_SMD:SOT-23-5")
+      (footprint "Package_TO_SOT_SMD:SOT-23-6")
       (fields
         (field
           (name "Description") "Single AND 3-Input Gate, Low-Voltage CMOS")
         (field
-          (name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+          (name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
         (field
           (name "Datasheet") "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf")
         (field
-          (name "SKiDL Tag") "WYyY8kLe3O")
+          (name "SKiDL Tag") "1Cqhm8EIE7")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:77"))
+          (name "SKiDL Line") "gen_gate.py:82"))
       (libsource
         (lib "74xGxx")
         (part "74LVC1G11"))
@@ -497,31 +473,31 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "aadbdd3a-83c8-5f26-84e9-91ffde8f09a1"))
+      (tstamps "e142dd00-4e50-5f29-9fa9-674eca6deb93"))
     (comp
       (ref "U5")
-      (value "74LVC1G17")
-      (description "Single Schmitt Buffer Gate, Low-Voltage CMOS")
+      (value "TPS3840DL40 (candidate)")
+      (description "Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)")
       (footprint "Package_TO_SOT_SMD:SOT-23-5")
       (fields
         (field
-          (name "Description") "Single Schmitt Buffer Gate, Low-Voltage CMOS")
+          (name "Description") "Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)")
         (field
           (name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
         (field
-          (name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74lvc1g17.pdf")
+          (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "48zwUCSWje")
+          (name "SKiDL Tag") "ks4neAr8hJ")
         (field
-          (name "SKiDL Line") "src/gen_gate.py:59"))
+          (name "SKiDL Line") "gen_gate.py:62"))
       (libsource
-        (lib "74xGxx")
-        (part "74LVC1G17"))
+        (lib "Connector_Generic")
+        (part "Conn_01x05"))
       (sheetpath
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e0952844-f804-5a64-abdc-182c938a1d7e")))
+      (tstamps "abbb89a2-4bcb-5766-a23c-1ecfc9f81e83")))
   (nets
     (net
       (code 1)
@@ -531,10 +507,6 @@
         (ref "#FLG")
         (pin "1")
         (pintype "POWER-OUT"))
-      (node
-        (ref "R1")
-        (pin "1")
-        (pintype "PASSIVE"))
       (node
         (ref "U2")
         (pin "5")
@@ -650,11 +622,15 @@
       (node
         (ref "U5")
         (pin "3")
-        (pintype "POWER-IN")))
+        (pintype "PASSIVE")))
     (net
       (code 7)
       (name "HOLD_OK")
       (class "Default")
+      (node
+        (ref "R6")
+        (pin "2")
+        (pintype "PASSIVE"))
       (node
         (ref "U3")
         (pin "6")
@@ -665,46 +641,22 @@
         (pintype "INPUT"))
       (node
         (ref "U5")
-        (pin "4")
-        (pintype "OUTPUT")))
+        (pin "1")
+        (pintype "PASSIVE")))
     (net
       (code 8)
-      (name "HOLD_RC")
-      (class "Default")
-      (node
-        (ref "C1")
-        (pin "1")
-        (pintype "PASSIVE"))
-      (node
-        (ref "D1")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "R6")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "U5")
-        (pin "2")
-        (pintype "INPUT")))
-    (net
-      (code 9)
       (name "ILIM")
       (class "Default")
       (node
         (ref "R_ILIM2")
         (pin "2")
-        (pintype "PASSIVE")))
-    (net
-      (code 10)
-      (name "ILIM1")
-      (class "Default")
+        (pintype "PASSIVE"))
       (node
         (ref "R_ILIM3")
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 11)
+      (code 9)
       (name "ILIM_STEP2_EN")
       (class "Default")
       (node
@@ -720,7 +672,7 @@
         (pin "4")
         (pintype "OUTPUT")))
     (net
-      (code 12)
+      (code 10)
       (name "ILIM_STEP3_EN")
       (class "Default")
       (node
@@ -736,7 +688,7 @@
         (pin "4")
         (pintype "OUTPUT")))
     (net
-      (code 13)
+      (code 11)
       (name "N$1")
       (class "Default")
       (node
@@ -748,7 +700,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 14)
+      (code 12)
       (name "N$2")
       (class "Default")
       (node
@@ -760,7 +712,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 15)
+      (code 13)
       (name "SEL_STEP2_GPIO")
       (class "Default")
       (node
@@ -772,7 +724,7 @@
         (pin "3")
         (pintype "INPUT")))
     (net
-      (code 16)
+      (code 14)
       (name "SEL_STEP3_GPIO")
       (class "Default")
       (node
@@ -784,6 +736,26 @@
         (pin "3")
         (pintype "INPUT")))
     (net
+      (code 15)
+      (name "SUP_CT")
+      (class "Default")
+      (node
+        (ref "C1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U5")
+        (pin "5")
+        (pintype "PASSIVE")))
+    (net
+      (code 16)
+      (name "SUP_MR_NC")
+      (class "Default")
+      (node
+        (ref "U5")
+        (pin "4")
+        (pintype "PASSIVE")))
+    (net
       (code 17)
       (name "VBUS_IC")
       (class "Default")
@@ -792,7 +764,7 @@
         (pin "1")
         (pintype "POWER-OUT"))
       (node
-        (ref "D1")
+        (ref "R1")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -805,5 +777,5 @@
         (pintype "PASSIVE"))
       (node
         (ref "U5")
-        (pin "5")
-        (pintype "POWER-IN")))))
+        (pin "2")
+        (pintype "PASSIVE")))))

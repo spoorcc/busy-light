@@ -8,7 +8,7 @@
 * H VBUS dip to 3.5 V after the hold-off was done, then IC glitch while it debounces again.
 .param tr=1m
 Vrail 3v3 0 PWL(0 0 {tr} 3.3)
-Vbus vbus 0 PWL(0 0 {tr} 5 {d0} 5 {d0+1m} 3.5 {d1} 3.5 {d1+1m} 5)
+Vbus vbus 0 PWL(0 0 {tr} 5 {d0} 5 {d0+1m} {dv} {d1} {dv} {d1+1m} 5)
 Vsel sel 0 PWL(0 0 {tsel} 0 {tsel+10u} 3.3)
 Rpu vbus out1n 100k
 Cpin out1n 0 20p
@@ -30,7 +30,7 @@ Band enraw 0 V = {V(3v3)} * ((V(ok) > 0.5*V(3v3) && V(sel) > 0.5*V(3v3) && V(hol
 Ren enraw en 1k
 Cen en 0 10p
 Rpd en 0 100k
-.param glitch=GLITCH tgs=TGS tgend=TGEND tsel=TSEL chold=CHOLD d0=DIP0 d1=DIP1
+.param glitch=GLITCH tgs=TGS tgend=TGEND tsel=TSEL chold=CHOLD d0=DIP0 d1=DIP1 dv=DIPV
 .control
 set noaskquit
 tran 20u 1200m

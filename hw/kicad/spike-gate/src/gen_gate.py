@@ -57,12 +57,15 @@ inv[4] += ok
 # diode does not: review finding H2). The open-drain output is pulled up to VBUS_IC, not 3V3, so an
 # unpowered supervisor reads "hold-off not done" (low).
 hold_ok, ct = Net("HOLD_OK"), Net("SUP_CT")
-sup = Part("Connector_Generic", "Conn_01x04", ref="U5", value="TPS3840DL40 (candidate)",
-           footprint="Package_TO_SOT_SMD:SOT-23-6")
-sup[1] += VBUS         # VDD / sense
-sup[2] += GND
-sup[3] += ct           # delay capacitor
-sup[4] += hold_ok      # open-drain, high = hold-off done
+# Pin order of the TPS3840 DBV package (SNVSB03E, p. 4): 1 RESET, 2 VDD, 3 GND, 4 MR/NC, 5 CT.
+# MR (pin 4) is left open here; whether it needs a tie-off is NOT read yet (open item).
+sup = Part("Connector_Generic", "Conn_01x05", ref="U5", value="TPS3840DL40 (candidate)",
+           footprint="Package_TO_SOT_SMD:SOT-23-5")
+sup[1] += hold_ok      # open-drain RESET, high = hold-off done
+sup[2] += VBUS         # VDD / sense
+sup[3] += GND
+sup[4] += Net("SUP_MR_NC")
+sup[5] += ct           # delay capacitor
 c_ct = Part("Device", "C", ref="C1", value="620n C0G 5%", footprint="Capacitor_SMD:C_0603_1608Metric")
 c_ct[1] += ct
 c_ct[2] += GND

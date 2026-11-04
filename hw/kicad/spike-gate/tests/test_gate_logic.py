@@ -30,15 +30,28 @@ def net_of(nets, ref, pin):
 
 # Ideal model of the gate path. out1_n: level of the open-drain IC output
 # ("low" = IC reports >= 1.5 A, "high_z" = released or IC unpowered, "short_high", "short_low").
-def step_enable(out1_n, sel, pullup_present=True, gate_logic_powered=True):
+def step_enable(out1_n, sel, pullup_present=True, gate_logic_powered=True,
+                vbus_present=True, hold_done=True, supervisor_stuck_high=False):
+    """Ideal model of one gated step.
+
+    The IC output pull-up goes to VBUS_IC (not 3V3): with VBUS gone and 3V3 still up, the output
+    reads 0 V, "CC OK" goes high (RV-008 v3a finding H1) and only the hold-off input keeps the
+    gate closed, through the pull-up of HOLD_OK to VBUS_IC. A supervisor stuck high is a single
+    fault that removes the hold-off (RISK-044) and is not covered by the gate itself.
+    """
     if not gate_logic_powered:
         return False                      # unpowered AND output is low
-    level = {"low": 0, "short_low": 0, "short_high": 1,
-             "high_z": 1 if pullup_present else None}[out1_n]
+    if not vbus_present:
+        level = 0                         # pull-up and IC supply both gone: output reads 0 V
+        hold = supervisor_stuck_high      # HOLD_OK pulled up to the absent VBUS_IC
+    else:
+        level = {"low": 0, "short_low": 0, "short_high": 1,
+                 "high_z": 1 if pullup_present else None}[out1_n]
+        hold = hold_done or supervisor_stuck_high
     if level is None:
         return False                      # floating input: not treated as "high" (HW-010 rule)
     ok = (level == 0)                     # inverter U2
-    return ok and sel
+    return ok and sel and hold
 
 
 class GateNetlist(unittest.TestCase):
@@ -72,22 +85,24 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(self.nets, "U1", "1"), "VBUS_IC")
 
     def test_hold_off_input_on_both_ands(self):
-        hold = net_of(self.nets, "U5", "4")
+        hold = net_of(self.nets, "U5", "1")
         self.assertEqual(hold, "HOLD_OK")
         self.assertEqual(net_of(self.nets, "U3", "6"), hold)
         self.assertEqual(net_of(self.nets, "U4", "6"), hold)
 
     def test_hold_off_supervisor_on_ic_supply_with_pullup_to_ic_supply(self):
         # Pull-up to VBUS_IC (not 3V3): an unpowered supervisor must read "hold-off not done".
-        self.assertEqual(net_of(self.nets, "U5", "1"), "VBUS_IC")
+        self.assertEqual(net_of(self.nets, "U5", "2"), "VBUS_IC")  # VDD (TPS3840 DBV pin order)
         self.assertEqual(net_of(self.nets, "R6", "1"), "VBUS_IC")
         self.assertEqual(net_of(self.nets, "R6", "2"), "HOLD_OK")
-        self.assertEqual(net_of(self.nets, "C1", "1"), net_of(self.nets, "U5", "3"))
+        self.assertEqual(net_of(self.nets, "C1", "1"), net_of(self.nets, "U5", "5"))   # CT
+        self.assertEqual(net_of(self.nets, "U5", "1"), "HOLD_OK")                   # RESET
+        self.assertEqual(net_of(self.nets, "U5", "3"), "GND")
         self.assertEqual(net_of(self.nets, "C1", "2"), "GND")
 
     def test_no_single_pin_named_nets_except_placeholders(self):
         # Review finding: Net("ILIM") created twice gave two one-pin nets that parity ignored.
-        allowed = {"CC_OUT2_N", "CC_RESERVED"}
+        allowed = {"CC_OUT2_N", "CC_RESERVED", "SUP_MR_NC"}
         for name, pins in self.nets.items():
             real = {p for p in pins if not p[0].startswith("#")}
             if len(real) < 2 and name not in allowed and not name.startswith("unconnected"):
@@ -103,6 +118,7 @@ class GateNetlist(unittest.TestCase):
         for ref in ("U3", "U4"):
             blk = text[text.index(f'(ref "{ref}")'):][:600]
             self.assertIn("SOT-23-6", blk)
+        self.assertIn("SOT-23-5", text[text.index('(ref "U5")'):][:600])   # supervisor: 5-pin package
 
     def test_both_ands_share_the_same_ic_path(self):
         # Finding H1 of RV-008: one IC fault reaches both steps and the firmware read.
@@ -123,6 +139,15 @@ class TruthTable(unittest.TestCase):
         self.assertFalse(step_enable("high_z", True))                             # IC unpowered
         self.assertFalse(step_enable("short_high", True))                         # output shorted high
         self.assertFalse(step_enable("high_z", True, pullup_present=False))       # pull-up open
+
+    def test_hold_off_blocks_even_a_good_reading(self):
+        self.assertFalse(step_enable("low", True, hold_done=False))
+        self.assertTrue(step_enable("low", True, hold_done=True))
+
+    def test_vbus_gone_with_3v3_up_stays_closed_only_through_the_hold_off(self):
+        # v3a finding H1: "CC OK" is high here, so the hold-off input is the only barrier.
+        self.assertFalse(step_enable("high_z", True, vbus_present=False))
+        self.assertTrue(step_enable("high_z", True, vbus_present=False, supervisor_stuck_high=True))
 
     def test_not_covered_fault_is_visible(self):
         # IC output shorted low: both the gate and the firmware see "1.5 A" (RISK-042).
