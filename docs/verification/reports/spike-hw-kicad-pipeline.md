@@ -92,3 +92,18 @@ Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (commit daa78d7), `run_spike.
 | ngspice, CI image run, tool-qualification table, pins by digest | Not done. | not run |
 
 Status against gate G1 of ADR-0012 (stand-in board, what-if pegs): (a) ERC 0, parity 0, DRC 0: met. (b) 100 percent routed: met. (c) identical dumps including tracks, vias and zones: not met, because the dump covers parts, nets and positions only. (d) Freerouting scripted: met locally, not yet in CI. With the housing pegs, (a) and (b) are not met.
+
+## 9. Round 5 (2026-11-04): widened semantic dump, regeneration gate, negative tests
+Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (`src/dump_design.py`, `src/route_freerouting.py`, `run_spike.sh`, `tests/test_dump_design.py`, `expected/`, `fixtures/`).
+
+| Step | Result | Label |
+|------|--------|-------|
+| Dump scope | Parts, nets, footprint positions, tracks (net, layer, width, endpoints), vias, zones and rule areas, stackup, board thickness, design rules, net classes and net class patterns. UUID-free and sorted, coordinates rounded to 1 um. | run |
+| Negative tests (pytest, 10 tests) | A changed net, value, footprint swap, track edit, via edit, zone edit, design-rule edit, net-class edit and stackup edit each change the dump. An unchanged board gives an identical dump. All pass. | run |
+| Router determinism | Freerouting gives different tracks and vias in two runs with the same input and the same final score (301 against 318 tracks, 6 against 11 vias in one pair). The router is not deterministic. | run |
+| Stored routing session | The session of one run is stored as `expected/routed.ses`. Importing it into a freshly generated board reproduces the committed dump exactly, and KiCad DRC on the result reports 0 violations, 0 unconnected, 0 parity issues. The gate runs without the Freerouting jar. | run |
+| Gate failure path | The script exits non-zero if DRC has violations, a dump differs from the committed one, or the stored session is missing. The failing branch was not exercised by a deliberate tamper test. | run (pass path), not run (fail path) |
+| `pcbnew` Python interface | `import pcbnew` prints a deprecation warning: "The SWIG-based Python interface to the PCB editor is deprecated and will be removed in a future version of KiCad. Please plan to move to the new IPC API and/or make use of the kicad-cli tool." The generator and the dump use this interface (footprint load, board build, DSN and SES import). The IPC API was not evaluated. Under Python 3.14 the SWIG iterators for tracks and drawings also fail (`GetTracks`, `GetDrawings`), so the dump reads tracks from the board file text. | run |
+| CI | Nothing of this runs in CI yet. | not run |
+
+Status against gate G1 of ADR-0012: (c) is met on the stand-in for the dump scope above, with the routed copper restored from the stored session. The routing itself is reproducible only through the stored session.
