@@ -288,7 +288,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Unit does not start or cannot read the advertised current
 - **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
 - **Mitigated by:** SYS-020, HW-003
-- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; with ADR-0016 the CC pins belong to a detection IC and its datasheet rating and a clamp must be checked (the ADC pin no longer touches CC)
+- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; with ADR-0016 the CC pins belong to a detection IC (the ADC pin no longer touches CC); TUSB321 datasheet: CC pins 6 V absolute maximum, 7 kV HBM (`docs/verification/reports/cc-ic-datasheet-evidence.md`); a fault above 6 V on CC and a clamp are still to decide
 - **Verified by:** TC-203
 - **Status:** Open
 
@@ -475,6 +475,6 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Misreads at temperature, assembly yield loss, or a re-layout for another part
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** HW-003, ADR-0016 item 3 (checks before a part is fixed), SYS-021
-- **Residual risk (after mitigation):** Not assessed; no second source named
+- **Residual risk (after mitigation):** Not assessed; datasheet confirms 0 to 70 C for TUSB321; the older PTN5150 states -40 to +85 C and is a candidate second source (PTN5150A not read; `docs/verification/reports/cc-ic-datasheet-evidence.md`)
 - **Verified by:** Design review of the BOM at G2 of ADR-0012; TC-203
 - **Status:** Open
