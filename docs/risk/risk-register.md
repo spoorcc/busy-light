@@ -464,7 +464,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source or cable; the hardware gate no longer protects (it is independent of firmware faults only)
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** HW-003, HW-010, ADR-0016
-- **Residual risk (after mitigation):** Not assessed; band-edge and fault-injection tests are open; a diverse second opinion (ADC or comparator) is not part of ADR-0016
+- **Residual risk (after mitigation):** Not assessed; band-edge and fault-injection tests are open; a diverse second opinion (ADC or comparator) is not part of ADR-0016; a start-up hold-off of at least [200] ms on the gate is required (HW-010) because the IC output level before its first debounce is not stated
 - **Verified by:** TC-203, TC-210
 - **Status:** Open
 
