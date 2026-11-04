@@ -14,10 +14,10 @@
 | F2 | Creative Commons licences do not grant trademark or patent rights. | same page, same limit | Yes, paraphrase |
 | F3 | NonCommercial: the FAQ says the condition prohibits commercial use. The detailed NC section is on the unread part of the page (characters 100000 to 178882). | same page | Partly |
 | F4 | KiCad official libraries are CC-BY-SA 4.0 with an exception: the copyright holder waives article 3 (the Share-Alike and attribution conditions) for electronic designs and generated files that use the library data. The page shows no date or version of the exception. | https://www.kicad.org/libraries/license/ | Yes |
-| F5 | Mbed TLS files are offered "under a dual Apache-2.0 OR GPL-2.0-or-later license". The user chooses. | https://raw.githubusercontent.com/Mbed-TLS/mbedtls/development/LICENSE (development branch, not the release that Zephyr pins) | Yes, branch differs |
+| F5 | Mbed TLS files are offered "under a dual Apache-2.0 OR GPL-2.0-or-later license". The user chooses. Same text in the Zephyr-pinned commit c43f34b9 (`LICENSE`). | Pinned commit read 2026-11-04 | Yes |
 | F6 | Noto Sans is under the SIL Open Font License 1.1 (26 February 2007). The font may not be sold by itself. A modified version must not use a Reserved Font Name. No Reserved Font Name was shown. | https://github.com/notofonts/latin-greek-cyrillic/blob/main/OFL.txt | Yes |
 | F7 | The `LICENSE` files of Zephyr (tag v4.5.0) and MCUboot (main branch) contain the Apache-2.0 text. The MCUboot file adds: "This product bundles tinycrypt, which is available under the 3-clause BSD license." Per-file licences inside both trees were not checked. | raw.githubusercontent.com `zephyrproject-rtos/zephyr/v4.5.0/LICENSE`, `mcu-tools/mcuboot/main/LICENSE` | Yes, top-level file only |
-| F8 | Espressif Wi-Fi and Bluetooth binary libraries: licence terms (redistribution, restriction to Espressif chips) not found. Fetches of `espressif/esp-wifi-lib/LICENSE` (404), `hal_espressif/main/LICENSE` and `hal_espressif/zephyr/zephyr/blobs/license.txt` (both returned only the Apache-2.0 text) did not show them. | none | No |
+| F8 | In the pinned `hal_espressif` (commit cc81db00, from the Zephyr v4.5.0 manifest) the Wi-Fi and RF binary libraries are declared in `zephyr/module.yml` with `license-path: zephyr/blobs/license.txt`; that file is the Apache-2.0 text and `REUSE.toml` labels `zephyr/blobs/**` Apache-2.0, copyright Espressif Systems. This is the module's declaration: it was not checked against Espressif's own terms or the blob contents. | git clone of the pinned commit, read 2026-11-04 | Yes, module declaration only |
 
 ## Compatibility table
 
@@ -26,7 +26,7 @@
 | Zephyr RTOS (v4.5.0 pin) | Firmware base | Apache-2.0 (F7, top-level file) | Linked into the image | Compatible with Apache-2.0 code. Keep NOTICE and licence texts. | Open: per-file licences unchecked |
 | MCUboot | Bootloader | Apache-2.0, bundles tinycrypt under BSD-3-Clause (F7) | Linked, separate image | Same; add the BSD-3-Clause notice for tinycrypt to NOTICE if it is built in | Open |
 | Mbed TLS | TLS | Apache-2.0 OR GPL-2.0-or-later (F5) | Linked | Choose Apache-2.0 and record the choice in the SBOM. The GPL branch is not used. | Open: record the choice and the pinned release |
-| Espressif Wi-Fi binaries | Radio | unknown (F8) | Linked binary | Cannot judge redistribution of images, or a build by others, until the terms are read. Also affects RED and CRA evidence (supplier declaration). | Open, blocking for release |
+| Espressif Wi-Fi binaries | Radio | Apache-2.0 as declared by the module (F8) | Linked binary | Compatible with Apache-2.0 code if the declaration is right. Keep the licence text and notices. Espressif's own terms and the supplier declaration for RED and CRA are still to get. | Open: declaration only |
 | KiCad symbols, footprints, 3D models | Hardware | CC BY-SA 4.0 with exception (F4) | Used in the design | The exception covers designs and generated files. Copying a library part into `hw/` as a file is not covered and keeps CC BY-SA 4.0. CC BY-NC-SA and CC BY-SA do not combine into one work: a BY-SA part stays BY-SA (SA compatibility is a lawyer question). | Open (LAWYER) |
 | Noto Sans | Diagram font | SIL OFL 1.1 (F6) | Installed in CI, not committed; embedded in rendered diagrams only as drawn text | The font is not distributed in this repository. Rendered diagrams carry glyph shapes only (author's reading, to check). | Open |
 | `scripts/diagrams/package-lock.json` and its dependencies | Diagram tooling | Mixed, not read | Dev tool only | The lock file is third-party data labelled Apache-2.0 today (P10 of RV-008). List each dependency licence in the SBOM. | Open |
@@ -34,7 +34,7 @@
 
 ## Actions
 
-- Read the Espressif binary licence from the Zephyr module in the pinned workspace after `west update` (west is not installed here), and close F8. Check per-file licences for F7.
+- Get Espressif's own licence statement for the binaries (F8 is the module declaration only) and the supplier declaration for RED and CRA. Check per-file licences of Zephyr and MCUboot (F7).
 - Read F3 (the detailed NC text) and the CC BY-SA compatibility list.
 - Produce the SBOM, then replace this table by rows generated from it.
 - Lawyer: the KiCad BY-SA rows and the Wi-Fi binary row.
