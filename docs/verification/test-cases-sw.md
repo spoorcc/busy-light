@@ -74,3 +74,13 @@
 - **Expected result / pass criteria:** see acceptance criteria of SW-008
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-109 Follow the hardware gate state and shed load
+
+- **Verifies:** SW-009
+- **Level:** Unit / integration, then bench with TC-210
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SW-009
+- **Automated:** TBD
+- **Evidence:** TBD
+

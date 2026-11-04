@@ -111,3 +111,17 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** TBD
 - **Priority:** Must
 - **Status:** Draft
+
+### SW-009 Follow the hardware gate state and shed load when the gate closes
+
+- **Statement:** The firmware shall read the hold-off and gate-enable state back from the hardware gate and shall reduce the LED load to the budget of the lowest current step within [50] ms of the hold-off or the gate closing, and shall not count a brown-out that happens during a hold-off towards the back-off of SW-007.
+- **Rationale:** The gate (ADR-0016) closes by itself after a dip of VBUS for [200] to [600] ms and drops the limit to the first step while the MCU stays up with its select line high (goldfish review of the gate, finding H2). Without readback the firmware keeps a full load on a limit that is already lower and causes a brown-out and the 60 s back-off after a cable wobble. Needs a readback line from the gate to the MCU, which HW-010 does not yet have (owner decision).
+- **Parent:** SYS-020
+- **Acceptance criteria:** With the hold-off forced active (VBUS dip, bench), the LED load is within the lowest-step budget within [50] ms of the gate state change, and no brown-out back-off starts. When the gate state input is not readable, the firmware assumes the gate closed and uses the lowest step.
+- **Verification method:** Test
+- **Verified by:** TC-109
+- **Category:** Safety
+- **Regulatory:** TBD
+- **Priority:** Must
+- **Status:** Draft
+

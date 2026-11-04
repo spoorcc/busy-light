@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- SW-009 (follow the hardware gate state and shed load when the gate closes, Draft, needs a readback line that HW-010 does not have yet) and TC-109 stub; RISK-044 extended with the findings of the second goldfish review of the gate (SW-005, HW-010).
 - RISK-044 (hold-off supervisor of the current-limit gate fails or is mis-set) and a TC-210 extension (VBUS dip restart, shorted or open delay capacitor, supervisor output forced high); candidate supervisor and datasheet evidence are on branch `spike/hw-gate` (HW-010, RISK-042).
 - Re-run of the ADR-0012 gate G1 stand-in spike (`docs/verification/reports/hw-flow-g1-rerun.md`, Draft): ERC, parity, DRC 0 and identical dumps reproduced locally; CI, Freerouting run, pinning and the peg-azimuth decision still open; ADR-0012 stays Proposed on the owner's choice "not yet".
 - HW-010 (hardware current limit on the USB input) Approved by the owner 2026-11-04 on instruction in the session; uncovered faults stay listed (RISK-029, RISK-042).
