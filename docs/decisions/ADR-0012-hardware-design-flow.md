@@ -81,7 +81,7 @@ Choose **B**, with C as the defined fallback.
 - Requirements created or changed: none now; HW requirements are drafted before any generator code. `design-hw.md` and `design-mech.md` need an update after acceptance.
 
 ## Verification and revisit
-- First generated board passes `kicad-cli` ERC and DRC; the semantic dump of a regenerated design equals the committed dump (item 10, check in a script).
+- First generated board passes `kicad-cli` ERC and DRC; the semantic dump of a regenerated design equals the committed dump (item 11, check in a script).
 - Interference check against the FreeCAD housing runs from the shared parameter file.
 - Revisit when: scripted routing fails the first-board review (switch to C), the KiCad scripting interface changes incompatibly, or the owner prefers the GUI.
 
