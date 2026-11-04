@@ -10,7 +10,7 @@ Process rules: `docs/process/README.md`.
 ### MECH-001 Housing size
 
 - **Statement:** The printed housing with the board fitted shall have a largest outer dimension from 48 mm to 58 mm.
-- **Rationale:** SYS-028: size between a table-tennis ball and a tennis ball.
+- **Rationale:** SYS-028: size between a table-tennis ball and a tennis ball. Working value in plan 05: diameter [53.0] mm, height [16.5] mm.
 - **Parent:** SYS-028
 - **Acceptance criteria:** A caliper measurement of [3] printed housings gives a largest dimension within the range.
 - **Verification method:** Test
@@ -35,10 +35,10 @@ Process rules: `docs/process/README.md`.
 
 ### MECH-003 Antenna clearance
 
-- **Statement:** The housing shall keep the antenna area of the module free of metal, conductive filament and metallised paint, to the distance given in ADR-0003.
-- **Rationale:** RISK-011: detuning of the antenna by nearby conductive material.
+- **Statement:** The housing shall have only non-conductive plastic inside a box of [15] mm around the antenna area of the module (no metal, magnet, screw, insert, conductive or metallic filament, metallic or conductive paint, metallised label), and its nearest wall shall be at least [15] mm from the antenna edge.
+- **Rationale:** RISK-011: detuning of the antenna by nearby conductive material. The vendor guideline (15 mm in all directions) also covers LEDs, tracks and ground near the antenna and the centred module: that is a PCB layout matter, recorded in ADR-0003 and HW-005, not a housing requirement. The 15 mm cannot be met literally in a 53 mm unit (plan 05 section 4.6); the range test decides.
 - **Parent:** SYS-038
-- **Acceptance criteria:** The housing drawing shows the clearance; the range test of SYS-038 passes with the finished housing.
+- **Acceptance criteria:** The housing drawing shows the plastic-only box and the wall distance; the range test of SYS-038 passes with the finished housing.
 - **Verification method:** Inspection
 - **Verified by:** TC-303
 - **Category:** Performance
@@ -74,10 +74,10 @@ Process rules: `docs/process/README.md`.
 
 ### MECH-006 Label area
 
-- **Statement:** The housing shall have a flat area of at least [20] x [20] mm for the unit label (identifier, passphrase, QR code) and the "prototype, not for sale" mark, which a user can read and which is not hidden when the unit stands on a desk.
-- **Rationale:** ADR-0006 puts the passphrase on a label. Regulatory labelling is a tight fit on a 53 mm housing (AS4).
+- **Statement:** The housing shall have a flat area of at least [20] x [20] mm on the underside of the base for the unit label (identifier, passphrase, QR code) and the "prototype, not for sale" mark, which a user can read when the unit is lifted.
+- **Rationale:** ADR-0006 puts the passphrase on a label. Regulatory labelling is a tight fit on a 53 mm housing (AS4). Assumption, the owner confirms: the unit lies flat on a desk with the ring up (plan 05 A1). The underside keeps the housing low (16.5 mm instead of 28 mm), keeps the label on a part that does not move, and exposes the passphrase less to photographing from a distance. The label is inside the 15 mm antenna box of MECH-003 (the floor is 6.6 mm below the antenna), so it must not be metallised.
 - **Parent:** SYS-013
-- **Acceptance criteria:** The drawing shows the area. A printed label of the stated size fits and stays readable after [100] cycles of opening and closing the housing. The label sits on a part that does not move when the housing opens.
+- **Acceptance criteria:** The drawing shows the area on the underside of the base. A printed label of the stated size fits, is not metallised and stays readable after [100] cycles of opening and closing the housing. The label sits on a part that does not move when the housing opens.
 - **Verification method:** Inspection
 - **Verified by:** TC-306
 - **Category:** Usability

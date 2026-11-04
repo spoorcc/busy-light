@@ -87,3 +87,11 @@ Spike 7.2 report in `docs/verification/`; the criterion above. Revisit when: fir
 Strongest objection: "Fallback B changes the BOM and the manual assembly, so deciding 'A first' makes the schematic work wasted."
 Answer: A and B use the same chip and footprint family; the module variants have the same pin function, so schematic and most of the layout carry over. The module footprint differs (to confirm).
 Second objection: "RSSI on a bench is not a real-world range test." Accepted; the criterion is a relative loss against a reference module, which removes most of the room dependence.
+
+## Finding from the housing analysis (2026-11-04)
+Source: plan 05 section 4.6 and `docs/verification/reports/mech-concept-analysis.md` section 8. Numbers are analysis, not measured. This ADR stays Proposed; the owner decides.
+- The housing uses D_pcb [46.0] mm (inside the 46 to 48 mm of the context) in a 53.0 mm housing. The module sits at the board centre, antenna end toward azimuth 180, antenna end edge 8.3 mm from the axis (assumed antenna area 13.2 x 5.4 mm).
+- The Espressif guideline (design guidelines, release master of 3 Nov 2026) asks for 15 mm clearance around the antenna, no LEDs, tracks or ground within it, and says not to centre the module with clearance on all four sides. Option A (module in the ring centre) breaks this by design. The housing cannot fix it. MECH-003 now covers only the housing part (plastic only in the 15 mm box, nearest wall at least 15 mm from the antenna edge).
+- Distances in this layout: nearest LED centre to the antenna area about 9.5 mm (11.7 mm on the module axis; the package edge is about 1 mm closer); antenna corners to the inner housing wall 14.3 mm (0.7 mm below 15 mm); middle of the end edge to the wall 16.6 mm. The LED distance is below 15 mm.
+- Consequence for the decision: option A needs board cut-outs around the antenna (both sides and below, per the guideline) and the KiCad keep-out check (decision item 4) **before** any layout work. If the cut-outs do not fit a 46 mm board with the ring of 16 LEDs, use the pre-agreed fallback B (u.FL variant), or move the module to the board edge. The distance to the nearest LED must be accepted by the range test of SYS-038 (TC-038) or be fixed by the layout.
+- Not decided here: which of the two (B or board edge) to prefer. Open for the owner with the spike 7.2 data.

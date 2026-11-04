@@ -4,7 +4,7 @@
 - **Date:** 2026-11-04
 - **Author:** Claude (analysis for the owner). Analysis only. Nothing was measured. Not reviewed by a goldfish or the owner.
 - **Related:** MECH-001, MECH-002, MECH-003, MECH-004, MECH-005, MECH-006, SYS-001, SYS-020, SYS-028, SYS-038, HW-001, HW-005, ADR-0003, ADR-0009, ADR-0011, RISK-005, RISK-011, plan 05 (`docs/plans/05-mechanical-design.md`); power numbers from `spike-7-5-power-budget-paper.md`
-- **Script:** reproduced in sections 6 and 7. The source files are kept in the session scratchpad only (`mech/mech_analysis.py`, `mech/adr_scores.py`).
+- **Script:** reproduced in sections 6 and 7. The source files are kept in the session scratchpad only (`mech/mech_analysis.py`, `mech/adr_scores.py`). Section 8 (2026-11-04) re-runs everything with the resolved dimensions (`mech_analysis_v2.py`, `adr_scores_v2.py`); sections 1 to 7 are the first draft.
 
 ## 1. Purpose
 
@@ -585,4 +585,413 @@ lowering one B score by 1 makes A >= B for: none
   P5 do nothing (no printed housing)               sum  100 ( 64.5 %)  EXCLUDED by gate: ['3 Diffuser quality possible in this process']
 
 P2 - P1 = -8
+```
+
+## 8. Re-run with resolved dimensions (2026-11-04)
+
+Sections 1 to 7 above are the first draft and are kept unchanged. This section re-runs the analysis with the dimensions chosen to resolve the three open conflicts of plan 05 (MECH-006 height and facet, the 15 mm antenna clearance, the PCB size of ADR-0003). The new dimensions are the author's decisions, not yet confirmed by the owner. Still analysis only, nothing measured. Scripts are in the session scratchpad (`mech/mech_analysis_v2.py`, `mech/adr_scores_v2.py`); the old scripts are unchanged. `mech_analysis_v2.py` imports the functions of `mech_analysis.py` (section 6); keep both in one folder.
+
+### 8.1 New inputs
+D_out 53.0 mm, wall 1.6 mm, floor 2.0 mm, D_pcb 46.0 mm, D_ring 40.0 mm, post height 3.0 mm, Z_pcb_bot 5.0, Z_pcb_top 6.6, LED top 7.25, d_led 8.0, lid plate 1.2, lid underside 15.25, H_total 16.5 (16.45 computed), joint zone Z 14.0 to 15.25, label recess 21 x 21 x 0.3 in the underside with 4 feet 1.0 mm tall, window 14.0 x 8.0 mm centred at Z 8.25, module at the board centre with the antenna end at azimuth 180. All are assumptions or working values (brackets in plan 05).
+
+### 8.2 Results
+
+| Topic | First draft (D 55 x H 28) | Re-run (D 53 x H 16.5) | What changes |
+|-------|---------------------------|------------------------|--------------|
+| Ring pitch (D_ring 40) | 7.85 mm arc, 7.80 mm chord | same | nothing |
+| Ripple at d_led 8.0 (60 / 45 deg half angle) | 1.1 % / 2.4 % | same; over 7.14 to 8.86 mm: 2.1 to 0.6 % and 4.4 to 1.3 % | nothing (the old note says 1.4 % for 45 deg at 8.86 mm; this run gives 1.3 %: rounding) |
+| Radial gap PCB to wall, nominal / worst case / RSS | 3.90 / 3.38 / 3.56 mm | 1.90 / 1.38 / 1.56 mm | thinner by 2.0 mm; no interference |
+| Label facet stack | 1.38 mm nominal, 0.80 mm worst case | removed | the thinnest fit of the first draft is gone |
+| USB-C window 14.0 x 8.0 against 12.35 x 6.5 | worst case ok | identical numbers (slack 1.35 x 1.20 mm, 1.20 needed); window Z 4.25 to 12.25: 2.25 mm above the floor top, 1.75 mm below the joint zone | passes; the receptacle position on the board is still unknown |
+| Wall outer surface to PCB edge | 5.5 mm | 3.5 mm | the plug overmold must still reach the receptacle mouth (open, report F5) |
+| Spigot clearance 0.35 mm, worst case minimum | +0.05 mm | +0.05 mm | nothing; the joint zone is now 1.25 mm high (was 1.8 mm) |
+| Shell area, bottom excluded | 72.1 cm2 | 49.5 cm2 (ratio 0.687); all faces 71.6 cm2 | 31 % less |
+| Mass, PETG, base plus lid (estimate) | 19.2 g | 13.6 g (base ASA, lid PETG: 12.0 g; old 16.8 g) | about 30 % less; walls and plates taken as solid, PCB and parts excluded |
+
+Thermal, surface rise at 25 deg C ambient, bottom excluded, h_conv 10 / 5 / 3 W/m2K:
+
+| P [W] | First draft [K] | Re-run [K] |
+|-------|-----------------|-----------|
+| 0.5 | 4.5 / 6.5 / 8.0 | 6.5 / 9.5 / 11.6 |
+| 1.0 | 8.9 / 12.9 / 15.7 | 12.8 / 18.5 / 22.3 |
+| 2.0 | 17.4 / 24.9 / 29.9 | 25.0 / 35.3 / 41.8 |
+| 2.5 | 21.6 / 30.7 / 36.5 | 30.9 / 43.1 / 50.7 |
+| 3.0 | 25.7 / 36.2 / 42.9 | 36.7 / 50.7 / 59.1 |
+| 4.7 | 39.3 / 54.0 / 62.8 | 55.4 / 74.2 / 84.8 |
+| 6.75 | 54.7 / 73.4 / 83.9 | 76.3 / 99.1 / 111.2 |
+
+Maximum power for HDT minus 15 K, room 35 deg C, h_conv 10 / 5 / 3: PLA (55) 0.40 / 0.28 / 0.23 W; PETG (69) 1.56 / 1.09 / 0.90 W; PETG (78) 2.34 / 1.64 / 1.36 W; ASA (103) 4.65 / 3.33 / 2.81 W. Room 25 deg C: PETG (69) 2.33 / 1.62 / 1.33 W; PETG (78) 3.11 / 2.17 / 1.79 W; ASA 5.42 / 3.86 / 3.24 W (first draft ASA at 35 deg C: 6.77 / 4.86 / 4.09 W).
+Reading: the same rough model with a smaller shell, so the rise is 1.4 times higher. PETG does not meet MECH-005 at 2.5 W in a 35 deg C room for any assumed convection; ASA meets 2.5 W in all cases but not 4.7 W. The model has no heat path through the desk. Counting all faces (not realistic for a unit on a desk) gives about the first-draft numbers (3 W: 25.9 / 36.5 / 43.2 K).
+
+Antenna geometry (module 13.2 x 16.6 mm centred, antenna strip 5.4 mm at the end, inner wall radius 24.9 mm, outer 26.5 mm):
+
+| Distance | Value | Against 15 mm |
+|----------|-------|---------------|
+| Antenna end edge (middle) to inner wall | 16.6 mm (outer surface 18.2) | met |
+| Antenna end corners (10.6 mm from the axis) to inner wall | 14.3 mm (outer surface 15.9) | not met by 0.7 mm |
+| Same corners with D_out 55 (R_in 25.9) | 15.3 mm | met |
+| PCB top (antenna plane) to lid underside / to floor outer face | 8.65 / 6.6 mm | inside the box; plastic and the label |
+| Nearest LED centre (R 20) to the antenna rectangle | 9.5 mm (11.7 mm on the module axis) | below 15 mm; layout matter |
+
+The task text gave about 11 mm for the LED distance; the computed minimum over the 16 LEDs is 9.5 mm (assumed antenna rectangle 13.2 x 5.4 mm, full width; the real keep-out is in an Espressif figure that is not available as text).
+
+Other results: the label recess 21 x 21 mm has a half diagonal of 14.85 mm; feet at radius 21 mm with pad radius 3 mm are 3.15 mm clear of it. The band of light at half intensity reaches R 28 to 34 mm and is cut by the wall at R 24.9 mm, as before. For what does not fit, see plan 05 section 4.11.
+
+### 8.3 ADR-0011 scores re-run
+Criterion 4 (size and label) improves for A (3 to 4) and C (2 to 3) because a label on the underside is easier than a facet in a sphere or in a three-part case; B stays at 5. Process criterion 2 (thermal) for P1 (PETG) falls from 3 to 2 because of the thermal result. Result: B 147, A 133 (was 129), C 117 (was 113), D 122 (excluded by gates); B leads A by 14 points (was 18); P1 114 (was 119), P2 111, P3 104, P4 113 (excluded), P5 100 (excluded); P2 minus P1 is minus 3 (was minus 8). The ranking is unchanged. These are the author's scores, not measured.
+
+### 8.4 Script `mech_analysis_v2.py`
+
+```python
+#!/usr/bin/env python3
+"""busy-light mechanical analysis, re-run with the resolved dimensions (plan 05 rev 2026-11-04).
+Analysis only, nothing measured. Run: python3 -I mech_analysis_v2.py
+Imports the functions of mech_analysis.py (same folder) for light and thermal.
+Parts: (a) light pitch/ripple, (b) thermal for the smaller shell, (c) tolerance stack,
+(d) antenna geometry, (e) printed mass (estimate)."""
+import math, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import mech_analysis as m
+
+rss = m.rss if hasattr(m, "rss") else (lambda v: math.sqrt(sum(x * x for x in v)))
+OLD = dict(D_out=55.0, H=28.0, D_pcb=44.0)
+NEW = dict(D_out=53.0, H=16.5, D_pcb=46.0)
+
+def part_a():
+    print("=== (a) light: D_ring 40.0, d_led 8.0 (unchanged) ===")
+    arc, ch = m.ring_pitch(40.0)
+    print(f"pitch arc {arc:.2f} mm, chord {ch:.2f} mm")
+    for th in (60, 45):
+        mm = m.lambert_order(th)
+        for h in (7.14, 8.0, 8.86):
+            rp, _ = m.ring_irradiance_ripple(40.0, h, mm)
+            print(f"  half angle {th} deg, h {h:.2f} mm: ripple {rp*100:.1f} %")
+    # new lit-band width unchanged; check band fits inside the lid: outer lit edge radius
+    for th in (60, 45):
+        w = 8.0 * math.tan(math.radians(th))
+        print(f"  half-intensity band half width at 8 mm, {th} deg: {w:.1f} mm; ring R 20 + {w:.1f} = {20+w:.1f} mm vs inner wall R 24.9 mm")
+
+def part_b():
+    print("\n=== (b) thermal, 25 deg C ambient, eps 0.9 ===")
+    for tag, g in (("OLD", OLD), ("NEW", NEW)):
+        d, h = g["D_out"], g["H"]
+        for incl in (False, True):
+            A = m.housing_area(d, h, incl)
+            print(f"{tag} D{d:.0f} x H{h:.1f}, {'all faces' if incl else 'bottom excluded'}: A = {A*1e4:.1f} cm2")
+            if incl: continue
+            for P in (0.5, 1.0, 2.0, 2.5, 3.0):
+                v = [m.solve_dt(P, A, hc, 0.9, 25.0)[0] for hc in (10.0, 5.0, 3.0)]
+                print(f"   P {P:4.2f} W: dT {v[0]:5.1f} / {v[1]:5.1f} / {v[2]:5.1f} K (h_conv 10/5/3)")
+    A = m.housing_area(53, 16.5, False)
+    for P in (4.7, 6.75):
+        print(f"   NEW bottom excluded P {P:4.2f} W: dT " + " / ".join(f"{m.solve_dt(P, A, hc, 0.9, 25.0)[0]:.1f}" for hc in (10.0, 5.0, 3.0)) + " K")
+    A = m.housing_area(53, 16.5, True)
+    for P in (0.5, 1.0, 2.0, 3.0):
+        print(f"   NEW all faces P {P:4.2f} W: dT " + " / ".join(f"{m.solve_dt(P, A, hc, 0.9, 25.0)[0]:.1f}" for hc in (10.0, 5.0, 3.0)) + " K")
+    A_old, A_new = m.housing_area(55, 28, False), m.housing_area(53, 16.5, False)
+    print(f"area ratio new/old = {A_new/A_old:.3f}")
+    print("max P for HDT-15 K, bottom excluded, NEW shell (h_conv 10/5/3):")
+    mats = {"PLA 55": 55, "PLA 60": 60, "PETG 69": 69, "PETG 78": 78, "ASA 103": 103}
+    A = A_new
+    for t_room in (25.0, 35.0):
+        print(f" room {t_room:.0f} C")
+        for name, hdt in mats.items():
+            allowed = hdt - 15.0 - t_room
+            out = []
+            for hc in (10.0, 5.0, 3.0):
+                if allowed <= 0:
+                    out.append("none"); continue
+                lo, hi = 0.0, 20.0
+                for _ in range(60):
+                    mid = 0.5 * (lo + hi)
+                    dt, _ = m.solve_dt(mid, A, hc, 0.9, t_room)
+                    if dt > allowed: hi = mid
+                    else: lo = mid
+                out.append(f"{lo:.2f}")
+            print(f"   {name:10s} {out[0]} / {out[1]} / {out[2]} W")
+
+def part_c():
+    print("\n=== (c) tolerance stack, new dimensions ===")
+    tf, tff, tpd, tpt, place = 0.30, 0.20, 0.15, 0.16, 0.30
+    D_out, wall, D_pcb = 53.0, 1.6, 46.0
+    D_in = D_out - 2 * wall
+    nom = (D_in - D_pcb) / 2.0
+    wc = (D_in - tf - (D_pcb + tpd)) / 2.0 - place
+    rs = nom - rss([tf / 2, tpd / 2, place])
+    print(f"1. radial gap PCB to wall: D_in {D_in:.1f}; nominal {nom:.2f}, WC {wc:.2f}, RSS {rs:.2f} mm")
+    print(f"   (old: 3.90 / 3.38 / 3.56). Distance outer wall surface to PCB edge: {wall+nom:.2f} mm (old 5.5)")
+    ov_w, ov_h = 12.35, 6.5
+    pos = [0.10, place, tff]
+    mw, mr = sum(pos), rss(pos)
+    print(f"3. USB-C window: misalignment WC +-{mw:.2f}, RSS +-{mr:.2f}")
+    for w, h in ((13.2, 7.3), (13.6, 7.7), (14.0, 8.0)):
+        sw, sh = (w - tf) - ov_w, (h - tf) - ov_h
+        ok = "WC ok" if min(sw, sh) >= 2 * mw else ("RSS ok, WC not" if min(sw, sh) >= 2 * mr else "FAIL")
+        print(f"   {w:.1f} x {h:.1f}: slack WC {sw:.2f} x {sh:.2f}; need WC {2*mw:.2f}, RSS {2*mr:.2f} -> {ok}")
+    # window vertical position
+    zc, zt, zb = 8.25, 8.25 + 4.0, 8.25 - 4.0
+    print(f"   window Z {zb:.2f}..{zt:.2f}; floor top 2.00; joint zone starts 14.00 -> margin to floor {zb-2.0:.2f}, to joint {14.0-zt:.2f} mm")
+    # cable path: window bottom vs PCB bottom
+    print(f"   window bottom {zb:.2f} vs PCB underside 5.00 and post top 5.00: posts at R 21, window at the wall, no clash if no post at azimuth 0")
+    # 4 LED to diffuser
+    items = {"post": 0.20, "pcb t": tpt, "LED h": 0.10, "lid": 0.20, "base h": 0.20}
+    wcd, rsd = sum(items.values()), rss(list(items.values()))
+    print(f"4. d_led 8.0: WC +-{wcd:.2f} ({8-wcd:.2f}..{8+wcd:.2f}), RSS +-{rsd:.2f}")
+    for cl in (0.25, 0.35, 0.40):
+        print(f"5. spigot clearance {cl:.2f}: WC min {cl-tf:+.2f}, RSS min {cl-rss([tf/2, tf/2]):+.2f}, max play {cl+tf:.2f}")
+    # Z chain
+    z_pcb_bot, t_pcb, h_led, d_led, t_lid, t_floor = 5.0, 1.6, 0.65, 8.0, 1.2, 2.0
+    z_pcb_top = z_pcb_bot + t_pcb; z_led = z_pcb_top + h_led; z_lid = z_led + d_led; H = z_lid + t_lid
+    print(f"Z chain: PCB top {z_pcb_top:.2f}, LED top {z_led:.2f}, lid underside {z_lid:.2f}, H_total {H:.2f}; post height {z_pcb_bot - t_floor:.2f}")
+    print(f"   joint zone 14.00..{z_lid:.2f} = {z_lid-14.0:.2f} mm high; lid skirt 14.00..{H:.2f} = {H-14.0:.2f} mm; module top {z_pcb_top+2.4:.2f}")
+    print(f"   feet 1.0: overall height {H+1.0:.2f} mm; label recess 0.3 in floor 2.0 leaves {2.0-0.3:.1f} mm")
+    # label recess vs feet
+    half_diag = 21 * math.sqrt(2) / 2
+    print(f"   label 21 x 21 half diagonal {half_diag:.2f} mm; feet pad R3 at radius 21 on the diagonals: nearest edge {21-3:.1f} mm -> {'clear' if 21-3 > half_diag else 'CLASH'}")
+    # old stack 2 (label facet) no longer exists
+    print("2. label facet stack: removed (no side facet).")
+
+def part_d():
+    print("\n=== (d) antenna geometry ===")
+    L, Wd, ant = 16.6, 13.2, 5.4
+    R_in, R_out = 24.9, 26.5
+    tip = L / 2
+    corner = math.hypot(Wd / 2, tip)
+    print(f"module centred; antenna end edge at {tip:.2f} mm from axis; far corners at {corner:.2f} mm")
+    print(f"distance end edge (mid) to inner wall {R_in-tip:.2f}, outer surface {R_out-tip:.2f}")
+    print(f"distance corner to inner wall {R_in-corner:.2f}, outer surface {R_out-corner:.2f} mm (15 mm rule: {'ok' if R_in-corner>=15 else 'NOT met at corners'})")
+    # old: D_out 55, R_in 25.9
+    print(f"old (R_in 25.9): end {25.9-tip:.2f}, corner {25.9-corner:.2f}")
+    # vertical: module top and antenna to lid, floor
+    z_mod_top, z_pcb_top, z_lid = 9.0, 6.6, 15.25
+    print(f"antenna plane (PCB top 6.6) to lid underside {z_lid-z_pcb_top:.2f} mm, to lid top {z_lid+1.2-z_pcb_top:.2f}; PCB top to floor outer face {z_pcb_top:.1f} mm")
+    print("label on the floor outer face is inside the 15 mm box vertically (6.6 mm below the antenna)")
+    # LED distances
+    ring_R = 20.0
+    # antenna end strip: x from 2.9 to 8.3 along azimuth 180 axis, width +-6.6
+    best = 1e9
+    import itertools
+    for k in range(16):
+        a = math.radians(22.5 * k)
+        lx, ly = ring_R * math.cos(a), ring_R * math.sin(a)
+        # rectangle in module frame: antenna end toward azimuth 180 -> x in [-8.3, -2.9], y in [-6.6, 6.6]
+        dx = max(-8.3 - lx, 0, lx + 2.9); dy = max(abs(ly) - 6.6, 0)
+        best = min(best, math.hypot(dx, dy))
+    print(f"LED centres at R 20 (ring phase 0 deg): nearest distance to antenna rectangle {best:.2f} mm (user figure about 11 mm)")
+    # phase 11.25 deg
+    best2 = 1e9
+    for k in range(16):
+        a = math.radians(22.5 * k + 11.25)
+        lx, ly = ring_R * math.cos(a), ring_R * math.sin(a)
+        dx = max(-8.3 - lx, 0, lx + 2.9); dy = max(abs(ly) - 6.6, 0)
+        best2 = min(best2, math.hypot(dx, dy))
+    print(f"ring phase 11.25 deg: {best2:.2f} mm; the LED edge (2.0 mm package) is about 1 mm closer")
+
+def part_e():
+    print("\n=== (e) printed mass, ESTIMATE (walls and plates solid, density PETG 1.27, ASA 1.07 g/cm3; PCB and parts excluded) ===")
+    def vol(D_out, wall, floor, H_base, H_tot, t_lid, post_h, post_a=16.0, spig_t=1.15, spig_h=1.8, skirt_t=0.9, facet=0.0):
+        r = D_out / 2; ri = r - wall
+        v_floor = math.pi * r * r * floor
+        v_wall = math.pi * (r * r - ri * ri) * (H_base - floor)
+        v_post = 3 * post_a * post_h
+        v_spig = math.pi * ((ri - 0.0) ** 2 - (ri - spig_t) ** 2) * spig_h
+        v_plate = math.pi * r * r * t_lid
+        v_skirt = math.pi * (r * r - (r - skirt_t) ** 2) * spig_h
+        return (v_floor + v_wall + v_post + v_spig - facet) / 1000.0, (v_plate + v_skirt) / 1000.0  # cm3
+    ob, ol = vol(55, 1.6, 2.0, 25.0, 28.0, 1.2, 14.55, spig_h=1.8, facet=0.0)
+    nb, nl = vol(53, 1.6, 2.0, 14.0, 16.5, 1.2, 3.0, spig_h=1.25)
+    for tag, b, l in (("OLD 55x28", ob, ol), ("NEW 53x16.5", nb, nl)):
+        print(f"{tag}: base {b:.1f} cm3, lid {l:.1f} cm3; PETG {1.27*(b+l):.1f} g; base ASA + lid PETG {1.07*b+1.27*l:.1f} g")
+    print("(infill reductions in floor/plate are not modelled; real mass is likely lower; weigh the first print)")
+
+if __name__ == "__main__":
+    part_a(); part_b(); part_c(); part_d(); part_e()
+```
+
+Output, copied unchanged:
+
+```text
+=== (a) light: D_ring 40.0, d_led 8.0 (unchanged) ===
+pitch arc 7.85 mm, chord 7.80 mm
+  half angle 60 deg, h 7.14 mm: ripple 2.1 %
+  half angle 60 deg, h 8.00 mm: ripple 1.1 %
+  half angle 60 deg, h 8.86 mm: ripple 0.6 %
+  half angle 45 deg, h 7.14 mm: ripple 4.4 %
+  half angle 45 deg, h 8.00 mm: ripple 2.4 %
+  half angle 45 deg, h 8.86 mm: ripple 1.3 %
+  half-intensity band half width at 8 mm, 60 deg: 13.9 mm; ring R 20 + 13.9 = 33.9 mm vs inner wall R 24.9 mm
+  half-intensity band half width at 8 mm, 45 deg: 8.0 mm; ring R 20 + 8.0 = 28.0 mm vs inner wall R 24.9 mm
+
+=== (b) thermal, 25 deg C ambient, eps 0.9 ===
+OLD D55 x H28.0, bottom excluded: A = 72.1 cm2
+   P 0.50 W: dT   4.5 /   6.5 /   8.0 K (h_conv 10/5/3)
+   P 1.00 W: dT   8.9 /  12.9 /  15.7 K (h_conv 10/5/3)
+   P 2.00 W: dT  17.4 /  24.9 /  29.9 K (h_conv 10/5/3)
+   P 2.50 W: dT  21.6 /  30.7 /  36.5 K (h_conv 10/5/3)
+   P 3.00 W: dT  25.7 /  36.2 /  42.9 K (h_conv 10/5/3)
+OLD D55 x H28.0, all faces: A = 95.9 cm2
+NEW D53 x H16.5, bottom excluded: A = 49.5 cm2
+   P 0.50 W: dT   6.5 /   9.5 /  11.6 K (h_conv 10/5/3)
+   P 1.00 W: dT  12.8 /  18.5 /  22.3 K (h_conv 10/5/3)
+   P 2.00 W: dT  25.0 /  35.3 /  41.8 K (h_conv 10/5/3)
+   P 2.50 W: dT  30.9 /  43.1 /  50.7 K (h_conv 10/5/3)
+   P 3.00 W: dT  36.7 /  50.7 /  59.1 K (h_conv 10/5/3)
+NEW D53 x H16.5, all faces: A = 71.6 cm2
+   NEW bottom excluded P 4.70 W: dT 55.4 / 74.2 / 84.8 K
+   NEW bottom excluded P 6.75 W: dT 76.3 / 99.1 / 111.2 K
+   NEW all faces P 0.50 W: dT 4.5 / 6.6 / 8.1 K
+   NEW all faces P 1.00 W: dT 8.9 / 13.0 / 15.8 K
+   NEW all faces P 2.00 W: dT 17.6 / 25.1 / 30.1 K
+   NEW all faces P 3.00 W: dT 25.9 / 36.5 / 43.2 K
+area ratio new/old = 0.687
+max P for HDT-15 K, bottom excluded, NEW shell (h_conv 10/5/3):
+ room 25 C
+   PLA 55     1.18 / 0.80 / 0.66 W
+   PLA 60     1.58 / 1.09 / 0.89 W
+   PETG 69    2.33 / 1.62 / 1.33 W
+   PETG 78    3.11 / 2.17 / 1.79 W
+   ASA 103    5.42 / 3.86 / 3.24 W
+ room 35 C
+   PLA 55     0.40 / 0.28 / 0.23 W
+   PLA 60     0.81 / 0.56 / 0.46 W
+   PETG 69    1.56 / 1.09 / 0.90 W
+   PETG 78    2.34 / 1.64 / 1.36 W
+   ASA 103    4.65 / 3.33 / 2.81 W
+
+=== (c) tolerance stack, new dimensions ===
+1. radial gap PCB to wall: D_in 49.8; nominal 1.90, WC 1.38, RSS 1.56 mm
+   (old: 3.90 / 3.38 / 3.56). Distance outer wall surface to PCB edge: 3.50 mm (old 5.5)
+3. USB-C window: misalignment WC +-0.60, RSS +-0.37
+   13.2 x 7.3: slack WC 0.55 x 0.50; need WC 1.20, RSS 0.75 -> FAIL
+   13.6 x 7.7: slack WC 0.95 x 0.90; need WC 1.20, RSS 0.75 -> RSS ok, WC not
+   14.0 x 8.0: slack WC 1.35 x 1.20; need WC 1.20, RSS 0.75 -> WC ok
+   window Z 4.25..12.25; floor top 2.00; joint zone starts 14.00 -> margin to floor 2.25, to joint 1.75 mm
+   window bottom 4.25 vs PCB underside 5.00 and post top 5.00: posts at R 21, window at the wall, no clash if no post at azimuth 0
+4. d_led 8.0: WC +-0.86 (7.14..8.86), RSS +-0.39
+5. spigot clearance 0.25: WC min -0.05, RSS min +0.04, max play 0.55
+5. spigot clearance 0.35: WC min +0.05, RSS min +0.14, max play 0.65
+5. spigot clearance 0.40: WC min +0.10, RSS min +0.19, max play 0.70
+Z chain: PCB top 6.60, LED top 7.25, lid underside 15.25, H_total 16.45; post height 3.00
+   joint zone 14.00..15.25 = 1.25 mm high; lid skirt 14.00..16.45 = 2.45 mm; module top 9.00
+   feet 1.0: overall height 17.45 mm; label recess 0.3 in floor 2.0 leaves 1.7 mm
+   label 21 x 21 half diagonal 14.85 mm; feet pad R3 at radius 21 on the diagonals: nearest edge 18.0 mm -> clear
+2. label facet stack: removed (no side facet).
+
+=== (d) antenna geometry ===
+module centred; antenna end edge at 8.30 mm from axis; far corners at 10.60 mm
+distance end edge (mid) to inner wall 16.60, outer surface 18.20
+distance corner to inner wall 14.30, outer surface 15.90 mm (15 mm rule: NOT met at corners)
+old (R_in 25.9): end 17.60, corner 15.30
+antenna plane (PCB top 6.6) to lid underside 8.65 mm, to lid top 9.85; PCB top to floor outer face 6.6 mm
+label on the floor outer face is inside the 15 mm box vertically (6.6 mm below the antenna)
+LED centres at R 20 (ring phase 0 deg): nearest distance to antenna rectangle 9.54 mm (user figure about 11 mm)
+ring phase 11.25 deg: 9.47 mm; the LED edge (2.0 mm package) is about 1 mm closer
+
+=== (e) printed mass, ESTIMATE (walls and plates solid, density PETG 1.27, ASA 1.07 g/cm3; PCB and parts excluded) ===
+OLD 55x28: base 12.0 cm3, lid 3.1 cm3; PETG 19.2 g; base ASA + lid PETG 16.8 g
+NEW 53x16.5: base 7.9 cm3, lid 2.8 cm3; PETG 13.6 g; base ASA + lid PETG 12.0 g
+(infill reductions in floor/plate are not modelled; real mass is likely lower; weigh the first print)
+```
+
+### 8.5 Script `adr_scores_v2.py`
+
+```python
+#!/usr/bin/env python3
+"""ADR-0011 weighted decision tables, re-run 2026-11-04 with resolved dimensions (changed scores: A crit 4 3->4, C crit 4 2->3, P1 thermal 3->2). Scores are the author's judgement (0-5), not measured.
+Run: python3 -I adr_scores_v2.py"""
+def table(title, crit, opts, gate_idx):
+    w = [c[1] for c in crit]
+    print(f"== {title}: weights {w}, sum {sum(w)}, max {5*sum(w)}")
+    for name, sc in opts.items():
+        assert len(sc) == len(crit), name
+        assert all(0 <= s <= 5 for s in sc)
+        tot = sum(a * b for a, b in zip(w, sc))
+        gate = [crit[i][0] for i, lim in gate_idx if sc[i] <= lim]
+        print(f"  {name:48s} sum {tot:4d} ({100*tot/(5*sum(w)):5.1f} %)" + (f"  EXCLUDED by gate: {gate}" if gate else ""))
+    print()
+
+C = [("1 Diffusion: closed band, no point source (MECH-002)", 5),
+     ("2 Antenna friendliness: no metal near antenna (MECH-003)", 5),
+     ("3 Thermal and material margin (MECH-005)", 4),
+     ("4 Size and fixed label area (MECH-001, MECH-006)", 4),
+     ("5 USB-C and button access (MECH-004)", 4),
+     ("6 Assembly without tools or common screws, reopening (DFx)", 4),
+     ("7 Printability, tolerance sensitivity (DFx 1)", 4),
+     ("8 Test and programming access (DFx 3, HW-006)", 3),
+     ("9 Part count and print cost", 2)]
+concepts = {
+ "A clamshell + separate diffuser ring (3 parts)":      [5, 4, 4, 4, 4, 3, 3, 4, 2],
+ "B opaque base + one translucent lid (2 parts)":        [4, 5, 3, 5, 4, 4, 4, 4, 5],
+ "C sphere, two snap-fit halves":                        [3, 5, 3, 3, 3, 4, 2, 3, 4],
+ "D do nothing (bare board, no housing)":                [0, 5, 5, 0, 3, 5, 5, 5, 5],
+}
+table("Concept table", C, concepts, gate_idx=[(0, 0), (3, 0)])
+
+# sensitivity: +-1 on every score of the top two, check ranking holds / weights +-1
+import itertools
+w0 = [c[1] for c in C]
+def total(w, s): return sum(a*b for a, b in zip(w, s))
+a, b = concepts["A clamshell + separate diffuser ring (3 parts)"], concepts["B opaque base + one translucent lid (2 parts)"]
+print("B - A =", total(w0, b) - total(w0, a))
+# worst-case: each criterion weight changed by -1/+1 one at a time
+flip = []
+for i in range(len(w0)):
+    for d in (-1, 1):
+        w = list(w0); w[i] = max(1, w[i] + d)
+        if total(w, b) <= total(w, a): flip.append((C[i][0][:30], d))
+print("single weight +-1 changes that make A >= B:", flip or "none")
+# score shift: every B score -1 on one criterion
+flip2 = []
+for i in range(len(w0)):
+    bb = list(b); bb[i] = max(0, bb[i]-1)
+    if total(w0, bb) <= total(w0, a): flip2.append(C[i][0][:30])
+print("lowering one B score by 1 makes A >= B for:", flip2 or "none")
+# diffuser weight 5 -> A advantage criterion: how much must criterion-1 weight rise for A to tie B
+for w1 in range(5, 15):
+    w = list(w0); w[0] = w1
+    if total(w, a) >= total(w, b):
+        print("A ties/overtakes B when weight of criterion 1 reaches", w1); break
+print()
+
+P = [("1 Dimensional accuracy for fits (USB-C window, spigot)", 4),
+     ("2 Thermal margin: HDT vs MECH-005 (needs data per product)", 5),
+     ("3 Diffuser quality possible in this process", 4),
+     ("4 Availability at the owner and lead time (UNKNOWN: owner question)", 4),
+     ("5 Strength of snap/screw features, reopening x100", 3),
+     ("6 Non-conductive, no metal fill (MECH-003)", 5),
+     ("7 Handling safety, post-processing effort", 3),
+     ("8 Cost per housing (prototype, 10 units)", 3)]
+procs = {
+ "P1 FDM, PETG base + natural PETG diffuser":            [3, 2, 3, 4, 3, 5, 5, 5],
+ "P2 FDM, ASA base + natural PETG diffuser":             [3, 4, 3, 3, 3, 5, 3, 4],
+ "P3 resin (MSLA), opaque base + clear/white lid":       [5, 2, 4, 3, 2, 5, 2, 3],
+ "P4 FDM, PLA (cheapest, common)":                       [3, 1, 3, 5, 3, 5, 5, 5],
+ "P5 do nothing (no printed housing)":                   [0, 5, 0, 5, 0, 5, 5, 5],
+}
+table("Process table", P, procs, gate_idx=[(2, 0), (1, 1)])
+w = [c[1] for c in P]
+print("P2 - P1 =", total(w, procs["P2 FDM, ASA base + natural PETG diffuser"]) - total(w, procs["P1 FDM, PETG base + natural PETG diffuser"]))
+```
+
+Output, copied unchanged:
+
+```text
+== Concept table: weights [5, 5, 4, 4, 4, 4, 4, 3, 2], sum 35, max 175
+  A clamshell + separate diffuser ring (3 parts)   sum  133 ( 76.0 %)
+  B opaque base + one translucent lid (2 parts)    sum  147 ( 84.0 %)
+  C sphere, two snap-fit halves                    sum  117 ( 66.9 %)
+  D do nothing (bare board, no housing)            sum  122 ( 69.7 %)  EXCLUDED by gate: ['1 Diffusion: closed band, no point source (MECH-002)', '4 Size and fixed label area (MECH-001, MECH-006)']
+
+B - A = 14
+single weight +-1 changes that make A >= B: none
+lowering one B score by 1 makes A >= B for: none
+
+== Process table: weights [4, 5, 4, 4, 3, 5, 3, 3], sum 31, max 155
+  P1 FDM, PETG base + natural PETG diffuser        sum  114 ( 73.5 %)
+  P2 FDM, ASA base + natural PETG diffuser         sum  111 ( 71.6 %)
+  P3 resin (MSLA), opaque base + clear/white lid   sum  104 ( 67.1 %)
+  P4 FDM, PLA (cheapest, common)                   sum  113 ( 72.9 %)  EXCLUDED by gate: ['2 Thermal margin: HDT vs MECH-005 (needs data per product)']
+  P5 do nothing (no printed housing)               sum  100 ( 64.5 %)  EXCLUDED by gate: ['3 Diffuser quality possible in this process']
+
+P2 - P1 = -3
 ```
