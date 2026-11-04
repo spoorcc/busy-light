@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- ADR-0014 (mounting interface on the back; Proposed: printed bayonet, fallback dovetail). Owner decisions recorded 2026-11-04: unit mounted horizontal and vertical, label on the back, orientation sensor added, clock mode in a later release.
 - Goldfish review RV-004 of plan 05 and ADR-0011 (housing): not ready for approval; 30 findings with resolutions and owner decisions listed. Plan 05 section 3 scores corrected to the ADR values.
 - CI fixes after the first GitHub run: npm lockfile for the diagram tools, root user in the KiCad container, pinned FreeCAD AppImage, virtual environment for the software job.
 - Risk register: RISK-027 to RISK-030 (hardware current limit band, 5 V rail collapse, limit step stuck high, limit switch availability) from ADR-0010.
