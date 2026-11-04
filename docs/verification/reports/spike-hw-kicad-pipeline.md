@@ -55,3 +55,19 @@ Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (`src/schematic_writer.py`, `
 | ngspice, FreeCAD side of the parameter file, Docker run of the CI image | Not run. | not run |
 
 Conclusion of round 2: the schematic path (ERC-clean, reproducible, traceable fields) is feasible with an own writer on KiCad 8 syntax. The routing path is not shown. A real router (Freerouting) or a rule-based router is needed; this is the main remaining risk of ADR-0012 option B. The KiCad 8 syntax dependency (kiutils) is a pin risk: KiCad 10 upgrades the file on first save in the GUI.
+
+## 7. Round 3 (2026-11-04): Freerouting and the FreeCAD fit check
+Code: `hw/kicad/spike/src/freecad_fit.py`, `run_spike.sh`, `params.toml` on branch `spike/hw-kicad` (commit 1fcc888). The Freerouting commands were run by hand in the session scratchpad and are not yet in a script.
+
+| Step | Result | Label |
+|------|--------|-------|
+| Freerouting 2.5.0 (`freerouting-2.5.0.jar` from the GitHub release; SHA-256 equals the digest published with the release; run headless on OpenJDK 27) | Runs. DSN export and SES import work through `pcbnew` (`ExportSpecctraDSN`, `ImportSpecctraSES`). | run |
+| Routing of the stand-in board | 14.4 s. 53 unrouted connections at the start, 3 unrouted at the end, 0 violations reported by the router. | run |
+| KiCad DRC after the SES import | 3 unconnected items. No shorting, crossing or clearance violations (the naive script gave 16, 10 and 7). Remaining: 32 copper-to-edge, 20 track-width, 12 dangling-via and 29 silk-to-edge violations. No design rules or net classes are defined yet, and the stand-in puts the connector and the buffer on top of each other near the board centre. Not investigated further. | run |
+| Parameter consistency with the housing model (D_PCB, T_PCB, Z_PCB_BOT, N_LED, D_RING, R_POST, PEG_RAD, POST_AZ) | All pass. This compares `params.toml` with constants in the housing script. It is a consistency check, not a single source: the housing script does not read the file. | run |
+| KiCad STEP of the board imported into FreeCAD, placed at Z_PCB_BOT, checked against the V1 housing STEP files | Outline diameter 46.000 mm matches. No interference with the lid. Tallest part (stand-in pin header) top at z 15.14 mm, below the lid top at 16.45 mm. | run |
+| Same check, failures | (1) The board solid is 1.51 mm thick, not 1.6 mm: the KiCad default stackup sums to 1.51 mm, so the stackup must be defined explicitly (not fixed). (2) One overlap of 3.378 mm3 between the board and the base, near x 0, y 22.4, z 5.0 to 6.5 mm (about 2.4 x 1.2 mm), at azimuth 90 degrees on the board edge. The housing model has a notch there (NOTCH_R, NOTCH_AZ); the board has none. Cause not verified. | run, not fixed |
+| Mounting holes for the three pegs | Added to the board from `params.toml`. Only the one overlap above remains. | run |
+| Interference check with the real board, real parts, real housing | Not possible yet: the housing uses placeholders, the board is a stand-in. | not run |
+
+Conclusion of round 3: a real router closes most of the routing gap, and the board-to-housing check finds real mismatches (stackup, notch) from files alone. Routing with defined design rules, the stackup and the notch are the next items.
