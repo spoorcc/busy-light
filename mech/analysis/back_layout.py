@@ -125,6 +125,27 @@ def v4_dovetail_rail(rail_w: float = 12.0) -> Check:
     )
 
 
+def v5_offset_recess() -> tuple[Check, dict[str, float]]:
+    """Bayonet recess off the axis, label beside it (both fully on the back)."""
+    d = 24.0
+    cx = -(d / 2 - 1.7)  # recess centre; its right edge stays clear of the label square
+    label_left = cx + d / 2 + CLEAR
+    label_cx = label_left + LABEL / 2
+    corner = square_corner_radius(label_cx, 0.0, LABEL)
+    recess_far = abs(cx) + d / 2
+    ok = corner <= R_AVAIL and recess_far <= R_AVAIL
+    return (
+        Check(
+            "V5 off-axis 24 mm bayonet recess with the 21 mm label beside it",
+            ok,
+            f"recess centre {cx:.1f} mm off the axis, label corner R {corner:.1f}, "
+            f"recess far edge R {recess_far:.1f} (limit {R_AVAIL:.1f}); the accessory load is "
+            "off the axis and there is no room for feet next to both",
+        ),
+        {"d": d, "cx": cx, "label_cx": label_cx},
+    )
+
+
 def foot_clearance_v2(geo: dict[str, float]) -> float:
     return geo["foot_r"] - geo["foot_pad_r"] - geo["outer"]
 
@@ -213,12 +234,101 @@ def draw(path: str) -> None:
     fig.savefig(path, dpi=110, bbox_inches="tight")
 
 
+def draw_options(path: str) -> None:
+    """One sheet: each option with the accessory mounted, label visible or covered."""
+    import matplotlib  # noqa: PLC0415 (deferred: the checks run without matplotlib)
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt  # noqa: PLC0415
+    from matplotlib.patches import Circle, Rectangle  # noqa: PLC0415
+
+    _, g2 = v2_annular_bayonet()
+    _, g5 = v5_offset_recess()
+    fig, axes = plt.subplots(1, 5, figsize=(21, 5.4))
+    specs = [
+        ("A  As written\n(centred recess and label)", "Label HIDDEN when mounted", "tab:red"),
+        (
+            "B  Annular bayonet (RECOMMENDED)\nring accessory, label open",
+            "Label VISIBLE when mounted",
+            "tab:green",
+        ),
+        (
+            "C  Label shrunk to 14 mm\ninside the 30 mm recess",
+            "Label HIDDEN when mounted",
+            "tab:red",
+        ),
+        (
+            "D  Dovetail rail 12 mm wide\nlabel beside the rail",
+            "21 mm label does NOT fit\n(17.5 mm at most)",
+            "tab:red",
+        ),
+        (
+            "E  Off-axis 24 mm recess\nlabel beside it",
+            "Label VISIBLE, but load is off\nthe axis and no room for feet",
+            "tab:orange",
+        ),
+    ]
+    for ax, (title, verdict, colour) in zip(axes, specs, strict=True):
+        ax.set_aspect("equal")
+        ax.set_xlim(-R_OUT - 1, R_OUT + 1)
+        ax.set_ylim(-R_OUT - 9, R_OUT + 1)
+        ax.add_patch(Circle((0, 0), R_OUT, fill=False, lw=1.8))
+        ax.set_title(title, fontsize=10)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.text(
+            0, -R_OUT - 2.5, verdict, ha="center", va="top", fontsize=9, color=colour, weight="bold"
+        )
+    acc = {"fc": "tab:grey", "alpha": 0.45, "hatch": "//", "ec": "black"}
+    lab = {"fill": False, "ec": "tab:red", "lw": 2.0}
+    a, b, c, d, e = axes
+    a.add_patch(Circle((0, 0), RECESS_D / 2 + 3, **acc))
+    a.add_patch(Rectangle((-LABEL / 2, -LABEL / 2), LABEL, LABEL, **lab))
+    a.text(0, 0, "21 mm\nlabel", ha="center", va="center", fontsize=8)
+    b.add_patch(Circle((0, 0), g2["outer"], **acc))
+    b.add_patch(Circle((0, 0), g2["inner"], fc="white", ec="black"))
+    b.add_patch(Rectangle((-LABEL / 2, -LABEL / 2), LABEL, LABEL, **lab))
+    b.text(0, 0, "21 mm\nlabel", ha="center", va="center", fontsize=8)
+    for k in range(4):
+        t = math.radians(45 + 90 * k)
+        b.add_patch(
+            Circle(
+                (g2["foot_r"] * math.cos(t), g2["foot_r"] * math.sin(t)),
+                g2["foot_pad_r"],
+                fc="tab:green",
+                alpha=0.5,
+            )
+        )
+    c.add_patch(Circle((0, 0), RECESS_D / 2 + 3, **acc))
+    c.add_patch(Rectangle((-7, -7), 14, 14, **lab))
+    c.text(0, 0, "14 mm", ha="center", va="center", fontsize=8)
+    d.add_patch(Rectangle((-6, -R_AVAIL), 12, 2 * R_AVAIL, **acc))
+    s4 = 17.5
+    d.add_patch(Rectangle((6.5, -s4 / 2), s4, s4, fill=False, ec="tab:red", lw=2.0))
+    d.add_patch(
+        Rectangle((6.5, -LABEL / 2), LABEL, LABEL, fill=False, ec="tab:red", lw=1.0, ls="--")
+    )
+    d.text(15, 0, "17.5 mm\nmax", ha="center", va="center", fontsize=8)
+    e.add_patch(Circle((g5["cx"], 0), g5["d"] / 2 + 1.5, **acc))
+    e.add_patch(Rectangle((g5["label_cx"] - LABEL / 2, -LABEL / 2), LABEL, LABEL, **lab))
+    e.text(g5["label_cx"], 0, "21 mm\nlabel", ha="center", va="center", fontsize=8)
+    fig.suptitle(
+        "Back of the housing, 53 mm. Grey hatched = mounted accessory, red = label, green = feet. "
+        "SPIKE: 2D geometry of working values only",
+        fontsize=11,
+    )
+    fig.savefig(path, dpi=100, bbox_inches="tight")
+
+
 def main(argv: list[str]) -> int:
     for c in run():
         print(f"{'PASS' if c.ok else 'FAIL'}  {c.name}: {c.detail}")
     if len(argv) > 1:
         draw(argv[1])
         print(f"wrote {argv[1]}")
+    if len(argv) > 2:  # noqa: PLR2004
+        draw_options(argv[2])
+        print(f"wrote {argv[2]}")
     return 0
 
 

@@ -24,3 +24,9 @@ def test_annular_bayonet_fits_on_paper() -> None:
 
 def test_dovetail_rail_leaves_no_room_for_a_21_mm_label() -> None:
     assert not b.v4_dovetail_rail().ok
+
+
+def test_offset_recess_fits_but_is_off_axis() -> None:
+    check, geo = b.v5_offset_recess()
+    assert check.ok
+    assert geo["cx"] < 0  # the recess is off the axis, so the accessory load is off the axis
