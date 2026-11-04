@@ -36,7 +36,9 @@ jobs:
       - run: pytest
   hardware:
     runs-on: ubuntu-24.04
-    container: kicad/kicad:10.0
+    container:
+      image: kicad/kicad:10.0
+      options: --user root
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: scripts/ci_hw.sh
@@ -49,7 +51,16 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Install FreeCAD
-        run: sudo apt-get update && sudo apt-get install -y freecad
+        # Ubuntu 24.04 has no freecad package. The sha256 comes from the same release page,
+        # so it detects a corrupt download but not a compromised release (ADR-0012 item 4, open).
+        run: |
+          curl -fsSL -o FreeCAD.AppImage https://github.com/FreeCAD/FreeCAD/releases/download/1.1.4/FreeCAD_1.1.4-Linux-x86_64-py311.AppImage
+          echo "f6dc6ba676e5ac96a565ebc8d657232f94c6158e85b4352141bd1a46f6b43434  FreeCAD.AppImage" | sha256sum -c -
+          chmod +x FreeCAD.AppImage
+          mkdir -p "$HOME/bin"
+          printf '#!/bin/sh\nAPPIMAGE_EXTRACT_AND_RUN=1 exec "%s/FreeCAD.AppImage" "$@"\n' "$GITHUB_WORKSPACE" > "$HOME/bin/freecad"
+          chmod +x "$HOME/bin/freecad"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
       - run: scripts/ci_mech.sh
   software:
     runs-on: ubuntu-24.04
