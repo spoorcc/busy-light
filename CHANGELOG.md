@@ -12,7 +12,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ### Added
 - Continuous integration (`.github/workflows/ci.yml`): documentation checks, Python tool checks, hardware (`scripts/ci_hw.sh`), mechanical (`scripts/ci_mech.sh`) and software (`scripts/ci_sw.sh`) jobs; `pyproject.toml` for the tool environment. Hardware and mechanical jobs report NOT RUN until sources exist.
-- ADR-0012 (hardware design flow, Proposed).
+- ADR-0012 (hardware design flow, Proposed), with a KiCad feasibility spike report (Draft).
 
 ### Changed
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
