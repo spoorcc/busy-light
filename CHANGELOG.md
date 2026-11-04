@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- CC detection IC chosen by the owner: TUSB321, PTN5150A as fallback if the IC ambient exceeds 70 C (ADR-0016, HW-003, RISK-043).
 - Licence record: per-file licence tag counts of the pinned Zephyr, MCUboot, hal_espressif and Mbed TLS trees, NonCommercial definition from the licence text; HW-010 hold-off upper limit of [600] ms (spike finding F7: a plain CMOS threshold is too loose for the timer).
 - Start-up hold-off of at least [200] ms on the high-step gate: HW-010 acceptance criteria, TC-210 procedure points, ADR-0016 amendment (owner to confirm) and RISK-042 (reason: the IC output level before its first debounce is not stated in the datasheet).
 - Datasheet evidence record for the CC detection IC (`docs/verification/reports/cc-ic-datasheet-evidence.md`, Draft): TUSB321 Rev C read (supply from VBUS, 0 to 70 C, CC pins 6 V, thresholds, OUT1 and PORT behaviour; power-up output level not stated); PTN5150 Rev 1 (older) as a second-source hint; RISK-026 and RISK-043 updated.

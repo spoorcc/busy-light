@@ -475,6 +475,6 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Misreads at temperature, assembly yield loss, or a re-layout for another part
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** HW-003, ADR-0016 item 3 (checks before a part is fixed), SYS-021
-- **Residual risk (after mitigation):** Not assessed; datasheet confirms 0 to 70 C for TUSB321; the older PTN5150 states -40 to +85 C and is a candidate second source (PTN5150A not read; `docs/verification/reports/cc-ic-datasheet-evidence.md`)
+- **Residual risk (after mitigation):** TUSB321 chosen by the owner 2026-11-04; datasheet confirms 0 to 70 C, the prototype must record the IC ambient (HW-003) with PTN5150A as fallback; the older PTN5150 states -40 to +85 C and is a candidate second source (PTN5150A not read; `docs/verification/reports/cc-ic-datasheet-evidence.md`)
 - **Verified by:** Design review of the BOM at G2 of ADR-0012; TC-203
 - **Status:** Open
