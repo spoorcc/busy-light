@@ -299,7 +299,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source, or a false trip on a legitimate draw
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** HW-010, SYS-020, ADR-0010
-- **Residual risk (after mitigation):** Not assessed; resistor values and the owner decision on the margin are open
+- **Residual risk (after mitigation):** Band chosen by owner instruction 2026-11-04 (ADR-0010 open points 1 and 2): 506 to 623 mA at the first step with a 500 mA firmware budget; 1366 to 1577 mA at the top step with a 1350 mA firmware value. The limit can be up to about 5 % over a 1.5 A source rating in a fault; not assessed further. Owner confirmation, bench values (TC-210) and the thermal analysis are open
 - **Verified by:** TC-203, TC-020
 - **Status:** Open
 
