@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Spike on branch `spike/hw-gate`: the ADR-0016 gate fragment built from code (SKiDL), checked with KiCad ERC, a netlist parity check and a truth-table test; report `docs/verification/reports/spike-hw-gate-fragment.md` (Draft; exploratory, no design content for `main`).
 - ADR-0010 open points 1 and 2 decided by owner instruction (recommended options: first step 506 to 623 mA with a 500 mA firmware budget; top step 1366 to 1577 mA with a 1350 mA firmware value); HW-010 and RISK-027 carry the numbers. ADR status stays Proposed.
 - Licence compatibility table and record of licence facts (`docs/regulatory/technical-file/05-cybersecurity/licence-compatibility.md`, Draft): KiCad libraries, Mbed TLS, Noto Sans and Creative Commons facts checked against sources on 2026-11-04; Zephyr and MCUboot top-level licence files read, Mbed TLS pinned commit and the Espressif binary module declaration (Apache-2.0) read; Espressif's own terms not verified (ADR-0015 item 8, RV-008 P14).
 - Draft software requirements SW-005 to SW-008 (raise the USB current step only after a stable reading, reduce load before lowering, back-off after brown-out, tolerance of Power Delivery traffic) and test stubs TC-105 to TC-108; closes the RV-008 action "write the software requirement" (RV-006 S3 to S6). Status Draft; owner approval needed.
