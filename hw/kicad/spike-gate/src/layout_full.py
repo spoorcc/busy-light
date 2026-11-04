@@ -71,8 +71,10 @@ PARTS = {  # ref: (lib, part, footprint, value)
 for i in range(1, 17):
     PARTS[f"D{i}"] = (*LED, "WS2812B")
     PARTS[f"C{7 + i}"] = (*C, "100n")
-for i, n in enumerate(("TP_5V", "TP_3V3", "TP_GND", "TP_TX", "TP_RX", "TP_LED", "TP_EN", "TP_BOOT"), 1):
+for i, n in enumerate(("TP_5V", "TP_3V3", "TP_GND", "TP_LED", "TP_EN", "TP_BOOT"), 1):
     PARTS[f"TP{i}"] = (*TP, n)
+PARTS["R14"] = (*R, "1k")
+PARTS["R15"] = (*R, "1k")
 
 S = L.SIZE
 BOXES = {
@@ -142,9 +144,9 @@ HIDE_VALUE = {f"D{i}" for i in range(1, 17)} | {f"C{7 + i}" for i in range(1, 17
 for i in range(1, 17):
     TEXT[f"D{i}"] = (2.54, -10.5, "left")
     TEXT[f"C{7 + i}"] = (-1.9, -1.27, "right")
-for i in range(1, 9):
+for i in range(1, 7):
     TEXT[f"TP{i}"] = (1.5, 1.0, "left")
-for i in (4, 5, 7, 8):
+for i in (5, 6):
     TEXT[f"TP{i}"] = (-2.5, -1.0, "right")
 
 
@@ -507,23 +509,36 @@ def _build():
     s.stub("USB_DN", ("U9", "GPIO18"), -5.08, 0, 180)
     s.stub("USB_DP", ("U9", "GPIO19"), -5.08, 0, 180)
     # test points on the left side
-    for pin, net, ref, x in (("GPIO21", "UART_TX", "TP4", 36.0), ("GPIO20", "UART_RX", "TP5", 36.0),
-                             ("GPIO9", "BOOT", "TP8", 36.0)):
+    a = P("U9", "GPIO9")
+    s.bind("BOOT", "U9", "GPIO9")
+    s.wire(a, (36.0, a[1]))
+    PLACE["TP6"] = (36.0, a[1], 0)
+    s.put("TP6")
+    s.bind("BOOT", "TP6", 1)
+    # gate-enable readbacks on GPIO20 / GPIO21 (HW-010 proposed amendment); 1 k series resistor
+    # because GPIO21 (U0TXD) is an output while the ROM prints boot messages
+    for pin, net, rb, ref in (("GPIO20", "ILIM_STEP2_EN", "STEP2_EN_RB", "R14"),
+                              ("GPIO21", "ILIM_STEP3_EN", "STEP3_EN_RB", "R15")):
         a = P("U9", pin)
-        s.bind(net, "U9", pin)
-        s.wire(a, (x, a[1]))
-        PLACE[ref] = (x, a[1], 0)
+        s.bind(rb, "U9", pin)
+        PLACE[ref] = (44.0, a[1], 90)
         s.put(ref)
-        s.bind(net, ref, 1)
+        near, far = sorted(("1", "2"), key=lambda k: -P(ref, k)[0])
+        s.bind(rb, ref, near)
+        s.wire(a, P(ref, near))
+        s.bind(net, ref, far)
+        e = (P(ref, far)[0] - 5.08, a[1])
+        s.wire(P(ref, far), e)
+        s.label(net, e[0], e[1], 180)
     s.nc(P("U9", "GPIO2"))
     s.nc(P("U9", "GPIO8"))
     # reset: pull-up and capacitor, test point
     en = P("U9", "EN")
     s.bind("CHIP_EN", "U9", "EN")
     s.wire(en, (38.0, en[1]))
-    PLACE["TP7"] = (38.0, en[1], 0)
-    s.put("TP7")
-    s.bind("CHIP_EN", "TP7", 1)
+    PLACE["TP5"] = (38.0, en[1], 0)
+    s.put("TP5")
+    s.bind("CHIP_EN", "TP5", 1)
     s.bind("CHIP_EN", "R9", 2)
     s.junction(*P("R9", "2"))
     s.pw("+3V3", ("R9", "1"))
@@ -576,10 +591,10 @@ def _build():
     s.bind("LED_DATA", "R11", 1)
     s.junction(*pd)
     s.pw("GND", ("R11", "2"), True)
-    PLACE["TP6"] = (pd[0], a[1] - 6.0, 0)
-    s.put("TP6")
-    s.bind("LED_DATA", "TP6", 1)
-    s.wire(pd, PLACE["TP6"][:2])
+    PLACE["TP4"] = (pd[0], a[1] - 6.0, 0)
+    s.put("TP4")
+    s.bind("LED_DATA", "TP4", 1)
+    s.wire(pd, PLACE["TP4"][:2])
     y = P("U11", 4)
     s.bind("LED_BUF", "U11", 4)
     s.wire(y, (y[0] + 6.0, y[1]))

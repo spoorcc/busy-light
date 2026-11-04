@@ -80,14 +80,25 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(self.pin_net[("U10", "4")], "HOLD_OK_RB")
         self.assertEqual(self.pin_net[("U9", "GPIO6")], "HOLD_OK_RB")
 
+    def test_gate_enable_readbacks(self):
+        self.assertEqual(self.pin_net[("U3", "4")], "ILIM_STEP2_EN")
+        self.assertEqual(self.pin_net[("U4", "4")], "ILIM_STEP3_EN")
+        self.assertEqual(self.pin_net[("U9", "GPIO20")], "STEP2_EN_RB")
+        self.assertEqual(self.pin_net[("U9", "GPIO21")], "STEP3_EN_RB")
+        self.assertEqual({self.pin_net[("R14", "1")], self.pin_net[("R14", "2")]}, {"ILIM_STEP2_EN", "STEP2_EN_RB"})
+        self.assertEqual({self.pin_net[("R15", "1")], self.pin_net[("R15", "2")]}, {"ILIM_STEP3_EN", "STEP3_EN_RB"})
+
+    def test_no_uart_test_points(self):
+        self.assertFalse({"UART_TX", "UART_RX"} & set(self.pin_net.values()))
+
     def test_every_gpio_in_use_is_listed(self):
         used = {p[1] for p in self.pin_net if p[0] == "U9"} - {"3V3", "GND"}
         self.assertEqual(used, {"GPIO0", "GPIO1", "GPIO3", "GPIO10", "GPIO4", "GPIO5", "GPIO6", "GPIO7",
                                 "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "EN"})
 
     def test_test_points(self):
-        nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 9)}
-        self.assertEqual(nets, {"+5V", "+3V3", "GND", "UART_TX", "UART_RX", "LED_DATA", "CHIP_EN", "BOOT"})
+        nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 7)}
+        self.assertEqual(nets, {"+5V", "+3V3", "GND", "LED_DATA", "CHIP_EN", "BOOT"})
 
 
 if __name__ == "__main__":
