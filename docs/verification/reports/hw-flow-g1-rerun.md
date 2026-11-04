@@ -1,4 +1,4 @@
-# ADR-0012 gate G1: re-run of the stand-in spike on 2026-11-04
+# Gate G1 of the hardware design flow (ADR-0012): re-run of the stand-in spike on 2026-11-04
 
 - **Status:** Draft
 - **Date:** 2026-11-04 (a re-run late in the session)
