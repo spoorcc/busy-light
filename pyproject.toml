@@ -1,0 +1,43 @@
+# Tooling for the busy-light repository (documentation checks and hardware-as-code, ADR-0012).
+# This file does not describe a distributable package. Install the tools with:
+#   python3 -m venv --system-site-packages .venv   (system site packages give access to KiCad's `pcbnew`)
+#   .venv/bin/pip install --group hw --group dev
+[project]
+name = "busy-light-tools"
+version = "0.0.0"
+description = "Repository tooling for busy-light (not a product package)"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+hw = [
+    "kiutils",
+    "skidl",
+]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = [".claude", "sw/modules", "modules", "zephyr", "bootloader", "tools"]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "PL"]
+
+[tool.ruff.lint.per-file-ignores]
+# Existing repository check scripts: branch count is accepted until they are split.
+"scripts/check_traceability.py" = ["PLR0912"]
+
+[tool.pytest.ini_options]
+testpaths = ["scripts", "hw/kicad/src"]
+pythonpath = ["scripts"]
+
+[tool.mypy]
+strict = true
+
+[tool.ruff.format]
+exclude = ["*.md"]

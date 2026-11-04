@@ -32,3 +32,10 @@ __pycache__/
 
 # Generated diagram renders and node tooling
 scripts/diagrams/node_modules/
+
+# Python virtual environment
+/.venv/
+__pycache__/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
