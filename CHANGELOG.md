@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added
+- RISK-031: the FreeCAD spike model shows the USB-C receptacle collides with the LED ring; options listed in the owner guide.
 - Mechanical plan 05 revised (Draft): label on the underside and a flat-lying unit assumed (owner confirms), housing 53.0 x 16.5 mm with PCB 46 mm, antenna rules split between MECH-003 and an ADR-0003 finding; analysis re-run in the concept report (section 8).
 - Draft mechanical plan 05, ADR-0011 (housing concept: opaque base plus translucent lid, FDM, PLA excluded) and the concept analysis report (light, thermal, tolerance); no CAD yet.
 - Owner input recorded: read USB-C CC with the ADC (ADR-0009) and have a hardware current limit; draft HW-010 and TC-210; ADR-0004 item 4 updated.

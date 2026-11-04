@@ -291,3 +291,14 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; clamp or series resistor to decide in spike 7.5
 - **Verified by:** TC-203
 - **Status:** Open
+
+### RISK-031 USB-C receptacle does not fit inside the LED ring
+
+- **Hazard / failure mode:** The receptacle (8.94 mm wide, reaching in to about R 16) collides with the LED ring (R 20, pitch 7.85 mm, LED bodies about 2 mm)
+- **Cause:** 16 LEDs on a ring of 40 mm and a board of 46 mm (HW-001), receptacle on the same side at the board edge (HW-003, SYS-022); found by the FreeCAD spike model (`mech-spike-model.md`, check UsbC-Leds, 2.6 mm3 overlap)
+- **Effect:** Board cannot be laid out as specified; no azimuth works on this ring
+- **Severity (1-5):** 3  **Likelihood (1-5):** 5  **Initial risk:** 15
+- **Mitigated by:** HW-001, HW-003, SYS-022, ARCH-003
+- **Residual risk (after mitigation):** Options under study in the spike: a board tab that carries the receptacle outside the ring (V1), or a bottom-side receptacle (V2, breaks the one-side assembly of SYS-022); a larger ring is not possible within 58 mm. Owner decision needed.
+- **Verified by:** TC-201, TC-209
+- **Status:** Open
