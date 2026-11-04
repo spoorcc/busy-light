@@ -1,4 +1,5 @@
 @startuml process-egm-planning
+skinparam defaultFontName "Noto Sans"
 title Planning with the Elephant-Goldfish Model
 actor Developer
 participant "Elephant\n(long-context session)" as E

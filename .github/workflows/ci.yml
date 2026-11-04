@@ -21,7 +21,7 @@ jobs:
         run: |
           # Ubuntu's plantuml package is an older version and draws differently. Use the exact
           # version that the committed SVGs were made with, checked against the publisher's SHA-256.
-          sudo apt-get update && sudo apt-get install -y default-jre-headless
+          sudo apt-get update && sudo apt-get install -y default-jre-headless fonts-noto-core
           curl -fsSL -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2026.8/plantuml-1.2026.8.jar
           echo "5e1ecfa8ecd32c90b03bbf3b1eb6f020943f98ab0fcf4032be31a0002ee2c462  plantuml.jar" | sha256sum -c -
           mkdir -p "$HOME/bin"

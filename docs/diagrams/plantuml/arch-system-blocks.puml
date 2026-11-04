@@ -1,4 +1,5 @@
 @startuml arch-system-blocks
+skinparam defaultFontName "Noto Sans"
 title Busy light - proposed blocks (draft)
 !pragma layout smetana
 left to right direction
