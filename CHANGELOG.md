@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Diagram check (`scripts/build_diagrams.sh --check`) compares structure, labels and colours, not coordinates, because text widths depend on the machine's font metrics (`scripts/svg_normalize.py`, with tests).
 - Diagrams use an explicit font (Noto Sans) and CI installs it, so box sizes do not depend on the machine's default font.
 - README gallery: architecture block diagram, stand-in KiCad board render and placeholder housing concept preview (image of the mechanical spike under `docs/verification/reports/images/`).
 - CI docs job: PlantUML 1.2026.8 pinned by SHA-256 (the Ubuntu package draws differently); block diagram uses the built-in layout engine so Graphviz versions cannot change it.

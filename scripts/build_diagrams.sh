@@ -34,8 +34,21 @@ if ((${#wd[@]})); then
 fi
 
 if [[ $CHECK -eq 1 ]]; then
-  if diff -ru "$SRC/generated" "$OUT" -x .gitkeep >/dev/null; then echo "diagrams: up to date"
-  else diff -ru "$SRC/generated" "$OUT" -x .gitkeep | head -40; echo "ERROR: generated diagrams are stale. Run scripts/build_diagrams.sh" >&2; fail=1; fi
+  # Compare structure and text, not coordinates: text widths depend on the machine's font metrics
+  # (scripts/svg_normalize.py replaces numbers inside attribute values).
+  stale=0
+  while IFS= read -r -d '' f; do
+    rel="${f#"$SRC/generated/"}"
+    if [[ ! -f "$OUT/$rel" ]] || ! diff -q <(python3 -I "$ROOT/scripts/svg_normalize.py" "$f") \
+         <(python3 -I "$ROOT/scripts/svg_normalize.py" "$OUT/$rel") >/dev/null; then
+      echo "stale: $rel"; stale=1
+    fi
+  done < <(find "$SRC/generated" -name '*.svg' -print0)
+  while IFS= read -r -d '' f; do
+    [[ -f "$SRC/generated/${f#"$OUT/"}" ]] || { echo "missing committed output: ${f#"$OUT/"}"; stale=1; }
+  done < <(find "$OUT" -name '*.svg' -print0)
+  if [[ $stale -eq 0 ]]; then echo "diagrams: up to date"
+  else echo "ERROR: generated diagrams are stale. Run scripts/build_diagrams.sh" >&2; fail=1; fi
 else
   echo "diagrams: rendered to ${OUT#"$ROOT"/}"
 fi
