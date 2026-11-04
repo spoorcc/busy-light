@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Licence record: per-file licence tag counts of the pinned Zephyr, MCUboot, hal_espressif and Mbed TLS trees, NonCommercial definition from the licence text; HW-010 hold-off upper limit of [600] ms (spike finding F7: a plain CMOS threshold is too loose for the timer).
 - Start-up hold-off of at least [200] ms on the high-step gate: HW-010 acceptance criteria, TC-210 procedure points, ADR-0016 amendment (owner to confirm) and RISK-042 (reason: the IC output level before its first debounce is not stated in the datasheet).
 - Datasheet evidence record for the CC detection IC (`docs/verification/reports/cc-ic-datasheet-evidence.md`, Draft): TUSB321 Rev C read (supply from VBUS, 0 to 70 C, CC pins 6 V, thresholds, OUT1 and PORT behaviour; power-up output level not stated); PTN5150 Rev 1 (older) as a second-source hint; RISK-026 and RISK-043 updated.
 - ADR-0010 open points 1 and 2 decided by owner instruction (recommended options: first step 506 to 623 mA with a 500 mA firmware budget; top step 1366 to 1577 mA with a 1350 mA firmware value); HW-010 and RISK-027 carry the numbers. ADR status stays Proposed.
