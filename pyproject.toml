@@ -11,8 +11,7 @@ dependencies = []
 
 [dependency-groups]
 hw = [
-    "kiutils",
-    "skidl",
+    "kiutils==1.4.8",
 ]
 dev = [
     "pytest",

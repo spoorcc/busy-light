@@ -51,6 +51,7 @@ Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (`src/schematic_writer.py`, `
 | Scripted routing (`route_pcb.py`: pad-to-pad tracks, GND vias and a B.Cu pour) | Every net is connected (0 unconnected items) but DRC reports 16 shorting items, 10 crossing tracks, 7 clearance and 34 solder-mask bridge violations. Naive routing is not sufficient. | run |
 | Freerouting | Not installed, not tried. | not run |
 | Schematic-to-board parity | 36 parity issues remain (footprint-to-symbol link and fields); cause not investigated. | run, not fixed |
+| SKiDL netlist with fixed `tag=` values and `PYTHONHASHSEED=0`, two runs | Identical except the source path and date. SKiDL schematic placement still differed between runs (symbol positions). Observed in the session scratchpad; no log archived. | run |
 | Net names | `pcbnew` net names carry a `/` prefix (`/GND`); scripts must account for it. | run |
 | ngspice, FreeCAD side of the parameter file, Docker run of the CI image | Not run. | not run |
 

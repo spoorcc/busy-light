@@ -302,3 +302,36 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Residual risk (after mitigation):** Modelled on the spike branch `spike/mech-concept` (placeholders): V1 board tab plus wall bulge passes all checks, largest outer dimension 57.43 mm; V2 bottom-side receptacle passes with a floor pocket or taller posts but breaks the one-side assembly of SYS-022; a larger ring is not possible within 58 mm. Owner decision needed.
 - **Verified by:** TC-201, TC-209
 - **Status:** Open
+
+### RISK-032 Generated layout fails RF or EMC review
+
+- **Hazard / failure mode:** The scripted placement and routing of the antenna, USB-C and ESD area is worse than a hand layout and the failure is found late
+- **Cause:** ADR-0012 option B (generated hardware); keep-out of ADR-0011 already below the vendor figure
+- **Effect:** Board respin; RED radio and EMC evidence delayed
+- **Severity (1-5):** 4  **Likelihood (1-5):** 3  **Initial risk:** 12
+- **Mitigated by:** ADR-0012 items 3, 5, 6 (DRC-enforced keep-out, review set, pre-compliance scan, fallback to GUI routing)
+- **Residual risk (after mitigation):** Not assessed; no RF evidence exists (spike used a stand-in)
+- **Verified by:** Gate G2 of ADR-0012; TC-nnn to be written
+- **Status:** Open
+
+### RISK-033 Generator or build tool compromised, changed or abandoned
+
+- **Hazard / failure mode:** A dependency (kiutils, KiCad, Freerouting jar, Java runtime) changes a net or part in the generated hardware, or is abandoned during the 5-year support period
+- **Cause:** Hardware authored by code; community tools; unsigned jar; floating tags
+- **Effect:** Wrong or non-reproducible board that still passes ERC
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** ADR-0012 items 4, 11, 12 (digest and hash pins, tool-qualification table, SBOM, regeneration gate, tool change procedure)
+- **Residual risk (after mitigation):** Not assessed; pins are not yet in place
+- **Verified by:** Gate G1 of ADR-0012
+- **Status:** Open
+
+### RISK-034 Generated files and generator drift apart
+
+- **Hazard / failure mode:** A reviewer or the owner saves a generated file in the KiCad GUI (KiCad 10 rewrites the format), or a manual edit passes the check
+- **Cause:** Committed generated files; the semantic dump covered parts, nets and positions only
+- **Effect:** Released board differs from the reviewed source
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** ADR-0012 items 1 and 11 (marker, full-scope dump, CI regeneration gate, negative tests)
+- **Residual risk (after mitigation):** Not assessed; the gate is not implemented
+- **Verified by:** Gate G1 of ADR-0012
+- **Status:** Open
