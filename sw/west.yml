@@ -9,5 +9,5 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v4.2.0   # pin a release; bump deliberately
+      revision: v4.5.0   # pin a release; bump deliberately
       import: true

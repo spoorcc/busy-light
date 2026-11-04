@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Light style check for user documentation (docs/user/**/*.md) against docs/standards/writing.md.
 
-Checks: numbered steps <= 20 words, other sentences <= 25 words, paragraphs <= 6 sentences, no contractions.
+Checks: numbered steps <= 20 words, other sentences <= 25 words, paragraphs <= 6 sentences,
+no contractions.
 This is NOT an ASD-STE100 conformance check; it catches common violations only. Exit 1 on findings.
 """
+
 import re
 import sys
 from pathlib import Path
@@ -14,13 +16,13 @@ STEP = re.compile(r"^\s*\d+\.\s+(.*)")
 
 
 def clean(text: str) -> str:
-    text = re.sub(r"`[^`]*`", "X", text)                 # inline code
+    text = re.sub(r"`[^`]*`", "X", text)  # inline code
     text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)  # links
-    text = re.sub(r"[*_>#]", "", text)                    # emphasis, quotes, headings
+    text = re.sub(r"[*_>#]", "", text)  # emphasis, quotes, headings
     return text.strip()
 
 
-def sentences(text: str):
+def sentences(text: str) -> list[str]:
     return [s for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
 
 
@@ -29,7 +31,7 @@ def check(path: Path) -> list[str]:
     para: list[str] = []
     para_start = 0
 
-    def flush():
+    def flush() -> None:
         nonlocal para
         if para:
             n = len(sentences(" ".join(para)))
@@ -49,8 +51,9 @@ def check(path: Path) -> list[str]:
             continue
         step = STEP.match(raw)
         text = clean(step.group(1) if step else raw)
-        if CONTRACTION.search(text):
-            out.append(f"{path}:{n}: contraction ('{CONTRACTION.search(text).group(0)}')")
+        found = CONTRACTION.search(text)
+        if found:
+            out.append(f"{path}:{n}: contraction ('{found.group(0)}')")
         if step:
             flush()
             words = len(text.split())

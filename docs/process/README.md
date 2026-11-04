@@ -129,6 +129,9 @@ recorded and passing; traceability check passes; docs updated; no new warnings
 - West manifest pins exact revisions. No floating branches.
 - Builds must be reproducible; the firmware embeds git describe, build date policy
   and a version readable at runtime.
+- `CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and Semantic Versioning. Every user-visible or
+  release-relevant change adds an entry under `[Unreleased]` in the same PR (Added, Changed, Deprecated, Removed, Fixed, Security).
+  At release, `[Unreleased]` becomes the dated version section and the release record links to it.
 - A release = annotated signed tag + `docs/verification/releases/<version>.md`
   (baseline of requirement versions, test reports, known issues, artefact hashes).
 - Hardware releases: tagged, with Gerbers/BOM/PnP in `hw/fabrication/<rev>/` plus ERC/DRC reports.

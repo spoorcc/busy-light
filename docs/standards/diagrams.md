@@ -24,7 +24,7 @@ precise layout)? Write an ADR first; the replacement must also be text-based.
    **never edited by hand**. Inline Mermaid renders natively on GitHub.
 2. **Reproducible and pinned.** PlantUML version is recorded in the build log; Mermaid and WaveDrom CLIs are pinned in
    `scripts/diagrams/package.json`. Build: `scripts/build_diagrams.sh`. CI runs `scripts/build_diagrams.sh --check` and fails if
-   committed outputs are stale or a source does not render.
+   committed outputs are stale or a source does not render. The check compares structure, labels and colours, not coordinates, because text widths depend on the machine's font metrics (`scripts/svg_normalize.py`). CI pins PlantUML 1.2026.8 and Noto Sans; regenerate with the same versions.
 3. **Name by area, topic, type:** `arch-system-context.puml`, `sw-led-driver-sequence.puml`, `hw-i2c-timing.json`.
 4. **Traceable.** Architecture elements carry their `ARCH-nnn` ID in the label; the diagram is referenced from the document that
    defines those IDs. Interfaces drawn must exist in the requirements or interface spec -- a diagram never introduces a design fact.

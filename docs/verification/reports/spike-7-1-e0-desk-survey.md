@@ -1,0 +1,95 @@
+# Spike 7.1, E0: desk survey of Zephyr on ESP32-C3
+
+- **Status:** Draft (author's survey; not reviewed by a goldfish or the owner)
+- **Date:** 2026-11-03
+- **Plan:** `docs/plans/03-spike-7-1-zephyr-esp32c3.md`, experiment E0
+- **Method:** three passes. Pass 1: web search and page fetches of public documentation. Pass 2 (this report's section "Pass 2"): shallow clones of Zephyr `v4.5.0` and the pinned MCUboot revision (`725d63c9`) read with `grep`. Nothing was built, no `west update` was run (the hal_espressif module and the Wi-Fi blobs were not fetched), no hardware was used. Every line is **"documented"** (a page says so) or **"not found"** (my searches did not show it). "Not found" does not mean "missing". Documentation pages can lag the code, and the pages read were mostly the `latest` tree or mirrors, not exactly v4.2.0.
+- **Evidence class:** documentation and source read, not built, not measured. Nothing here replaces a build and a test.
+
+## Results
+**Pass 1 rows refer to Zephyr v4.2.0 and to documentation pages. The v4.5.0 source findings in Pass 2 and Pass 3 take precedence where they differ** (WPA2-Enterprise, virtual eFuses, AP+STA).
+
+| Item | Finding | Class | Effect |
+|------|---------|-------|--------|
+| Board name | `esp32c3_devkitm` (Espressif, SoC esp32c3). Partition file `partitions_0x0_default_4M.dtsi`, so a 4 MB layout. Needs `west blobs fetch hal_espressif` for the Wi-Fi and Bluetooth binary blobs | documented ([board page, 4.2.0](https://docs.zephyrproject.org/4.2.0/boards/espressif/esp32c3_devkitm/doc/index.html)) | Use this board name in E1. The blobs are a licence and SBOM item (RISK-020, SYS-044) |
+| Wi-Fi station | "ESP32 SoC Wi-Fi" is in the feature table | documented (same page) | E1 expected to pass |
+| Wi-Fi AP+STA | The Zephyr AP-STA sample for the Espressif boards uses `CONFIG_ESP32_WIFI_AP_STA_MODE`, enables AP first and then STA, and runs a DHCPv4 server. The sample's board list is the classic ESP32 DevKitC; ESP32-C3 is not mentioned | partly documented ([sample search result](https://docs.zephyrproject.org/latest/samples/boards/espressif/wifi_apsta_mode/README.html), which returned 404 on direct fetch for `latest`; the 4.2.0 URL redirects) | AP+STA on the C3 is **unconfirmed**: E4 stays a hardware test. Read the sample source and the C3 board Kconfig in the cloned tree |
+| Soft AP with WPA2-PSK | Not confirmed for the C3 in the pages read | not found | E3 stays open; check `wifi_mgmt` AP enable and the security options in the cloned tree |
+| DHCP server | `dhcpv4_server` exists in Zephyr and the AP-STA sample uses it | documented | Fine for the access point |
+| DNS answer for a captive portal | No Zephyr DNS responder for captive portals found (Zephyr has mDNS/LLMNR responders for names) | not found | Expect custom code: a small UDP DNS server that answers every name with the AP address. Count it in the flash budget and as a local component (not a patch to Zephyr) |
+| HTTP server with TLS | `HTTPS_SERVICE_DEFINE` with TLS security tags and `tls_credential_add`; credentials must be registered first ([HTTP server docs](https://docs.zephyrproject.org/latest/services/connectivity/networking/api/http_server.html)) | documented | E5 can use this. Whether it builds on the C3 with Wi-Fi, and its RAM use, is for E5 and E6. Check whether it uses PSA crypto or the legacy mbedTLS API in v4.2.0 |
+| LED driver | Zephyr has the `worldsemi,ws2812-spi` binding (SPI master encodes each bit as several SPI bits; properties `spi-max-frequency`, `spi-zero-frame`, `spi-one-frame`, `bits-per-symbol`, `latch-delay`) and a UART variant. The sample says 5 V data may need a level translator such as a 74AHCT125 ([binding](https://docs.zephyrproject.org/latest/build/dts/api/bindings/led_strip/worldsemi%2Cws2812-spi.html), [sample](https://docs.zephyrproject.org/latest/samples/drivers/led_ws2812/README.html)). No Zephyr RMT `led_strip` driver for the C3 was found. The C3 board page lists SPI and LEDC but no RMT | documented (SPI); not found (RMT) | ADR-0004 says "SPI or RMT". On present evidence only the SPI route exists in Zephyr, which also fits the buffer advice. Check DMA use for the SPI on the C3 (E7), because without DMA the Wi-Fi interrupts can disturb the frame |
+| Random source | Board page lists "ESP32 TRNG" as the entropy driver | documented | The question whether the radio must be on for true randomness is open (E8). Not found in the pages read |
+| MCUboot port | MCUboot has an Espressif port. ESP32-C3 is a supported chip. Zephyr RTOS is a supported OS for it ([MCUboot Espressif docs](https://docs.mcuboot.com/readme-espressif)). Zephyr builds use `CONFIG_BOOTLOADER_MCUBOOT=y` and sysbuild (`west build ... --sysbuild`) | documented | E9 can start. Whether the Zephyr v4.2.0 C3 port uses upstream MCUboot flash code or the Espressif HAL bootloader needs the tree |
+| Swap modes | Not stated in the Espressif page | not found | Decide in E9 and E2 |
+| ROM secure boot signature | ROM Secure Boot V2 verifies the **bootloader** with **RSA-3072 (RSA-PSS)** on most chips; ECDSA is used on C2 and C61 only | documented (MCUboot docs) | Corrects an assumption in the plan: the ROM stage does not use ECDSA P-256. ADR-0007 and the key-management document need a second key type: RSA-3072 for the bootloader |
+| Application image signature | MCUboot app signing accepts RSA-2048, RSA-3072, EC256 or ED25519 | documented | ECDSA P-256 for the application (ADR-0007) is possible |
+| Key count | The page shows one signing key per image and one for the bootloader. No total limit stated | not found | Whether a backup release key can be added is open. The key-management document keeps it marked *(verify)* |
+| Flash encryption | Development mode (reversible, debugging allowed) and release mode (permanent; first boot encrypts flash and burns eFuses). Device-generated or host-generated key. **OTA images must be sent as plaintext** (the device encrypts on write). With encryption on, `CONFIG_ESP_MCUBOOT_ERASE_PROGRESSIVELY` must be off | documented (MCUboot docs) | Matches ADR-0007 (device encrypts on write). The "device-generated key never leaves the chip" preference is documented as possible. Dev mode cannot show the locked state, as RV-002 said |
+| Download mode | `CONFIG_SECURE_DISABLE_ROM_DL_MODE` removes UART download mode. `CONFIG_SECURE_ENABLE_SECURE_ROM_DL_MODE` limits it to basic flash read, write and erase. Both irreversible after first full boot | documented | The secure download mode is a candidate for SYS-046 recovery. Still to decide in the eFuse procedure |
+| Known problem | MCUboot issue 1866: `boot_request_upgrade()` silently fails on Zephyr v3.5.0 with MCUboot v2.0.0 on the ESP32-C3 when flash encryption is on; works without. A maintainer wrote that virtual eFuses are not supported on Zephyr for Espressif chips ([issue](https://github.com/mcu-tools/mcuboot/issues/1866)). Status today not checked | documented (old) | A direct risk to ADR-0007 stage 3. E11b must test an upgrade request with encryption on the pinned versions. Also the missing virtual eFuses means that development rehearsals cannot be done in software (superseded: v4.5.0 has `ESP32_EFUSE_VIRTUAL`, see the E11a record; untested) |
+| Bootloader size | With secure boot, image signing and flash encryption all enabled, the bootloader may exceed the ROM loader's size limit, depending on the signature algorithm (MCUboot issue 1262) | documented | Add to E11a and to the flash budget: bootloader size with all three on |
+| Serial recovery | Serial recovery writes straight to the primary slot, so an interrupted upload can leave an unbootable image | documented | Not a SYS-046 recovery path as it stands |
+| WPA2-Enterprise | Zephyr's hostap module has enterprise options (EAP-TLS, TTLS, PEAP) behind `WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE`. A 4.3.0 snapshot calls enterprise mode "NOT SECURE due to the lack of certificate validation", and notes stack overflow problems in enterprise mode. Nothing was found that links it to the ESP32 Wi-Fi driver, which uses Espressif's blob | documented (hostap, general); not found (ESP32) | SYS-036 (headroom for WPA2-Enterprise) is at risk: the ESP32 driver may not expose it in Zephyr at all. E12 starts with that check. Do not promise WPA2-Enterprise until it is shown |
+| Simple boot | Without MCUboot the C3 build uses "simple boot": one image, no OTA, no security features | documented (board page) | Confirms that MCUboot (or another bootloader) is a must for SYS-029 |
+
+## What this changes (Pass 1)
+These were proposals. Status on 2026-11-03: all applied to the Proposed ADRs and the key-management draft (see "Pass 3, What Pass 3 changes"), except item 3 (WPA2-Enterprise priority), which Pass 2 reversed.
+1. **Key types.** ADR-0007 and the key-management document name only ECDSA P-256. For the secure-boot stage the bootloader key is RSA-3072. That is a second algorithm and a second key. Update both documents when the ADR is next revised.
+2. **LED driver.** ADR-0004 can say "SPI (Zephyr `ws2812-spi`)" as the only evidenced route and keep RMT as unverified.
+3. **WPA2-Enterprise (SYS-036)** is the least supported item. Suggest keeping it Draft and `Could` until E12's driver check is done.
+4. **Flash encryption with MCUboot on the C3** has a documented upstream failure (issue 1866) and a bootloader size limit (issue 1262). Raise RISK-009 and RISK-022 and keep E (the Espressif bootloader) as a live fallback, as ADR-0007 already does.
+5. **Captive portal DNS** is custom code, not a Zephyr feature.
+
+## Not done and not claimed (superseded by Pass 2 and 3)
+No clone of the Zephyr tree, no Kconfig symbol checked in v4.2.0, no build, no look at the current state of the two MCUboot issues, no check of Zephyr's PSA crypto setting. These are the next E0 steps once the tree is cloned (`west init -l sw && west update`) and are done by reading, not by purchase.
+
+## Pass 2: Zephyr v4.5.0 source read (2026-11-03)
+The owner approved the move from the v4.2.0 pin to `v4.5.0` (newest release; no 4.6 exists). `sw/west.yml` now pins `v4.5.0`. The clones are in the session scratchpad, not in the repository. Each line below is **in source** (seen in a file at the tag), **not in source** (searched, not found), or **unknown**.
+
+| Item | Finding at v4.5.0 | Class | Effect |
+|------|-------------------|-------|--------|
+| Board | `boards/espressif/esp32c3_devkitm/` exists; `supported` list includes `netif:wifi`, `spi`, `dma`, `entropy`, `crypto`, `watchdog`. The sysbuild file sets MCUboot as the default bootloader | in source | E1 can start with `west build -b esp32c3_devkitm --sysbuild` |
+| AP and station together | Kconfig `ESP32_WIFI_AP_STA_MODE` ("Station/AP co-existence mode"), default `y` if `WIFI_USAGE_MODE_STA_AP`, depends on `WIFI_NM`. The driver has AP states (`ESP32_AP_STARTED`, `ESP32_AP_CONNECTED`) | in source | AP+STA exists in the driver. Whether it works on the C3 with a router on another channel is for E4 |
+| The AP+STA sample | `samples/net/wifi/apsta_mode` has board files only for NXP boards (RW612 family), none for ESP32 | in source | No ready sample for the C3: expect to write the glue |
+| Soft AP security | `esp32_wifi_ap_enable()` accepts open, WPA2-PSK, and WPA3-SAE when `ESP32_WIFI_SOFTAP_SAE_SUPPORT` is set; OWE is refused. `max_connection` is fixed at 5 in the driver | in source | WPA2-PSK for the provisioning AP is supported (ADR-0006). **One client at a time (SYS-012) is not enforced by the driver** and must be done in our code (or by a driver change) |
+| DHCP server | `subsys/net/lib/dhcpv4/dhcpv4_server.c` | in source | Fine |
+| DNS answering for a captive portal | `subsys/net/lib/dns` holds a resolver only; no DNS server | not in source | Confirmed as custom code |
+| HTTP server | `subsys/net/lib/http` with TLS option (`NET_SOCKETS_SOCKOPT_TLS`, ALPN); sample `samples/net/http_server` | in source | E5 can use it |
+| WPA2-Enterprise | The ESP32 Wi-Fi driver maps Zephyr EAP types (EAP-TLS, PEAP-MSCHAPv2, PEAP-GTC, TTLS-MSCHAPv2, PEAP-TLS) to Espressif's own enterprise methods (`esp_eap_method_t`), i.e. the Espressif blob does the work, not hostap | in source | **Corrects Pass 1.** SYS-036 is much more likely feasible than I wrote. Flash and heap cost still to measure (E12) |
+| LED driver | `drivers/led_strip/ws2812_spi.c` (SPI master, `bits-per-symbol`); `ws2812_gpio`, `ws2812_i2s`, `ws2812_uart`, `ws2812_pulse_io` and others. No ESP32 RMT driver. The C3 devicetree has SPI with DMA channels (`dmas`, `espressif,esp32-gdma`) | in source | SPI is the route. Whether the C3 SPI driver uses DMA for a transfer of this size and whether the timing holds is for E7 |
+| MCUboot with flash encryption | `ESP_FLASH_ENCRYPTION` Kconfig (Zephyr side) requires the flash `write-block-size` to be 32. The upstream MCUboot repo has an Espressif port (`boot/espressif`, with `esp32c3`). Zephyr's own flash-encryption sample exists (`samples/boards/espressif/flash_encryption`) | in source | The "silent upgrade failure" in MCUboot issue 1866 (closed, no fix commit) was fixed by a `write-block-size = <32>` overlay according to the reporter. Add this to the E11 checklist |
+| Bootloader size with secure boot, encryption and signing | MCUboot issue 1262 (closed by a stale bot in 2022, no fix): with secure boot v2 and flash encryption, **RSA-2048 and RSA-3072 MCUboot signing fail on the ESP32-C3 because the bootloader is too large; EC256 works.** A 2025 comment reports ED25519 failing on the C3 as well | read on the web (issue page) | **Supports ADR-0007's choice of ECDSA P-256 (EC256) for the application signature** and makes RSA a bad choice for it. E11a must still build it to confirm |
+| Random source | The entropy driver comment says the hardware random register gets extra entropy "provided Wi-Fi or BT are enabled" | in source | **Risk for ADR-0006 (passphrase) and ADR-0008 (TLS key):** keys created while the radio is off may not be truly random. E8 must test the radio-off case. Rule for the design: start Wi-Fi (or collect entropy from another source) before the first key or passphrase |
+| Swap mode | In the MCUboot Kconfig, the scratch partition is not required on the ESP32 family when no scratch partition exists in the devicetree; the swap mode in use is not stated in the files read | unknown | Decide in E9 and E2 |
+
+## What Pass 2 changes (proposals for the owner; no ADR edited)
+1. **SYS-036 (WPA2-Enterprise)** is less at risk than Pass 1 said. Keep its priority; measure the cost in E12.
+2. **ADR-0007:** EC256 (ECDSA P-256) for the application stays the right choice. Add the `write-block-size = <32>` overlay and the bootloader-size check to stage 2. The ROM stage still uses RSA-3072 (Pass 1).
+3. **ADR-0006 and ADR-0008:** add a rule that keys and passphrases are created only after the radio has been started or after another entropy source is available. Production step: the passphrase is created while Wi-Fi is enabled.
+4. **SYS-012:** the driver allows 5 clients. Either our code enforces one client, or a small driver change is needed (a DEV record).
+5. **Plan 03 A2:** the pinned release is now v4.5.0; the second run on a newer release is no longer needed.
+
+## Still not done (as of Pass 2; see Pass 3)
+No `west update` (hal_espressif and the blobs not fetched), no build, no check of the PSA crypto setting for TLS, no read of the MCUboot Espressif port's Kconfig for swap mode and key count, no run of any sample. These need the full workspace; `west update` downloads several hundred MB, so I did not run it without asking.
+
+## Pass 3: full workspace at v4.5.0 (2026-11-03)
+A west workspace was created in the session scratchpad from the committed manifest (`de34f23`, Zephyr `v4.5.0`) and updated with a project filter (Zephyr, hal_espressif, mcuboot, mbedtls, hostap, psa-arch-tests; shallow; about 890 MB). The Wi-Fi binary blobs were not fetched. No toolchain (Zephyr SDK) is installed, so nothing was built.
+
+| Item | Finding | Class | Effect |
+|------|---------|-------|--------|
+| TLS library | The bundled Mbed TLS is version **4.1.1**, and Zephyr's Mbed TLS Kconfig is written in terms of `PSA_WANT_*` options | in source | TLS in v4.5.0 is PSA-based. The legacy `mbedtls_*` crypto API is gone from Mbed TLS 4. E5 and the key code must use PSA keys (this also decides how the device key is stored, ADR-0008) |
+| MCUboot version and swap modes | MCUboot 2.5.0 (`725d63c`). Zephyr offers swap using scratch, move, offset, overwrite-only, direct XIP (with revert) and others | in source | Swap using move or offset needs no scratch partition and is the better fit for 4 MB; the choice and its time are E9 / E2 |
+| Keys in the bootloader | The Espressif MCUboot port compiles in **one** public key (`bootutil_key_cnt = 1`, one entry chosen by the signature type) | in source | **ADR-0007's "backup release key in the bootloader if MCUboot supports several keys" is not supported by this port as it stands.** A second key needs a local change to `keys.c` (a DEV record) or a different recovery plan. With secure boot on, the bootloader cannot be changed over the air, so a lost or leaked release key means a hardware recall. This raises the importance of the key-management rules and may justify E (the Espressif bootloader), which was not checked for multiple keys |
+| Signature algorithm in the port | `CONFIG_ESP_SIGN_EC256`, `CONFIG_ESP_SIGN_RSA`, `CONFIG_ESP_SIGN_ED25519`; the C3 default file mentions `root-ec-p256.pem` and `CONFIG_SECURE_BOOT_V2_ENABLED` | in source | EC256 is a first-class option in the port |
+| Zephyr sysbuild | The C3 board makes MCUboot the default bootloader | in source | Consistent with Pass 2 |
+
+## What Pass 3 changes
+**Applied on 2026-11-03 on the owner's instruction** to ADR-0004, ADR-0006, ADR-0007, ADR-0008 and the key-management document (all still Proposed or Draft): items 1 to 5 of the Pass 2 list, items 6 and 7 below (6 as decided), and item 8 (swap-mode comparison in the ADR-0007 stage 2 checklist). Original wording of the proposals:
+
+6. **ADR-0007 item 2 and the key-management document:** the backup release key cannot sit in the bootloader without a local patch. **Decided by the owner on 2026-11-03: no patch; a lost or leaked release key means a recall of locked units.** ADR-0007, the key-management document and RISK-006 are updated.
+7. **ADR-0008:** the device key and certificate code must be written against PSA (Mbed TLS 4); the key record design (atomic record, checksum) stays, but key import/export uses PSA key attributes.
+8. **E9:** compare swap using move and offset first (no scratch partition).
+
+## Still not done
+No build (no SDK), no blobs, no run, no check of the Espressif-framework bootloader (option E) for multiple keys, no check that `ESP_FLASH_ENCRYPTION` plus the generic `boot/zephyr` MCUboot path is the one Zephyr uses for the C3 (the port in `boot/espressif` is the one that holds the key array shown above). The workspace is not kept in the repository.

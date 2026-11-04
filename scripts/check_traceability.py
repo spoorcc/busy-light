@@ -5,6 +5,7 @@ Definitions are headings starting with an ID, e.g. '### SW-012 Title'.
 Links are bullet fields: '- **Parent:** SYS-003', '- **Verified by:** TC-010', ...
 Exit status is non-zero on errors. Use --strict to treat warnings as errors.
 """
+
 import re
 import sys
 from pathlib import Path
