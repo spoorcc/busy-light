@@ -2,4 +2,5 @@
   (version 7)
   (lib (name "LED_SMD")(type "KiCad")(uri "/usr/share/kicad/footprints/LED_SMD.pretty")(options "")(descr ""))
   (lib (name "Package_TO_SOT_SMD")(type "KiCad")(uri "/usr/share/kicad/footprints/Package_TO_SOT_SMD.pretty")(options "")(descr ""))
+  (lib (name "Connector_PinHeader_2.54mm")(type "KiCad")(uri "/usr/share/kicad/footprints/Connector_PinHeader_2.54mm.pretty")(options "")(descr ""))
 )

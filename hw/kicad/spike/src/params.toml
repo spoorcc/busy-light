@@ -1,0 +1,6 @@
+# Shared parameters (spike). One source for KiCad and FreeCAD scripts.
+[board]
+outline_diameter_mm = 46.0
+[ring]
+led_count = 16
+radius_mm = 20.0
