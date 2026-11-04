@@ -33,6 +33,17 @@ ec.SetCenter(VECTOR2I(0, 0))
 ec.SetEnd(VECTOR2I(FromMM(P["board"]["outline_diameter_mm"] / 2), 0))
 ec.SetWidth(FromMM(0.1))
 b.Add(ec)
+b.GetDesignSettings().SetBoardThickness(FromMM(P["stackup"]["pcb_thickness_mm"]))
+for az in P["mounting"]["peg_azimuths_deg"]:
+    h = pcbnew.PCB_SHAPE(b)
+    h.SetShape(pcbnew.SHAPE_T_CIRCLE)
+    h.SetLayer(pcbnew.Edge_Cuts)
+    cx = P["mounting"]["peg_radius_mm"] * math.cos(math.radians(az))
+    cy = -P["mounting"]["peg_radius_mm"] * math.sin(math.radians(az))
+    h.SetCenter(VECTOR2I(FromMM(cx), FromMM(cy)))
+    h.SetEnd(VECTOR2I(FromMM(cx + P["mounting"]["hole_diameter_mm"] / 2), FromMM(cy)))
+    h.SetWidth(FromMM(0.1))
+    b.Add(h)
 n_led, radius = P["ring"]["led_count"], P["ring"]["radius_mm"]
 fps, k = {}, 0
 for c in comps:

@@ -4,3 +4,14 @@ outline_diameter_mm = 46.0
 [ring]
 led_count = 16
 radius_mm = 20.0
+[stackup]
+z_pcb_bottom_mm = 5.0   # PCB bottom above the outside of the housing floor
+pcb_thickness_mm = 1.6
+[housing]
+# Files exported by the FreeCAD housing model (variant V1). The spike reads them from the mech spike worktree.
+variant = "V1"
+[mounting]
+# Housing pegs pass through the board (housing model: R_POST, POST_AZ, PEG_RAD + G_PEG).
+peg_radius_mm = 21.0
+peg_azimuths_deg = [30.0, 150.0, 270.0]
+hole_diameter_mm = 2.8

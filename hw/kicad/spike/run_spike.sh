@@ -17,4 +17,12 @@ echo "== requirement fields"; PYTHONPATH="$HERE/src" "$PY" "$HERE/src/check_req_
 echo "== semantic equality of two runs"; diff -q "$A/dump.json" "$B/dump.json" && echo "semantic dumps identical"
 echo "== schematic byte equality of two runs"; cmp "$A/spike.kicad_sch" "$B/spike.kicad_sch" && echo "schematic bytes identical" || echo "schematic bytes differ"
 echo "== DRC (run only; routing not done)"; kicad-cli pcb drc --severity-all --schematic-parity --output "$A/drc.rpt" "$A/spike.kicad_pcb" | tail -2
+if [[ -n "${HOUSING_DIR:-}" ]]; then
+  echo "== FreeCAD fit check (board STEP vs housing STEP)"
+  KICAD10_3DMODEL_DIR=/usr/share/kicad/3dmodels kicad-cli pcb export step --subst-models --output "$A/board.step" "$A/spike.kicad_pcb" >/dev/null
+  echo "import sys; sys.argv=['x','$A/board.step','$HOUSING_DIR','$HERE/src/params.toml','$HOUSING_SCRIPT','$A/fit.json']; exec(open('$HERE/src/freecad_fit.py').read())" \
+    | QT_QPA_PLATFORM=offscreen timeout 300 freecad -c 2>&1 | grep -E "PASS|FAIL|RESULT|board bbox" || true
+else
+  echo "== FreeCAD fit check NOT RUN (set HOUSING_DIR and HOUSING_SCRIPT)"
+fi
 echo "outputs: $A"
