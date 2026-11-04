@@ -78,7 +78,7 @@ Process rules: `docs/process/README.md`.
 - **Rationale:** ADR-0006 puts the passphrase on a label. Owner decision 2026-11-04: the unit is mounted horizontal and vertical and the label is on the back (assumption A1 of plan 05 is withdrawn). The label stays on the base, which does not move when the lid opens, and never on a swappable accessory. The label is inside the 15 mm antenna box of MECH-003, so it must not be metallised. Regulatory labelling is a tight fit on a 53 mm housing (AS4).
 - **Parent:** SYS-013
 - **Acceptance criteria:** The drawing shows the label area on the back, outside the recess of MECH-007. A printed label of the stated size fits, is not metallised, and stays readable after a wipe test of [20] cycles and after the heat soak of MECH-005. A locked accessory does not cover the label.
-- **Verification method:** Inspection
+- **Verification method:** Inspection and Test
 - **Verified by:** TC-306
 - **Category:** Usability
 - **Regulatory:** none
@@ -87,8 +87,8 @@ Process rules: `docs/process/README.md`.
 
 ### MECH-007 Back mounting interface
 
-- **Statement:** The back of the housing shall have a round recess of [30] mm diameter with [3] lugs that takes an accessory (stand, clip or blank plate) by a quarter turn of about [30] degrees, without tools, and shall have no metal, magnet or insert in or on the back.
-- **Rationale:** NEED-022 and ADR-0014 (Proposed): a printed bayonet is plastic only, so it respects the antenna box of MECH-003, and fits the 2 mm floor. A printed thread and a tripod socket were rejected.
+- **Statement:** The back of the housing shall have a round recess of [30] mm diameter with [3] lugs that takes an accessory (stand, clip or blank plate) by a turn of about [30] degrees, without tools, and shall have no metal, magnet or insert in or on the back.
+- **Rationale:** NEED-022 and ADR-0014 (Proposed): a printed bayonet is plastic only, so it respects the antenna box of MECH-003. Whether it fits the 2 mm floor and next to the label is not shown (RV-007 findings G1, G2). A printed thread and a tripod socket were rejected.
 - **Parent:** NEED-022
 - **Acceptance criteria:** The drawing shows the recess, the lugs and the detent with tolerances. A test accessory fits and locks on [3] printed housings by one hand in under [10] s, and detaches again. No metal part is in the back (inspection).
 - **Verification method:** Inspection and Test

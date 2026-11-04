@@ -1,5 +1,8 @@
 # Contributing
 
+> **Outside code and document contributions are not accepted yet.** The contributor terms below are a draft that needs a
+> legal check first (ADR-0013, review RV-005). Issues, questions and critical reviews of the drafts are welcome now.
+
 This project follows a documented engineering process. Read these first:
 1. [`docs/process/README.md`](docs/process/README.md) -- lifecycle, gates, definition of done
 2. [`docs/process/planning-egm.md`](docs/process/planning-egm.md) -- how we plan (design doc, then review, then code)

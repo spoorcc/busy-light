@@ -2,13 +2,13 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-04
-- **Deciders / reviewers:** Ben Spoor (owner); no goldfish review yet
+- **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-006 (2026-11-04): not ready for acceptance, actions open
 - **Related:** NEED-003, SYS-020, SYS-021, SYS-022, HW-003, HW-004, HW-010, ADR-0004 (item 4), ADR-0009, RISK-003, RISK-004, RISK-005, RISK-024, RISK-025, RISK-026; `docs/verification/reports/spike-7-5-power-budget-paper.md`
 
 ## Context and problem
 The device takes 5 V from a USB-C connector as a sink (SYS-020). The firmware reads the advertised current from the CC lines with the processor ADC (ADR-0009, owner choice). The allowed limit is [500] mA by default. It is the advertised value minus [10] % when the source advertises more, at most [1500] mA (so 1350 mA).
 Owner decision of 2026-11-04 (HW-010, ADR-0004 item 4): the board has a hardware current limit. It starts at [500] mA with the firmware stopped. The firmware raises it, in steps, only after the CC read.
-Why: a firmware-only limiter cannot protect a source that advertises 500 mA if the firmware fails or misreads the CC voltage (RISK-003, RISK-025).
+Why: a firmware-only limiter cannot protect a source that advertises 500 mA if the firmware stops, never starts, or draws too much while the limit is still at the start value (RISK-003). The hardware limit does **not** cover a firmware that misreads the CC voltage and then raises the limit itself: with the select line from the firmware, that case stays open (RV-006 finding S1, RISK-025).
 The limiter must also:
 - pass the Wi-Fi transmit peak (350 mA at 3.3 V, spike 7.5 E1) and the LED current (16 LEDs) without a false trip or a collapse of the 5 V rail (HW-004, RISK-004);
 - start into the input capacitance without tripping (start-up inrush);
@@ -168,7 +168,7 @@ Revisit when: the owner changes the margin or the cap; the bench band is wider t
 
 ## Critical review notes
 Strongest objection: "The part's tolerance (about -10 / +10 % of the nominal limit, plus resistor tolerance) is larger than the [10] % margin the owner chose. So the hardware limit cannot protect a source at its exact advertised value, and may trip on a legitimate draw. It is a backstop with a wide net, not a precise limiter."
-Answer: the objection is correct (see option A, finding). The limiter is a backstop for faults, not the control loop. The firmware stays the precise limiter, with the [10] % margin. The hardware limit protects against a stopped or wrong-reading firmware at the 500 mA step, where the owner's concern lies, and against a short circuit. What the owner must decide is whether the band is acceptable (open point 1). Without the hardware limit the case "source advertises 500 mA, firmware misreads" has no protection at all.
+Answer: the objection is correct (see option A, finding). The limiter is a backstop for faults, not the control loop. The firmware stays the precise limiter, with the [10] % margin. The hardware limit protects against a firmware that is stopped, in reset, or never started, at the 500 mA step where the owner's concern lies, and against a short circuit. It does not protect against a firmware that misreads CC and raises the limit itself (RV-006 finding S1); that needs an independent path (for example a CC IC output ANDed with the GPIO, ADR-0009 option B) or the owner accepts the gap. What the owner must decide is whether the band is acceptable (open point 1). Without the hardware limit the case "source advertises 500 mA, firmware misreads" has no protection at all.
 Second objection: "Constant-current limiting with a buck load can collapse the rail, so the limiter makes a brown-out worse." Answer: yes, if the firmware budget is above the hardware minimum. So the firmware budget must stay below the minimum limit at each step, and the bench test peaks must show it (RISK-028). A reset after a collapse is safe (the limit falls back to step 1).
 Third objection: "The TPS2553 is an extended part and has a fee at JLCPCB; a basic part would be cheaper." Answer: no basic candidate was found in this research (E8, E16, E19: class not found for the others). The fee was not looked up. The cost against SYS-021 must be checked in the real quote (TC-021).
 Fourth objection: "Most of the numbers come from one family datasheet." Answer: yes, for A1. They were read in the document (E1 to E7), and the same page has the two-level circuit. The prices and stocks are snippets.

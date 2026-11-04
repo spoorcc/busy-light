@@ -64,7 +64,7 @@ Author's first assessment of 2026-11-03 from the design plan 02 and ADR-0002 to 
 1. ~~Prototypes stay internal.~~ Answered: yes.
 2. Which markets: EU only, or also UK, US, Switzerland?
 3. What support period will you commit to (CRA default is at least 5 years *(verify)*)?
-4. Is the project published as open source with no commercial supply, or sold? This changes the CRA role (steward or manufacturer) *(verify)*.
+4. Is the project published as open source with no commercial supply, or sold? This changes the CRA role (steward or manufacturer) *(verify)*. Since ADR-0013 (2026-11-04) the hardware and documents are source-available under CC BY-NC-SA 4.0 and the owner may sell commercial licences. The open-source steward path therefore cannot be assumed; plan for the manufacturer role (RV-005, needs a lawyer).
 5. Do you accept that units placed on the market need secure boot and flash encryption, or a written justification?
 6. Who will be the manufacturer (legal person and postal address) on the label for the first sold units? Deferred by the owner; needed before the first supply to others.
 

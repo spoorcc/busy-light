@@ -121,7 +121,7 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Status:** Draft
 
 ### NEED-020 The ring knows which way is up
-- **Statement:** The device is mounted both horizontal and vertical. The ring finds its own orientation, so that a level gauge starts at the same place on the ring in every orientation, without the user setting it.
+- **Statement:** The device is mounted both horizontal and vertical. The ring finds its own orientation, so that a level gauge starts at the same place on the ring when the unit hangs or stands, without the user setting it. A flat unit has no sensed direction; its zero is fixed on the board.
 - **Source:** Product owner, 2026-11-04 (answers to the orientation question of plan 05, RV-004 finding A1).
 - **Open points:** When the unit lies flat with the ring up, gravity gives no direction in the ring plane. The proposal (SYS-047) is a fixed zero position on the board for this case. The owner confirms.
 - **Status:** Draft

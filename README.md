@@ -14,7 +14,7 @@ Sixteen RGB LEDs that show your Jenkins build status or any other level, with no
 ![Market: EU](https://img.shields.io/badge/market-EU%20(not%20certified)-003399)
 [![Code: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSES/Apache-2.0.txt)
 [![Docs, hardware, mechanics: CC BY-NC-SA 4.0](https://img.shields.io/badge/docs%20%C2%B7%20hardware%20%C2%B7%20mechanics-CC%20BY--NC--SA%204.0-lightgrey)](LICENSES/CC-BY-NC-SA-4.0.txt)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+[![Issues and reviews welcome](https://img.shields.io/badge/issues%20%26%20reviews-welcome-brightgreen)](CONTRIBUTING.md)
 
 [Documentation](docs/README.md) ·
 [Requirements](docs/requirements/needs.md) ·
@@ -169,7 +169,7 @@ They report **NOT RUN** until product sources exist, so a skipped check is never
 
 ## Contributing
 
-Ideas, reviews and critical questions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) first.
+Ideas, reviews and critical questions are welcome. Pull requests with code or documents are not accepted until the contributor terms have had a legal check. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) first.
 A good first contribution is to challenge a draft requirement or a proposed decision in
 [`docs/decisions/`](docs/decisions/): write down the alternative you would pick and why.
 

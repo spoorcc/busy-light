@@ -277,7 +277,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source or cable
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** SYS-020, HW-003, ARCH-001, ARCH-014
-- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is wanted by the owner (HW-010, ADR-0004 item 4): it starts at [500] mA and is raised by the firmware after the CC read
+- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is wanted by the owner (HW-010, ADR-0004 item 4): it starts at [500] mA and is raised by the firmware after the CC read. It covers a stopped firmware and a short circuit, **not** a firmware that misreads CC and raises the limit itself (RV-006 S1); an independent decode path is an owner decision
 - **Verified by:** TC-203, TC-020
 - **Status:** Open
 
@@ -378,4 +378,81 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Mitigated by:** ADR-0012 items 1 and 11 (marker, full-scope dump, CI regeneration gate, negative tests)
 - **Residual risk (after mitigation):** Not assessed; the gate is not implemented
 - **Verified by:** Gate G1 of ADR-0012
+- **Status:** Open
+
+### RISK-035 Licence-incompatible dependency in the build
+
+- **Hazard / failure mode:** A dependency or blob (Wi-Fi binaries, Mbed TLS licence choice, KiCad or vendor libraries) has terms that conflict with Apache-2.0 for code or CC BY-NC-SA 4.0 for the rest
+- **Cause:** Mixed licences (ADR-0013); vendor material may land in the repository under the catch-all CC licence
+- **Effect:** Distribution not allowed, or a licence violation in a published image or file
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** ADR-0013 item 6, SYS-044
+- **Residual risk (after mitigation):** Not assessed; compatibility table and NOTICE file do not exist yet (RV-005)
+- **Verified by:** `reuse lint` in CI; compatibility table (to be written)
+- **Status:** Open
+
+### RISK-036 Meaning of "non-commercial" leads to a dispute
+
+- **Hazard / failure mode:** Hobbyists, charities, schools and companies disagree with the owner on what CC BY-NC-SA 4.0 allows
+- **Cause:** The licence text defines non-commercial vaguely; LICENSE.md gives no examples
+- **Effect:** Dispute, bad reputation or a licence that cannot be enforced
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** ADR-0013, LICENSE.md
+- **Residual risk (after mitigation):** Not assessed; FAQ with examples and a lawyer check are open (RV-005)
+- **Verified by:** Legal review (no test case)
+- **Status:** Open
+
+### RISK-037 Contributor terms are not enforceable
+
+- **Hazard / failure mode:** Contributions arrive without a valid grant, so the owner cannot license them commercially or defend the licence
+- **Cause:** Draft terms in CONTRIBUTING.md; a sign-off certifies origin but is not a licence grant
+- **Effect:** Split ownership of the design; the commercial route is blocked
+- **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
+- **Mitigated by:** CONTRIBUTING.md notice (no outside contributions until the legal check), ADR-0013
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** Legal review (no test case)
+- **Status:** Open
+
+### RISK-038 CRA role differs from the open-source steward assumption
+
+- **Hazard / failure mode:** The project is treated as a manufacturer of a product with digital elements, not as an open-source steward
+- **Cause:** Hardware and documents are source-available (not open source) and the owner may sell commercial licences (ADR-0013)
+- **Effect:** Full manufacturer duties (vulnerability handling, SBOM, reporting) apply to published firmware
+- **Severity (1-5):** 3  **Likelihood (1-5):** 4  **Initial risk:** 12
+- **Mitigated by:** ADR-0013, SYS-044, SYS-045
+- **Residual risk (after mitigation):** Plan for the manufacturer role; legal check open (applicability.md question 4)
+- **Verified by:** Regulatory check (no test case)
+- **Status:** Open
+
+### RISK-039 Bayonet lug creeps, breaks or releases
+
+- **Hazard / failure mode:** The printed lugs or the detent creep in a warm unit, break, or release when the unit is turned by hand; the unit falls
+- **Cause:** FDM lugs in PETG or ASA at 50 to 60 deg C; hanging and leverage loads; a 30 degree turn unlocks (ADR-0014)
+- **Effect:** Unit falls off a wall or stand while on USB power
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** MECH-007, MECH-008, ADR-0014
+- **Residual risk (after mitigation):** Not assessed; load case, unlock torque and geometry are open (RV-007)
+- **Verified by:** TC-307, TC-308
+- **Status:** Open
+
+### RISK-040 Accessory covers the label or puts metal near the antenna
+
+- **Hazard / failure mode:** A locked accessory hides the label with the passphrase, or has a metal part near the antenna
+- **Cause:** Label and accessories share the back; accessories are made by users
+- **Effect:** Passphrase unreadable while mounted; range loss or detuning (RISK-011)
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** MECH-006, MECH-007, MECH-003
+- **Residual risk (after mitigation):** Not assessed; range test with accessories attached is not planned yet (RV-007)
+- **Verified by:** TC-306, TC-303
+- **Status:** Open
+
+### RISK-041 Orientation is reported wrongly
+
+- **Hazard / failure mode:** The level gauge starts at the wrong place: flat unit, stand tilt near the 30 degree limit, ring facing down, sensor failed or knocked
+- **Cause:** An accelerometer gives no in-plane direction when flat (SYS-047)
+- **Effect:** A level is read wrongly (display only; status colours are not affected)
+- **Severity (1-5):** 2  **Likelihood (1-5):** 3  **Initial risk:** 6
+- **Mitigated by:** SYS-047, HW-011
+- **Residual risk (after mitigation):** Not assessed; filtering, hysteresis and face-down behaviour are open (RV-007)
+- **Verified by:** TC-047, TC-211
 - **Status:** Open

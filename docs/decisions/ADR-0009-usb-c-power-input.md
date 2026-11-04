@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-04
-- **Deciders / reviewers:** Ben Spoor (owner); no goldfish review yet
+- **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-006 (2026-11-04): not ready for acceptance, actions open
 - **Related:** NEED-003, SYS-020, SYS-021, SYS-022, SYS-027, SYS-028, HW-003, HW-004, ADR-0003, ADR-0004 (item 4), RISK-003, RISK-004, RISK-005; `docs/verification/reports/spike-7-5-power-budget-paper.md` (sections 2.3 and 8)
 
 ## Context and problem
@@ -122,7 +122,7 @@ Recommend **A**: read both CC lines with two ADC1 inputs, no divider, with these
 - Positive: no extra IC; no extra unit cost beyond a few passives; E is the same board with firmware at 500 mA; the rule is plain logic that the PC can test with recorded voltages.
 - **Negative / trade-offs accepted:** the margin of one ADC threshold in a 90 mV gap is thin (E4, E11); detection depends on firmware (no hardware path); two GPIO pins stay used; a weak 1.5 A source can be read as default (accepted, safe side).
 - Relation to ADR-0004 item 4 (hardware backstop, not decided here): a load switch with a fixed current limit protects the connector and cable, not a source that advertises 500 mA. To protect a default source it needs two limits, selected by the advertised current. With A, the select line comes from firmware, so a firmware fault still removes the protection. With B, OUT1 could set the limit select in hardware (my idea, not checked in a datasheet). That is an argument for B if item 4 turns out to be required.
-- New risks (proposed text for the risk register, not added there): **RISK-024** Source advertises 1.5 A but supplies less (weak charger, long cable, drop in the cable) and the device browns out or the source shuts down. **RISK-025** The CC voltage is read wrongly (ADC error, Wi-Fi noise, tolerance of Rd or Rp) and the device draws up to 1350 mA from a source that advertises 500 mA. **RISK-026** The CC pin sees a voltage above the processor pin rating (VCONN or a fault) and damages the ADC pin. RISK-003 must say that the limit value, not only the limiter, comes from a firmware read. RISK-005 changes: more dissipation at 1350 mA.
+- New risks (now in the risk register as RISK-024 to RISK-026; the text here is the original proposal): **RISK-024** Source advertises 1.5 A but supplies less (weak charger, long cable, drop in the cable) and the device browns out or the source shuts down. **RISK-025** The CC voltage is read wrongly (ADC error, Wi-Fi noise, tolerance of Rd or Rp) and the device draws up to 1350 mA from a source that advertises 500 mA. **RISK-026** The CC pin sees a voltage above the processor pin rating (VCONN or a fault) and damages the ADC pin. RISK-003 must say that the limit value, not only the limiter, comes from a firmware read. RISK-005 changes: more dissipation at 1350 mA.
 - Requirements created or changed: HW-003 already allows the ADC read path; add that the ADC pin has a clamp and that the safe threshold is on the default side. New SW requirement for the CC read and the limit rule (with a PC test). TC-203 needs a procedure (three sources). SYS-020 stays as written; criteria for the margin check should name the bands.
 
 ## Verification and revisit

@@ -423,7 +423,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 
 ### SYS-032 Level display
 
-- **Statement:** The device shall show a level between 0 % and 100 % as a filled arc of the ring, starting at a fixed LED, with the last lit LED set in proportion to the remainder.
+- **Statement:** The device shall show a level between 0 % and 100 % as a filled arc of the ring, starting at the LED given by SYS-047 (the fixed LED when the unit is flat), with the last lit LED set in proportion to the remainder.
 - **Rationale:** The owner wants levels as well as states in the first release (NEED-004, owner answer 2026-11-03).
 - **Parent:** NEED-004
 - **Acceptance criteria:** For input levels 0, 25, 50, 75 and 100 % the ring lights 0, 4, 8, 12 and 16 LEDs fully; for 50 % plus half of one LED step (53.1 %) the ninth LED is lit at about half brightness; a step of 1/16 of the range (6.25 %) is visible as a change. The user can set the colour and the value range (minimum and maximum) per source.

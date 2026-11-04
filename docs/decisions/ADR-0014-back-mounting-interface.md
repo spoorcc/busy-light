@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-04
-- **Deciders / reviewers:** Ben Spoor (owner); no goldfish review yet
+- **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-007 (2026-11-04): not ready for approval, actions open
 - **Related:** NEED-014, NEED-020, NEED-022, SYS-047, HW-011, MECH-007, MECH-008, SYS-013, SYS-028, MECH-001, MECH-003, MECH-006, ADR-0003, ADR-0011, RISK-011, RISK-005, RV-004 (finding A1)
 
 ## Context and problem
@@ -22,7 +22,7 @@ Not known: the weight and leverage of the intended accessories (stand, clips); t
 |-----------|--------------|--------------------|
 | Only plastic in the antenna box (gate: score 0 excludes the option) | 5 | MECH-003, RISK-011 |
 | Holds the unit under load, many times, and warm (hang weight, 100 cycles, creep) | 5 | MECH-005, MECH-006 |
-| Prints on FDM without supports and fits the 2 mm floor and the height budget | 4 | ADR-0011, MECH-001, SYS-028 |
+| Prints on FDM without supports and fits the floor and the height budget (not shown yet, RV-007) | 4 | ADR-0011, MECH-001, SYS-028 |
 | Takes different accessories (stand, clips, blank plate) | 4 | owner decision 2026-11-04 |
 | Attaches without tools, with one hand | 3 | DFx standard 2 |
 | Works at any rotation angle (the sensor handles orientation) | 3 | owner decision 2026-11-04 |
@@ -77,7 +77,7 @@ Scores 0 to 5, my judgement; nothing is printed or tested. The totals come from 
 | Parts and cost (3) | 4 | 5 | 5 | 4 | 2 | 5 | 5 |
 | **Weighted sum (max 150)** | 92 | **128** | 120 | 95 (excluded) | 83 (excluded) | 103 | 40 |
 
-Sensitivity: B stays first when any single weight changes by 2 up or down. B leads C by 8, which is inside my scoring error; the lead disappears if C scores 4 on FDM and height and 3 on rotation. The coupon test, not the table, decides between B and C.
+Sensitivity: B stays first when any single weight changes by 2 up or down. B leads C by 8, which is inside my scoring error; the lead shrinks to 1 point if C scores 4 on FDM and height and 3 on rotation (C then totals 127). The coupon test, not the table, decides between B and C.
 
 ## Decision
 Choose **B, a printed bayonet**, with these design rules. Items in brackets are working values.
@@ -98,6 +98,15 @@ Choose **B, a printed bayonet**, with these design rules. Items in brackets are 
 ## Verification and revisit
 - Coupon test (plan 05 increment 1): attach and detach [100] cycles, a pull-off test at room temperature and after a heat soak, a hanging load test with the heaviest planned accessory.
 - Revisit when: the coupon fails the heat soak or the cycles (then C); the antenna moves to the board edge (ADR-0003 B), which would allow a metal insert and option E; the owner needs standard tripod accessories; the floor thickness or height changes.
+
+## Review findings still open (RV-007)
+The goldfish review of 2026-11-04 found problems that can invalidate this option as drawn; the status stays Proposed.
+- **Layout:** a centred 30 mm recess leaves a ring (53 - 30) / 2 = 11.5 mm wide, so a 20 mm label does not fit beside it. The recess, the label and the feet need a scale drawing first.
+- **Floor:** a 1.5 mm recess in a 2.0 mm floor leaves 0.5 mm, which is not a whole number of 0.4 mm perimeters, and the lug and recess values are not multiples of 0.4 mm either.
+- **Print orientation:** with the floor on the bed, the recess is a bridge. "No supports" is not shown.
+- **Release:** a 30 degree turn unlocks the unit, so a knock or turning it by hand can release it.
+- **Load case:** the 10 N pull-off figure has no derivation; a stand loads the lugs in moment and shear.
+- **Antenna:** any accessory on the back lies inside the 15 mm box; the range test has no accessory case.
 
 ## Critical review notes
 Strongest objection: "A custom bayonet means no existing accessories; the owner's thread or a 1/4-inch tripod socket would give many for free."
