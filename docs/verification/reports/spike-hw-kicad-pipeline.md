@@ -121,3 +121,18 @@ Environment: `kicad-python` (module `kipy`) 0.8.0 installed in a throwaway venv 
 | `kiutils` as a file-based alternative | Not evaluated for boards in this round. It writes KiCad 8 syntax (see section 6); it could replace the `pcbnew` board build but not the DSN and SES steps. | not run |
 
 Conclusion of round 6: the IPC API is not a drop-in replacement today. It needs a running editor, it did not respond in this environment, and it lacks the DSN and SES functions and the stackup and rule setters that the flow uses. The SWIG interface stays the only working route for the board build and the router round trip, and its deprecation is an open risk. Mitigation options for the ADR: keep all `pcbnew` use behind one small adapter module; generate the board file with `kiutils` where possible; re-check at every KiCad major release; install a virtual display and retry the IPC API.
+
+## 11. Round 7 (2026-11-04): board file built with `kiutils` instead of `pcbnew`; IPC API retry
+Code: `hw/kicad/spike/src/gen_pcb_kiutils.py` on branch `spike/hw-kicad`. Same inputs as the `pcbnew` builder (netlist and `params.toml`).
+
+| Step | Result | Label |
+|------|--------|-------|
+| `kiutils` 1.4.8 reading KiCad 10 files | Reads all 101 footprints of the LED library and three others (`kicad_mod`). Fails on a KiCad 10 board file: pad nets are written as `(net "name")` without a number, and the reader expects both (IndexError). So an existing KiCad 10 board cannot be edited with `kiutils`; a new board can be written. | run |
+| Board written from scratch (KiCad 8 syntax, version 20240108): nets, 18 footprints from the library, outline, three mounting holes, keep-out rule areas, explicit stackup, hidden requirement field | KiCad 10 loads it. `kicad-cli` DRC with schematic parity: 0 parity issues, 53 unconnected items (unrouted, as before). STEP export and 3D render work. | run |
+| Fidelity problems found and fixed | (1) Pad angles are absolute in the file format: without adding the footprint rotation, pads of rotated LEDs were turned back and DRC reported 8 false clearance violations (0.13 mm against 0.2 mm). (2) `kiutils` writes `property` entries without position or layer, which put reference and value text on the silkscreen (38 silk-over-copper and 50 silk-overlap warnings); reference and value are now written as `fp_text` on the fabrication layer. | run |
+| Remaining difference | 1 `lib_footprint_mismatch` warning for the pin header (cause not investigated). The zones of the `kiutils` board are encoded differently from the `pcbnew` board (ring as a slit polygon), so the dump differs in zones only; each builder needs its own committed dump. | run |
+| Routing on the `kiutils` board | The stored session from the `pcbnew`-built board imports (through `pcbnew`) and gives 0 unconnected items, 0 parity issues and no other DRC violation than the pin-header warning. | run |
+| What `pcbnew` is still needed for | DSN export, SES import and reading footprint positions in the dump. The board build, the tracks and zones in the dump, the netlist and the schematic do not need it. | run |
+| IPC API retry | Not possible: no virtual display (`Xvfb`) is installed and the owner has not installed one. | not run |
+
+Conclusion of round 7: a board built by `kiutils` is a workable way to cut the board build off the deprecated interface, at the price of KiCad 8 syntax and of fidelity work (two bugs found above). The Specctra round trip is the remaining dependency. The `kiutils` output was not compared against a full DRC set with the real parts.
