@@ -10,8 +10,19 @@ command -v kicad-cli >/dev/null || { echo "ERROR: kicad-cli not found" >&2; exit
 kicad-cli version
 OUT="${HW_CI_OUT:-$(mktemp -d)}"; mkdir -p "$OUT"
 shopt -s nullglob globstar
-sch=(hw/kicad/**/*.kicad_sch); pcb=(hw/kicad/**/*.kicad_pcb)
-((${#sch[@]} + ${#pcb[@]})) || { echo "hw: NOT RUN - no .kicad_sch or .kicad_pcb file in hw/kicad"; exit 0; }
+# The spike folder (fixtures, generated stand-in) has its own gate script and is not scanned here.
+sch=(); pcb=()
+for f in hw/kicad/**/*.kicad_sch; do [[ $f == hw/kicad/spike/* ]] || sch+=("$f"); done
+for f in hw/kicad/**/*.kicad_pcb; do [[ $f == hw/kicad/spike/* ]] || pcb+=("$f"); done
+if [[ -x hw/kicad/spike/run_spike.sh ]]; then
+  echo "== spike gate (stand-in board: ERC, parity, DRC, stored routing session, regeneration dump) and dump tests"
+  [[ -n "${CI_SKIP_PIP:-}" ]] || python3 -m pip install --quiet "kiutils==1.4.8" pytest
+  python3 -m pytest -q hw/kicad/spike/tests
+  PY=python3 hw/kicad/spike/run_spike.sh
+else
+  echo "hw: spike gate NOT RUN - no hw/kicad/spike/run_spike.sh"
+fi
+((${#sch[@]} + ${#pcb[@]})) || { echo "hw: product files NOT RUN - no .kicad_sch or .kicad_pcb file outside hw/kicad/spike"; exit 0; }
 for f in "${sch[@]}"; do
   echo "== ERC $f"
   kicad-cli sch erc --severity-all --exit-code-violations --output "$OUT/$(basename "$f").erc.rpt" "$f"
