@@ -107,3 +107,17 @@ Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (`src/dump_design.py`, `src/r
 | CI | Nothing of this runs in CI yet. | not run |
 
 Status against gate G1 of ADR-0012: (c) is met on the stand-in for the dump scope above, with the routed copper restored from the stored session. The routing itself is reproducible only through the stored session.
+
+## 10. Round 6 (2026-11-04): KiCad IPC API as a replacement for the SWIG interface
+Environment: `kicad-python` (module `kipy`) 0.8.0 installed in a throwaway venv in the session scratchpad (not in `pyproject.toml`); KiCad 10.0.6 `pcbnew` started with `QT_QPA_PLATFORM=offscreen` and a temporary `KICAD_CONFIG_HOME` that enables the API server (the owner's KiCad configuration was not touched).
+
+| Step | Result | Label |
+|------|--------|-------|
+| API surface of `kipy` 0.8.0 (`Board` class) | Read and edit of footprints, pads, tracks, vias, zones, nets, shapes, text, selection, commit and save. Read of stackup and net classes. No call to set the stackup or design rules, no import or export of Specctra DSN or SES, no call to load a footprint from a library file. | run (inspection of the class) |
+| Server start | `pcbnew` with the API enabled starts offscreen and creates the socket `/tmp/kicad/api.sock`. A client connects. | run |
+| Replies | Every call during 90 s answered "KiCad is not ready to reply". No call succeeded, so no board was read or changed through the API. Cause not found (no log output; possibly the offscreen platform without OpenGL). | run (failed) |
+| Headless alternatives | No `Xvfb`, `Xvnc` or `xvfb-run` is installed, so a virtual display could not be tried. The IPC API needs a running KiCad editor process in any case; `kicad-cli` has no API mode. | run |
+| `kicad-cli` coverage | No Specctra DSN or SES commands (`kicad-cli pcb` offers drc, export, import, render, upgrade). DSN export and SES import therefore exist only in the SWIG interface. | run |
+| `kiutils` as a file-based alternative | Not evaluated for boards in this round. It writes KiCad 8 syntax (see section 6); it could replace the `pcbnew` board build but not the DSN and SES steps. | not run |
+
+Conclusion of round 6: the IPC API is not a drop-in replacement today. It needs a running editor, it did not respond in this environment, and it lacks the DSN and SES functions and the stackup and rule setters that the flow uses. The SWIG interface stays the only working route for the board build and the router round trip, and its deprecation is an open risk. Mitigation options for the ADR: keep all `pcbnew` use behind one small adapter module; generate the board file with `kiutils` where possible; re-check at every KiCad major release; install a virtual display and retry the IPC API.
