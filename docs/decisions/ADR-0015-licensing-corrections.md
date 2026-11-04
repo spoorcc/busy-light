@@ -1,6 +1,6 @@
-# ADR-0015: Licensing, corrected and completed (supersedes ADR-0013 when accepted)
+# ADR-0015: Licensing, corrected and completed (supersedes ADR-0013)
 
-- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session, after the options were presented as recommendations). Supersedes ADR-0013. Accepted before its own goldfish review; the review follows (see Deciders / reviewers).
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session, after the options were presented as recommendations). Supersedes ADR-0013. Accepted before its own goldfish review; the review RV-008 followed and its amendments are listed below.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); reviewed as RV-005 (goldfish review of ADR-0013, 2026-11-04); this ADR itself was accepted before its own review; a goldfish review of ADR-0015 and ADR-0016 is recorded as RV-008. Not legal advice; the items marked LAWYER need a professional before the first outside contribution or commercial sale.
 - **Related:** NEED-012, SYS-044, RISK-020, RISK-035, RISK-036, RISK-037, RISK-038, ADR-0013, ADR-0012; RV-005; `docs/regulatory/applicability.md`
@@ -33,7 +33,7 @@ Unchanged from ADR-0013 (weights 1 to 5), so the scores can be compared.
 **Gate, stated precisely (correction of ADR-0013):** an option passes if others cannot sell copies **of the device design** (board, housing, manual) without a licence from the owner. The gate is **not** applied to the code. Options A and B fail it; they are scored for reference. Option F passes for the device design and fails for the code, which the owner accepted on 2026-11-04.
 
 ## Alternatives considered
-The six options are those of ADR-0013 (A permissive, B copyleft, C non-commercial source-available with PolyForm, D option C plus a commercial licence and a CLA, E all rights reserved, F Apache-2.0 for code and CC BY-NC-SA 4.0 for the rest). Their descriptions stay as in ADR-0013. One change: **E** (all rights reserved) scores 5 on "others cannot profit", because nobody may copy anything; ADR-0013 gave it 3.
+The six options are those of ADR-0013: **A** permissive open licences (Apache-2.0, CERN-OHL-P, CC BY 4.0); **B** copyleft open licences (AGPL or GPL, CERN-OHL-S, CC BY-SA 4.0); **C** non-commercial source-available (PolyForm Noncommercial for code, CC BY-NC-SA 4.0 for the rest); **D** option C plus a commercial licence by the owner and a CLA; **E** all rights reserved (defer); **F** Apache-2.0 for code and CC BY-NC-SA 4.0 for the rest. The full descriptions and their strongest cases are in ADR-0013. One change: **E** (all rights reserved) scores 5 on "others cannot profit", because nobody may copy anything; ADR-0013 gave it 3.
 
 ## Comparison
 Scores 0 to 5, my judgement. **F was scored by the author after the owner chose it** (ADR-0013); the table is a record, not the input of the decision. Max 160.
@@ -53,7 +53,7 @@ Scores 0 to 5, my judgement. **F was scored by the author after the owner chose 
 Among the options that pass the corrected gate (C, D, E, F), F scores 96, D 89, E 86 and C 74. The lead of F over D is 7 points, which is inside my scoring error. F's advantage is the Zephyr criterion (weight 4, score 5) and the mature text; D's is the commercial option. The owner decided F; this table does not overturn that and does not prove it.
 
 ## Decision
-**Owner decision 2026-11-04: Accepted with the recommended options.** All items below are applied by the change that records this acceptance, except the checks that need a lawyer (items 3, 5, 6, 7, 9, 10, 11), which are written down as the owner's position and flagged in `LICENSE.md` as not legal advice. Items 1 and 2 restate ADR-0013; items 3 to 11 are new.
+**Owner decision 2026-11-04: Accepted with the recommended options.** Done with the acceptance: items 1, 2, 4, the SPDX headers and the CI check of item 8, `NOTICE`, and the written positions of items 3, 5, 6, 9, 10 and 11 in `LICENSE.md` (flagged as not legal advice). Planned, not done: the compatibility table, the record of the Creative Commons facts (source and date), and the legal check of items 3, 5, 6, 7, 9, 10 and 11. Items 1 and 2 restate ADR-0013; items 3 to 11 are new.
 1. **Code is Apache-2.0** (firmware in `sw/`, scripts, generators, build files, CI). **Documents, hardware files, mechanics and images are CC BY-NC-SA 4.0.** (Unchanged.)
 2. **Wording:** the code is "open source"; the rest is "source-available" and not open source hardware. (Unchanged.)
 3. **Generated output.** A file produced by an Apache-2.0 generator (KiCad or FreeCAD files, rendered SVG) belongs to the design and is CC BY-NC-SA 4.0; the generator stays Apache-2.0. Code in a document (snippets, examples) is Apache-2.0 and carries an SPDX line. Diagram sources are documentation (CC BY-NC-SA 4.0). LAWYER: whether the generator licence reaches the output.
@@ -74,6 +74,18 @@ Among the options that pass the corrected gate (C, D, E, F), F scores 96, D 89, 
 - **Negative / trade-offs accepted:** F still lets anyone sell the code, including a competitor who redoes only the hardware; the hardware and documents are not open source; companies cannot build units from the files without a licence; the non-commercial boundary can still be disputed; contributions are paused until the legal check; the owner takes on maintaining an FAQ and a commercial licence.
 - New risks: RISK-035 to RISK-038 (already in the register, from RV-005).
 - Requirements created or changed: NEED-012 (rename to "Licensing and publication", with an acceptance criterion: `reuse lint` passes and the compatibility table exists); `LICENSE.md` (purchased-unit grant, FAQ); `CONTRIBUTING.md`; `REUSE.toml` (`.claude/`, third-party entries); NOTICE file; `applicability.md` question 4 (done in RV-005 actions).
+
+## Amendments after RV-008 (made before the pull request was merged; the owner confirms)
+The goldfish review RV-008 found points in this text and in `LICENSE.md` that promised more than the licences grant. They are corrected; option F stays.
+- **Selling devices.** `LICENSE.md` no longer says that selling a device built from the files "needs a licence". It says that copying, adapting or sharing the **files** for commercial purposes needs a licence, and that CC BY-NC-SA does not stop someone who re-implements a design independently or who builds from their own drawings. LAWYER.
+- **The "allowed without asking" list** is stated as the owner's non-binding reading; the licence texts rule. It is not an extra grant. Open: whether a school that charges tuition, a charity that sells units for fundraising, or a hobbyist who uses a commercial PCB house is non-commercial.
+- **Purchased-unit grant.** It names the grantor (the owner) and its scope (units sold by the owner or an authorised seller), is stated as not revocable for units already sold, and moves into the sale terms and the manual when they exist. It does not allow copying a board; unsigned images are allowed only where secure boot allows them (ADR-0007, Proposed), and modified firmware ends any conformity claim of the owner. LAWYER.
+- **Patents.** The repository has been public since 2026-11-04. In the EU, public disclosure generally ends the novelty of what was disclosed, so the choice "file before publishing" has probably passed for the published designs. LAWYER (a patent attorney).
+- **Title to the copyright.** The employment-contract check (item 11) is a **gate before the first sale or the first outside contribution**, with the owner as holder; the licences are already published, so a claim by an employer would affect every grant.
+- **Trademark.** "busy-light" is a descriptive name and not registered; the text says the licences grant no right to the name and logo, not that the owner "reserves" a protected mark. Whoever builds and sells a unit becomes its manufacturer with their own conformity duties (RED, CRA); `LICENSE.md` says so.
+- **Commercial route.** No commercial licence, template or price exists yet; `LICENSE.md` says so and gives the owner's GitHub account as the contact route (link RISK-038).
+- **Status clarifications.** Item 4 (`.claude/` under Apache-2.0) is decided and applied. `CONTRIBUTING.md` is a placeholder until the lawyer aligns it with item 7; issue and comment text are contributions under the same terms. The pull request template now states that outside pull requests are not accepted yet.
+- **Open, not closed by this ADR:** `sw/**` and `scripts/**` are matched by path, not by extension, so a document or a third-party file placed there would be labelled Apache-2.0 (`scripts/diagrams/package-lock.json` is third-party dependency data labelled Apache-2.0 today); KiCad libraries under CC BY-SA 4.0 and a BY-NC-SA design need the compatibility table before any import.
 
 ## Verification and revisit
 - `reuse lint` in CI (exists); a CI check for code files under the CC default (to write); the compatibility table (to write); a lawyer reads `LICENSE.md`, the FAQ and `CONTRIBUTING.md` before the first outside contribution or commercial sale.

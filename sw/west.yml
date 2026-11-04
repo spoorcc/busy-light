@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 # West manifest. Initialise the workspace from the repo root with:
 #   west init -l sw && west update
 manifest:

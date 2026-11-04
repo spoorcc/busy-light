@@ -22,5 +22,7 @@ The project uses two licences (see [`LICENSE.md`](LICENSE.md) and [ADR-0015](doc
   Without this grant the owner cannot offer a commercial licence for a design that contains your work.
 - Only contribute work that you have the right to license in this way, and sign your commits (`git commit -s`).
 
+Issue and comment text you post is a contribution under the same terms. The intended full terms (irrevocable and sublicensable grant, a patent licence for hardware and mechanical work, an employer release, what the sign-off means) are in ADR-0015 item 7; this file is a **placeholder** until a lawyer aligns it with them.
+
 *(Draft terms. They need a legal check before the first outside contribution is accepted.)*
 

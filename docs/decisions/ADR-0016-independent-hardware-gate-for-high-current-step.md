@@ -1,6 +1,6 @@
 # ADR-0016: Independent hardware gate for the high current step
 
-- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session; option B). Replaces the sensing decision of ADR-0009 (option A) and the hardware-backstop wording of ADR-0010. Accepted before its own goldfish review; the review follows (see Deciders / reviewers).
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session; option B). Replaces the sensing decision of ADR-0009 (option A) and the hardware-backstop wording of ADR-0010. Accepted before its own goldfish review; the review RV-008 followed and its amendments are listed below.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); based on review RV-006 findings S1, S2 and S7; this ADR itself was accepted before its own review; a goldfish review of ADR-0015 and ADR-0016 is recorded as RV-008
 - **Related:** SYS-020, HW-003, HW-010, RISK-003, RISK-024, RISK-025, RISK-029, ADR-0004, ADR-0009, ADR-0010; RV-006; `docs/verification/reports/spike-7-5-power-budget-paper.md`
@@ -10,7 +10,7 @@ ADR-0010 puts a current-limited load switch in the VBUS path: 500 mA at power-up
 The wanted property: **the high step can switch on only if a part that is independent of the firmware has also seen that the source advertises at least 1.5 A.**
 Related finding S7: the ADC margin of ADR-0009 option A is thin and its spike criterion cannot be met at worst-case band edges (reviewer recomputation, not repeated by me).
 
-What this does and does not solve: it removes the firmware from the decision to raise the limit. A hung firmware at the high step on a source that really advertises 1.5 A stays within the source rating; the remaining risk is heat in the closed housing at 1350 mA (RISK-005, RV-004 T2), which is a thermal question and not solved here.
+What this does and does not solve: it removes the firmware from the decision to raise the limit. A hung firmware at the high step on a source that really advertises 1.5 A draws the advertised current (up to the limit band of ADR-0010, which can exceed it: RISK-027); the remaining risk is heat in the closed housing at 1350 mA (RISK-005, RV-004 T2), which is a thermal question and not solved here.
 
 Not known: the CC-pin ratings of the candidate IC (datasheet pages not read for this ADR), its behaviour with a PD-capable charger (BMC traffic on the CC line, RV-006 S6), JLCPCB class and setup fee of the part, the pin state of the chosen ESP32-C3 GPIO during reset (E24 of ADR-0010).
 
@@ -72,9 +72,9 @@ B leads C and D by 2 points, which is inside my scoring error. Sensitivity: if t
 
 ## Decision
 **Owner decision 2026-11-04: Accepted, option B.** HW-003 and HW-010 (Draft) are drafted to match; the checks of item 3 are still required before a part is fixed. The decision: **B, a CC detection IC with its output ANDed with the firmware GPIO.** The owner may instead accept option A (and RISK-025 stays open) or choose C or D.
-1. **Gate:** the high step switches on only if the IC reports at least 1.5 A and the firmware GPIO is high. Both must agree. The firmware can always hold or drop to the lower step.
+1. **Gate:** every step above the 500 mA step (the middle step of ADR-0010, if kept, and the top step) switches on only if the IC reports at least 1.5 A and the firmware GPIO for that step is high. Both must agree. The firmware can always hold or drop to a lower step.
 2. **Firmware reads the IC outputs** (two GPIO pins), not the ADC. The ADC read of ADR-0009 option A is dropped, so the 90 mV gap and the +-35 mV ADC error no longer decide the limit. A firmware misread can no longer raise the limit above the hardware reading; a wrong IC reading is the remaining failure and is covered by the vendor specification and test.
-3. **Part:** the part and its second source are decided after the checks below; no part number is fixed here. Required checks before acceptance: the CC pin ratings and VCONN behaviour, the temperature range of the actual part (the conflict of E14 and E15), the JLCPCB class and setup fee, and behaviour with a PD-capable charger.
+3. **Part:** the part and its second source are decided after the checks below; no part number is fixed here. Required checks before a part is fixed and before HW-010 can be Approved: the CC pin ratings and VCONN behaviour, the temperature range of the actual part (the conflict of E14 and E15), the JLCPCB class and setup fee, and behaviour with a PD-capable charger.
 4. **Defaults when the IC output is undefined** (IC failed, unpowered): the pull-ups read "default", so the high step stays off (500 mA).
 5. **Hung firmware (finding S2):** with B the high step cannot be on unless the source advertises it; the remaining effect is heat at the advertised current, handled by the thermal requirement (RV-004 T2). A heartbeat gate (option D) is not added now; revisit if the thermal analysis shows the high step is unsafe for a hung firmware.
 
@@ -83,6 +83,15 @@ B leads C and D by 2 points, which is inside my scoring error. Sensitivity: if t
 - **Negative / trade-offs accepted:** one more IC and one gate (about USD 0.6 at 1 piece, my estimate from the snippet price); an extended-part fee is likely and not looked up; single-source risk (RISK-030 style); the CC pins and their ESD and VCONN handling now depend on one datasheet; the spike 7.5 ADC measurement is replaced by an IC test.
 - New risks (to add after the owner decides): IC misclassifies a charger (wrong band) with no firmware second opinion; IC temperature range; IC out of stock.
 - Requirements created or changed: HW-003 (CC sensing by IC, ESD and clamp on CC), HW-010 (gate), SYS-020 (no change), a new SW requirement (read the IC outputs, hold or lower the step, brown-out back-off), ADR-0009 (superseded by this ADR for sensing), ADR-0010 (select line is ANDed), RISK-025 (residual text).
+
+## Amendments after RV-008 (made before the pull request was merged; the owner confirms)
+The goldfish review RV-008 found points that this text did not state. They clarify the decision and do not change option B.
+- **"Independent" means independent of firmware faults only.** The gate and the firmware read the same IC output. A fault in the IC or its output (misclassification, latch-up, output shorted low) makes both agree on "high"; then only the firmware stands in the way, as in option A. A diverse second opinion (the ADC kept, or a comparator, options C and D) would cover that, and is not part of this decision. Accepted risk: RISK-042.
+- **Single faults not covered:** the AND output or a series MOSFET stuck high (the same single fault as RISK-029); the IC misclassifying a charger; a non-compliant cable whose Rp advertises more than the port supplies (RV-006 S3); the thin band edges (the IC thresholds fill the whole 90 mV gap, 0.61 to 0.70 V, so protection depends on the IC meeting the Type-C bands, which was not read from the specification).
+- **Truth table.** Every open or short on the gate path must resolve to "off": the gate input has a pull-down (so a floating GPIO or an unpowered gate reads "off", independent of the ESP32-C3 reset state, ADR-0010 E24); the active-low IC output is inverted to an enable with a pull-up of the IC output so that an unpowered or failed IC reads "default"; an open pull-up must not read as "high".
+- **Tests.** The fault-injection list (IC unpowered, output shorted high and low, gate input open, MOSFET shorted, GPIO stuck high), a PD-capable charger, an e-marked cable and band-edge Rp (resistor-simulated sources at 0.61 V and 0.70 V) move into the acceptance criteria of HW-010 and HW-003.
+- **Cost.** The added cost is a range of about USD 0.6 to 1.0 at 1 piece (the IC about USD 0.51, snippet, plus a gate and passives, my estimate; an extended-part fee is likely and not looked up).
+- **Open, not closed by this ADR:** the hung-firmware case (S2) is deferred to a thermal requirement and a watchdog requirement that do not exist yet; the brown-out back-off and the PD chatter need a software requirement; a temperature range of 0 to 70 C in a closed housing is a blocking check.
 
 ## Verification and revisit
 - Bench test with chargers that advertise default, 1.5 A and 3 A, an e-marked cable, a PD-capable charger and a non-compliant cable: the high step must stay off unless the IC reports at least 1.5 A and the GPIO is high; firmware stopped, GPIO high and source advertising default must give 500 mA (TC-203, TC-210).
