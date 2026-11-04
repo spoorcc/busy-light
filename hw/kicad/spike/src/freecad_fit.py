@@ -31,6 +31,7 @@ pairs = [
     ("Z_PCB_BOT", P["stackup"]["z_pcb_bottom_mm"]),
     ("N_LED", P["ring"]["led_count"]),
     ("D_RING", 2 * P["ring"]["radius_mm"]),
+    ("LED_PHASE", P["ring"]["phase_deg"]),
     ("R_POST", P["mounting"]["peg_radius_mm"]),
     ("PEG_RAD", P["mounting"]["hole_diameter_mm"] / 2 - 0.2),
 ]
@@ -45,7 +46,8 @@ base = Part.read(f"{housing_dir}/base.step")
 lid = Part.read(f"{housing_dir}/lid.step")
 # The bare board is the solid with the largest volume; parts and pins may extend below it.
 pcb = max(board.Solids, key=lambda x: x.Volume)
-board.translate(V(0, 0, P["stackup"]["z_pcb_bottom_mm"] - pcb.BoundBox.ZMin))
+CU = P["stackup"]["copper_thickness_mm"]
+board.translate(V(0, 0, P["stackup"]["z_pcb_bottom_mm"] + CU - pcb.BoundBox.ZMin))  # STEP board = dielectric core; copper bottom at Z_PCB_BOT
 solids = board.Solids
 pcb = max(solids, key=lambda x: x.Volume)
 bb = board.BoundBox
@@ -55,7 +57,7 @@ print("board bbox", [round(x, 2) for x in res["board_bbox"]])
 # 3. Outline from KiCad equals the parameter (bare board solid)
 dia = max(pcb.BoundBox.XLength, pcb.BoundBox.YLength)
 check("KiCad outline diameter", abs(dia - P["board"]["outline_diameter_mm"]) < 0.01, f"{dia:.3f} mm")
-check("PCB thickness", abs(pcb.BoundBox.ZLength - P["stackup"]["pcb_thickness_mm"]) < 0.01, f"{pcb.BoundBox.ZLength:.3f} mm")
+check("PCB thickness (core + 2 x copper)", abs(pcb.BoundBox.ZLength + 2 * CU - P["stackup"]["pcb_thickness_mm"]) < 0.01, f"{pcb.BoundBox.ZLength + 2 * CU:.3f} mm")
 
 # 4. Interference of every board solid with the housing parts (the bare board rests on the posts: touching is allowed)
 for i, sol in enumerate(solids):

@@ -4,14 +4,20 @@ outline_diameter_mm = 46.0
 [ring]
 led_count = 16
 radius_mm = 20.0
+phase_deg = 3.75      # azimuth of LED 0, counter-clockwise from +X (housing LED_PHASE)
+package = "2020"       # housing LED_SIZE 2.0 mm (placeholder part class)
 [stackup]
 z_pcb_bottom_mm = 5.0   # PCB bottom above the outside of the housing floor
-pcb_thickness_mm = 1.6
+pcb_thickness_mm = 1.6    # including both copper layers
+copper_thickness_mm = 0.035
 [housing]
 # Files exported by the FreeCAD housing model (variant V1). The spike reads them from the mech spike worktree.
 variant = "V1"
 [mounting]
 # Housing pegs pass through the board (housing model: R_POST, POST_AZ, PEG_RAD + G_PEG).
 peg_radius_mm = 21.0
-peg_azimuths_deg = [30.0, 150.0, 270.0]
+# What-if value 15/150/285: the housing value 30/150/270 puts holes on LED pads D2 and D13 (spike report section 8)
+peg_azimuths_deg = [15.0, 150.0, 285.0]
 hole_diameter_mm = 2.8
+[rules]
+edge_keepout_mm = 0.5   # copper to board edge and to mounting holes (prototype shop capability; to become a HW requirement)
