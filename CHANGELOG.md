@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Licence compatibility table and record of licence facts (`docs/regulatory/technical-file/05-cybersecurity/licence-compatibility.md`, Draft): KiCad libraries, Mbed TLS, Noto Sans and Creative Commons facts checked against sources on 2026-11-04; Zephyr, MCUboot and the Espressif Wi-Fi binaries not verified (ADR-0015 item 8, RV-008 P14).
 - Draft software requirements SW-005 to SW-008 (raise the USB current step only after a stable reading, reduce load before lowering, back-off after brown-out, tolerance of Power Delivery traffic) and test stubs TC-105 to TC-108; closes the RV-008 action "write the software requirement" (RV-006 S3 to S6). Status Draft; owner approval needed.
 - Goldfish review RV-008 of ADR-0015 and ADR-0016 with amendments (gate covers every step above the first; independence only against firmware faults; RISK-042 and RISK-043; `LICENSE.md` reworded to what the licences grant; SPDX headers on the remaining `sw/` files; outside pull requests paused in the template).
 - ADR-0015 (licensing corrected and completed) and ADR-0016 (independent hardware gate for the high current step) Accepted by the owner 2026-11-04; ADR-0013 and ADR-0009 are Superseded. Applied: `.claude/` under Apache-2.0, `NOTICE` file, SPDX headers on code files, `LICENSE.md` with the purchased-unit grant, the non-commercial reading, name, patents and authorship points (not legal advice).
