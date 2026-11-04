@@ -105,6 +105,9 @@ if __name__ == "__main__":
     os.chdir(out)
     ERC()
     generate_netlist(file_="gate.net")
+    if "--netlist-only" in sys.argv:  # the own writer (write_sch.py) makes the schematic (ADR-0012)
+        print("netlist written")
+        sys.exit(0)
     for attempt in range(5):  # the router is not deterministic (spike finding F4)
         try:
             generate_schematic(filepath=".", top_name="gate", flatness=0.0, retries=6)
