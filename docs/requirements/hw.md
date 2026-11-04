@@ -44,7 +44,8 @@ Process rules: `docs/process/README.md`.
 - **Category:** Safety
 - **Regulatory:** none
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved
+- **Approval:** the owner (Ben Spoor), 2026-11-04, by instruction in the session; recorded by the assistant. The bracketed values stay open until set.
 
 ### HW-004 Power budget and supply margin
 

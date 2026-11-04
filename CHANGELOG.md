@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- HW-003 (USB-C power input) Approved by the owner 2026-11-04 on instruction in the session.
 - CC detection IC chosen by the owner: TUSB321, PTN5150A as fallback if the IC ambient exceeds 70 C (ADR-0016, HW-003, RISK-043).
 - Licence record: per-file licence tag counts of the pinned Zephyr, MCUboot, hal_espressif and Mbed TLS trees, NonCommercial definition from the licence text; HW-010 hold-off upper limit of [600] ms (spike finding F7: a plain CMOS threshold is too loose for the timer).
 - Start-up hold-off of at least [200] ms on the high-step gate: HW-010 acceptance criteria, TC-210 procedure points, ADR-0016 amendment (owner to confirm) and RISK-042 (reason: the IC output level before its first debounce is not stated in the datasheet).
