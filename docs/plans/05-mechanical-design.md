@@ -1,11 +1,11 @@
 # 05 -- Mechanical design: housing for the LED status ring (design doc)
 
-- **Status:** Draft (elephant draft; no goldfish review yet; the owner has not approved it; the MECH requirements are Draft). Revised 2026-11-04: the three open conflicts are resolved by author decisions that the owner must confirm (section 4.11).
+- **Status:** Draft (elephant draft; goldfish review RV-004 done, not ready for approval; the owner has not approved it; the MECH requirements are Draft). Revised 2026-11-04: the three open conflicts are resolved by author decisions that the owner must confirm (section 4.11).
 - **Date:** 2026-11-04  **Owner:** Ben Spoor
 - **Area:** mech (planning only; nothing in `mech/`, `hw/` or `sw/` is created or changed by this plan)
 - **Requirements addressed:** MECH-001, MECH-002, MECH-003, MECH-004, MECH-005, MECH-006 (all Draft). Parents: SYS-001, SYS-013, SYS-017, SYS-020, SYS-028, SYS-038. Interfaces to HW-001, HW-005, HW-010 and HW-006.
 - **Decision record:** ADR-0011 (Proposed). Analysis: `docs/verification/reports/mech-concept-analysis.md` (Draft, not measured).
-- **EGM review record:** none yet (comprehension / antagonistic / readiness passes still to run)
+- **EGM review record:** RV-004 (comprehension and antagonistic passes run 2026-11-04; outcome: not ready for approval, actions open; readiness pass not run)
 
 ## 1. Problem definition
 The product needs a housing. It must hold one round PCB with 16 RGB LEDs on a ring, an ESP32-C3-MINI-1 module with its on-board antenna, a USB-C connector and one button. The housing is 3D printed. It turns the 16 LEDs into a closed band of colour that is readable at desk distance (SYS-001, MECH-002), is about 53 mm across (SYS-028: 48 to 58 mm, MECH-001), and carries the unit label on its underside (MECH-006, SYS-013).
@@ -41,12 +41,12 @@ Full comparison, scoring and sensitivity in ADR-0011 (Proposed). Summary:
 
 | Option | Idea | Weighted sum (max 175) | Verdict |
 |--------|------|------------------------|---------|
-| A | Clamshell: opaque base, opaque top cap with a ring window, separate translucent diffuser ring (3 parts) | 129 | Fallback if the single lid fails the diffusion test |
+| A | Clamshell: opaque base, opaque top cap with a ring window, separate translucent diffuser ring (3 parts) | 133 | Fallback if the single lid fails the diffusion test |
 | **B** | Opaque base plus one translucent lid that is the diffuser (2 parts) | **147** | **Recommended** |
-| C | Sphere of two snap-fit halves | 113 | Rejected: flat label and USB-C window on a sphere, supports, snap creep |
+| C | Sphere of two snap-fit halves | 117 | Rejected: flat label and USB-C window on a sphere, supports, snap creep |
 | D | Do nothing (bare board) | 122, excluded by gates | Baseline only |
 
-Process (ADR-0011, second table): FDM with PETG (119) or ASA (111) for the base, natural translucent PETG for the lid; resin (104) as the fallback for the lid; PLA (113, excluded by the thermal gate). The tables do not separate PETG from ASA; the thermal estimate does (ASA safe, PETG marginal in a hot room).
+Process (ADR-0011, second table): FDM with PETG (114) or ASA (111) for the base, natural translucent PETG for the lid; resin (104) as the fallback for the lid; PLA (113, excluded by the thermal gate). The tables do not separate PETG from ASA; the thermal estimate does (ASA safe, PETG marginal in a hot room).
 
 ## 4. Technical plan
 
