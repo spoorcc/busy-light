@@ -36,6 +36,8 @@ Generic parts only: a placeholder 5-pin header for the CC detection IC (VDD, GND
 - **F5.** Open: the 3.3 V logic level versus the IC output (open-drain pulled to 3.3 V is fine on paper, not checked against a datasheet), the AND gate input threshold, the inverter delay at plug-in (scenario C shows that an IC output glitch while the select line is high enables the step for as long as the glitch lasts; the pull-downs do not help, and the firmware must hold the select lines low until the IC outputs have been stable ([5] reads, SW-005), which SW-005 now requires), and the state of the select GPIO during reset (ADR-0010 E24, not found).
 - **F6.** The two enable nets share one ILIM node; the spike does not model the TPS2553 ILIM network or the resistor values.
 
+**Correction (datasheet read after this spike):** the schematic powers the placeholder IC from 3.3 V. The TUSB321 datasheet specifies VDD 4.5 to 5.5 V, so the IC is powered from VBUS and only the output pull-up goes to 3.3 V; its output pin rating is VDD + 0.3 V, so the power order matters. The datasheet does not state the OUT1 level before the first 133 ms debounce, so the glitch in scenario C remains an assumption. See `docs/verification/reports/cc-ic-datasheet-evidence.md` on branch `docs/review-actions`.
+
 ## 5. Not done
 No PCB, no footprints checked, no 3D, no DRC, no ngspice, no BOM, no JLCPCB check, no review by a goldfish. The schematic is not a deliverable.
 
