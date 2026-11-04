@@ -1,0 +1,39 @@
+# Licensing map (REUSE specification 3.2). Decision: ADR-0013.
+# Code is Apache-2.0. Documentation, hardware and mechanical files are CC BY-NC-SA 4.0.
+version = 1
+SPDX-PackageName = "busy-light"
+SPDX-PackageSupplier = "Ben Spoor"
+SPDX-PackageDownloadLocation = "https://github.com/spoorcc/busy-light"
+
+# Everything not named below: documentation, hardware, mechanics, images, project files.
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Ben Spoor"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
+
+# Code: firmware, scripts, generators, build configuration, CI.
+[[annotations]]
+path = [
+  "sw/**",
+  "scripts/**",
+  "hw/kicad/src/**",
+  "hw/kicad/spike/src/**",
+  "hw/kicad/spike/tests/**",
+  "hw/kicad/spike/run_spike.sh",
+  "mech/freecad/**/*.py",
+  ".github/**",
+  "pyproject.toml",
+  ".gitignore",
+  ".gitattributes",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Ben Spoor"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Third-party license texts are not licensed by this project.
+[[annotations]]
+path = "LICENSES/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The respective license authors"
+SPDX-License-Identifier = "LicenseRef-license-text"

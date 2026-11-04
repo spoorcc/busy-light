@@ -115,8 +115,9 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Status:** Draft
 
 ### NEED-012 Open source
-- **Statement:** The software, hardware and mechanical design are published as open source.
-- **Open points:** Licenses to be chosen.
+- **Statement:** The code is published as open source (Apache-2.0). The hardware, mechanical design and documentation are published source-available for non-commercial use (CC BY-NC-SA 4.0).
+- **Clarified (owner, 2026-11-04):** Code Apache-2.0; documentation, hardware and mechanics CC BY-NC-SA 4.0. Hardware and mechanics are therefore not open source hardware (ADR-0013).
+- **Open points:** Contributor licence agreement for hardware, mechanical and documentation contributions; CRA role (`docs/regulatory/applicability.md`).
 - **Status:** Draft
 
 ## Project constraints (not product needs)

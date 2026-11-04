@@ -12,7 +12,8 @@ Sixteen RGB LEDs that show your Jenkins build status or any other level, with no
 ![KiCad 10](https://img.shields.io/badge/KiCad-10-314cb0?logo=kicad&logoColor=white)
 ![FreeCAD 1.1](https://img.shields.io/badge/FreeCAD-1.1-ae1c28?logo=freecad&logoColor=white)
 ![Market: EU](https://img.shields.io/badge/market-EU%20(not%20certified)-003399)
-![License: proposal PolyForm NC and CC BY-NC-SA](https://img.shields.io/badge/license-proposal%3A%20non--commercial-lightgrey)
+[![Code: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSES/Apache-2.0.txt)
+[![Docs, hardware, mechanics: CC BY-NC-SA 4.0](https://img.shields.io/badge/docs%20%C2%B7%20hardware%20%C2%B7%20mechanics-CC%20BY--NC--SA%204.0-lightgrey)](LICENSES/CC-BY-NC-SA-4.0.txt)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
 [Documentation](docs/README.md) ·
@@ -52,7 +53,7 @@ different set of goals.
 | **No app, no cloud** | Set-up and configuration through a web page served by the device itself. |
 | **Small enough to put anywhere** | About 53 mm across, powered over USB-C. |
 | **Cheap to build** | Target assembled board cost of EUR 10 to 20 with a prototype shop. |
-| **Source-available and reproducible** | Software, hardware and mechanics are all in this repository, with generated files and checks that anyone can rerun. Free to copy and build for non-commercial use (licence proposal, see below). |
+| **Source-available and reproducible** | Software, hardware and mechanics are all in this repository, with generated files and checks that anyone can rerun. Code is Apache-2.0. Documentation, hardware and mechanics are free to copy and build for non-commercial use. |
 | **Built like a product** | Requirements, decisions, risks and tests are traced from the first line, with EU market access (CE) in mind from day one. |
 
 ## Planned features
@@ -167,17 +168,14 @@ The planned vulnerability handling and key management are drafts under
 
 ## License
 
-**No licence has been granted yet.** Until a `LICENSE` file is added, all rights are reserved by the author.
+| Part | Licence |
+|------|---------|
+| Code (firmware, scripts, generators, CI) | [Apache-2.0](LICENSES/Apache-2.0.txt) |
+| Documentation, hardware, mechanics, images | [CC BY-NC-SA 4.0](LICENSES/CC-BY-NC-SA-4.0.txt) |
+| Commercial use of the hardware, mechanics or documentation | Separate licence from the owner |
 
-The owner's wish is that people can copy and build from the files but not profit from them. The proposal in
-[ADR-0013](docs/decisions/ADR-0013-licensing.md) (status Proposed, not accepted) is:
-
-| Part | Proposed licence |
-|------|------------------|
-| Software | PolyForm Noncommercial 1.0.0 (drivers meant for upstream Zephyr stay Apache-2.0) |
-| Hardware files, mechanics, documentation, images | Creative Commons BY-NC-SA 4.0 |
-| Commercial use | Separate paid licence from the owner |
-
-Those licences are **source-available, not open source**, because they forbid commercial use.
-Using a unit that you bought is not restricted. Third-party parts such as Zephyr keep their own licences.
+You may copy, study and build from the hardware and mechanical files for non-commercial purposes. Using a unit that you
+bought is not restricted. The non-commercial parts are **source-available, not open source hardware**.
+Details and the path-by-path map are in [`LICENSE.md`](LICENSE.md) and [`REUSE.toml`](REUSE.toml);
+the decision is [ADR-0013](docs/decisions/ADR-0013-licensing.md). Third-party parts such as Zephyr keep their own licences.
 This is not legal advice.

@@ -14,6 +14,7 @@ hw = [
     "kiutils==1.4.8",
 ]
 dev = [
+    "reuse",
     "pytest",
     "ruff",
     "mypy",

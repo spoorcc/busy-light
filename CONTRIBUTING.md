@@ -10,3 +10,14 @@ simulation and analysis; decisions are recorded; every change goes through a pul
 
 Small fixes (typos, obvious bugs with an approved requirement) can skip the design doc but still need a test.
 Open an issue to discuss larger changes before you write code.
+
+## Licensing of contributions
+The project uses two licences (see [`LICENSE.md`](LICENSE.md) and [ADR-0013](docs/decisions/ADR-0013-licensing.md)).
+- **Code** you contribute is licensed under Apache-2.0 (section 5 of that licence applies).
+- **Documentation, hardware and mechanical files** you contribute are licensed under CC BY-NC-SA 4.0. You also grant the
+  project owner a perpetual, worldwide, non-exclusive right to license your contribution to others for commercial use.
+  Without this grant the owner cannot offer a commercial licence for a design that contains your work.
+- Only contribute work that you have the right to license in this way, and sign your commits (`git commit -s`).
+
+*(Draft terms. They need a legal check before the first outside contribution is accepted.)*
+

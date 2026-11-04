@@ -1,6 +1,6 @@
 # ADR-0013: Licensing of software, hardware, mechanics and documentation
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Proposed. Owner decision of 2026-11-04 recorded below; the owner still sets Accepted.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); no goldfish review yet; not legal advice, a lawyer should check the final texts before the first commercial sale
 - **Related:** NEED-012, SYS-044, ADR-0002, ADR-0012; `docs/regulatory/applicability.md`
@@ -49,6 +49,10 @@ As C, and the owner offers a separate paid licence to manufacturers. Needs a con
 Strongest case: keeps the "professional product" route and the volume plan open while still meeting the wish.
 Cons: the CLA adds friction for contributors; the owner takes on licence management; same non-open-source label as C.
 
+### F. Split: Apache-2.0 for code, CC BY-NC-SA 4.0 for the rest
+Apache-2.0 for firmware, scripts and generators; CC BY-NC-SA 4.0 for documentation, hardware files, mechanics and images.
+Strongest case: the most familiar licence per kind of file; code goes upstream and into other products without friction; the device itself (board, housing, manual) cannot be copied and sold without a licence from the owner. Cons: anyone can reuse the code commercially, so the owner wish is met for the device but not for the code; hardware and mechanics are not open source hardware; CC does not cover patents and CC advises against its licences for hardware.
+
 ### E. Do nothing / defer
 Keep all rights reserved (today's state). Reversible, but nobody may reuse anything, which contradicts NEED-012, and contributors cannot send patches safely.
 
@@ -68,23 +72,26 @@ Scores 0 to 5, my judgement. Weighted sums over the nine criteria, max 160.
 | Commercial option for the owner (4) | 2 | 3 | 2 | 5 | 5 |
 | **Weighted sum (max 160)** | 108 | 108 | 74 | 89 | 76 |
 
+Option F, scored the same way after the owner chose it: others cannot profit 3 (the device, not the code), open source 2, contributors 3, Zephyr upstream 5, CRA 3, mature text 4, companies 2, reversible 1, commercial option 3, giving 96.
+
 A and B score highest overall and fail the gate. Among the options that meet the owner wish, D leads C by 15 points and E by 13.
 
 ## Decision
-Recommendation: choose **D**, in this form; the owner decides, and nothing is licensed until the owner accepts and adds the licence files.
-1. **Software** (`sw/`, `scripts/`, tooling): PolyForm Noncommercial 1.0.0. Files that are meant for upstream Zephyr (drivers) are kept in separate files or modules under Apache-2.0, so that they can be contributed.
-2. **Hardware files, mechanics, documentation, images:** CC BY-NC-SA 4.0. The repository says plainly that CC does not cover patents and that CC recommends other licences for hardware; this is accepted because no non-commercial hardware licence of comparable maturity exists.
-3. **Wording:** the project calls itself "source-available" and not "open source", and does not use the OSHWA mark. NEED-012 ("published as open source") no longer holds as written. **Owner decision needed** to change NEED-012 to "published source-available for non-commercial use" or to accept option B instead.
-4. **Commercial licence:** the owner may grant separate paid licences. Before the repository takes outside contributions, a CLA (or a DCO plus a relicensing grant) is put in `CONTRIBUTING.md`, because without it contributed code cannot be relicensed.
-5. **Third-party parts keep their own licences:** Zephyr, MCUboot, Mbed TLS, the Wi-Fi binary blobs (RISK-020), KiCad libraries and others; the SBOM (SYS-044) lists them, and a licence-compatibility review is part of the technical file.
-6. **Use of a purchased unit is not restricted:** the non-commercial terms cover copying, changing and building, not using a unit that someone bought from the owner. This is written in the README in plain words.
-7. A `LICENSE` file for each part, an SPDX header policy and the README licence section are added only after acceptance.
+**Owner decision, 2026-11-04: option F.** Code under Apache-2.0; documentation, hardware and mechanics under CC BY-NC-SA 4.0. (The owner first asked for "more common" licences than PolyForm; Apache-2.0 and CC BY-NC-SA 4.0 are the most widely known pair for this wish.) The recommendation in the earlier draft was option D; the owner chose F.
+1. **Code** (firmware in `sw/`, scripts, hardware and mechanical generators, build configuration, CI): Apache-2.0, the same licence as Zephyr, so drivers can go upstream without a separate licence.
+2. **Documentation, hardware files, mechanics, images:** CC BY-NC-SA 4.0. The hardware and mechanical files are source-available, not open source hardware; the repository says so. CC does not cover patents; this is accepted.
+3. **Path map and checks:** `REUSE.toml` maps every path to one SPDX identifier, the licence texts are in `LICENSES/`, `LICENSE.md` explains them in plain words, and `reuse lint` runs in CI. On 2026-11-04 `reuse lint` reported all 123 files with licence and copyright information.
+4. **Wording:** the project calls the code "open source" and the rest "source-available". NEED-012 is updated accordingly (Draft).
+5. **Commercial licence for the hardware, mechanics and documents:** the owner may grant separate paid licences. `CONTRIBUTING.md` carries draft terms: code contributions are Apache-2.0 (section 5), other contributions are CC BY-NC-SA 4.0 plus a grant that lets the owner license them commercially. The terms need a legal check before the first outside contribution.
+6. **Third-party parts keep their own licences:** Zephyr, MCUboot, Mbed TLS, the Wi-Fi binary blobs (RISK-020), KiCad libraries; the SBOM (SYS-044) lists them, and a compatibility review goes in the technical file.
+7. **Use of a purchased unit is not restricted.**
+8. **Open item:** `.claude/` (skills and instructions for the assistant) is covered by the CC BY-NC-SA 4.0 default, not by Apache-2.0; the owner may prefer otherwise.
 
 ## Consequences
-- Positive: meets the stated wish; keeps the commercial route; the repository becomes legally reusable for non-commercial purposes.
-- **Negative / trade-offs accepted:** not open source, so the project loses OSI and OSHWA recognition, and contributors who need an open-source licence will stay away; companies cannot build units for internal use without a licence from the owner; the non-commercial boundary can be disputed; a CLA adds friction.
+- Positive: most familiar licences; the code is reusable and upstreamable; the device design cannot be copied and sold without the owner; the repository becomes legally reusable.
+- **Negative / trade-offs accepted:** the hardware, mechanics and documents are not open source (no OSHWA mark), and contributors who need that will stay away; anyone may use the code commercially, including in a competing product; companies cannot build units from the files for internal use without a licence from the owner; the non-commercial boundary can be disputed; the contributor grant adds friction.
 - New risks (to add to the risk register): licence-incompatible dependency in the build; ambiguity of "non-commercial" leads to a dispute; contributors refuse the CLA; CRA role differs from the open-source steward assumption.
-- Requirements created or changed: NEED-012 (see item 3); `docs/regulatory/applicability.md` question 4 (CRA role); `CONTRIBUTING.md`; README licence section.
+- Requirements created or changed: NEED-012 (updated, Draft); `docs/regulatory/applicability.md` question 4 (CRA role); `CONTRIBUTING.md`; README licence section; `LICENSE.md`, `REUSE.toml`, `LICENSES/`.
 
 ## Verification and revisit
 - A licence-compatibility table of all components in the SBOM, checked at each release (tool check to be written when the SBOM exists).
@@ -92,7 +99,7 @@ Recommendation: choose **D**, in this form; the owner decides, and nothing is li
 - Revisit when: the first outside contribution arrives, the project is offered a place in an open-source foundation or distribution, volume production starts, or option B (copyleft) looks better to the owner after reading this ADR.
 
 ## Critical review notes
-Strongest objection: "Non-commercial licences are the worst of both worlds: not open source, vague at the edges, and they shut out companies, which are the target users of a build light."
+Strongest objection: "Non-commercial licences for the hardware are the worst of both worlds: not open source, vague at the edges, and they shut out companies, which are the target users of a build light."
 Answer: partly accepted. Companies can still buy finished units; only building units from the files for company use needs a licence. If that cost is too high, option B is the better fit, because it allows commercial use but forces derivatives to stay open.
 Second objection: "CC licences are not meant for software or hardware." Answer: accepted for software (PolyForm is used instead); for hardware no non-commercial licence of comparable maturity exists, and the limit about patents is stated in the README.
 Third objection: "The wish 'people can copy but not profit' may really be 'a competitor must not sell a closed clone'." Answer: that is what option B does, without the non-commercial label; the owner should decide which concern is the real one.
