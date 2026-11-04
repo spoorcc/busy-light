@@ -1,0 +1,33 @@
+* SPDX-License-Identifier: Apache-2.0
+* Spike: power-up of the ADR-0016 gate. Behavioural, ideal logic with thresholds at 50 % of VCC.
+* Scenario A: advertised default (IC output released, pulled up). Gate must stay low.
+* Scenario C: as B and the firmware raises the select line at 4 ms, inside the glitch.
+* Scenario B: IC output glitches low for 2 ms while the 3V3 rail is already up (assumed; not from a datasheet).
+.param tr=1m
+Vrail 3v3 0 PWL(0 0 {tr} 3.3)
+* firmware select GPIO: driven high by firmware 5 ms after the rail is up (worst case for the gate)
+Vsel sel 0 PWL(0 0 {tsel} 0 {tsel+10u} 3.3)
+* open-drain IC output: released = high-Z; scenario switch ICLOW closes a switch to ground
+Rpu 3v3 out1n 100k
+Cpin out1n 0 20p
+Sic out1n 0 icdrv 0 SWM
+Bdrv icdrv 0 V = {glitch} * ((time > 3m && time < 5m) ? 1 : 0)
+.model SWM SW(Vt=0.5 Vh=0.05 Ron=100 Roff=1e9)
+* inverter and AND as behavioural sources with 10 ns delay (RC), thresholds at half of the rail
+Binv invraw 0 V = {V(3v3)} * (V(out1n) < 0.5*V(3v3) ? 1 : 0)
+Rinv invraw ok 1k
+Cinv ok 0 10p
+Band enraw 0 V = {V(3v3)} * ((V(ok) > 0.5*V(3v3) && V(sel) > 0.5*V(3v3)) ? 1 : 0)
+Ren enraw en 1k
+Cen en 0 10p
+* pull-down on the enable net (100 k) loads the 1k source: negligible
+Rpd en 0 100k
+.param glitch=GLITCH tsel=TSEL
+.control
+set noaskquit
+tran 10u 20m
+meas tran en_max MAX v(en)
+meas tran ok_max MAX v(ok)
+meas tran en_pw TRIG v(en) VAL=1.65 RISE=1 TARG v(en) VAL=1.65 FALL=1
+.endc
+.end
