@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Re-run of the ADR-0012 gate G1 stand-in spike (`docs/verification/reports/adr-0012-g1-rerun.md`, Draft): ERC, parity, DRC 0 and identical dumps reproduced locally; CI, Freerouting run, pinning and the peg-azimuth decision still open; ADR-0012 stays Proposed on the owner's choice "not yet".
 - HW-010 (hardware current limit on the USB input) Approved by the owner 2026-11-04 on instruction in the session; uncovered faults stay listed (RISK-029, RISK-042).
 - HW-003 (USB-C power input) Approved by the owner 2026-11-04 on instruction in the session.
 - CC detection IC chosen by the owner: TUSB321, PTN5150A as fallback if the IC ambient exceeds 70 C (ADR-0016, HW-003, RISK-043).
