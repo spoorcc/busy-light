@@ -1,4 +1,4 @@
-# Licensing map (REUSE specification 3.2). Decision: ADR-0013.
+# Licensing map (REUSE specification 3.2). Decision: ADR-0015 (supersedes ADR-0013).
 # Code is Apache-2.0. Documentation, hardware and mechanical files are CC BY-NC-SA 4.0.
 version = 1
 SPDX-PackageName = "busy-light"
@@ -28,6 +28,8 @@ path = [
   "hw/sim/**/*.sh",
   "hw/kicad/**/*.py",
   ".github/**",
+  ".claude/**",
+  "NOTICE",
   "pyproject.toml",
   ".gitignore",
   ".gitattributes",

@@ -1,3 +1,5 @@
+> Outside pull requests with code or documents are not accepted yet (contributor terms need a legal check, see CONTRIBUTING.md).
+
 ## Summary
 What and why. Link requirement/ADR IDs: 
 

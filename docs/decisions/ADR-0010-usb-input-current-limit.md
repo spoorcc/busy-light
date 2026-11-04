@@ -1,6 +1,6 @@
 # ADR-0010: Hardware current limit on the USB input
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Proposed (only the owner sets Accepted). Amended by ADR-0016 (Accepted): the select line to the high step is ANDed with a CC detection IC output.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-006 (2026-11-04): not ready for acceptance, actions open
 - **Related:** NEED-003, SYS-020, SYS-021, SYS-022, HW-003, HW-004, HW-010, ADR-0004 (item 4), ADR-0009, RISK-003, RISK-004, RISK-005, RISK-024, RISK-025, RISK-026; `docs/verification/reports/spike-7-5-power-budget-paper.md`

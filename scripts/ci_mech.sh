@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Mechanical checks. Same script locally and in CI.
 # Runs every mech/freecad/*.py generator headless and then every mech/analysis/check_*.py.
 # Needs: FreeCAD 1.x (`freecad` command). Missing input is reported as NOT RUN, never as a pass.

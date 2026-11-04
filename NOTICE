@@ -1,0 +1,9 @@
+busy-light
+Copyright 2026 Ben Spoor
+
+The code in this repository is licensed under the Apache License 2.0 (LICENSES/Apache-2.0.txt).
+Documentation, hardware files, mechanical files and images are licensed under CC BY-NC-SA 4.0
+(LICENSES/CC-BY-NC-SA-4.0.txt). See LICENSE.md and ADR-0015.
+
+This repository contains no third-party source code today. Attributions required by Apache-2.0
+section 4 for any third-party code that is added later are listed here with its licence.

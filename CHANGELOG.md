@@ -11,6 +11,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Goldfish review RV-008 of ADR-0015 and ADR-0016 with amendments (gate covers every step above the first; independence only against firmware faults; RISK-042 and RISK-043; `LICENSE.md` reworded to what the licences grant; SPDX headers on the remaining `sw/` files; outside pull requests paused in the template).
+- ADR-0015 (licensing corrected and completed) and ADR-0016 (independent hardware gate for the high current step) Accepted by the owner 2026-11-04; ADR-0013 and ADR-0009 are Superseded. Applied: `.claude/` under Apache-2.0, `NOTICE` file, SPDX headers on code files, `LICENSE.md` with the purchased-unit grant, the non-commercial reading, name, patents and authorship points (not legal advice).
+- Options sheet for the back layout (five options with the accessory mounted); `scripts/check_license_map.py` (fails when a code file falls under the documentation licence, in CI); HW-003 and HW-010 drafted for the CC detection IC gate of ADR-0016; NEED-012 renamed with an acceptance criterion. Owner instruction to follow the recommended options recorded in ADR-0015 and ADR-0016 (status stays Proposed).
+- Review actions: spike report on the layout of the back (annular bayonet proposed; spike code on `spike/mech-back-layout`), ADR-0015 (licensing corrected and completed; would supersede ADR-0013), ADR-0016 (independent hardware gate for the high current step; recommends a CC detection IC ANDed with the firmware GPIO).
 - Goldfish reviews RV-005 (ADR-0013 licensing), RV-006 (ADR-0009 and ADR-0010 USB power) and RV-007 (ADR-0014 and the orientation and mounting requirements); RISK-035 to RISK-041; outside contributions paused until the contributor terms have a legal check; REUSE code globs extended.
 - Diagram check (`scripts/build_diagrams.sh --check`) compares structure, labels and colours, not coordinates, because text widths depend on the machine's font metrics (`scripts/svg_normalize.py`, with tests).
 - Diagrams use an explicit font (Noto Sans) and CI installs it, so box sizes do not depend on the machine's default font.

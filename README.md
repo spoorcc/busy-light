@@ -85,7 +85,7 @@ The project has done a lot of thinking and some experiments, but **no product co
 | Area | State |
 |------|-------|
 | Requirements | Drafted (needs, system, software, hardware, mechanical). **None approved.** |
-| Architecture decisions | 14 decision records written. Licensing (ADR-0013) is **Accepted**; the other 13 are **Proposed**. They cover platform, LED drive, mapping model, provisioning, update and boot security, transport, USB-C power input and current limit, housing, the hardware design flow, licensing and the mounting interface. |
+| Architecture decisions | 16 decision records written. **Accepted:** licensing (ADR-0015, which supersedes ADR-0013) and the hardware gate for the high current step (ADR-0016, which replaces the sensing decision of ADR-0009). The other 12 are **Proposed**. They cover platform, LED drive, mapping model, provisioning, update and boot security, transport, USB-C power input and current limit, housing, the hardware design flow, licensing and the mounting interface. |
 | Risk register | Open. Each risk has a mitigation and a verification link. |
 | Reviews | Independent "goldfish" reviews recorded for the system design, the first spike plan and the hardware flow decision ([`docs/reviews/`](docs/reviews/)). |
 | Software | Zephyr 4.5.0 workspace pinned. A first build check ran. A mapping extractor and an LED current limiter were tried as **PC-only prototypes**; the results are in the reports, the code is not in `sw/`. |
@@ -183,12 +183,12 @@ The planned vulnerability handling and key management are drafts under
 
 | Part | Licence |
 |------|---------|
-| Code (firmware, scripts, generators, CI) | [Apache-2.0](LICENSES/Apache-2.0.txt) |
+| Code (firmware, scripts, generators, CI, assistant instructions in `.claude/`) | [Apache-2.0](LICENSES/Apache-2.0.txt) |
 | Documentation, hardware, mechanics, images | [CC BY-NC-SA 4.0](LICENSES/CC-BY-NC-SA-4.0.txt) |
 | Commercial use of the hardware, mechanics or documentation | Separate licence from the owner |
 
 You may copy, study and build from the hardware and mechanical files for non-commercial purposes. Using a unit that you
 bought is not restricted. The non-commercial parts are **source-available, not open source hardware**.
 Details and the path-by-path map are in [`LICENSE.md`](LICENSE.md) and [`REUSE.toml`](REUSE.toml);
-the decision is [ADR-0013](docs/decisions/ADR-0013-licensing.md). Third-party parts such as Zephyr keep their own licences.
+the decision is [ADR-0015](docs/decisions/ADR-0015-licensing-corrections.md). Third-party parts such as Zephyr keep their own licences.
 This is not legal advice.

@@ -277,7 +277,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source or cable
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** SYS-020, HW-003, ARCH-001, ARCH-014
-- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is wanted by the owner (HW-010, ADR-0004 item 4): it starts at [500] mA and is raised by the firmware after the CC read. It covers a stopped firmware and a short circuit, **not** a firmware that misreads CC and raises the limit itself (RV-006 S1); an independent decode path is an owner decision
+- **Residual risk (after mitigation):** Single threshold inside the gap between the bands, repeated reads, fallback to [500] mA; a hardware current limit is wanted by the owner (HW-010, ADR-0004 item 4): it starts at [500] mA and is raised by the firmware after the CC read. It covers a stopped firmware and a short circuit, **not** a firmware that misreads CC and raises the limit itself (RV-006 S1); an independent path from firmware faults is decided in ADR-0016; it does not cover a fault of the detection IC itself (RISK-042)
 - **Verified by:** TC-203, TC-020
 - **Status:** Open
 
@@ -288,7 +288,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Unit does not start or cannot read the advertised current
 - **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
 - **Mitigated by:** SYS-020, HW-003
-- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; clamp or series resistor to decide in spike 7.5
+- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; with ADR-0016 the CC pins belong to a detection IC and its datasheet rating and a clamp must be checked (the ADC pin no longer touches CC)
 - **Verified by:** TC-203
 - **Status:** Open
 
@@ -455,4 +455,26 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Mitigated by:** SYS-047, HW-011
 - **Residual risk (after mitigation):** Not assessed; filtering, hysteresis and face-down behaviour are open (RV-007)
 - **Verified by:** TC-047, TC-211
+- **Status:** Open
+
+### RISK-042 CC detection IC misclassifies a charger with no firmware second opinion
+
+- **Hazard / failure mode:** The IC reports 1.5 A for a source that advertises the default current (or latches or fails with its output low), so the gate and the firmware both read "high" and the high step switches on
+- **Cause:** The IC thresholds fill the 90 mV gap between the bands (0.61 to 0.70 V); a fault in the IC or its output; the Type-C specification was not read (ADR-0016)
+- **Effect:** Overloaded source or cable; the hardware gate no longer protects (it is independent of firmware faults only)
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** HW-003, HW-010, ADR-0016
+- **Residual risk (after mitigation):** Not assessed; band-edge and fault-injection tests are open; a diverse second opinion (ADC or comparator) is not part of ADR-0016
+- **Verified by:** TC-203, TC-210
+- **Status:** Open
+
+### RISK-043 CC detection IC temperature range, package or availability
+
+- **Hazard / failure mode:** The IC is specified for 0 to 70 C recommended (datasheet) in a closed housing with a hot LED ring; its X2QFN 1.6 mm package may not suit the shop; it goes out of stock or has one source
+- **Cause:** Single candidate part (ADR-0016); conflicting range of the vendor and a distributor listing
+- **Effect:** Misreads at temperature, assembly yield loss, or a re-layout for another part
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** HW-003, ADR-0016 item 3 (checks before a part is fixed), SYS-021
+- **Residual risk (after mitigation):** Not assessed; no second source named
+- **Verified by:** Design review of the BOM at G2 of ADR-0012; TC-203
 - **Status:** Open

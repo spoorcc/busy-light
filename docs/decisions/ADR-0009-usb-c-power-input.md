@@ -1,6 +1,6 @@
 # ADR-0009: USB-C power input and detection of the advertised source current
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Superseded by ADR-0016 for the sensing decision (option A, ADC on the CC lines, replaced by option B, a CC detection IC). The analysis and evidence tables stay as the record; the threshold, band and safe-side logic of the evidence still apply to the IC outputs.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-006 (2026-11-04): not ready for acceptance, actions open
 - **Related:** NEED-003, SYS-020, SYS-021, SYS-022, SYS-027, SYS-028, HW-003, HW-004, ADR-0003, ADR-0004 (item 4), RISK-003, RISK-004, RISK-005; `docs/verification/reports/spike-7-5-power-budget-paper.md` (sections 2.3 and 8)

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Render diagram sources (docs/diagrams/{plantuml,mermaid,wavedrom}) to SVG in docs/diagrams/generated/.
 #   scripts/build_diagrams.sh          render all
 #   scripts/build_diagrams.sh --check  render to a temp dir and fail if committed outputs differ (CI)

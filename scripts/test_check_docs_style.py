@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Regression tests for scripts/check_docs_style.py."""
 
 from pathlib import Path

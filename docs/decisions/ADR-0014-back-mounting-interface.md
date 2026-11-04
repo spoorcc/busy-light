@@ -101,7 +101,7 @@ Choose **B, a printed bayonet**, with these design rules. Items in brackets are 
 
 ## Review findings still open (RV-007)
 The goldfish review of 2026-11-04 found problems that can invalidate this option as drawn; the status stays Proposed.
-- **Layout:** a centred 30 mm recess leaves a ring (53 - 30) / 2 = 11.5 mm wide, so a 20 mm label does not fit beside it. The recess, the label and the feet need a scale drawing first.
+- **Layout (checked, `docs/verification/reports/spike-mech-back-layout.md`):** as drawn, the centred 21 mm label lies inside the centred 30 mm recess, so any accessory covers it; beside a centred 30 mm recess only a 9.5 mm square fits, and beside a 12 mm dovetail rail only 17.5 mm. The one variant that keeps the 21 mm label outside the recess and readable is an **annular bayonet** (ring R 16.3 to 21.0 mm, feet at R 23.5) around an open centre. This is proposed as option B2; the owner decides, and MECH-006 and MECH-007 change only after that.
 - **Floor:** a 1.5 mm recess in a 2.0 mm floor leaves 0.5 mm, which is not a whole number of 0.4 mm perimeters, and the lug and recess values are not multiples of 0.4 mm either.
 - **Print orientation:** with the floor on the bed, the recess is a bridge. "No supports" is not shown.
 - **Release:** a 30 degree turn unlocks the unit, so a knock or turning it by hand can release it.
