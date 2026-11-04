@@ -136,3 +136,16 @@ Code: `hw/kicad/spike/src/gen_pcb_kiutils.py` on branch `spike/hw-kicad`. Same i
 | IPC API retry | Not possible: no virtual display (`Xvfb`) is installed and the owner has not installed one. | not run |
 
 Conclusion of round 7: a board built by `kiutils` is a workable way to cut the board build off the deprecated interface, at the price of KiCad 8 syntax and of fidelity work (two bugs found above). The Specctra round trip is the remaining dependency. The `kiutils` output was not compared against a full DRC set with the real parts.
+
+## 12. Round 8 (2026-11-04): gate failure path and CI wiring
+Code: `scripts/ci_hw.sh` on branch `spike/hw-kicad` (it runs the spike gate and the dump tests when `hw/kicad/spike/run_spike.sh` exists, and skips the spike folder in its generic scan). On `feature/project-foundation` the script is unchanged.
+
+| Step | Result | Label |
+|------|--------|-------|
+| Gate failure path | With one value in the committed dump changed (minimum track width 0.1 instead of 0.15), `run_spike.sh` prints "DIFFERS from committed dump" and exits 1. With the file restored it exits 0. | run |
+| `scripts/ci_hw.sh` locally (with the venv on the path, pip step skipped) | Runs the 10 dump tests, then the gate: ERC 0, requirement fields present, two runs identical, parity 0, stored session reproduces the committed dump, DRC with 0 unconnected items. Exit 0. | run |
+| The same script inside the `kicad/kicad:10.0` container on a CI runner | Not run. Unknown: whether the image has a Python with `pcbnew`, whether `pip install` is allowed there, and whether the image tag still resolves. | not run |
+| Freerouting in CI | Not wired (needs the jar and a Java runtime in the job, hash pinned). The gate uses the stored session and does not need it. | not run |
+| FreeCAD fit check in CI | Not wired; the housing STEP files exist only in the mechanical spike worktree. | not run |
+
+Gate G1(d) of ADR-0012 is therefore met locally and wired in a branch, but unverified in CI.
