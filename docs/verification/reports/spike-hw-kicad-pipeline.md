@@ -36,3 +36,22 @@ The flow B is technically feasible for schematic, netlist, BOM, placement, outli
 
 ## 5. Not covered
 No requirement traceability on parts (custom fields were not added), no ngspice test, no routing, no electrical correctness of the stand-in circuit, no EMC or RF layout, no run on the CI runner.
+
+## 6. Round 2 (2026-11-04): own schematic writer, reproducibility, requirement fields, scripted routing
+Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (`src/schematic_writer.py`, `gen_schematic.py`, `gen_pcb.py`, `route_pcb.py`, `dump_design.py`, `check_req_fields.py`, `params.toml`, `run_spike.sh`). Stand-in circuit as in section 2, plus one 4-pin connector and two power flags.
+
+| Step | Result | Label |
+|------|--------|-------|
+| Own schematic writer (`kiutils` 1.4.8, `uuid5` IDs, fixed reference designators) | KiCad 10 loads the file only when the format version is set to 20231120 (KiCad 8). With version 20250114 `kicad-cli` fails with "Failed to load schematic", because kiutils writes the older syntax. Derived symbols must be flattened and unit names renamed. | run |
+| ERC of the written schematic | 0 violations (after a project file and library tables are present; without them ERC reports library errors). | run |
+| Reproducibility, two runs | Schematic bytes identical. Semantic dumps (parts, nets, positions) identical. | run |
+| Negative tests of the checks | A part without `HW_REQ` is reported (exit 1). A moved footprint changes the dump (diff exit 1). | run |
+| `HW_REQ` field per part | Survives the KiCad netlist and the dump; check script works. | run |
+| One parameter file (`params.toml`) feeding the PCB script | Works for the PCB script. The FreeCAD side was not connected. | run (PCB), not run (FreeCAD) |
+| Scripted routing (`route_pcb.py`: pad-to-pad tracks, GND vias and a B.Cu pour) | Every net is connected (0 unconnected items) but DRC reports 16 shorting items, 10 crossing tracks, 7 clearance and 34 solder-mask bridge violations. Naive routing is not sufficient. | run |
+| Freerouting | Not installed, not tried. | not run |
+| Schematic-to-board parity | 36 parity issues remain (footprint-to-symbol link and fields); cause not investigated. | run, not fixed |
+| Net names | `pcbnew` net names carry a `/` prefix (`/GND`); scripts must account for it. | run |
+| ngspice, FreeCAD side of the parameter file, Docker run of the CI image | Not run. | not run |
+
+Conclusion of round 2: the schematic path (ERC-clean, reproducible, traceable fields) is feasible with an own writer on KiCad 8 syntax. The routing path is not shown. A real router (Freerouting) or a rule-based router is needed; this is the main remaining risk of ADR-0012 option B. The KiCad 8 syntax dependency (kiutils) is a pin risk: KiCad 10 upgrades the file on first save in the GUI.
