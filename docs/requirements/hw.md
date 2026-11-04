@@ -136,7 +136,8 @@ Process rules: `docs/process/README.md`.
 - **Category:** Safety
 - **Regulatory:** EN 62368-1 *(verify)*
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved
+- **Approval:** the owner (Ben Spoor), 2026-11-04, by instruction in the session; recorded by the assistant. Not covered and still open: a fault of the detection IC itself (RISK-042), a stuck gate output or shorted select MOSFET (RISK-029), a non-compliant cable, hung firmware (ADR-0010 open point 4). Bracketed values stay open.
 
 ### HW-011 Orientation sensor
 

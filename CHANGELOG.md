@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- HW-010 (hardware current limit on the USB input) Approved by the owner 2026-11-04 on instruction in the session; uncovered faults stay listed (RISK-029, RISK-042).
 - HW-003 (USB-C power input) Approved by the owner 2026-11-04 on instruction in the session.
 - CC detection IC chosen by the owner: TUSB321, PTN5150A as fallback if the IC ambient exceeds 70 C (ADR-0016, HW-003, RISK-043).
 - Licence record: per-file licence tag counts of the pinned Zephyr, MCUboot, hal_espressif and Mbed TLS trees, NonCommercial definition from the licence text; HW-010 hold-off upper limit of [600] ms (spike finding F7: a plain CMOS threshold is too loose for the timer).
