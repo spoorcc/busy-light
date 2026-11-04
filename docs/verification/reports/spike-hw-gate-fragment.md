@@ -42,6 +42,12 @@ Generic parts only: a placeholder 5-pin header for the CC detection IC (VDD, GND
 
 **Finding F7 (hold-off).** A plain CMOS input as timer threshold is too loose: the hold-off would span about 0.2 to 1.1 s, and the upper value breaks SYS-020 (limit set within [1] s of connection) if it runs after the firmware wait. Use a Schmitt-trigger input or a comparator with a reference for the timer. With a maximum hold-off of about 600 ms the sequence stays inside 1 s only because the hold-off (from the IC supply) and the firmware window of SW-005 (from the first valid read, after the 133 ms debounce) overlap: about 133 ms + 500 ms = 633 ms. HW-010 now states a maximum of [600] ms.
 
+**Version 2 (2026-11-04, after HW-003 and HW-010 were Approved).** The generator now supplies the IC from `VBUS_IC`, adds the start-up hold-off (R6 1 MOhm, C1 510 nF, Schmitt buffer U5, discharge diode D1) and uses a 3-input AND (`74LVC1G11`) per gated step. Results:
+- **F8 (netlist).** 12 netlist and truth-table tests pass, including three new ones (IC on VBUS, hold-off on both ANDs, RC charge and discharge path). The first run failed one test: my edit had left the old GND pin on the select input, shorting it to ground. The test caught it; the connectivity tests are worth keeping for that reason.
+- **F9 (writer).** The SKiDL schematic writer did not finish within 120 s on this fragment (version 1 took about 9 s; an earlier run of version 2 ran 15 min on the first attempt). No v2 schematic exists, so ERC, parity and DRC were **not run** on v2. This is a second point for the own writer of ADR-0012, and a reason not to use SKiDL's router for the product schematic.
+- **F10 (timing).** With the assumed tolerances (R 1 %, C 10 %, Schmitt thresholds 0.4 to 0.6 of the rail) the window of 200 to 600 ms is met only just: the ratio of longest to shortest time is about 2.97, and the window allows 3.0. A 20 % X7R capacitor does not fit. The thresholds are assumed, not read from the datasheet of the Schmitt part; read them before fixing C1. The 74LVC1G11 pin numbers come from the KiCad symbol (GND on pin 2) and have not been checked against a datasheet.
+- Not run on v2: ngspice (the v1 scenarios D to G cover the hold-off in principle with ideal parts), thermal, power order of the 5 V IC and the 3.3 V pull-up.
+
 ## 5. Not done
 No PCB, no footprints checked, no 3D, no DRC, no ngspice, no BOM, no JLCPCB check, no review by a goldfish. The schematic is not a deliverable.
 

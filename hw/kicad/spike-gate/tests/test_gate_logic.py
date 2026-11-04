@@ -60,13 +60,30 @@ class GateNetlist(unittest.TestCase):
 
     def test_pulldowns_on_inputs_and_enables(self):
         for ref, gate_pin in (("R2", ("U3", "4")), ("R3", ("U4", "4")),
-                              ("R4", ("U3", "2")), ("R5", ("U4", "2"))):
+                              ("R4", ("U3", "3")), ("R5", ("U4", "3"))):
             self.assertEqual(net_of(self.nets, ref, "2"), "GND")
             self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, *gate_pin))
 
     def test_enable_drives_mosfet_gate(self):
         self.assertEqual(net_of(self.nets, "Q2", "1"), net_of(self.nets, "U3", "4"))
         self.assertEqual(net_of(self.nets, "Q3", "1"), net_of(self.nets, "U4", "4"))
+
+    def test_ic_is_supplied_from_vbus_not_3v3(self):
+        self.assertEqual(net_of(self.nets, "U1", "1"), "VBUS_IC")
+
+    def test_hold_off_input_on_both_ands(self):
+        hold = net_of(self.nets, "U5", "4")
+        self.assertEqual(hold, "HOLD_OK")
+        self.assertEqual(net_of(self.nets, "U3", "6"), hold)
+        self.assertEqual(net_of(self.nets, "U4", "6"), hold)
+
+    def test_hold_off_rc_is_charged_from_ic_supply_and_discharged_on_unplug(self):
+        rc = net_of(self.nets, "R6", "2")
+        self.assertEqual(net_of(self.nets, "R6", "1"), "VBUS_IC")
+        self.assertEqual(net_of(self.nets, "C1", "1"), rc)
+        self.assertEqual(net_of(self.nets, "U5", "2"), rc)
+        self.assertEqual(net_of(self.nets, "D1", "2"), rc)       # anode on the RC node
+        self.assertEqual(net_of(self.nets, "D1", "1"), "VBUS_IC")  # cathode on the supply
 
     def test_both_ands_share_the_same_ic_path(self):
         # Finding H1 of RV-008: one IC fault reaches both steps and the firmware read.
