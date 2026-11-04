@@ -299,6 +299,6 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Board cannot be laid out as specified; no azimuth works on this ring
 - **Severity (1-5):** 3  **Likelihood (1-5):** 5  **Initial risk:** 15
 - **Mitigated by:** HW-001, HW-003, SYS-022, ARCH-003
-- **Residual risk (after mitigation):** Options under study in the spike: a board tab that carries the receptacle outside the ring (V1), or a bottom-side receptacle (V2, breaks the one-side assembly of SYS-022); a larger ring is not possible within 58 mm. Owner decision needed.
+- **Residual risk (after mitigation):** Modelled on the spike branch `spike/mech-concept` (placeholders): V1 board tab plus wall bulge passes all checks, largest outer dimension 57.43 mm; V2 bottom-side receptacle passes with a floor pocket or taller posts but breaks the one-side assembly of SYS-022; a larger ring is not possible within 58 mm. Owner decision needed.
 - **Verified by:** TC-201, TC-209
 - **Status:** Open
