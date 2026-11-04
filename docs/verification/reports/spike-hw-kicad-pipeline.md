@@ -72,3 +72,23 @@ Code: `hw/kicad/spike/src/freecad_fit.py`, `run_spike.sh`, `params.toml` on bran
 | Interference check with the real board, real parts, real housing | Not possible yet: the housing uses placeholders, the board is a stand-in. | not run |
 
 Conclusion of round 3: a real router closes most of the routing gap, and the board-to-housing check finds real mismatches (stackup, notch) from files alone. Routing with defined design rules, the stackup and the notch are the next items.
+
+## 8. Round 4 (2026-11-04): gate G1 work (scripted routing, rules, parity, stackup, mechanical conflict)
+Code: `hw/kicad/spike/` on branch `spike/hw-kicad` (commit daa78d7), `run_spike.sh` runs the whole chain. Freerouting is called from `src/route_freerouting.py`, which checks the jar hash before use and stores the routing session as `routed.kicad_pcb.ses` next to the output.
+
+| Step | Result | Label |
+|------|--------|-------|
+| Schematic-to-board parity | 0 issues. Cause of the 36: footprints had no library name in their identifier (`SetFPID` with the library nickname) and no `HW_REQ` field. | run |
+| Footprint choice | LED symbol and footprint changed from 3535 (SK6812MINI) to 2020 (WS2812B-2020) to match the housing placeholder (LED_SIZE 2.0 mm). LED phase 3.75 degrees now comes from `params.toml` and is checked against the housing constant. | run |
+| Design rules | Net classes Default (0.25 mm track) and Power (0.5 mm on +5V and GND), minimum track 0.15 mm, copper-to-edge 0.5 mm, in the hand-maintained `libs/spike.kicad_pro`. The values are placeholders for a prototype shop and must become HW requirements. | run |
+| Tool overwrite finding | `pcbnew` overwrites the project file (`.kicad_pro`) when it saves a board, and `kicad-cli` rewrites it too. The reviewed rules file must be copied back after each generation step; otherwise net classes and rules are silently lost. | run |
+| Edge keep-out as rule areas | Copper keep-out rings (0.5 mm) along the board edge and around the mounting holes, built from `params.toml`. The router honours them through the DSN. | run |
+| Mechanical conflict found | With the housing peg azimuths 30, 150 and 270 degrees at R 21 mm, the 2.8 mm holes fall on the pads of LED D2 and D13 (LEDs at 3.75 + 22.5 k degrees, R 20 mm). That caused the edge-clearance violations and the unrouted connections. A hole fits only within about 3 degrees of a midpoint between two LEDs, and three pegs 120 degrees apart cannot all sit at midpoints. A what-if with 15, 150 and 285 degrees (uneven spacing) routes completely. This is a housing or LED-count decision for the owner. | run |
+| Routing with the what-if pegs | Freerouting: 53 connections, 0 unrouted, 2 s. KiCad DRC of the routed board: 0 violations, 0 unconnected, 0 parity issues. The router's own score line reports 16 violations; KiCad DRC is the reference used here and the difference is not explained. | run |
+| Routing with the housing pegs | 5 to 6 unrouted connections and 7 to 10 copper-to-edge violations, all at D2 and D13. | run |
+| Stackup | Explicit two-layer stackup written into the board; the STEP board is now 1.600 mm including copper. The earlier 1.51 mm came from the KiCad default stackup. | run |
+| FreeCAD fit check | Outline 46.000 mm and thickness 1.600 mm pass; no lid interference. Still failing: POST_AZ differs (the what-if, expected) and a 3.4 mm3 overlap with the base near the board edge at about 90 degrees, probably the missing board notch. Not fixed. | run, not fixed |
+| Reproducibility | Dumps and schematic bytes identical over two runs. Two Freerouting runs were not compared. | run (design), not run (router) |
+| ngspice, CI image run, tool-qualification table, pins by digest | Not done. | not run |
+
+Status against gate G1 of ADR-0012 (stand-in board, what-if pegs): (a) ERC 0, parity 0, DRC 0: met. (b) 100 percent routed: met. (c) identical dumps including tracks, vias and zones: not met, because the dump covers parts, nets and positions only. (d) Freerouting scripted: met locally, not yet in CI. With the housing pegs, (a) and (b) are not met.
