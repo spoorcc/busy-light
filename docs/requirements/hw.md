@@ -136,3 +136,16 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** EN 62368-1 *(verify)*
 - **Priority:** Must
 - **Status:** Draft
+
+### HW-011 Orientation sensor
+
+- **Statement:** The board shall carry a 3-axis accelerometer that the processor reads, with a range of at least plus or minus [2] g and an angle error of at most [5] degrees in the static case, with its axes fixed relative to the ring, drawing at most [0.2] mA on average, and with a part cost of at most EUR [0.5] at 10 units.
+- **Rationale:** SYS-047 needs the direction of gravity. The values are working figures; no part is chosen, and no datasheet was read for this draft. The part cost and current come from the budget in SYS-020 and SYS-021, not from a part.
+- **Parent:** SYS-047
+- **Acceptance criteria:** On a prototype board in a test jig, the measured angle in 12 positions differs from the jig angle by at most [5] degrees; the added average current is at most [0.2] mA; the part is on the shop's parts list (HW-008) and the second source with the same footprint is named in the BOM. The sensor does not conflict with the antenna keep-out of HW-005.
+- **Verification method:** Test
+- **Verified by:** TC-211
+- **Category:** Functional
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft

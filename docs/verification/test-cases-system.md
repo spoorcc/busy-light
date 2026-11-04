@@ -429,3 +429,11 @@
 - **Automated:** TBD
 - **Evidence:** TBD
 
+### TC-047 Automatic ring orientation
+
+- **Verifies:** SYS-047
+- **Level:** System
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SYS-047
+- **Automated:** TBD
+- **Evidence:** TBD

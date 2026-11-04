@@ -74,10 +74,10 @@ Process rules: `docs/process/README.md`.
 
 ### MECH-006 Label area
 
-- **Statement:** The housing shall have a flat area of at least [20] x [20] mm on the underside of the base for the unit label (identifier, passphrase, QR code) and the "prototype, not for sale" mark, which a user can read when the unit is lifted.
-- **Rationale:** ADR-0006 puts the passphrase on a label. Regulatory labelling is a tight fit on a 53 mm housing (AS4). Assumption, the owner confirms: the unit lies flat on a desk with the ring up (plan 05 A1). The underside keeps the housing low (16.5 mm instead of 28 mm), keeps the label on a part that does not move, and exposes the passphrase less to photographing from a distance. The label is inside the 15 mm antenna box of MECH-003 (the floor is 6.6 mm below the antenna), so it must not be metallised.
+- **Statement:** The housing shall have a flat area of at least [20] x [20] mm on the back of the base, outside the mounting recess of MECH-007, for the unit label (identifier, passphrase, QR code) and the "prototype, not for sale" mark, which an accessory on the back does not cover.
+- **Rationale:** ADR-0006 puts the passphrase on a label. Owner decision 2026-11-04: the unit is mounted horizontal and vertical and the label is on the back (assumption A1 of plan 05 is withdrawn). The label stays on the base, which does not move when the lid opens, and never on a swappable accessory. The label is inside the 15 mm antenna box of MECH-003, so it must not be metallised. Regulatory labelling is a tight fit on a 53 mm housing (AS4).
 - **Parent:** SYS-013
-- **Acceptance criteria:** The drawing shows the area on the underside of the base. A printed label of the stated size fits, is not metallised and stays readable after [100] cycles of opening and closing the housing. The label sits on a part that does not move when the housing opens.
+- **Acceptance criteria:** The drawing shows the label area on the back, outside the recess of MECH-007. A printed label of the stated size fits, is not metallised, and stays readable after a wipe test of [20] cycles and after the heat soak of MECH-005. A locked accessory does not cover the label.
 - **Verification method:** Inspection
 - **Verified by:** TC-306
 - **Category:** Usability
@@ -85,3 +85,28 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Should
 - **Status:** Draft
 
+### MECH-007 Back mounting interface
+
+- **Statement:** The back of the housing shall have a round recess of [30] mm diameter with [3] lugs that takes an accessory (stand, clip or blank plate) by a quarter turn of about [30] degrees, without tools, and shall have no metal, magnet or insert in or on the back.
+- **Rationale:** NEED-022 and ADR-0014 (Proposed): a printed bayonet is plastic only, so it respects the antenna box of MECH-003, and fits the 2 mm floor. A printed thread and a tripod socket were rejected.
+- **Parent:** NEED-022
+- **Acceptance criteria:** The drawing shows the recess, the lugs and the detent with tolerances. A test accessory fits and locks on [3] printed housings by one hand in under [10] s, and detaches again. No metal part is in the back (inspection).
+- **Verification method:** Inspection and Test
+- **Verified by:** TC-307
+- **Category:** Functional
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft
+
+### MECH-008 Accessory retention
+
+- **Statement:** An accessory locked to the back shall hold the unit against a pull-off force of at least [10] N, before and after [100] attach and detach cycles and after a heat soak at the highest internal temperature of MECH-005.
+- **Rationale:** The unit hangs on a wall clip or stands on an accessory. FDM lugs and detents in warm PETG or ASA can creep (plan 05 section 4.8; no strain limit found). The force value is a working figure that must come from the mass and leverage of the planned accessories.
+- **Parent:** NEED-022
+- **Acceptance criteria:** On [3] housings, the pull-off force is at least [10] N before the cycles, after [100] cycles, and after the heat soak; no lug is cracked; the accessory does not release by itself in a hanging test of [24] h at the soak temperature.
+- **Verification method:** Test
+- **Verified by:** TC-308
+- **Category:** Safety
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft

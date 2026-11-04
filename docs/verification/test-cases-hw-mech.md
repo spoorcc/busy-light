@@ -145,3 +145,30 @@
 - **Expected result / pass criteria:** see acceptance criteria of HW-010
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-211 Orientation sensor
+
+- **Verifies:** HW-011
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of HW-011
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-307 Back mounting interface
+
+- **Verifies:** MECH-007
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of MECH-007
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-308 Accessory retention
+
+- **Verifies:** MECH-008
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of MECH-008
+- **Automated:** TBD
+- **Evidence:** TBD

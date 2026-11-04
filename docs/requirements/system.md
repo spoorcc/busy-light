@@ -616,3 +616,15 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 - **Priority:** Should
 - **Status:** Draft
 
+### SYS-047 Automatic ring orientation
+
+- **Statement:** The device shall measure its orientation and shall start the level display (SYS-032) at the top of the ring within [2] s of a change when the ring plane is more than [30] degrees from horizontal, and at a fixed position on the ring given in the hardware design (proposed: opposite the USB-C connector) when the ring plane is within [30] degrees of horizontal, without user action.
+- **Rationale:** NEED-020. An accelerometer gives the direction of gravity, so "up" is known only when the ring plane is not horizontal. A level gauge that starts at a different place in each orientation is hard to read. A fixed zero for the flat case is the only automatic rule that gravity allows.
+- **Parent:** NEED-020
+- **Acceptance criteria:** With the unit rotated in steps of 90 degrees (plus or minus [10] degrees) in a vertical plane, the zero of a 0 to 100 percent level lies at the top (plus or minus 1 LED). With the unit flat, the zero lies at the fixed position. A change takes effect within [2] s and does not flicker at the [30] degree limit (hysteresis of at least [5] degrees). With the sensor missing or failed, the zero is the fixed position, a fault event is logged and the status display still works (SYS-003).
+- **Verification method:** Test
+- **Verified by:** TC-047
+- **Category:** Functional
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft

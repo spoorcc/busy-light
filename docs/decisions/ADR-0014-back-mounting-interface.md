@@ -3,7 +3,7 @@
 - **Status:** Proposed (only the owner sets Accepted)
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); no goldfish review yet
-- **Related:** NEED-014, SYS-013, SYS-028, MECH-001, MECH-003, MECH-006, ADR-0003, ADR-0011, RISK-011, RISK-005, RV-004 (finding A1)
+- **Related:** NEED-014, NEED-020, NEED-022, SYS-047, HW-011, MECH-007, MECH-008, SYS-013, SYS-028, MECH-001, MECH-003, MECH-006, ADR-0003, ADR-0011, RISK-011, RISK-005, RV-004 (finding A1)
 
 ## Context and problem
 The owner decided on 2026-11-04 that the unit is mounted both horizontal and vertical (withdraws assumption A1 of plan 05), that the back of the housing gets a small interface that accepts a horizontal stand, clips or a blank plate, and that the label goes on the back. The owner first proposed a thread; this ADR weighs it against other interfaces.
@@ -92,7 +92,7 @@ Choose **B, a printed bayonet**, with these design rules. Items in brackets are 
 - Positive: no metal near the antenna; tool-free; shallow; one interface for stand, clips and plate; leaves the label on the back free.
 - **Negative / trade-offs accepted:** a custom interface (no standard tripod accessories); accessories must be printed or made; lock positions are discrete; a stand holding a heavy load is not claimed; the lug on a 2.0 mm floor may need local thickening, which adds height.
 - New risks (add to the risk register after the owner confirms): lug creep or fracture when warm; accessory loosens and the unit falls; accessory cover blocks the label; accessory with a metal part near the antenna after the user mounts it (a marking or manual warning).
-- Requirements created or changed: a new MECH requirement for the back interface, a MECH requirement for retention (pull-off force before and after heat soak), changes to MECH-006 (label on the back, not covered), changes to ADR-0011 and plan 05 (height, thermal in both orientations, label recess); a new HW requirement and SYS/NEED requirement for the orientation sensor (not drafted yet).
+- Requirements created or changed: MECH-007 (back interface) and MECH-008 (retention), MECH-006 rewritten (label on the back, not covered), NEED-020 to NEED-022, SYS-047 and HW-011 (orientation sensor), all Draft. Still to do: changes to ADR-0011 and plan 05 (height, thermal in both orientations, label recess).
 - Orientation: an accelerometer gives the direction of gravity. It tells vertical from horizontal and the rotation when the unit hangs. When the unit lies flat with the ring up, gravity gives no direction in the plane, so "automatic" is not possible with this sensor. A magnetometer gives a compass direction, not a useful zero. The proposed automatic rule: when the unit lies flat, the zero position is fixed on the board (12 o'clock opposite the USB-C connector, so the cable comes toward the viewer); when it hangs or stands, gravity sets the zero. The owner can confirm or change this in the requirement.
 
 ## Verification and revisit

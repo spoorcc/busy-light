@@ -120,6 +120,24 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Open points:** Contributor licence agreement for hardware, mechanical and documentation contributions; CRA role (`docs/regulatory/applicability.md`).
 - **Status:** Draft
 
+### NEED-020 The ring knows which way is up
+- **Statement:** The device is mounted both horizontal and vertical. The ring finds its own orientation, so that a level gauge starts at the same place on the ring in every orientation, without the user setting it.
+- **Source:** Product owner, 2026-11-04 (answers to the orientation question of plan 05, RV-004 finding A1).
+- **Open points:** When the unit lies flat with the ring up, gravity gives no direction in the ring plane. The proposal (SYS-047) is a fixed zero position on the board for this case. The owner confirms.
+- **Status:** Draft
+
+### NEED-021 Clock mode (later release, not in the first release)
+- **Statement:** A later release shows the time on the ring, with 12 o'clock at the top in any orientation.
+- **Source:** Product owner, 2026-11-04 ("Clock mode", later on).
+- **Consequence:** The first design must not make a clock mode hard later: the orientation sensor (NEED-020) is in the first release. No clock requirement exists for the first release. Open points for later: time source and time zone, 16 LEDs against 12 hours (30 degrees per hour, LEDs 22.5 degrees apart).
+- **Status:** Draft
+
+### NEED-022 Mount the device in different ways
+- **Statement:** The device attaches to a horizontal stand, to clips or to a blank plate through one small interface on its back. The label is on the back.
+- **Source:** Product owner, 2026-11-04.
+- **Open points:** Which accessories are made in the first release? Weight and leverage of each accessory.
+- **Status:** Draft
+
 ## Project constraints (not product needs)
 - Open-source project: Zephyr software, KiCad hardware, FreeCAD enclosure.
 - Developed to the process in `docs/process/README.md`. Regulatory work comes later, but the design must not block it (`docs/regulatory/applicability.md`).
