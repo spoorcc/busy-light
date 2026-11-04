@@ -18,23 +18,30 @@ One A3 sheet, drawn by `layout_full.py` in the same hand-laid style as the gate 
 - **Button (HW-007):** series resistor, pull-up, ESD diode, switch.
 - **Buffers:** `HOLD_OK` (5 V) to 3.3 V buffer for the MCU; 5 V LED data buffer (HW-002) with pull-down.
 - **LEDs (HW-001, HW-002):** 16 WS2812B in a chain (two rows of eight), 100 nF each, 330 ohm series resistor at the first LED, a bulk capacitor on 5 V. The sheet shows a chain, not the circle: the geometry is a PCB matter.
-- **Test points (HW-006):** 5 V, 3.3 V, GND, TX, RX, LED data, EN, BOOT.
-- **Size:** 82 part references (16 LEDs, 16 LED capacitors, 8 test points, 12 ICs and boxes), plus power symbols and flags (217 symbol instances in the file), 50 nets with more than one pin.
+- **Test points (HW-006):** 5 V, 3.3 V, GND, LED data, EN, BOOT (UART points removed, see F1 update).
+- **Size:** 84 part references (16 LEDs, 16 LED capacitors, 6 test points, ICs, boxes, resistors and capacitors), plus power symbols and flags (221 symbol instances in the file), 52 nets with more than one pin.
 
 ## 2. Results
 | # | Check | Result | Status |
 |---|-------|--------|--------|
 | 1 | kicad-cli ERC, errors | 0 | **run** |
-| 2 | ERC, all severities | 302 warnings, all "library not configured" (85 footprint, 217 symbol): the libraries are not in a project table. 0 off-grid endpoints after snapping all coordinates to the 1.27 mm grid | **run** |
-| 3 | Intent table versus the netlist exported from the drawn sheet (`check_full.py`) | 50 nets in each, 0 only in the intent, 0 only in the drawing | **run** |
+| 2 | ERC, all severities | 308 warnings from `kicad-cli sch erc --severity-all` (87 footprint link, 221 symbol library issues), none other; `check_full.py` itself only fails on errors: the libraries are not in a project table. 0 off-grid endpoints after snapping all coordinates to the 1.27 mm grid | **run** |
+| 3 | Intent table versus the netlist exported from the drawn sheet (`check_full.py`) | 52 nets in each, 0 only in the intent, 0 only in the drawing | **run** |
 | 4 | Determinism (`run_full.sh`) | two generations byte-identical | **run** |
-| 5 | Tests | `test_layout_full.py` 10 tests pass (chain, capacitors, HW-007 strapping pins, no 5 V net on an MCU pin, CC IC wiring, TPS2553 path, gate and readbacks, GPIO list, test points, determinism); whole folder 33 tests pass | **run** |
+| 5 | Tests | `test_layout_full.py` 14 tests pass; whole folder 37 tests pass with `GATE_NET=tests/data/gate.net`. The 5 V test now follows connections (pull-up to a 5 V rail, 5 V output pins on an MCU net) and was shown to fail on a deliberately broken netlist; it still depends on the hand-listed output pins of U1, U5, U7, U11 | **run** |
 | 6 | Render looked at by eye (pdftoppm), overlaps fixed over three rounds | Remaining cosmetic issues: the up-pointing ground symbol on the OE pins of the two buffers (captioned), stacked pin numbers on the VBUS and GND pins of J1, small text overlaps near U6 | **run** |
 | 7 | Opened in the KiCad GUI, PCB update, other KiCad versions | not done | **not run** |
 
 The intent table is written by the same script that draws, so it proves that the drawn wires, labels and power symbols give the connections that the script meant to draw. It does not prove that those connections are the right circuit.
 
 ## 3. Findings
+
+**Goldfish review of this sheet (2026-11-05, `review-full-board-goldfish.md`, nothing was run by the reviewer):**
+- H1 GPIO2 and GPIO8 floated (module datasheet Table 4-1): **fixed**, R16 and R17 10 k to 3V3 (GPIO2 against glitches, GPIO8 = 1 for download boot and ROM printing left on; Table 4-3); test added.
+- H2 tests could not catch level errors: **partly fixed** (connection-based test, negative check run); the intent table still comes from the drawing script, so it proves the drawing matches the intent only.
+- M1 D+ pull-up back-feed into VBUS_IC through the USBLC6, M2 CC_OK_1A5 reads high with VBUS gone and 3V3 up (only HOLD_OK holds the gates; needs a firmware rule), M3 Zephyr console default on GPIO20/21, M4 hold-off threshold about 4.0 V below the TUSB321 4.5 V minimum, M5 "ADR" pin and VCONN on the TUSB321 symbol: **open**, not examined here.
+- M7 stale counts and warning source: **fixed** in this section.
+
 - **F1 update (2026-11-04, owner chose option b):** UART test points removed; GPIO20 and GPIO21 now read the enables of step 2 and step 3 through R14 and R15 (1 k, because GPIO21 is an output during ROM boot messages); 6 test points; 50 nets, ERC 0 errors, intent equals drawing, 35 tests pass (with `GATE_NET=tests/data/gate.net`), two runs identical. Module pins 30 and 31 read in the datasheet. Original finding below.
 - **F1 (HW-010 amendment): no GPIO is left for the gate-enable readback.** Used: GPIO0, 1, 3, 4, 5, 6, 7, 10 (the eight usable ones), 18 and 19 (USB), 20 and 21 (UART test points), 9 (boot test point), EN. The amendment asks for a readback of each gated step enable (EN2, EN3) as well as the hold-off. Options: (a) an I/O expander (one more part); (b) give GPIO20 and GPIO21 to the readbacks and drop the UART test points (HW-006 says programming and self-test go through the USB-C connector alone, so the UART points may be optional: owner decision); (c) read CC_OK and HOLD_OK only and drop the enable readbacks (the gate state is then inferred, not seen); (d) use the strapping pins GPIO2 or GPIO8 as inputs (risky, not examined). I recommend (b) or (c) for the first prototype.
 - **F2: the CC IC outputs sit at 5 V.** The pull-ups go to `VBUS_IC` (the output pins are rated VDD + 0.3 V, `datasheet-evidence-supervisor.md`), so the firmware must read the 3.3 V inverter outputs (`CC_OK_1A5`, `CC_OK_3A`), never the raw pins. A test checks that no 5 V net is on an MCU pin. That an ESP32-C3 GPIO is not 5 V tolerant is from general knowledge and **not read** in the module datasheet.

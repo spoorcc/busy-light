@@ -80,6 +80,33 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(self.pin_net[("U10", "4")], "HOLD_OK_RB")
         self.assertEqual(self.pin_net[("U9", "GPIO6")], "HOLD_OK_RB")
 
+    def test_no_mcu_net_is_pulled_to_5v_or_driven_by_a_5v_output(self):
+        """Derived from the connections, not from net names: a pull-up resistor to a 5 V rail, or a
+        output pin of a part that runs on 5 V (U1 7/8, U5 1, U7 6, U11 4) on the same net as an MCU pin."""
+        rails = {"VBUS", "VBUS_IC", "+5V"}
+        five_volt_outputs = {("U1", "7"), ("U1", "8"), ("U5", "1"), ("U7", "6"), ("U11", "4")}
+        for (ref, pin), net in self.pin_net.items():
+            if ref != "U9" or net in ("+3V3", "GND"):
+                continue
+            for (r2, p2) in self.intent[net]:
+                if r2[0] == "R":
+                    other = "2" if p2 == "1" else "1"
+                    self.assertNotIn(self.pin_net[(r2, other)], rails, f"U9 {pin}: {r2} pulls {net} to 5 V")
+                if (r2, p2) == ("U7", "4"):     # TPS2553 FAULT: open drain, must be pulled up to 3V3
+                    self.assertEqual(self.pin_net[("R8", "1")], "+3V3")
+                    self.assertEqual(self.pin_net[("R8", "2")], net)
+                    continue
+                self.assertNotIn((r2, p2), five_volt_outputs, f"U9 {pin} on {net} shares a net with {r2} pin {p2}")
+
+    def test_strapping_pins_have_defined_levels(self):
+        """Module datasheet Tables 4-1 and 4-3: GPIO2 and GPIO8 float by default; both pulled up."""
+        for pin, ref in (("GPIO2", "R16"), ("GPIO8", "R17")):
+            net = self.pin_net[("U9", pin)]
+            self.assertEqual(self.pin_net[(ref, "2")], net)
+            self.assertEqual(self.pin_net[(ref, "1")], "+3V3")
+            self.assertEqual({r for r, _ in self.intent[net]}, {"U9", ref})
+        self.assertEqual(layout_full.PARTS["R16"][-1], "10k")
+
     def test_gate_enable_readbacks(self):
         self.assertEqual(self.pin_net[("U3", "4")], "ILIM_STEP2_EN")
         self.assertEqual(self.pin_net[("U4", "4")], "ILIM_STEP3_EN")
@@ -94,7 +121,7 @@ class FullBoard(unittest.TestCase):
     def test_every_gpio_in_use_is_listed(self):
         used = {p[1] for p in self.pin_net if p[0] == "U9"} - {"3V3", "GND"}
         self.assertEqual(used, {"GPIO0", "GPIO1", "GPIO3", "GPIO10", "GPIO4", "GPIO5", "GPIO6", "GPIO7",
-                                "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "EN"})
+                                "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "GPIO2", "GPIO8", "EN"})
 
     def test_test_points(self):
         nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 7)}

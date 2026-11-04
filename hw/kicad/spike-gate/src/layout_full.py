@@ -73,6 +73,8 @@ for i in range(1, 17):
     PARTS[f"C{7 + i}"] = (*C, "100n")
 for i, n in enumerate(("TP_5V", "TP_3V3", "TP_GND", "TP_LED", "TP_EN", "TP_BOOT"), 1):
     PARTS[f"TP{i}"] = (*TP, n)
+PARTS["R16"] = (*R, "10k")
+PARTS["R17"] = (*R, "10k")
 PARTS["R14"] = (*R, "1k")
 PARTS["R15"] = (*R, "1k")
 
@@ -530,8 +532,20 @@ def _build():
         e = (P(ref, far)[0] - 5.08, a[1])
         s.wire(P(ref, far), e)
         s.label(net, e[0], e[1], 180)
-    s.nc(P("U9", "GPIO2"))
-    s.nc(P("U9", "GPIO8"))
+    # strapping pins GPIO2 and GPIO8 float by default (module datasheet Tables 4-1, 4-3): pull both
+    # up (GPIO2 against glitches, GPIO8 = 1 for download boot; GPIO8 = 1 also leaves UART0 ROM
+    # printing enabled while the eFuse default is unchanged)
+    dy = P("R9", "2")[1] - PLACE["R9"][1]
+    for pin, ref in (("GPIO2", "R16"), ("GPIO8", "R17")):
+        a = P("U9", pin)
+        s.bind("PULL_" + pin, "U9", pin)
+        PLACE[ref] = (30.0, a[1] - dy, 0)
+        s.put(ref)
+        s.bind("PULL_" + pin, ref, 2)
+        s.wire(a, (30.0, a[1]))
+        s.junction(*P(ref, "2"))
+        s.bind("+3V3", ref, 1)
+        s.pw("+3V3", (ref, "1"))
     # reset: pull-up and capacitor, test point
     en = P("U9", "EN")
     s.bind("CHIP_EN", "U9", "EN")
