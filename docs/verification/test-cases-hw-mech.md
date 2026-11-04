@@ -141,7 +141,7 @@
 
 - **Verifies:** HW-010
 - **Level:** Prototype
-- **Procedure:** TBD. Must include: scope of the IC supply, the IC output and each gate enable at plug-in on a default source and on a 1.5 A source; the hold-off time of at least [200] ms; the IC output forced low during the hold-off; repeated plug-in and a brown-out of the IC supply
+- **Procedure:** TBD. Must include: scope of the IC supply, the IC output and each gate enable at plug-in on a default source and on a 1.5 A source; the hold-off time of at least [200] ms; the IC output forced low during the hold-off; repeated plug-in and a brown-out of the IC supply; a VBUS dip to about 3.5 V for 10 to 100 ms after the hold-off is done (the full hold-off must start again; measure the discharge time of the delay capacitor of the supervisor, RISK-044); a shorted and an open delay capacitor and a supervisor output forced high (the gate must be shown to lose the hold-off, to size RISK-044)
 - **Expected result / pass criteria:** see acceptance criteria of HW-010
 - **Automated:** TBD
 - **Evidence:** TBD

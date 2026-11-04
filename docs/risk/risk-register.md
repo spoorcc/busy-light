@@ -478,3 +478,14 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Residual risk (after mitigation):** TUSB321 chosen by the owner 2026-11-04; datasheet confirms 0 to 70 C, the prototype must record the IC ambient (HW-003) with PTN5150A as fallback; the older PTN5150 states -40 to +85 C and is a candidate second source (PTN5150A not read; `docs/verification/reports/cc-ic-datasheet-evidence.md`)
 - **Verified by:** Design review of the BOM at G2 of ADR-0012; TC-203
 - **Status:** Open
+
+### RISK-044 Hold-off supervisor of the current-limit gate fails or is mis-set
+
+- **Hazard / failure mode:** The start-up hold-off of the gate (HW-010) is lost or too short: the supervisor output is stuck high or shorted, its delay capacitor is shorted, open, mis-valued (X7R loses capacitance under DC bias) or leaks, or a dip of VBUS does not discharge the capacitor and so does not restart the full delay
+- **Cause:** One extra part in the gate path (ADR-0016 spike, version 3); the delay is set by a capacitor (TPS3840: tD = 618937 x C + 50 us, datasheet constants); the datasheets do not state the discharge time of the delay capacitor or its leakage
+- **Effect:** An IC output glitch before its first debounce (RISK-042) can switch on the high current step for a source that advertises the default current
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** HW-010 (hold-off at least [200] ms, at most [600] ms), SW-005 (firmware waits for equal reads), `docs/verification/reports/datasheet-evidence-supervisor.md` on branch `spike/hw-gate` (candidate part TPS3840DL40; C0G or film capacitor at 5 % or better is needed for a 200 to 600 ms window)
+- **Residual risk (after mitigation):** Not assessed. Part not chosen (owner decision). Dip restart is not guaranteed by the datasheets and needs a bench or simulation check; a stuck-high output is a single fault that removes the hold-off, not covered by the gate itself
+- **Verified by:** TC-210 (dip and repeated plug-in), TC-203
+- **Status:** Open
