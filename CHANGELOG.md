@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Risk register: RISK-027 to RISK-030 (hardware current limit band, 5 V rail collapse, limit step stuck high, limit switch availability) from ADR-0010.
 - Continuous integration (`.github/workflows/ci.yml`): documentation checks, Python tool checks, hardware (`scripts/ci_hw.sh`), mechanical (`scripts/ci_mech.sh`) and software (`scripts/ci_sw.sh`) jobs; `pyproject.toml` for the tool environment. Hardware and mechanical jobs report NOT RUN until sources exist.
 - README rewritten as a project front page (honest status, planned features, roadmap); licences added: Apache-2.0 for code, CC BY-NC-SA 4.0 for documentation, hardware and mechanics (`LICENSE.md`, `LICENSES/`, `REUSE.toml`, `reuse lint` in CI); ADR-0013 (licensing, Accepted by the owner 2026-11-04); draft contribution terms in `CONTRIBUTING.md`.
 - ADR-0012 (hardware design flow, Proposed) with goldfish review RV-003, a KiCad feasibility spike report (Draft) and RISK-032 to RISK-034.

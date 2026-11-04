@@ -292,6 +292,50 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Verified by:** TC-203
 - **Status:** Open
 
+### RISK-027 Hardware current limit band is wider than the margin
+
+- **Hazard / failure mode:** The limit band is up to +25 % at 500 mA and up to about +5 % over the advertised 1500 mA at the top step, so the limit does not protect a source at its exact rating, or trips below the firmware value
+- **Cause:** Tolerance of the current-limit switch and of the set resistor (ADR-0010, finding 2)
+- **Effect:** Overloaded source, or a false trip on a legitimate draw
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** HW-010, SYS-020, ADR-0010
+- **Residual risk (after mitigation):** Not assessed; resistor values and the owner decision on the margin are open
+- **Verified by:** TC-203, TC-020
+- **Status:** Open
+
+### RISK-028 Peak above the limit collapses the 5 V rail
+
+- **Hazard / failure mode:** A peak above the constant-current limit lets the 5 V rail fall, the buck draws more current as a constant-power load, and the unit resets
+- **Cause:** Constant-current limiting without foldback; Wi-Fi and LED peaks coincide (ADR-0010, E5)
+- **Effect:** Brown-out reset in the field; related to RISK-004
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** HW-004, HW-010, ADR-0010 (firmware budget below the minimum hardware limit, bulk capacitance)
+- **Residual risk (after mitigation):** Not assessed; no simulation or bench evidence yet (behavioural model in `hw/sim/` proposed)
+- **Verified by:** TC-020, TC-203
+- **Status:** Open
+
+### RISK-029 Higher current step stays on after a firmware fault
+
+- **Hazard / failure mode:** The limit select output is driven high while the firmware hangs, or the select MOSFET shorts, so the higher step stays on
+- **Cause:** Single fault in the select path (ADR-0010)
+- **Effect:** The hardware backstop allows the higher limit; this single fault is not covered
+- **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
+- **Mitigated by:** HW-010, ADR-0010 (gate pull-downs, R1-only start state)
+- **Residual risk (after mitigation):** Not assessed; owner to accept or add a watchdog-driven drop to the lower step
+- **Verified by:** TC-020
+- **Status:** Open
+
+### RISK-030 Chosen current-limit switch unavailable or not recommended for new designs
+
+- **Hazard / failure mode:** The switch is an extended part, goes out of stock or is marked not recommended for new designs (as found for TPS2553-1 and AP22802)
+- **Cause:** Single-source part in a 5-year support period (SYS-021 cost)
+- **Effect:** Re-layout and re-verification for another part
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** HW-010, SYS-021, ADR-0010
+- **Residual risk (after mitigation):** Not assessed; second source with the same footprint to be named in the BOM
+- **Verified by:** Design review of the BOM at G2 of ADR-0012
+- **Status:** Open
+
 ### RISK-031 USB-C receptacle does not fit inside the LED ring
 
 - **Hazard / failure mode:** The receptacle (8.94 mm wide, reaching in to about R 16) collides with the LED ring (R 20, pitch 7.85 mm, LED bodies about 2 mm)
