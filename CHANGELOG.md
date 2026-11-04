@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- CI docs job: PlantUML 1.2026.8 pinned by SHA-256 (the Ubuntu package draws differently); block diagram uses the built-in layout engine so Graphviz versions cannot change it.
 - Draft requirements NEED-020 to NEED-022 (orientation, clock mode later, mounting), SYS-047, HW-011, MECH-007, MECH-008 and test-case stubs TC-047, TC-211, TC-307, TC-308; MECH-006 rewritten for the label on the back.
 - ADR-0014 (mounting interface on the back; Proposed: printed bayonet, fallback dovetail). Owner decisions recorded 2026-11-04: unit mounted horizontal and vertical, label on the back, orientation sensor added, clock mode in a later release.
 - Goldfish review RV-004 of plan 05 and ADR-0011 (housing): not ready for approval; 30 findings with resolutions and owner decisions listed. Plan 05 section 3 scores corrected to the ADR values.

@@ -1,5 +1,6 @@
 @startuml arch-system-blocks
 title Busy light - proposed blocks (draft)
+!pragma layout smetana
 left to right direction
 
 actor "User\n(phone browser)" as user
