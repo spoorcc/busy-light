@@ -1,0 +1,51 @@
+# Spike: full-board schematic, written by script
+
+- **Status:** Draft
+- **Date:** 2026-11-04
+- **Author:** Claude (exploratory spike on the owner's instruction "add all"). Not reviewed. Nothing here is Approved or Accepted.
+- **Related:** ADR-0012 (Proposed), ADR-0016, ADR-0010, ADR-0004, HW-001, HW-002, HW-003, HW-006, HW-007, HW-010, SW-009, RISK-044, `spike-hw-gate-fragment.md`, `spike-schematic-writer.md`
+- **Code:** branch `spike/hw-gate`, folder `hw/kicad/spike-gate/` (`src/layout_full.py`, `src/check_full.py`, `run_full.sh`, `tests/test_layout_full.py`). Exploratory. It must not merge as product design while ADR-0012 is Proposed.
+- **Labels:** every result is marked **run** or **not run**.
+
+## 1. What was built
+One A3 sheet, drawn by `layout_full.py` in the same hand-laid style as the gate sheet (wires for local connections, net labels for the rest, power symbols, captions, title block). Sections:
+- **USB-C input:** J1 (KiCad `USB_C_Receptacle_USB2.0_16P`), a TVS on VBUS, an ESD part on D+/D- (`USBLC6-2P6`), CC1 and CC2 only to the CC IC.
+- **CC detection and the ADR-0016 gate:** U1 (TUSB321, generated box symbol, PORT tied low, VBUS_DET through 887 kohm, pull-ups to the IC supply), two 3.3 V inverters (OUT1 and OUT2), the two 3-input ANDs, pull-downs, the two ILIM MOSFET switches (same refs as the gate fragment).
+- **Hold-off:** U5 (TPS3840DL40 candidate, generated box), delay capacitor, pull-up to the IC supply.
+- **Current limit:** U7 TPS2553 (generated box), EN tied to VBUS, base ILIM resistor plus the two switched ones, FAULT_N pull-up, output capacitor.
+- **Supply:** U8 3.3 V regulator (placeholder box, part not chosen), input and output capacitors, rail markers with power flags.
+- **MCU:** U9 ESP32-C3-MINI-1 (generated box), EN pull-up and capacitor, USB, UART, boot, readback inputs.
+- **Button (HW-007):** series resistor, pull-up, ESD diode, switch.
+- **Buffers:** `HOLD_OK` (5 V) to 3.3 V buffer for the MCU; 5 V LED data buffer (HW-002) with pull-down.
+- **LEDs (HW-001, HW-002):** 16 WS2812B in a chain (two rows of eight), 100 nF each, 330 ohm series resistor at the first LED, a bulk capacitor on 5 V. The sheet shows a chain, not the circle: the geometry is a PCB matter.
+- **Test points (HW-006):** 5 V, 3.3 V, GND, TX, RX, LED data, EN, BOOT.
+- **Size:** 82 part references (16 LEDs, 16 LED capacitors, 8 test points, 12 ICs and boxes), plus power symbols and flags (217 symbol instances in the file), 50 nets with more than one pin.
+
+## 2. Results
+| # | Check | Result | Status |
+|---|-------|--------|--------|
+| 1 | kicad-cli ERC, errors | 0 | **run** |
+| 2 | ERC, all severities | 302 warnings, all "library not configured" (85 footprint, 217 symbol): the libraries are not in a project table. 0 off-grid endpoints after snapping all coordinates to the 1.27 mm grid | **run** |
+| 3 | Intent table versus the netlist exported from the drawn sheet (`check_full.py`) | 50 nets in each, 0 only in the intent, 0 only in the drawing | **run** |
+| 4 | Determinism (`run_full.sh`) | two generations byte-identical | **run** |
+| 5 | Tests | `test_layout_full.py` 10 tests pass (chain, capacitors, HW-007 strapping pins, no 5 V net on an MCU pin, CC IC wiring, TPS2553 path, gate and readbacks, GPIO list, test points, determinism); whole folder 33 tests pass | **run** |
+| 6 | Render looked at by eye (pdftoppm), overlaps fixed over three rounds | Remaining cosmetic issues: the up-pointing ground symbol on the OE pins of the two buffers (captioned), stacked pin numbers on the VBUS and GND pins of J1, small text overlaps near U6 | **run** |
+| 7 | Opened in the KiCad GUI, PCB update, other KiCad versions | not done | **not run** |
+
+The intent table is written by the same script that draws, so it proves that the drawn wires, labels and power symbols give the connections that the script meant to draw. It does not prove that those connections are the right circuit.
+
+## 3. Findings
+- **F1 (HW-010 amendment): no GPIO is left for the gate-enable readback.** Used: GPIO0, 1, 3, 4, 5, 6, 7, 10 (the eight usable ones), 18 and 19 (USB), 20 and 21 (UART test points), 9 (boot test point), EN. The amendment asks for a readback of each gated step enable (EN2, EN3) as well as the hold-off. Options: (a) an I/O expander (one more part); (b) give GPIO20 and GPIO21 to the readbacks and drop the UART test points (HW-006 says programming and self-test go through the USB-C connector alone, so the UART points may be optional: owner decision); (c) read CC_OK and HOLD_OK only and drop the enable readbacks (the gate state is then inferred, not seen); (d) use the strapping pins GPIO2 or GPIO8 as inputs (risky, not examined). I recommend (b) or (c) for the first prototype.
+- **F2: the CC IC outputs sit at 5 V.** The pull-ups go to `VBUS_IC` (the output pins are rated VDD + 0.3 V, `datasheet-evidence-supervisor.md`), so the firmware must read the 3.3 V inverter outputs (`CC_OK_1A5`, `CC_OK_3A`), never the raw pins. A test checks that no 5 V net is on an MCU pin. That an ESP32-C3 GPIO is not 5 V tolerant is from general knowledge and **not read** in the module datasheet.
+- **F3: `HOLD_OK` (5 V) enters a 3.3 V buffer (U10, 74LVC1G125).** The 5 V input is within the rating of the 74LVC1G04 and 74LVC1G11 (read); the datasheet of the 74LVC1G125 was **not read**, so its 5 V input tolerance and its behaviour with 3.3 V absent are assumptions.
+- **F4: the LED buffer (U11, 74AHCT1G125) runs on 5 V with a 3.3 V input.** HW-002 asks for a TTL-compatible input; the AHCT datasheet was **not read**.
+- **F5: second CC output.** OUT2 is used for a second reading (`CC_OK_3A`, an extra inverter U12 and pull-up R7); the TUSB321 table says OUT2 is not a clean 3 A signal (default 900 mA case), so its meaning in the firmware is open (`cc-ic-datasheet-evidence.md` row 5).
+- **F6: sequence of rails.** The CC IC, the supervisor and the TPS2553 input are on raw VBUS; the LEDs and the regulator are on the switched `+5V`. The 3.3 V rail therefore drops when VBUS drops, which makes the "VBUS gone, 3.3 V still up" case of the goldfish review (H1) a short decay, not a steady state. It is still not simulated.
+- **F7: TPS2553 pin order is from memory.** IN 1, GND 2, EN 3, FAULT 4, ILIM 5, OUT 6 was **not read** in a datasheet; ADR-0010 states the package (SOT-23-6) only.
+- **F8: part pins that are not read.** U9: the module's pin numbers (the box uses function names, and the GPIO assignment to D+ and D- is from memory); U1: only OUT1 = pin 7 and OUT2 = pin 8 are numbered, the rest use pin names; U7 as above.
+- **F9: effort.** Placing and wiring about 80 references by hand-coded coordinates took many render-and-fix rounds; the writer is a drawing tool, not a placer. A real design needs either this effort per sheet or the KiCad GUI.
+
+## 4. Not drawn, not done
+- The accelerometer (HW-011, no part), the antenna and module placement (ADR-0003), a fuse or ferrite, the series resistor and clamp on the CC lines (HW-003 leaves their values to the datasheet), the connector shield network, the ILIM resistor values, bulk and decoupling values (all marked "tbd"), per-pin decoupling of the buffers, the rest of the BOM and the footprints (footprint names in the file are guesses, not checked).
+- The ring geometry and the peg-azimuth conflict (ADR-0012 gate G1) are PCB matters and are not touched.
+- A goldfish review of this sheet, a power budget, any simulation, any DRC.

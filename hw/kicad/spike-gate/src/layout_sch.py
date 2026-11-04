@@ -24,7 +24,7 @@ NS_LIB = "busylight_gate"
 SIZE = 1.27
 
 
-def box_symbol(name, pins, half_w=7.62, half_h=10.16, ref="U"):
+def box_symbol(name, pins, half_w=7.62, half_h=10.16, ref="U", hide_numbers=False):
     """Library symbol text: rectangle body and pins (number, name, side, offset, etype).
 
     side is top/bottom/left/right; offset (mm) is along the side; pins are 5.08 mm long and their
@@ -42,7 +42,8 @@ def box_symbol(name, pins, half_w=7.62, half_h=10.16, ref="U"):
         out.append(f'(pin {etype} line (at {x} {y} {ang}) (length 5.08) '
                    f'(name "{pname}" (effects (font (size {SIZE} {SIZE})))) '
                    f'(number "{num}" (effects (font (size {SIZE} {SIZE})))))')
-    txt = f'''(symbol "{name}" (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)
+    hn = " (pin_numbers hide)" if hide_numbers else ""
+    txt = f'''(symbol "{name}"{hn} (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)
  (property "Reference" "{ref}" (at 0 0 0) (effects (font (size {SIZE} {SIZE}))))
  (property "Value" "{name}" (at 0 0 0) (effects (font (size {SIZE} {SIZE}))))
  (property "Footprint" "" (at 0 0 0) (effects (font (size {SIZE} {SIZE})) hide))
