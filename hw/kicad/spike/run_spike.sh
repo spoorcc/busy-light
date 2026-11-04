@@ -9,7 +9,7 @@ run() {  # $1 = output dir
   kicad-cli sch export netlist --format kicadsexpr --output "$1/spike.net" "$1/spike.kicad_sch" >/dev/null
   PYTHONPATH="$HERE/src" "$PY" "$HERE/src/gen_pcb.py" "$1/spike.net" "$1/spike.kicad_pcb" 2>&1 | grep -v assert
   cp "$HERE/libs/spike.kicad_pro" "$1/"   # pcbnew overwrites the project file when it saves a board: restore the reviewed rules
-  PYTHONPATH="$HERE/src" "$PY" "$HERE/src/dump_design.py" "$1/spike.net" "$1/spike.kicad_pcb" 2>/dev/null > "$1/dump.json"
+  PYTHONPATH="$HERE/src" "$PY" "$HERE/src/dump_design.py" "$1/spike.net" "$1/spike.kicad_pcb" "$1/spike.kicad_pro" 2>/dev/null > "$1/dump.json"
 }
 G1=0
 A="$(mktemp -d)"; B="$(mktemp -d)"
@@ -19,16 +19,33 @@ echo "== requirement fields"; PYTHONPATH="$HERE/src" "$PY" "$HERE/src/check_req_
 echo "== semantic equality of two runs"; diff -q "$A/dump.json" "$B/dump.json" && echo "semantic dumps identical"
 echo "== schematic byte equality of two runs"; cmp "$A/spike.kicad_sch" "$B/spike.kicad_sch" && echo "schematic bytes identical" || echo "schematic bytes differ"
 echo "== DRC (run only; routing not done)"; kicad-cli pcb drc --severity-all --schematic-parity --output "$A/drc.rpt" "$A/spike.kicad_pcb" | tail -2
+dump_routed() { PYTHONPATH="$HERE/src" "$PY" "$HERE/src/dump_design.py" "$1/spike.net" "$1/routed.kicad_pcb" "$1/routed.kicad_pro" 2>/dev/null > "$2"; }
+finish() { cp "$1/spike.kicad_sch" "$1/routed.kicad_sch"; cp "$HERE/libs/spike.kicad_pro" "$1/routed.kicad_pro"; }
 if [[ -n "${FREEROUTING_JAR:-}" ]]; then
   echo "== Freerouting (scripted) and DRC of the routed board"
   PYTHONPATH="$HERE/src" "$PY" "$HERE/src/route_freerouting.py" "$A/spike.kicad_pcb" "$A/routed.kicad_pcb" "$FREEROUTING_JAR" "$FREEROUTING_SHA256" 2>&1 | grep -v assert
-  cp "$A/spike.kicad_sch" "$A/routed.kicad_sch"; cp "$A/spike.kicad_pro" "$A/routed.kicad_pro"
+  finish "$A"; dump_routed "$A" "$A/routed.dump.json"
   kicad-cli pcb drc --severity-all --schematic-parity --output "$A/routed-drc.rpt" "$A/routed.kicad_pcb" | tail -3
   grep "^\[" "$A/routed-drc.rpt" | sed 's/\].*//' | sort | uniq -c || true
   N="$(grep -c "^\[" "$A/routed-drc.rpt" || true)"
   echo "G1 routed DRC: ${N} violation lines (criterion: 0)"; [[ "$N" == "0" ]] || G1=1
+  echo "== second router run (information: Freerouting is not deterministic)"
+  PYTHONPATH="$HERE/src" "$PY" "$HERE/src/route_freerouting.py" "$B/spike.kicad_pcb" "$B/routed.kicad_pcb" "$FREEROUTING_JAR" "$FREEROUTING_SHA256" 2>&1 | grep -v assert
+  finish "$B"; dump_routed "$B" "$B/routed.dump.json"
+  diff -q "$A/routed.dump.json" "$B/routed.dump.json" >/dev/null && echo "two router runs: identical" || echo "two router runs: DIFFER (the stored session is the input, not the router run)"
+  if [[ "${UPDATE_EXPECTED:-0}" == "1" ]]; then
+    cp "$A/routed.kicad_pcb.ses" "$HERE/expected/routed.ses"; cp "$A/routed.dump.json" "$HERE/expected/routed.dump.json"; echo "expected session and dump updated"
+  fi
+fi
+if [[ -f "$HERE/expected/routed.ses" ]]; then
+  echo "== regeneration gate: import the stored session, dump must equal the committed dump"
+  C="$(mktemp -d)"; cp "$A"/spike.* "$A"/*lib-table "$C/"
+  PYTHONPATH="$HERE/src" "$PY" "$HERE/src/route_freerouting.py" "$C/spike.kicad_pcb" "$C/routed.kicad_pcb" "" "" "$HERE/expected/routed.ses" 2>&1 | grep -v assert || true
+  finish "$C"; dump_routed "$C" "$C/routed.dump.json"
+  diff -q "$C/routed.dump.json" "$HERE/expected/routed.dump.json" && echo "matches committed dump" || { echo "DIFFERS from committed dump"; G1=1; }
+  kicad-cli pcb drc --severity-all --schematic-parity --output "$C/gate-drc.rpt" "$C/routed.kicad_pcb" | tail -3
 else
-  echo "== Freerouting NOT RUN (set FREEROUTING_JAR and FREEROUTING_SHA256)"
+  echo "== regeneration gate NOT RUN (no expected/routed.ses)"
 fi
 if [[ -n "${HOUSING_DIR:-}" ]]; then
   echo "== FreeCAD fit check (board STEP vs housing STEP)"

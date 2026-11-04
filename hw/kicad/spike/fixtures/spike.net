@@ -1,0 +1,1941 @@
+(export
+	(version "E")
+	(design
+		(source "/tmp/tmp.hgvosJiT9q/spike.kicad_sch")
+		(date "2026-11-04T08:12:05")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "busy-light spike")
+				(company)
+				(rev)
+				(date)
+				(source "spike.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "D1")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d98cdbe2-5e09-56b8-8b09-787ee41ef470")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D2")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1004346c-e743-592d-b4ad-981dfa4c4d88")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D3")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b23215af-d02c-5926-ab07-f3f7a1c3ff03")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D4")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2da3449f-8260-5b1e-96b4-e210f69a814f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D5")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8259bcbe-6170-5ec4-8ff6-8fb99da51e23")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D6")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ea8e6cac-ce27-5dae-aa41-12b02288cf17")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D7")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1d6a58a0-b33f-53e4-b802-fc538a00e5e6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D8")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "31694a3e-8510-54d0-801a-714c6d19deef")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D9")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5ad04872-8ce5-55ad-a0c1-7536fc23ed93")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D10")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4d86c4e6-a299-548f-a100-0f7a7f1bdb43")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D11")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6b0b98bc-ce76-5a4a-a586-8894e54961cc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D12")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a6c6db5f-0748-5ac2-a6bd-2154b3264aa8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D13")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9cdae996-b7dc-55b5-b28b-da058ad4022b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D14")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e5980b1d-1ae2-5082-ab63-1054e516f98b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D15")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "cad3aca5-18c4-538c-b134-411f5a4532d7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D16")
+			(value "WS2812B-2020")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "43d45415-5094-5e39-96c8-a8e2a391ac93")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "Conn_01x04")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "HW_REQ") "HW-001")
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x04")
+				(description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-001")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0b48a8e8-9c5c-5905-8fb7-02f3e28c3dce")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U1")
+			(value "74AHCT1G125")
+			(footprint "Package_TO_SOT_SMD:SOT-23-5")
+			(fields
+				(field
+					(name "HW_REQ") "HW-002")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "74xGxx")
+				(part "74AHCT1G125")
+				(description "Single Buffer Gate Tri-State, Low-Voltage CMOS")
+			)
+			(property
+				(name "HW_REQ")
+				(value "HW-002")
+			)
+			(property
+				(name "Sheetname")
+				(value "spike")
+			)
+			(property
+				(name "Sheetfile")
+				(value "spike.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Single Gate Buff Tri-State LVC CMOS")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT* SG-*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "502bf998-520e-5dc4-914f-37e55fc443c4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "74xGxx")
+			(part "74AHCT1G125")
+			(description "Single Buffer Gate Tri-State, Low-Voltage CMOS")
+			(docs "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf")
+			(footprints
+				(fp "SOT*")
+				(fp "SG-*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "74AHCT1G125")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf")
+				(field
+					(name "Description") "Single Buffer Gate Tri-State, Low-Voltage CMOS")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "")
+					(type "tri_state")
+				)
+				(pin
+					(num "5")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_01x04")
+			(description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x04")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "LED")
+			(part "WS2812B-2020")
+			(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			(docs "https://cdn-shop.adafruit.com/product-files/4684/4684_WS2812B-2020_V1.3_EN.pdf")
+			(footprints
+				(fp "LED*WS2812*-2020_PLCC4*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "WS2812B-2020")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet") "https://cdn-shop.adafruit.com/product-files/4684/4684_WS2812B-2020_V1.3_EN.pdf")
+				(field
+					(name "Description") "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "DOUT")
+					(type "output")
+				)
+				(pin
+					(num "2")
+					(name "VSS")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "DIN")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "VDD")
+					(type "power_in")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "74xGxx")
+			(uri "/usr/share/kicad/symbols/74xGxx.kicad_sym")
+		)
+		(library
+			(logical "Connector_Generic")
+			(uri "/usr/share/kicad/symbols/Connector_Generic.kicad_sym")
+		)
+		(library
+			(logical "LED")
+			(uri "/usr/share/kicad/symbols/LED.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "/+5V")
+			(class "Power")
+			(node
+				(ref "D1")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D10")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D11")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D12")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D13")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D14")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D15")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D16")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D2")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D3")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D4")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D5")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D6")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D7")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D8")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D9")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "1")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "5")
+				(pinfunction "VCC_5")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "2")
+			(name "/D1")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D2")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "3")
+			(name "/D2")
+			(class "Default")
+			(node
+				(ref "D2")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D3")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "4")
+			(name "/D3")
+			(class "Default")
+			(node
+				(ref "D3")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D4")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "5")
+			(name "/D4")
+			(class "Default")
+			(node
+				(ref "D4")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D5")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "6")
+			(name "/D5")
+			(class "Default")
+			(node
+				(ref "D5")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D6")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "7")
+			(name "/D6")
+			(class "Default")
+			(node
+				(ref "D6")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D7")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "8")
+			(name "/D7")
+			(class "Default")
+			(node
+				(ref "D7")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D8")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "9")
+			(name "/D8")
+			(class "Default")
+			(node
+				(ref "D8")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D9")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "10")
+			(name "/D9")
+			(class "Default")
+			(node
+				(ref "D10")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+			(node
+				(ref "D9")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "11")
+			(name "/D10")
+			(class "Default")
+			(node
+				(ref "D10")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D11")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "12")
+			(name "/D11")
+			(class "Default")
+			(node
+				(ref "D11")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D12")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "13")
+			(name "/D12")
+			(class "Default")
+			(node
+				(ref "D12")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D13")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "14")
+			(name "/D13")
+			(class "Default")
+			(node
+				(ref "D13")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D14")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "15")
+			(name "/D14")
+			(class "Default")
+			(node
+				(ref "D14")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D15")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "16")
+			(name "/D15")
+			(class "Default")
+			(node
+				(ref "D15")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D16")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "17")
+			(name "/D_END")
+			(class "Default")
+			(node
+				(ref "D16")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "J1")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "18")
+			(name "/GND")
+			(class "Power")
+			(node
+				(ref "D1")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D10")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D11")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D12")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D13")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D14")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D15")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D16")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D2")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D3")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D4")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D5")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D6")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D7")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D8")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "D9")
+				(pin "2")
+				(pinfunction "VSS_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "3")
+				(pinfunction "GND_3")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "19")
+			(name "/LED_DATA")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "20")
+			(name "/MCU_DATA")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pintype "input")
+			)
+		)
+	)
+)
