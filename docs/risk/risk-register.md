@@ -288,7 +288,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Unit does not start or cannot read the advertised current
 - **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
 - **Mitigated by:** SYS-020, HW-003
-- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; with ADR-0016 the CC pins belong to a detection IC and its datasheet rating and a clamp must be checked (the ADC pin no longer touches CC)
+- **Residual risk (after mitigation):** Pin voltage rating still *not found* in the sources read; with ADR-0016 the CC pins belong to a detection IC (the ADC pin no longer touches CC); TUSB321 datasheet: CC pins 6 V absolute maximum, 7 kV HBM (`docs/verification/reports/cc-ic-datasheet-evidence.md`); a fault above 6 V on CC and a clamp are still to decide
 - **Verified by:** TC-203
 - **Status:** Open
 
@@ -299,7 +299,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source, or a false trip on a legitimate draw
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** HW-010, SYS-020, ADR-0010
-- **Residual risk (after mitigation):** Not assessed; resistor values and the owner decision on the margin are open
+- **Residual risk (after mitigation):** Band chosen by owner instruction 2026-11-04 (ADR-0010 open points 1 and 2): 506 to 623 mA at the first step with a 500 mA firmware budget; 1366 to 1577 mA at the top step with a 1350 mA firmware value. The limit can be up to about 5 % over a 1.5 A source rating in a fault; not assessed further. Owner confirmation, bench values (TC-210) and the thermal analysis are open
 - **Verified by:** TC-203, TC-020
 - **Status:** Open
 
@@ -464,7 +464,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Overloaded source or cable; the hardware gate no longer protects (it is independent of firmware faults only)
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** HW-003, HW-010, ADR-0016
-- **Residual risk (after mitigation):** Not assessed; band-edge and fault-injection tests are open; a diverse second opinion (ADC or comparator) is not part of ADR-0016
+- **Residual risk (after mitigation):** Not assessed; band-edge and fault-injection tests are open; a diverse second opinion (ADC or comparator) is not part of ADR-0016; a start-up hold-off of at least [200] ms on the gate is required (HW-010) because the IC output level before its first debounce is not stated
 - **Verified by:** TC-203, TC-210
 - **Status:** Open
 
@@ -475,6 +475,17 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** Misreads at temperature, assembly yield loss, or a re-layout for another part
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
 - **Mitigated by:** HW-003, ADR-0016 item 3 (checks before a part is fixed), SYS-021
-- **Residual risk (after mitigation):** Not assessed; no second source named
+- **Residual risk (after mitigation):** TUSB321 chosen by the owner 2026-11-04; datasheet confirms 0 to 70 C, the prototype must record the IC ambient (HW-003) with PTN5150A as fallback; the older PTN5150 states -40 to +85 C and is a candidate second source (PTN5150A not read; `docs/verification/reports/cc-ic-datasheet-evidence.md`)
 - **Verified by:** Design review of the BOM at G2 of ADR-0012; TC-203
+- **Status:** Open
+
+### RISK-044 Hold-off supervisor of the current-limit gate fails or is mis-set
+
+- **Hazard / failure mode:** The start-up hold-off of the gate (HW-010) is lost or too short: the supervisor output is stuck high or shorted, its delay capacitor is shorted, open, mis-valued (X7R loses capacitance under DC bias) or leaks, or a dip of VBUS does not discharge the capacitor and so does not restart the full delay
+- **Cause:** One extra part in the gate path (ADR-0016 spike, version 3); the delay is set by a capacitor (TPS3840: tD = 618937 x C + 50 us, datasheet constants); the datasheets do not state the discharge time of the delay capacitor or its leakage
+- **Effect:** An IC output glitch before its first debounce (RISK-042) can switch on the high current step for a source that advertises the default current
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** HW-010 (hold-off at least [200] ms, at most [600] ms), SW-005 (firmware waits for equal reads), `docs/verification/reports/datasheet-evidence-supervisor.md` on branch `spike/hw-gate` (candidate part TPS3840DL40; C0G or film capacitor at 5 % or better is needed for a 200 to 600 ms window)
+- **Residual risk (after mitigation):** Not assessed. Part not chosen (owner decision). Dip restart is not guaranteed by the datasheets and needs a bench or simulation check; a stuck-high output is a single fault that removes the hold-off, not covered by the gate itself; with the CC IC output pulled up to VBUS_IC, a supervisor stuck high is the only barrier left when VBUS is gone and 3V3 is still up (goldfish v3a H1); a dip to 4.1 to 4.4 V (between the supervisor threshold and the 4.5 V of the CC IC) gives no restart; faults of C1, R6 and the inverter are silent; the firmware cannot see the gate state (SW-009, Draft)
+- **Verified by:** TC-210 (dip and repeated plug-in), TC-203
 - **Status:** Open

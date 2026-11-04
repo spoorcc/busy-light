@@ -38,3 +38,49 @@
 - **Automated:** TBD
 - **Evidence:** TBD
 
+
+### TC-105 Raise the current limit only after a stable reading
+
+- **Verifies:** SW-005
+- **Level:** Unit / integration, then bench with TC-203
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SW-005
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-106 Reduce load before lowering the current step
+
+- **Verifies:** SW-006
+- **Level:** Unit / integration, then bench with TC-203
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SW-006
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-107 Back-off after a brown-out reset
+
+- **Verifies:** SW-007
+- **Level:** Unit / integration, then bench with TC-203
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SW-007
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-108 Tolerance of Power Delivery traffic and source changes
+
+- **Verifies:** SW-008
+- **Level:** Unit / integration, then bench with TC-203
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SW-008
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-109 Follow the hardware gate state and shed load
+
+- **Verifies:** SW-009
+- **Level:** Unit / integration, then bench with TC-210
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of SW-009
+- **Automated:** TBD
+- **Evidence:** TBD
+
