@@ -1,11 +1,5 @@
-ERC WARNING: Merging two named nets (SEL_STEP2_GPIO and GND) into SEL_STEP2_GPIO.
-ERC WARNING: Merging two named nets (SEL_STEP3_GPIO and SEL_STEP2_GPIO) into SEL_STEP3_GPIO.
 ERC WARNING: Only one pin (PASSIVE pin 4/Pin_4 of Conn_01x05/U1) attached to net CC_OUT2_N.
 ERC WARNING: Only one pin (PASSIVE pin 5/Pin_5 of Conn_01x05/U1) attached to net CC_RESERVED.
-ERC WARNING: Only one pin (PASSIVE pin 2/ of R/R_ILIM2) attached to net ILIM.
-ERC WARNING: Only one pin (PASSIVE pin 2/ of R/R_ILIM3) attached to net ILIM1.
-ERC WARNING: Unconnected pin: POWER-IN pin 2/GND of 74LVC1G11/U3.
-ERC WARNING: Unconnected pin: POWER-IN pin 2/GND of 74LVC1G11/U4.
-ERC INFO: 8 warnings found while running ERC.
+ERC INFO: 2 warnings found while running ERC.
 ERC INFO: 0 errors found while running ERC.
 

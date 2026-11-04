@@ -77,13 +77,32 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(self.nets, "U3", "6"), hold)
         self.assertEqual(net_of(self.nets, "U4", "6"), hold)
 
-    def test_hold_off_rc_is_charged_from_ic_supply_and_discharged_on_unplug(self):
-        rc = net_of(self.nets, "R6", "2")
+    def test_hold_off_supervisor_on_ic_supply_with_pullup_to_ic_supply(self):
+        # Pull-up to VBUS_IC (not 3V3): an unpowered supervisor must read "hold-off not done".
+        self.assertEqual(net_of(self.nets, "U5", "1"), "VBUS_IC")
         self.assertEqual(net_of(self.nets, "R6", "1"), "VBUS_IC")
-        self.assertEqual(net_of(self.nets, "C1", "1"), rc)
-        self.assertEqual(net_of(self.nets, "U5", "2"), rc)
-        self.assertEqual(net_of(self.nets, "D1", "2"), rc)       # anode on the RC node
-        self.assertEqual(net_of(self.nets, "D1", "1"), "VBUS_IC")  # cathode on the supply
+        self.assertEqual(net_of(self.nets, "R6", "2"), "HOLD_OK")
+        self.assertEqual(net_of(self.nets, "C1", "1"), net_of(self.nets, "U5", "3"))
+        self.assertEqual(net_of(self.nets, "C1", "2"), "GND")
+
+    def test_no_single_pin_named_nets_except_placeholders(self):
+        # Review finding: Net("ILIM") created twice gave two one-pin nets that parity ignored.
+        allowed = {"CC_OUT2_N", "CC_RESERVED"}
+        for name, pins in self.nets.items():
+            real = {p for p in pins if not p[0].startswith("#")}
+            if len(real) < 2 and name not in allowed and not name.startswith("unconnected"):
+                self.fail(f"net {name} has only {sorted(real)}")
+
+    def test_ilim_is_one_net_with_both_switches(self):
+        self.assertEqual(net_of(self.nets, "R_ILIM2", "2"), "ILIM")
+        self.assertEqual(net_of(self.nets, "R_ILIM3", "2"), "ILIM")
+
+    def test_six_pin_gates_use_a_six_pin_footprint(self):
+        text = os.environ["GATE_NET"]
+        text = Path(text).read_text()
+        for ref in ("U3", "U4"):
+            blk = text[text.index(f'(ref "{ref}")'):][:600]
+            self.assertIn("SOT-23-6", blk)
 
     def test_both_ands_share_the_same_ic_path(self):
         # Finding H1 of RV-008: one IC fault reaches both steps and the firmware read.

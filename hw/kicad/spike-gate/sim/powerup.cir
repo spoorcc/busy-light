@@ -1,34 +1,39 @@
 * SPDX-License-Identifier: Apache-2.0
-* Spike: power-up of the ADR-0016 gate. Behavioural, ideal logic with thresholds at 50 % of VCC.
-* Scenario A: advertised default (IC output released, pulled up). Gate must stay low.
-* Scenario C: as B and the firmware raises the select line at 4 ms, inside the glitch.
-* Scenario B: IC output glitches low for 2 ms while the 3V3 rail is already up (assumed; not from a datasheet).
+* Spike (version 3): power-up and VBUS dip of the ADR-0016 gate with a supervisor-type hold-off.
+* Behavioural, ideal logic with thresholds at 50 % of VCC. ALL numbers below are assumptions, not datasheet values.
+* VBUS (5 V) feeds the CC IC and the supervisor; the 3V3 rail feeds the inverter and the AND gates.
+* Supervisor: reset (hold low) while VBUS < 4.2 V; after VBUS >= 4.2 V the delay node charges
+* through 1 Mohm into CT (tau = 1 Mohm * CT); output released at half rail, pulled up to VBUS_IC.
+* Scenarios: A default advertised; B IC glitch, select high; C glitch, no hold-off; D to G hold-off;
+* H VBUS dip to 3.5 V after the hold-off was done, then IC glitch while it debounces again.
 .param tr=1m
 Vrail 3v3 0 PWL(0 0 {tr} 3.3)
-* firmware select GPIO: driven high by firmware 5 ms after the rail is up (worst case for the gate)
+Vbus vbus 0 PWL(0 0 {tr} 5 {d0} 5 {d0+1m} 3.5 {d1} 3.5 {d1+1m} 5)
 Vsel sel 0 PWL(0 0 {tsel} 0 {tsel+10u} 3.3)
-* open-drain IC output: released = high-Z; scenario switch ICLOW closes a switch to ground
 Rpu 3v3 out1n 100k
 Cpin out1n 0 20p
 Sic out1n 0 icdrv 0 SWM
-Bdrv icdrv 0 V = {glitch} * ((time > 3m && time < {tgend}) ? 1 : 0)
+Bdrv icdrv 0 V = {glitch} * ((time > {tgs} && time < {tgend}) ? 1 : 0)
 .model SWM SW(Vt=0.5 Vh=0.05 Ron=100 Roff=1e9)
-* inverter and AND as behavioural sources with 10 ns delay (RC), thresholds at half of the rail
 Binv invraw 0 V = {V(3v3)} * (V(out1n) < 0.5*V(3v3) ? 1 : 0)
 Rinv invraw ok 1k
 Cinv ok 0 10p
-* hold-off: RC from the rail (1 Mohm, chold); the AND has a third input HOLD (HW-010 start-up hold-off)
-Rh 3v3 hold 1Meg
-Ch hold 0 {chold}
+* supervisor: delay node; fast discharge while in reset
+Btd tdraw 0 V = (V(vbus) > 4.2) ? 5 : 0
+Rtd tdraw td R = '(V(tdraw) > 2.5) ? 1Meg : 1k'
+Ctd td 0 {chold}
+* open-drain output: pulled down while the delay node is below half rail or VBUS is low; pull-up to VBUS
+Rhp vbus hold 100k
+Shd hold 0 rst 0 SWM
+Brst rst 0 V = (V(td) < 2.5) ? 1 : 0
 Band enraw 0 V = {V(3v3)} * ((V(ok) > 0.5*V(3v3) && V(sel) > 0.5*V(3v3) && V(hold) > 0.5*V(3v3)) ? 1 : 0)
 Ren enraw en 1k
 Cen en 0 10p
-* pull-down on the enable net (100 k) loads the 1k source: negligible
 Rpd en 0 100k
-.param glitch=GLITCH tsel=TSEL tgend=TGEND chold=CHOLD
+.param glitch=GLITCH tgs=TGS tgend=TGEND tsel=TSEL chold=CHOLD d0=DIP0 d1=DIP1
 .control
 set noaskquit
-tran 20u 600m
+tran 20u 1200m
 meas tran en_max MAX v(en)
 meas tran ok_max MAX v(ok)
 meas tran en_t WHEN v(en)=1.65 RISE=1

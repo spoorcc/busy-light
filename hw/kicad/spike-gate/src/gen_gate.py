@@ -4,7 +4,7 @@
 Generic parts only: no part number is fixed (ADR-0016 item 3). Placeholder reference
 designators. Output: gate.net and gate.kicad_sch in the output directory.
 Traces to HW-010 (Approved 2026-11-04), HW-003 (Approved 2026-11-04), ADR-0016.
-Version 2: IC supplied from VBUS, start-up hold-off timer, 3-input AND (spike finding F8, F9).
+Version 3: IC supplied from VBUS, supervisor-type hold-off (restarts after a VBUS dip), 3-input AND.
 """
 import os
 import sys
@@ -49,24 +49,24 @@ inv[3] += GND
 inv[2] += out1_n
 inv[4] += ok
 
-# Start-up hold-off (HW-010): RC from the IC supply into a Schmitt buffer, so the gate stays
-# closed while the CC IC debounces. The diode empties C when VBUS goes away (new plug-in = new hold-off).
-hold_rc, hold_ok = Net("HOLD_RC"), Net("HOLD_OK")
-r_h = Part("Device", "R", ref="R6", value="1M 1%", footprint="Resistor_SMD:R_0603_1608Metric")
-c_h = Part("Device", "C", ref="C1", value="510n X7R 10%", footprint="Capacitor_SMD:C_0603_1608Metric")
-d_h = Part("Device", "D", ref="D1", value="Schottky small signal",
-           footprint="Diode_SMD:D_SOD-323")
-sch = Part("74xGxx", "74LVC1G17", ref="U5", footprint="Package_TO_SOT_SMD:SOT-23-5")
-r_h[1] += VBUS
-r_h[2] += hold_rc
-c_h[1] += hold_rc
-c_h[2] += GND
-d_h["A"] += hold_rc
-d_h["K"] += VBUS
-sch[5] += VBUS
-sch[3] += GND
-sch[2] += hold_rc
-sch[4] += hold_ok
+# Start-up hold-off (HW-010): a voltage supervisor with a programmable reset delay (placeholder part,
+# part not chosen; delay accuracy comes from its datasheet). RESET is held while VBUS is below the
+# threshold and for the delay after VBUS recovers, so a VBUS dip restarts the hold-off (an RC with a
+# diode does not: review finding H2). The open-drain output is pulled up to VBUS_IC, not 3V3, so an
+# unpowered supervisor reads "hold-off not done" (low).
+hold_ok, ct = Net("HOLD_OK"), Net("SUP_CT")
+sup = Part("Connector_Generic", "Conn_01x04", ref="U5", value="SUPERVISOR_PLACEHOLDER",
+           footprint="Package_TO_SOT_SMD:SOT-23-6")
+sup[1] += VBUS         # VDD / sense
+sup[2] += GND
+sup[3] += ct           # delay capacitor
+sup[4] += hold_ok      # open-drain, high = hold-off done
+c_ct = Part("Device", "C", ref="C1", value="CT PLACEHOLDER", footprint="Capacitor_SMD:C_0603_1608Metric")
+c_ct[1] += ct
+c_ct[2] += GND
+r_hp = Part("Device", "R", ref="R6", value="100k", footprint="Resistor_SMD:R_0603_1608Metric")
+r_hp[1] += VBUS
+r_hp[2] += hold_ok
 
 # One 3-input AND per gated step (select line AND ok AND hold-off done). Single-gate parts, because
 # the SKiDL schematic writer dropped a pin of the second unit of a dual part (spike finding F3).
@@ -74,7 +74,7 @@ sch[4] += hold_ok
 sel2, sel3 = Net("SEL_STEP2_GPIO"), Net("SEL_STEP3_GPIO")
 en2, en3 = Net("ILIM_STEP2_EN"), Net("ILIM_STEP3_EN")
 for ref, sel, en in (("U3", sel2, en2), ("U4", sel3, en3)):
-    g = Part("74xGxx", "74LVC1G11", ref=ref, footprint="Package_TO_SOT_SMD:SOT-23-5")
+    g = Part("74xGxx", "74LVC1G11", ref=ref, footprint="Package_TO_SOT_SMD:SOT-23-6")
     g[5] += V3
     g[2] += GND
     g[1] += ok
@@ -89,11 +89,11 @@ for ref, net in (("R2", en2), ("R3", en3), ("R4", sel2), ("R5", sel3)):
     r[2] += GND
 
 # Limit-resistor switches (ILIM network of ADR-0010 option A; values are placeholders).
+ilim = Net("ILIM")  # one net for both switched resistors (review finding: it was created twice)
 for tag, en in (("2", en2), ("3", en3)):
     q = Part("Transistor_FET", "2N7002", ref=f"Q{tag}", footprint="Package_TO_SOT_SMD:SOT-23")
     rl = Part("Device", "R", ref=f"R_ILIM{tag}", value="PLACEHOLDER",
               footprint="Resistor_SMD:R_0603_1608Metric")
-    ilim = Net("ILIM")
     q["G"] += en
     q["S"] += GND
     q["D"] += rl[1]
