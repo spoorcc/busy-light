@@ -12,6 +12,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ### Added
 - Continuous integration (`.github/workflows/ci.yml`): documentation checks, Python tool checks, hardware (`scripts/ci_hw.sh`), mechanical (`scripts/ci_mech.sh`) and software (`scripts/ci_sw.sh`) jobs; `pyproject.toml` for the tool environment. Hardware and mechanical jobs report NOT RUN until sources exist.
+- README rewritten as a project front page (honest status, planned features, roadmap, licence proposal); ADR-0013 (licensing, Proposed).
 - ADR-0012 (hardware design flow, Proposed) with goldfish review RV-003, a KiCad feasibility spike report (Draft) and RISK-032 to RISK-034.
 
 ### Changed
