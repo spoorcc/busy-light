@@ -7,43 +7,43 @@ WARNING: fp-lib-table file was not found. Component footprints are not available
 WARNING: fp-lib-table file was not found. Component footprints are not available.
 WARNING: fp-lib-table file was not found. Component footprints are not available.
 WARNING: Missing tag on PWR_FLAG instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:27.
-WARNING: Random tag zwSWNP798J generated for PWR_FLAG.
+WARNING: Random tag eKg2nMbKT3 generated for PWR_FLAG.
 WARNING: Missing tag on PWR_FLAG instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:27.
-WARNING: Random tag TZJJOL1pvP generated for PWR_FLAG.
+WARNING: Random tag 0jIEXgWF1k generated for PWR_FLAG.
 WARNING: Missing tag on PWR_FLAG instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:27.
-WARNING: Random tag U9ghRFK1KO generated for PWR_FLAG.
+WARNING: Random tag e0OuOKLEfS generated for PWR_FLAG.
 WARNING: Missing tag on Conn_01x05 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:30.
-WARNING: Random tag cKa_5rmMN2 generated for Conn_01x05.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:40.
-WARNING: Random tag wlXqGrNJij generated for R.
-WARNING: Missing tag on 74LVC1G04 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:45.
-WARNING: Random tag POJJeseJx_ generated for 74LVC1G04.
-WARNING: Missing tag on Conn_01x04 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:58.
-WARNING: Random tag lRS5lsktqU generated for Conn_01x04.
-WARNING: Missing tag on C instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:64.
-WARNING: Random tag BtYszUMEaS generated for C.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:67.
-WARNING: Random tag ziwVoCtn9s generated for R.
-WARNING: Missing tag on 74LVC1G11 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:77.
-WARNING: Random tag 8UbQPBs5oi generated for 74LVC1G11.
-WARNING: Missing tag on 74LVC1G11 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:77.
-WARNING: Random tag FH6HKE7BtG generated for 74LVC1G11.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:87.
-WARNING: Random tag oY1ukdzUEi generated for R.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:87.
-WARNING: Random tag LpJDApxprj generated for R.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:87.
-WARNING: Random tag uPOPTXNplN generated for R.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:87.
-WARNING: Random tag TquER892rq generated for R.
-WARNING: Missing tag on 2N7002 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:94.
-WARNING: Random tag rqxmhcU24t generated for 2N7002.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:95.
-WARNING: Random tag _LwdgrX3Xs generated for R.
-WARNING: Missing tag on 2N7002 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:94.
-WARNING: Random tag VwUnDpu2Z7 generated for 2N7002.
-WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:95.
-WARNING: Random tag a2kpB8QDvs generated for R.
+WARNING: Random tag XlKtMxlOd0 generated for Conn_01x05.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:42.
+WARNING: Random tag dGCmYOxwdm generated for R.
+WARNING: Missing tag on 74LVC1G04 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:47.
+WARNING: Random tag E3zehB52lp generated for 74LVC1G04.
+WARNING: Missing tag on Conn_01x04 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:60.
+WARNING: Random tag txSDyiMlIk generated for Conn_01x04.
+WARNING: Missing tag on C instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:66.
+WARNING: Random tag xd65piTIh1 generated for C.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:69.
+WARNING: Random tag 8OuEbBhSHV generated for R.
+WARNING: Missing tag on 74LVC1G11 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:79.
+WARNING: Random tag xuK1kO1ynt generated for 74LVC1G11.
+WARNING: Missing tag on 74LVC1G11 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:79.
+WARNING: Random tag qKits5NXFD generated for 74LVC1G11.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:89.
+WARNING: Random tag CMHSe8S6dI generated for R.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:89.
+WARNING: Random tag _r6MjGMlSc generated for R.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:89.
+WARNING: Random tag DzlgmHCuSN generated for R.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:89.
+WARNING: Random tag vfMZ7_zNBO generated for R.
+WARNING: Missing tag on 2N7002 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:96.
+WARNING: Random tag SeZow5PbhY generated for 2N7002.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:97.
+WARNING: Random tag njyrdJBJLb generated for R.
+WARNING: Missing tag on 2N7002 instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:96.
+WARNING: Random tag N2VmR1R39_ generated for 2N7002.
+WARNING: Missing tag on R instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/src/gen_gate.py:97.
+WARNING: Random tag j_V0f_J8Hk generated for R.
 WARNING: Missing tag on  instantiated at /home/ben/Programming/busy-light-spike-gate/hw/kicad/spike-gate/<frozen importlib._bootstrap>:491.
 INFO: 44 warnings found while generating netlist.
 INFO: 0 errors found while generating netlist.

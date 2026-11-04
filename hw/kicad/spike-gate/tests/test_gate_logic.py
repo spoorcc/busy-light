@@ -52,11 +52,11 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(self.nets, "U3", "1"), ok)
         self.assertEqual(net_of(self.nets, "U4", "1"), ok)
 
-    def test_ic_output_has_pullup_to_3v3(self):
+    def test_ic_output_has_pullup_to_ic_supply(self):
         out = net_of(self.nets, "U1", "3")
         self.assertEqual(net_of(self.nets, "U2", "2"), out)
         self.assertEqual(net_of(self.nets, "R1", "2"), out)
-        self.assertEqual(net_of(self.nets, "R1", "1"), "+3V3")
+        self.assertEqual(net_of(self.nets, "R1", "1"), "VBUS_IC")  # not 3V3: VDD + 0.3 V pin rating
 
     def test_pulldowns_on_inputs_and_enables(self):
         for ref, gate_pin in (("R2", ("U3", "4")), ("R3", ("U4", "4")),

@@ -36,9 +36,11 @@ ccic[3] += out1_n
 ccic[4] += Net("CC_OUT2_N")  # low: 3 A (not used by the gate)
 ccic[5] += Net("CC_RESERVED")
 
-# Pull-up so an unpowered or open IC output reads "not advertised".
+# Pull-up so an unpowered or open IC output reads "not advertised". It goes to the IC supply (VBUS_IC),
+# not to 3V3: the TUSB321 output pins are rated VDD + 0.3 V at most, so a 3.3 V pull-up that outlives VBUS
+# is outside the rating (datasheet-evidence-supervisor.md). The 3.3 V inverter then sees up to 5 V.
 r_pu = Part("Device", "R", ref="R1", value="100k", footprint="Resistor_SMD:R_0603_1608Metric")
-r_pu[1] += V3
+r_pu[1] += VBUS
 r_pu[2] += out1_n
 
 # Active-low output to active-high "ok" (inverter).
@@ -55,16 +57,16 @@ inv[4] += ok
 # diode does not: review finding H2). The open-drain output is pulled up to VBUS_IC, not 3V3, so an
 # unpowered supervisor reads "hold-off not done" (low).
 hold_ok, ct = Net("HOLD_OK"), Net("SUP_CT")
-sup = Part("Connector_Generic", "Conn_01x04", ref="U5", value="SUPERVISOR_PLACEHOLDER",
+sup = Part("Connector_Generic", "Conn_01x04", ref="U5", value="TPS3840DL40 (candidate)",
            footprint="Package_TO_SOT_SMD:SOT-23-6")
 sup[1] += VBUS         # VDD / sense
 sup[2] += GND
 sup[3] += ct           # delay capacitor
 sup[4] += hold_ok      # open-drain, high = hold-off done
-c_ct = Part("Device", "C", ref="C1", value="CT PLACEHOLDER", footprint="Capacitor_SMD:C_0603_1608Metric")
+c_ct = Part("Device", "C", ref="C1", value="620n C0G 5%", footprint="Capacitor_SMD:C_0603_1608Metric")
 c_ct[1] += ct
 c_ct[2] += GND
-r_hp = Part("Device", "R", ref="R6", value="100k", footprint="Resistor_SMD:R_0603_1608Metric")
+r_hp = Part("Device", "R", ref="R6", value="150k", footprint="Resistor_SMD:R_0603_1608Metric")
 r_hp[1] += VBUS
 r_hp[2] += hold_ok
 
