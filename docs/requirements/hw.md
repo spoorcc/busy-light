@@ -138,6 +138,7 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Must
 - **Status:** Approved
 - **Approval:** the owner (Ben Spoor), 2026-11-04, by instruction in the session; recorded by the assistant. Not covered and still open: a fault of the detection IC itself (RISK-042), a stuck gate output or shorted select MOSFET (RISK-029), a non-compliant cable, hung firmware (ADR-0010 open point 4). Bracketed values stay open.
+- **Proposed amendment (2026-11-04, from the second goldfish review of the gate; the Approved text above is unchanged until the owner confirms):** Add to the statement: "The board shall give the processor a readback input for the hold-off state and one for the gate enable of each gated step, at levels that the processor input accepts (3.3 V logic, no more than the processor rating at any power order), so that the firmware can reduce its load when the gate closes (SW-009)." Add to the acceptance criteria: "Each readback input shows the real state of the gate in the hold-off, with the gate open and with the gate closed; with VBUS at 0 V and 3V3 present, no readback pin exceeds the processor rating." Rationale: the gate closes alone for [200] to [600] ms after a VBUS dip while the processor keeps its full load (RISK-044, SW-009). The 5 V hold-off signal needs a level step (divider or a gate on 3V3) before the processor pin; this is not drawn yet.
 
 ### HW-011 Orientation sensor
 
