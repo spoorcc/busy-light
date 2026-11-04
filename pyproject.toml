@@ -22,7 +22,7 @@ dev = [
 
 [tool.ruff]
 line-length = 100
-extend-exclude = [".claude", "sw/modules", "modules", "zephyr", "bootloader", "tools"]
+extend-exclude = ["hw/kicad/spike", ".claude", "sw/modules", "modules", "zephyr", "bootloader", "tools"]
 target-version = "py311"
 
 [tool.ruff.lint]
