@@ -114,10 +114,11 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 - **Source:** Product owner, 2026-11-03 (process instruction).
 - **Status:** Draft
 
-### NEED-012 Open source
+### NEED-012 Licensing and publication
 - **Statement:** The code is published as open source (Apache-2.0). The hardware, mechanical design and documentation are published source-available for non-commercial use (CC BY-NC-SA 4.0).
 - **Clarified (owner, 2026-11-04):** Code Apache-2.0; documentation, hardware and mechanics CC BY-NC-SA 4.0. Hardware and mechanics are therefore not open source hardware (ADR-0013).
-- **Open points:** Contributor licence agreement for hardware, mechanical and documentation contributions; CRA role (`docs/regulatory/applicability.md`).
+- **Acceptance (RV-005):** `reuse lint` passes and no code file falls under the documentation licence (`scripts/check_license_map.py`); a compatibility table of the SBOM components exists; a lawyer has read `LICENSE.md` and `CONTRIBUTING.md` before the first outside contribution or sale.
+- **Open points:** Contributor licence agreement for hardware, mechanical and documentation contributions; CRA role (`docs/regulatory/applicability.md`); ADR-0015 (Proposed) completes the licensing decision.
 - **Status:** Draft
 
 ### NEED-020 The ring knows which way is up

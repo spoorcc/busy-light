@@ -3,8 +3,8 @@
 - **Status:** Draft (spike result, not approved)
 - **Date:** 2026-11-04
 - **Traces to:** ADR-0014, MECH-006, MECH-007, RV-007 findings G1 and G2
-- **Code:** branch `spike/mech-back-layout`, commit f96d228, `mech/analysis/back_layout.py` and its test (not merged; spike branch)
-- **Run:** `python3 mech/analysis/back_layout.py out.png` on 2026-11-04; the 4 tests of `test_back_layout.py` pass (`pytest`, 7 passed in the whole repository)
+- **Code:** branch `spike/mech-back-layout`, commit 0995c02, `mech/analysis/back_layout.py` and its test (not merged; spike branch)
+- **Run:** `python3 mech/analysis/back_layout.py out.png` on 2026-11-04; the 5 tests of `test_back_layout.py` pass (`pytest` on the spike branch)
 - **Not run:** height, wall and floor strength, print orientation, tolerances, any 3D model. This checks 2D geometry of working values only.
 
 ## Question
@@ -23,6 +23,19 @@ Outer diameter 53.0, edge margin 1.0 (so features lie within R 25.5), label 21 x
 | V4 label beside a 12 mm wide dovetail rail | **FAIL** | The largest square that fits beside the rail is 17.5 mm; the label needs 21 mm. The dovetail does not solve the layout either. |
 
 ![Three layouts of the back: as written, annular bayonet and label inside the recess](images/spike-mech-back-layout.png)
+
+## Options for the owner
+Each option with the accessory mounted (grey), the 21 mm label (red) and the feet (green). Option B is the recommendation; E is a fifth option found after the first run (an off-axis recess).
+
+![Five options for the back of the housing with the accessory mounted](images/spike-mech-back-options.png)
+
+| Option | Label readable when mounted | Fits | Main drawback |
+|--------|-----------------------------|------|---------------|
+| A as written | No, an accessory covers it | Overlaps (violates MECH-006) | The label cannot be read while mounted |
+| **B annular bayonet** | **Yes** with ring-shaped accessories | Yes on paper (ring 4.7 mm wide) | Narrow ring for lugs; accessories must leave the centre open; floor and print questions open (G2) |
+| C label 14 mm in the recess | No | Yes | Smaller label; passphrase unreadable while mounted |
+| D dovetail rail | Yes, but 17.5 mm at most | No for 21 mm | The label is too small |
+| E off-axis 24 mm recess | Yes | Yes on paper, no room for feet | Accessory load off the axis, a tilted stand leans to one side |
 
 ## Reading
 - The finding G1 of RV-007 is confirmed, and stronger than stated: the two centred features collide because the label lies inside the recess.

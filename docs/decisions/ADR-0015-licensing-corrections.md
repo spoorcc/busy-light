@@ -53,7 +53,7 @@ Scores 0 to 5, my judgement. **F was scored by the author after the owner chose 
 Among the options that pass the corrected gate (C, D, E, F), F scores 96, D 89, E 86 and C 74. The lead of F over D is 7 points, which is inside my scoring error. F's advantage is the Zephyr criterion (weight 4, score 5) and the mature text; D's is the commercial option. The owner decided F; this table does not overturn that and does not prove it.
 
 ## Decision
-The owner confirms or changes each item when accepting. Items 1 and 2 restate ADR-0013; items 3 to 11 are new.
+**Owner instruction 2026-11-04: follow the recommended options.** The status stays Proposed until the owner sets Accepted and the review below has been done; only items that change no licence are applied now (NEED-012 acceptance criterion, `scripts/check_license_map.py` in CI, outside contributions paused). `.claude/` stays CC BY-NC-SA 4.0 and `LICENSE.md` is unchanged until then. The owner confirms or changes each item when accepting. Items 1 and 2 restate ADR-0013; items 3 to 11 are new.
 1. **Code is Apache-2.0** (firmware in `sw/`, scripts, generators, build files, CI). **Documents, hardware files, mechanics and images are CC BY-NC-SA 4.0.** (Unchanged.)
 2. **Wording:** the code is "open source"; the rest is "source-available" and not open source hardware. (Unchanged.)
 3. **Generated output.** A file produced by an Apache-2.0 generator (KiCad or FreeCAD files, rendered SVG) belongs to the design and is CC BY-NC-SA 4.0; the generator stays Apache-2.0. Code in a document (snippets, examples) is Apache-2.0 and carries an SPDX line. Diagram sources are documentation (CC BY-NC-SA 4.0). LAWYER: whether the generator licence reaches the output.
