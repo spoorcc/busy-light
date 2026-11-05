@@ -154,16 +154,16 @@ class Placer:
         return sum(self.net_hpwl(n) for n in self.nets)
 
 
-def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000):
-    """Run the annealer for successive seeds; return the first overlap-free result (else the best), with
-    (state, seed, hpwl, overlap)."""
+def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000, margin=0.3, accept=None):
+    """Run the annealer for successive seeds; return the first overlap-free result that accept(state) allows
+    (else the best), with (state, seed, hpwl, overlap)."""
     best = None
     for s in seeds:
-        pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, seed=s)
+        pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, margin=margin, seed=s)
         pl.run(iters=iters)
         ov, wl = pl.total_overlap(), pl.total_hpwl()
         if best is None or (ov, wl) < (best[3], best[2]):
             best = (dict(pl.state), s, wl, ov)
-        if ov < 1e-9:
+        if ov < 1e-9 and (accept is None or accept(pl.state)):
             return dict(pl.state), s, wl, ov
     return best

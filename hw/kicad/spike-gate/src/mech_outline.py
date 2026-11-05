@@ -84,6 +84,18 @@ def largest_dim_mm(mouth_r):
     return (mouth_r - m("V1_MOUTH_IN") + m("T_WALL")) + R_OUT
 
 
+MAX_DIM_SPIKE_MM = 59.8      # plan 06 D2: the housing size of the earlier spike result; the board must not exceed it
+LED_SIZE_MM = 2.0            # WS2812B-2020 stand-in (LED_WS2812B-2020_PLCC4_2.0x2.0mm), vendor drawing not checked
+
+
+def check_largest_dim(mouth_r):
+    """Raise ValueError when the housing for a receptacle mouth at mouth_r is larger than MAX_DIM_SPIKE_MM."""
+    d = largest_dim_mm(mouth_r)
+    if d > MAX_DIM_SPIKE_MM:
+        raise ValueError("largest dimension %.2f mm exceeds %.1f mm" % (d, MAX_DIM_SPIKE_MM))
+    return d
+
+
 def kicad_xy(mx, my, cx, cy):
     """Mechanical (x right, y up, seen from above) to KiCad board coordinates (y down)."""
     return cx + mx, cy - my
@@ -99,7 +111,7 @@ def led_azimuths():
 
 
 def led_rotation_deg(az):
-    """KiCad footprint rotation for a WS2812B PLCC4 5x5 so that the footprint x axis points along the clockwise
+    """KiCad footprint rotation for a WS2812B PLCC4 (5x5 or the 2020 stand-in; same pad order) so that the footprint x axis points along the clockwise
     tangent (seen from above). Then pins 3 (GND) and 4 (DIN) face the previous LED and pins 1 (VDD) and
     2 (DOUT) face the next one, so DOUT(k) meets DIN(k+1) across the gap."""
     return (az - 90.0) % 360.0

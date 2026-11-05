@@ -1,0 +1,4 @@
+{"_comment": "G0 baseline of plan 06, 2026-11-05, KiCad 10.0.6, Freerouting 2.5.0 (4 layers, base a4ec0fb). Counts of DRC violations + unconnected_items by type.",
+ "placed": {"unconnected_items": 241, "total": 486},
+ "routed": {"unconnected_items": 121, "total": 373, "freerouting_unrouted": 40},
+ "stitched": {"unconnected_items": 57, "total": 309, "violations_only": 252, "stitch_failed_pads": 41, "vias_added": 65}}

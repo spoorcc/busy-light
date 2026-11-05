@@ -26,6 +26,7 @@ FP_ROOT = os.environ.get("KICAD_FOOTPRINT_DIR", "/usr/share/kicad/footprints/")
 # ----------------------------------------------------------------------------- board parameters
 J1_MOUTH_R = 29.85                        # V1: receptacle mouth radius of the mech spike (mech_outline.USB_MOUTH_R)
 J1_LED_GAP = 0.45                         # mm between the rear J1 pad edge and the nearest LED pad
+J1_COURT_GAP = 0.05                       # mm between the J1 courtyard and the nearest LED courtyard
 J1_TAB_BEHIND_MOUTH = 0.85                # mech: tab ends 0.85 mm before the mouth (29.0 vs 29.85)
 CLEARANCE = 0.15                          # mm, default net class (J1 pad gap is 0.15 mm)
 TRACK = 0.2                               # mm, default signal width
@@ -52,6 +53,9 @@ FOOTPRINT_OVERRIDE = {
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
+# plan 06 D1: smaller LED so the ring routes; the schematic still names the 5 x 5 part (stand-in, vendor drawing unchecked)
+LED_2020 = "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm"
+FOOTPRINT_OVERRIDE.update({"D%d" % i: LED_2020 for i in range(1, 17)})
 # schematic pin name -> pad number, where the schematic box symbol uses names (datasheet pin tables)
 PADMAP = {
     "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},   # TUSB321 SLLSEZ? pin table
@@ -195,6 +199,10 @@ import pcb_place            # noqa: E402
 SW1_POS = (13.0, 240.0)       # (radius, azimuth): inside the LED ring; a side-actuated switch would sit at the edge
 MODULE_ROT = 90               # antenna end towards -X (footprint antenna is at the top, rotation 90 turns it left)
 MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the courtyard)
+# ADR-0016 proximity rules (centre distance, mm); the placer rejects a seed that breaks one, the test checks the board
+LAYOUT_RULES = (("R3", "Q3", 6.0), ("R2", "Q2", 6.0), ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0),
+                ("R_ILIM3", "U7", 15.0), ("C1", "U5", 8.0), ("C1B", "U5", 12.0))
+PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 16.6                 # movable parts stay inside this radius (the LED ring pads start at about 17.8)
 SA_ITERS = 160000
 SA_SEEDS = tuple(range(1, 7))
@@ -209,8 +217,23 @@ def mech_of(x_mm, y_mm):
     return x_mm - CX, CY - y_mm
 
 
+def court_bbox_mm(fp):
+    """Bounding box of the footprint courtyard on its own side, or None when the footprint has none."""
+    layer = pcbnew.B_CrtYd if fp.GetLayer() == pcbnew.B_Cu else pcbnew.F_CrtYd
+    cy = fp.GetCourtyard(layer)
+    if cy.OutlineCount() == 0:
+        return None
+    b = cy.BBox()
+    return pcbnew.ToMM(b.GetX()), pcbnew.ToMM(b.GetY()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())
+
+
 def pad_extent_mm(fp, margin=0.0):
+    """Pads plus margin, widened to the courtyard (plan 06 G1: DRC counts courtyard overlaps). U9 is excluded:
+    its library courtyard is the antenna keep-out, which the board treats as rule areas."""
     x0, y0, x1, y1 = pad_bbox_mm(fp)
+    c = None if fp.GetReference() == "U9" else court_bbox_mm(fp)
+    if c:
+        x0, y0, x1, y1 = min(x0, c[0] + margin), min(y0, c[1] + margin), max(x1, c[2] - margin), max(y1, c[3] - margin)
     return x0 - margin, y0 - margin, x1 + margin, y1 + margin
 
 
@@ -379,11 +402,15 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     x0, y0, x1, y1 = bbox_mm(j1)
     px0, py0, px1, py1 = pad_bbox_mm(j1)
     # The mech spike places the mouth at R 29.85 (receptacle body R 22.5..29.85, placeholder LEDs 2 mm). The real
-    # LED pads (WS2812B 5 x 5) reach R 22.3 and the footprint pads start 9.5 mm behind the mouth, so the mouth is
+    # LED pads (WS2812B-2020 stand-in) reach R 22.3 and the footprint pads start 9.5 mm behind the mouth, so the mouth is
     # moved out until the rear pad edge clears the nearest LED pads by J1_LED_GAP. Both numbers go in the report.
     led_pad_x = max(pcbnew.ToMM(p.GetBoundingBox().GetRight()) for r in ("D1", "D16") for p in fps[r].Pads()) - CX
     rear = (x1 - px0)                                   # mouth to rear pad edge, mm
     mouth_r = max(J1_MOUTH_R, led_pad_x + J1_LED_GAP + rear)
+    # the courtyards of J1 and the nearest LEDs must not overlap either (plan 06 G1)
+    jc, lc = court_bbox_mm(j1), [court_bbox_mm(fps[r]) for r in ("D1", "D16")]
+    if jc and all(lc):
+        mouth_r = max(mouth_r, max(c[2] for c in lc) - CX + J1_COURT_GAP + (x1 - jc[0]))
     tab_r = mouth_r - J1_TAB_BEHIND_MOUTH
     j1.SetPosition(vec(CX + mouth_r - x1, CY - (py0 + py1) / 2))
     note_fixed("J1", "F", 0.3)
@@ -447,8 +474,13 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     def region_ok(side, x0, y0, x1, y1):       # SA frame (y down) -> mechanical frame (y up)
         return MO.region_rect_ok(side, x0, -y1, x1, -y0, R_MOVE, tab_r)
 
+    def layout_rules_ok(st):
+        return all(math.hypot(st[a][0] - st[b][0], st[a][1] - st[b][1]) <= lim
+                   for a, b, lim in LAYOUT_RULES if a in st and b in st)
+
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
-                                          seeds=SA_SEEDS, iters=sa_iters or SA_ITERS)
+                                          seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
+                                          accept=layout_rules_ok)
     for ref, (x, y, rot, side) in sorted(state.items()):
         fp = fps[ref]
         fp.SetPosition(vec(0, 0))
@@ -518,7 +550,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     normalise_uuids(pcb)
     write_project(os.path.join(outdir, name + ".kicad_pro"), name)
     with open(os.path.join(outdir, name + ".placement.json"), "w", encoding="utf-8") as f:
-        json.dump(dict(placement_info, sa_iters=sa_iters or SA_ITERS, cx=CX, cy=CY, j1_mouth_r=round(mouth_r, 2), tab_r=round(tab_r, 2), largest_dim_mm=round(MO.largest_dim_mm(mouth_r), 2)), f, indent=1, sort_keys=True)
+        json.dump(dict(placement_info, sa_iters=sa_iters or SA_ITERS, cx=CX, cy=CY, j1_mouth_r=round(mouth_r, 2), tab_r=round(tab_r, 2), largest_dim_mm=round(MO.check_largest_dim(mouth_r), 2)), f, indent=1, sort_keys=True)
         f.write("\n")
     return pcb
 
