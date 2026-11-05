@@ -77,7 +77,8 @@ class Board(unittest.TestCase):
 
     def test_substitutions_are_the_documented_ones(self):
         # every substituted footprint is a provisional stand-in; the report lists the same refs
-        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE), ["C1", "C1B", "C3", "C4", "U1", "U8", "U9"])
+        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE),
+                         sorted(["C1", "C1B", "C3", "C4", "U1", "U8", "U9"] + ["D%d" % i for i in range(1, 17)]))
         for ref in pcb_full.FOOTPRINT_OVERRIDE:
             self.assertIn(ref, self.comps)
 
@@ -101,15 +102,73 @@ class Board(unittest.TestCase):
             self.assertEqual(f.GetLayer(), pcbnew.F_Cu)
             self.assertEqual(self.fps["C%d" % (i + 8)].GetLayer(), pcbnew.B_Cu)
 
+    LED_FP = "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm"
+
+    def test_t1_led_footprint_and_pin_order(self):
+        """T1 (plan 06): D1 to D16 use the 2020 stand-in; DOUT (pad 2) of D(k) faces DIN (pad 4) of D(k+1)."""
+        for i in range(16):
+            d = self.fps["D%d" % (i + 1)]
+            self.assertEqual("%s:%s" % (d.GetFPID().GetLibNickname(), d.GetFPID().GetLibItemName()), self.LED_FP)
+        res, _ = pcb_check.compare(str(NETLIST), self.pcb)
+        self.assertEqual(res["pad_net_differences"], [])
+
+        def pad(ref, num):
+            p = [q for q in self.fps[ref].Pads() if q.GetNumber() == num][0]
+            return pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y)
+        for i in range(1, 15):
+            ox, oy = pad("D%d" % (i + 1), "2")
+            nxt = math.hypot(ox - pad("D%d" % (i + 2), "4")[0], oy - pad("D%d" % (i + 2), "4")[1])
+            prv = math.hypot(ox - pad("D%d" % i, "4")[0], oy - pad("D%d" % i, "4")[1])
+            self.assertLess(nxt, prv, "DOUT of D%d faces D%d" % (i + 1, i + 2))
+            self.assertLess(nxt, 7.0)
+
+    def test_t2_led_ring_tolerance(self):
+        """T2: radius within 0.2 mm and azimuth within 1 degree of 3.75 + 22.5 k (mech spike constraint)."""
+        for i in range(16):
+            p = self.fps["D%d" % (i + 1)].GetPosition()
+            mx, my = pcb_full.mech_of(pcbnew.ToMM(p.x), pcbnew.ToMM(p.y))
+            self.assertLessEqual(abs(math.hypot(mx, my) - 20.0), 0.2)
+            d = (math.degrees(math.atan2(my, mx)) - (3.75 + 22.5 * i) + 180.0) % 360.0 - 180.0
+            self.assertLessEqual(abs(d), 1.0)
+
+    def test_t3_courtyards_of_led_cap_and_j1_do_not_overlap(self):
+        """T3: no LED, bypass cap or J1 courtyard overlaps another courtyard on the same side (U9 keep-out excepted)."""
+        refs = ["D%d" % (i + 1) for i in range(16)] + ["C%d" % (i + 8) for i in range(16)] + ["J1"]
+        bad = []
+        for a in refs:
+            fa = self.fps[a]
+            la = fa.GetLayer()
+            ca = fa.GetCourtyard(la)
+            for b, fb in self.fps.items():
+                if b == a or fb.GetLayer() != la or (b in refs and b < a):
+                    continue
+                if b == "U9":        # the module's library courtyard is its antenna keep-out: known conflict, plan 06 G1/G5
+                    continue
+                cb = fb.GetCourtyard(la)
+                if ca.OutlineCount() and cb.OutlineCount():
+                    inter = pcbnew.SHAPE_POLY_SET(ca)
+                    inter.BooleanIntersection(cb)
+                    if inter.Area() > 0:
+                        bad.append((a, b))
+        self.assertEqual(bad, [])
+
+    def test_t12_largest_dim_is_computed_and_limited(self):
+        """T12: the housing size comes from the board and must not exceed the old 59.8 mm."""
+        self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
+        mouth = pcbnew.ToMM(self.fps["J1"].GetBoundingBox(False).GetRight()) - pcb_full.CX
+        self.assertAlmostEqual(mech_outline.largest_dim_mm(mouth), self.info["largest_dim_mm"], places=1)
+        with self.assertRaises(ValueError):
+            mech_outline.check_largest_dim(32.3)                 # 59.9 mm
+
     def test_usb_c_on_the_tab_facing_plus_x(self):
         b = self.fps["J1"].GetBoundingBox(False)
         mouth = pcbnew.ToMM(b.GetRight()) - pcb_full.CX
         self.assertAlmostEqual(mouth, self.info["j1_mouth_r"], places=1)
         self.assertGreaterEqual(self.info["j1_mouth_r"], pcb_full.J1_MOUTH_R)
 
-    def test_mouth_conflict_with_the_mech_limit_is_recorded(self):
-        """The mech spike's 58 mm limit (MECH-001) is exceeded once the real LED and receptacle footprints are used."""
-        self.assertGreater(self.info["largest_dim_mm"], mech_outline.m("MAX_DIM_MECH001"))
+    def test_mouth_against_the_mech_limit_is_recorded(self):
+        """Plan 06 D2: the limit MAX_DIM_MECH001 (58 mm) is reported; the spike limit is the old 59.8 mm."""
+        self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
 
     def test_antenna_strip_is_free(self):
         ax0, ay0, ax1, ay1 = mech_outline.antenna_strip()
@@ -146,12 +205,8 @@ class Board(unittest.TestCase):
             bx, by = centre(b)
             return ((ax - bx) ** 2 + (ay - by) ** 2) ** 0.5
 
-        self.assertLessEqual(dist("R3", "Q3"), 6.0)
-        self.assertLessEqual(dist("R2", "Q2"), 6.0)
-        for ref in ("R_ILIM1", "R_ILIM2", "R_ILIM3"):
-            self.assertLessEqual(dist(ref, "U7"), 15.0, ref)
-        self.assertLessEqual(dist("C1", "U5"), 8.0)
-        self.assertLessEqual(dist("C1B", "U5"), 12.0)
+        for r1, r2, lim in pcb_full.LAYOUT_RULES:
+            self.assertLessEqual(dist(r1, r2), lim, "%s %s" % (r1, r2))
 
     def test_star_net_is_the_q3_gate(self):
         net = self.nets["/ILIM_STEP3_EN"]
