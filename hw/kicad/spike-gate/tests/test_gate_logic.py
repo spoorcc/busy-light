@@ -128,12 +128,12 @@ class GateNetlist(unittest.TestCase):
             self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, gate, "4"))
             self.assertEqual(net_of(self.nets, ref, "2"), "GND")
 
-    def test_step_3_resistor_is_a_series_pair(self):
+    def test_step_3_resistor_is_a_single_part(self):
         n = self.nets
-        self.assertEqual(net_of(n, "U15", "1"), net_of(n, "R_ILIM3B", "1"))
-        self.assertEqual(net_of(n, "R_ILIM3B", "2"), net_of(n, "R_ILIM3", "1"))
+        self.assertEqual(net_of(n, "U15", "1"), net_of(n, "R_ILIM3", "1"))
         self.assertEqual(net_of(n, "R_ILIM3", "2"), "ILIM")
-        self.assertNotEqual(net_of(n, "R_ILIM3B", "2"), "ILIM")
+        self.assertNotEqual(net_of(n, "U15", "1"), "ILIM")
+        self.assertFalse([p for pins in n.values() for p in pins if p[0] == "R_ILIM3B"])
         self.assertEqual(net_of(n, "U14", "1"), net_of(n, "R_ILIM2", "1"))
 
     def test_ic_is_supplied_from_vbus_not_3v3(self):

@@ -81,7 +81,7 @@ PLACE = {
     "R_ILIM2": (250.19, 50.8, 90),
     "U4": (162.56, 91.44, 0), "R5": (137.16, 100.33, 0), "R3": (198.12, 95.25, 0),
     "U15": (223.52, 91.44, 0), "R19": (208.28, 95.25, 0), "C25": (228.6, 78.74, 0),
-    "R_ILIM3B": (241.3, 91.44, 90), "R_ILIM3": (250.19, 91.44, 90),
+    "R_ILIM3": (250.19, 91.44, 90),
     "U5": (50.8, 137.16, 0), "R6": (76.2, 130.81, 0), "C1": (78.74, 146.05, 0), "C1B": (86.36, 146.05, 0),
     "C1C": (93.98, 146.05, 0), "C1D": (101.6, 146.05, 0),
 }
@@ -89,7 +89,7 @@ PLACE = {
 TEXT = {"U1": (-2.54, -13.97, "right"), "U5": (-2.54, -13.97, "right"),
         "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U3": (3.81, 8.89, "left"), "U4": (3.81, 8.89, "left"),
         "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
-        "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R_ILIM3B": (-2.54, 2.54, "left")}
+        "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left")}
 DEFAULT_TEXT = (2.54, -1.27, "left")
 
 
@@ -220,7 +220,7 @@ def build(netlist_text):
     # captions
     s.text("CC detection (ADR-0016): OUT1_N low = 1.5 A or more advertised", 38.1, 27.0)
     s.text("Gate: step enable = select AND CC OK AND hold-off done; step 2 also AND NOT step 3 enable (U13)", 128.27, 20.0)
-    s.text("Current-limit switches (ADR-0010 option A): TMUX1101, step 3 = 27.4 k + 301 ohm", 183.0, 17.78)
+    s.text("Current-limit switches (ADR-0010 option A): TMUX1101, step 2 = 56.9 k, step 3 = 27.7 k", 183.0, 17.78)
     s.text("Hold-off after VBUS returns (HW-010: 200 to 600 ms; supervisor part not chosen)",
            38.1, 111.76)
     s.text("Rails come from the rest of the board", 172.72, 118.11)
@@ -274,8 +274,8 @@ def build(netlist_text):
         s.power("GND", *P(cap, 2))
         s.power("GND", *P(sw, 3))
         s.wire(P(sw, 2), P(sw, 3))
-    # step 2: switch - 56.2 k; step 3: switch - 301 ohm - 27.4 k
-    for sw, chain in (("U14", ("R_ILIM2",)), ("U15", ("R_ILIM3B", "R_ILIM3"))):
+    # step 2: switch - 56.9 k; step 3: switch - 27.7 k
+    for sw, chain in (("U14", ("R_ILIM2",)), ("U15", ("R_ILIM3",))):
         prev = P(sw, 1)
         for rl in chain:
             lo, hi = sorted((P(rl, 1), P(rl, 2)))

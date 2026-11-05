@@ -58,6 +58,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - ADR-0012 (hardware design flow, Proposed) with goldfish review RV-003, a KiCad feasibility spike report (Draft) and RISK-032 to RISK-034.
 
 ### Changed
+- Spike on branch `spike/hw-gate-pcb-g3`, owner decision 2026-11-06: ILIM resistors in the schematic generators are now one 56.9 k (R_ILIM2) and one 27.7 k (R_ILIM3), 0.1 % 0603, R_ILIM1 stays 47.0 k; R_ILIM3B (301 ohm) and its net are removed (53 nets, 92 components); fixtures, tests, `sim/ilim_steps.py` and the implementation report are updated. These two values have no confirmed LCSC or JLCPCB source at 0.1 % 0603. Windows 504.2 to 616.6, 929.6 to 1085.9 and 1381.2 to 1566.7 mA; Freerouting and bench not run; nothing Approved (HW-010, SW-009, ADR-0016).
 - Zephyr pin in `sw/west.yml` moved from v4.2.0 to v4.5.0 (owner approval 2026-11-03).
 
 ### Added

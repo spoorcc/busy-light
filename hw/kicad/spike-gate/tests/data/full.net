@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
-		(date "2026-11-05T23:27:25")
+		(date "2026-11-06T00:31:19")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -3707,7 +3707,7 @@
 		)
 		(comp
 			(ref "R_ILIM2")
-			(value "56.2k 0.1%")
+			(value "56.9k 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
 				(field
@@ -3761,7 +3761,7 @@
 		)
 		(comp
 			(ref "R_ILIM3")
-			(value "27.4k 0.1%")
+			(value "27.7k 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
 				(field
@@ -3799,60 +3799,6 @@
 				(tstamps "/")
 			)
 			(tstamps "fb847c3b-b019-5da0-90df-a5e3542d41d0")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R_ILIM3B")
-			(value "301 0.1%")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(fields
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "Sheetname")
-				(value "Root")
-			)
-			(property
-				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "97f7fdf6-781c-5f5b-b35a-168234c83062")
 			(units
 				(unit
 					(name "A")
@@ -7946,21 +7892,6 @@
 		)
 		(net
 			(code "44")
-			(name "Net-(R_ILIM3-Pad1)")
-			(class "Default")
-			(node
-				(ref "R_ILIM3")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R_ILIM3B")
-				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "45")
 			(name "Net-(R_VD-Pad2)")
 			(class "Default")
 			(node
@@ -7976,7 +7907,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "45")
 			(name "Net-(U1-OUT2_N)")
 			(class "Default")
 			(node
@@ -7997,7 +7928,7 @@
 			)
 		)
 		(net
-			(code "47")
+			(code "46")
 			(name "Net-(U9-GPIO2_(strap))")
 			(class "Default")
 			(node
@@ -8013,7 +7944,7 @@
 			)
 		)
 		(net
-			(code "48")
+			(code "47")
 			(name "Net-(U9-GPIO8_(strap))")
 			(class "Default")
 			(node
@@ -8029,7 +7960,7 @@
 			)
 		)
 		(net
-			(code "49")
+			(code "48")
 			(name "Net-(U9-GPIO9_(boot))")
 			(class "Default")
 			(node
@@ -8046,7 +7977,7 @@
 			)
 		)
 		(net
-			(code "50")
+			(code "49")
 			(name "Net-(U9-GPIO20_U0RXD)")
 			(class "Default")
 			(node
@@ -8062,7 +7993,7 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "50")
 			(name "Net-(U9-GPIO21_U0TXD)")
 			(class "Default")
 			(node
@@ -8078,7 +8009,7 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "51")
 			(name "Net-(U14-D)")
 			(class "Default")
 			(node
@@ -8094,11 +8025,11 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "52")
 			(name "Net-(U15-D)")
 			(class "Default")
 			(node
-				(ref "R_ILIM3B")
+				(ref "R_ILIM3")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8110,7 +8041,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "53")
 			(name "VBUS_IC")
 			(class "Default")
 			(node
@@ -8200,7 +8131,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "54")
 			(name "unconnected-(D16-DOUT-Pad2)")
 			(class "Default")
 			(node
@@ -8211,7 +8142,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "55")
 			(name "unconnected-(J1-SBU1-PadA8)")
 			(class "Default")
 			(node
@@ -8222,7 +8153,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "56")
 			(name "unconnected-(J1-SBU2-PadB8)")
 			(class "Default")
 			(node
@@ -8233,7 +8164,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "57")
 			(name "unconnected-(U1-CURRENT_MODE-Pad3)")
 			(class "Default")
 			(node
@@ -8244,7 +8175,7 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "58")
 			(name "unconnected-(U1-DIR-Pad11)")
 			(class "Default")
 			(node
@@ -8255,7 +8186,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "59")
 			(name "unconnected-(U1-ID-Pad9)")
 			(class "Default")
 			(node
@@ -8266,7 +8197,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "60")
 			(name "unconnected-(U1-VCONN_FAULT-Pad6)")
 			(class "Default")
 			(node
@@ -8277,7 +8208,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "61")
 			(name "unconnected-(U2-NC-Pad1)")
 			(class "Default")
 			(node
@@ -8288,7 +8219,7 @@
 			)
 		)
 		(net
-			(code "63")
+			(code "62")
 			(name "unconnected-(U5-MR-Pad4)")
 			(class "Default")
 			(node
@@ -8299,7 +8230,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "63")
 			(name "unconnected-(U12-NC-Pad1)")
 			(class "Default")
 			(node

@@ -61,8 +61,8 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "U14": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
-    # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
-    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R_ILIM3B": (*R, "301 0.1%"),
+    # owner decision 2026-11-05 (b): 0.1 % 0603; owner decision 2026-11-06: 56.9 k and 27.7 k single parts (unsourced at 0.1 % 0603)
+    "R_ILIM2": (*R, "56.9k 0.1%"), "R_ILIM3": (*R, "27.7k 0.1%"),
     "R_ILIM1": (*R, "47.0k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
     "R6": (*R, "150k"), "C1": (*C1206, "220n C0G 5% 50V"), "C1B": (*C1206, "220n C0G 5% 50V"),
@@ -134,7 +134,7 @@ PLACE = {
     "R_ILIM2": (gx(250.19), 50.8, 90),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
     "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
-    "R_ILIM3B": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
+    "R_ILIM3": (gx(250.19), 91.44, 90),
     "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C1B": (gx(86.36), 146.05, 0),
     "C1C": (gx(93.98), 146.05, 0), "C1D": (gx(101.6), 146.05, 0),
     "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
@@ -153,7 +153,7 @@ TEXT = {
     "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U12": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
     "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
-    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R_ILIM3B": (-2.54, 2.54, "left"),
+    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"),
     "R_ILIM1": (-2.54, -1.27, "right"),
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
     "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
@@ -448,8 +448,8 @@ def _build():
         s.bind("GND", sw, 2)
         s.pw("GND", (sw, "3"), True)
         s.wire(P(sw, 2), P(sw, 3))
-    # step 2: switch - 56.2 k - ILIM; step 3: switch - 301 ohm - 27.4 k - ILIM (decision (b))
-    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3B", "R_ILIM3"), "ILIM_D_U15")):
+    # step 2: switch - 56.9 k - ILIM; step 3: switch - 27.7 k - ILIM (decision (b))
+    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3",), "ILIM_D_U15")):
         prev, prev_pin = P(sw, 1), (sw, 1)
         for k, rl in enumerate(chain):
             (lo_pin, lo), (hi_pin, hi) = sorted((("1", P(rl, 1)), ("2", P(rl, 2))), key=lambda e: e[1][0])
