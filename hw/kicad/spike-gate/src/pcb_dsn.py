@@ -2,7 +2,7 @@
 """Spike: Specctra DSN export and SES import, for routing the placed board with an external router
 (for example Freerouting). The external router is not run by run_pcb.sh; see the PCB spike report.
 
-Usage: python3 pcb_dsn.py export <in.kicad_pcb> <out.dsn> [planes: B (default) | F | FB | none]
+Usage: python3 pcb_dsn.py export <in.kicad_pcb> <out.dsn> [planes: B (default) | F | FB | none | inner]
        python3 pcb_dsn.py import <in.kicad_pcb> <in.ses> <out.kicad_pcb>
 """
 import sys
@@ -10,20 +10,19 @@ import sys
 import pcbnew
 
 import pcb_full as P
+import pcb_rules
 
 if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "export":
         b = pcbnew.LoadBoard(sys.argv[2])
-        # option: leave a GND pour on the listed layers only (default B.Cu): a pour on both layers blocks the router
-        planes = (sys.argv[4] if len(sys.argv) > 4 else "B").upper()      # outer layers that keep a GND pour: F, B, FB
-        keep_inner = planes != "NONE"                                       # NONE removes every pour (router sees none)
+        # planes option: see pcb_rules.router_keeps_zone (none | inner | B | F | FB); other zones are removed for the router
+        planes = sys.argv[4] if len(sys.argv) > 4 else "B"
+        lname = {pcbnew.F_Cu: "F", pcbnew.B_Cu: "B"}
         for z in list(b.Zones()):
             if z.GetIsRuleArea():
                 continue
             lay = z.GetLayer()
-            if lay == pcbnew.F_Cu and "F" not in planes or lay == pcbnew.B_Cu and "B" not in planes:
-                b.Remove(z)
-            elif lay not in (pcbnew.F_Cu, pcbnew.B_Cu) and not keep_inner:
+            if not pcb_rules.router_keeps_zone(planes, lname.get(lay, b.GetLayerName(lay).split(".")[0]), z.GetNetname()):
                 b.Remove(z)
         ok = pcbnew.ExportSpecctraDSN(b, sys.argv[3])
         print("export", "ok" if ok else "FAILED", sys.argv[3])

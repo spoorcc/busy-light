@@ -4,7 +4,7 @@
 # and the net comparison.
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
-#   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner
+#   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
 # Env: FREEROUTING_JAR  path of freerouting-2.5.0.jar (v2.5.0, sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7, a pinned release downloaded
 #      from the official GitHub releases; not part of the repository). Without it the board is built and checked
 #      unrouted. PCB_PYTHON (default python3) must have KiCad's pcbnew module (KiCad 10). FR_PASSES (default 60).
@@ -26,6 +26,8 @@ if [ -n "$FREEROUTING_JAR" ]; then      # pinned release; a missing or different
 fi
 filter() { grep -v 'PROPERTY_ENUM' || true; }
 if [ -z "$PLANES" ]; then [ "$LAYERS" = 4 ] && PLANES=none || PLANES=B; fi
+case "$PLANES" in none|inner|B|F|FB) ;; *) echo "planes: not one of none, inner, B, F, FB: $PLANES"; exit 1;; esac
+if [ "$PLANES" = inner ] && [ "$LAYERS" != 4 ]; then echo "planes inner needs 4 layers"; exit 1; fi
 
 rm -rf "$OUT/a" "$OUT/b"
 "$PY" "$HERE/src/pcb_full.py" "$NET" "$OUT/a" busy_light_spike "$LAYERS" 2>&1 | filter

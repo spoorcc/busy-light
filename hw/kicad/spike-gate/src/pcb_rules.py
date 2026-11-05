@@ -44,6 +44,26 @@ STITCH_W_DEFAULT = 0.25
 PLANE_NET_ORDER = ("GND", "+5V")        # stitching order
 PLANE_NETS = frozenset(PLANE_NET_ORDER)
 
+# What the router sees as a pour (`planes` argument of pcb_dsn.py export and run_pcb.sh; plan 06 A-7, A-8).
+PLANES_OUTER = ("B", "F", "FB")         # legacy: GND pour on the listed outer layers, inner zones kept
+INNER_ROUTER_NETS = frozenset({"GND"})  # `inner`: only the inner GND plane is visible to the router
+
+
+def router_keeps_zone(planes, layer, net):
+    """True when the DSN export keeps the zone on `layer` ("F", "B", "In1", ...) with net `net` for setting `planes`.
+    `none`: no zone. `inner`: inner-layer zones of INNER_ROUTER_NETS only (the +5V plane and outer zones are removed from
+    the router's view; the stitcher completes what the router leaves). B, F, FB: the listed outer layers and all inner
+    zones (the behaviour before A-8). Case-insensitive; any other value raises ValueError."""
+    p = planes.upper()
+    outer = layer in ("F", "B")
+    if p == "NONE":
+        return False
+    if p == "INNER":
+        return (not outer) and net in INNER_ROUTER_NETS
+    if p not in PLANES_OUTER:
+        raise ValueError("planes must be one of none, inner, B, F, FB: %r" % planes)
+    return layer in p if outer else True
+
 # The values found in write_project and the stitcher at the start of G2 (the then current .kicad_pro). A value looser
 # than its floor is a defect (test_pcb_rules). Guardrails section 3 (hole-to-hole 0.5, annular 0.25) is the stricter target.
 FLOOR = {"clearance": 0.15, "track": 0.15, "via_diameter": 0.5, "through_hole": 0.3, "annular": 0.1,

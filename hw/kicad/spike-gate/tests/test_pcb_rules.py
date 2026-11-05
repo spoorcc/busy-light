@@ -175,6 +175,34 @@ def canary_board(path, track_w=0.25):
     pcbnew.SaveBoard(str(path), b)
 
 
+class RouterZoneSelection(unittest.TestCase):
+    """Plan 06 A-8: which zones the router sees for each `planes` setting (pure function, no pcbnew)."""
+
+    def test_none_keeps_no_zone(self):
+        for lay, net in (("F", "GND"), ("B", "GND"), ("In1", "GND"), ("In2", "+5V")):
+            self.assertFalse(R.router_keeps_zone("none", lay, net), (lay, net))
+
+    def test_inner_keeps_only_inner_gnd(self):
+        self.assertTrue(R.router_keeps_zone("inner", "In1", "GND"))
+        self.assertFalse(R.router_keeps_zone("inner", "In2", "+5V"), "the +5V plane stays out of the router view")
+        self.assertFalse(R.router_keeps_zone("inner", "F", "GND"))
+        self.assertFalse(R.router_keeps_zone("inner", "B", "GND"))
+
+    def test_setting_is_case_insensitive(self):
+        self.assertTrue(R.router_keeps_zone("INNER", "In1", "GND"))
+        self.assertFalse(R.router_keeps_zone("NONE", "In1", "GND"))
+
+    def test_outer_settings_keep_listed_outer_layers_and_inner_zones(self):
+        self.assertTrue(R.router_keeps_zone("B", "B", "GND"))
+        self.assertFalse(R.router_keeps_zone("B", "F", "GND"))
+        self.assertTrue(R.router_keeps_zone("FB", "F", "GND"))
+        self.assertTrue(R.router_keeps_zone("B", "In1", "GND"), "behaviour before A-8 is unchanged")
+
+    def test_unknown_setting_is_an_error(self):
+        with self.assertRaises(ValueError):
+            R.router_keeps_zone("inner2", "In1", "GND")
+
+
 @unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
 class NetClassesInDsn(unittest.TestCase):
     """T4 (DSN part): the router classes come from the PWR_* net classes of the project file."""
