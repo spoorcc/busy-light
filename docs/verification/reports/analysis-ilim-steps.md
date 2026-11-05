@@ -76,3 +76,16 @@ The ADR reference (46.4 / 28.0 kohm, 1 %, ideal switch) gives step 1 506/564/629
 ## 8. Not checked
 
 No SPICE model of the TPS2553 ILIM loop; no bench measurement (TC-210 would record the limits per step); no 2N7002 datasheet read; ILIM voltage unknown; resistor temperature coefficient and ageing; layout leakage (flux, humidity) at the 21 uA ILIM current; interaction of the 500 mA firmware budget with the minimum limit (RISK-028); JLCPCB stock and price of the resistors; E192 table cross-check against a vendor list.
+
+## Addendum: 2N7002 vendor datasheet read (2026-11-05)
+
+Source: Microchip 2N7002, DS20005797A (2018), DC electrical characteristics table, page 2 (supplied by the owner; kept outside the repository, ADR-0015 item 8). It replaces the web copy of another vendor's sheet used in `analysis-n1-n2-readback-backfeed.md` for the 2N7002 threshold; the values agree (VGS(th) 1 V min, 2.5 V max).
+
+| Item | Value in the datasheet | Conditions | Effect on the ILIM analysis |
+|------|------------------------|------------|------------------------------|
+| VGS(th) | min 1 V, max 2.5 V; temperature change max -5.5 mV/degC | VGS = VDS, ID = 250 uA | Gate drive is about 2.9 V (N1 analysis), so the margin over the 2.5 V maximum is about 0.4 V at 25 degC. Rds(on) at that overdrive is not guaranteed. |
+| IDSS | max 1 uA at 25 degC; max 500 uA at 125 degC | VGS = 0 V, VDS = maximum rating (60 V); 125 degC row at 0.8 x rating | The leakage at the ILIM node (about 1 V) is **not specified**. The guaranteed maximum is far above the 118 nA budget, so the datasheet cannot prove that step 1 and the top step stay inside the HW-010 limits. No value at 70 degC is given. |
+| RDS(ON) | max 7.5 ohm at VGS = 5 V, ID = 50 mA; 7.5 ohm at VGS = 10 V, ID = 500 mA; +1 %/degC max | 25 degC | No value at VGS = 3.3 V or below. The 57 k branch makes even tens of ohms negligible (below 1 mA); the unguaranteed overdrive matters more. |
+| IGSS | max +/-100 nA | VGS = +/-20 V, VDS = 0 V | Not relevant to the ILIM node. |
+
+Conclusion (analysis only, nothing measured): the leakage budget of about 118 nA per off MOSFET cannot be shown with this part from its datasheet. The typical leakage at 1 V is probably far lower than the 1 uA ceiling, but that is not a guarantee. Options for the owner: choose a part that specifies leakage at low VDS (or a lower IDSS ceiling), keep the 2N7002 and measure at 70 degC on the prototype, or place the select MOSFET so that its leakage does not add to the ILIM node. Not run: a search for a replacement part.
