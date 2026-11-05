@@ -1,0 +1,187 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the WS2812B addressable LED (D1 to D16). The datasheet in the folder is not from the manufacturer; see the document notes. See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: WS2812B
+  mpn: WS2812B
+  manufacturer: Worldsemi (name not printed in the document; the PDF metadata author is 'kuohuai')
+  description: Intelligent control LED, 5050 package, single-wire data
+  selection: chosen
+  package:
+    code: PLCC4-5050
+    name: PLCC4 5.0 x 5.0 mm
+    pin_count: 4
+  used_in:
+  - D1
+  - D2
+  - D3
+  - D4
+  - D5
+  - D6
+  - D7
+  - D8
+  - D9
+  - D10
+  - D11
+  - D12
+  - D13
+  - D14
+  - D15
+  - D16
+  schematic_symbol: LED:WS2812B
+documents:
+- id: ws2812b-ds
+  title: WS2812B Intelligent control LED integrated light source
+  doc_number: (no document number printed)
+  revision_date: Word 2007 file created 30 May 2013 (PDF metadata)
+  origin: unknown
+  file: ws2812b.pdf
+  sha256: 670517e400d01f76e91187e173c9bb105e5470741604f81243364c5f13d37448
+  pages: 5
+  retrieved_on: '2026-11-05'
+  notes: 'Origin unknown (no URL recorded); it is not a manufacturer file by its metadata: the PDF is a Word document whose author field is ''kuohuai'' and whose title is ''Feature''. The vendor name and a revision are not printed. Treat every
+    claim as weaker than a manufacturer datasheet. A manufacturer datasheet (Worldsemi) is needed before these values are verified.'
+defaults:
+  source_document: ws2812b-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: PLCC4-5050
+pins:
+- id: WS2812B.pin.1
+  pin: '1'
+  name: VDD
+  pin_type: power
+  source: {page: 2, locator: PIN function, quote: 1 VDD Power supply LED}
+- id: WS2812B.pin.2
+  pin: '2'
+  name: DOUT
+  pin_type: output
+  source: {page: 2, locator: PIN function, quote: 2 DOUT Control data signal output}
+- id: WS2812B.pin.3
+  pin: '3'
+  name: VSS
+  pin_type: ground
+  source: {page: 2, locator: PIN function, quote: 3 VSS Ground}
+- id: WS2812B.pin.4
+  pin: '4'
+  name: DIN
+  pin_type: input
+  source: {page: 2, locator: PIN function, quote: 4 DIN Control data signal input}
+claims:
+- id: WS2812B.abs_max_vdd
+  parameter: Power supply voltage
+  category: abs_max
+  min: 3.5
+  max: 5.3
+  unit: V
+  notes: The table gives +3.5 to +5.3 V as the absolute maximum rating, while the electrical characteristics are specified for VDD = 4.5 to 5.5 V. The two ranges conflict inside the document (5.5 V is above 5.3 V).
+  source: {page: 2, locator: Absolute Maximum Ratings, quote: Power supply voltage VDD +3.5~+5.3 V}
+- id: WS2812B.abs_max_vi
+  parameter: Input voltage
+  category: abs_max
+  min: -0.5
+  unit: V
+  notes: Maximum is VDD + 0.5 V (relative).
+  source: {page: 2, locator: Absolute Maximum Ratings, quote: Input voltage VI -0.5～VDD+0.5 V}
+- id: WS2812B.abs_max_topt
+  parameter: Operation junction temperature
+  category: abs_max
+  min: -25
+  max: 80
+  unit: degC
+  source: {page: 2, locator: Absolute Maximum Ratings, quote: Topt -25～+80}
+- id: WS2812B.abs_max_tstg
+  parameter: Storage temperature range
+  category: abs_max
+  min: -40
+  max: 105
+  unit: degC
+  source: {page: 2, locator: Absolute Maximum Ratings, quote: Storage temperature range Tstg -40~+105}
+- id: WS2812B.test_conditions
+  parameter: 'Conditions of the electrical characteristics: TA and VDD'
+  category: recommended
+  min: 4.5
+  max: 5.5
+  unit: V
+  notes: VDD range of the electrical characteristics table; the ambient range is -20 to +70 degC.
+  source: {page: 2, locator: Electrical Characteristics, quote: 'Electrical Characteristics（TA=-20～+70℃，VDD=4.5～5.5V,VSS=0V,unless otherwise specified）'}
+- id: WS2812B.ii
+  parameter: Input current
+  category: electrical
+  min: -1
+  max: 1
+  unit: uA
+  source: {page: 3, locator: Electrical Characteristics, quote: Input current II VI=VDD/VSS —— —— ±1 µA}
+- id: WS2812B.vih
+  parameter: High-level input voltage on DIN, factor of VDD
+  category: electrical
+  condition:
+    supply_voltage: {min: 4.5, max: 5.5, unit: V}
+  min: 0.7
+  unit: dimensionless
+  notes: 0.7 x VDD is 3.15 V at VDD = 4.5 V and 3.85 V at VDD = 5.5 V.
+  source: {page: 3, locator: Electrical Characteristics, quote: VIH DIN，SET 0.7VDD —— —— V}
+- id: WS2812B.vil
+  parameter: Low-level input voltage on DIN, factor of VDD
+  category: electrical
+  condition:
+    supply_voltage: {min: 4.5, max: 5.5, unit: V}
+  max: 0.3
+  unit: dimensionless
+  source: {page: 3, locator: Electrical Characteristics, quote: VIL DIN，SET —— —— 0.3 VDD V}
+- id: WS2812B.vh
+  parameter: Hysteresis voltage on DIN
+  category: electrical
+  typ: 0.35
+  unit: V
+  source: {page: 3, locator: Electrical Characteristics, quote: Hysteresis voltage VH DIN，SET —— 0.35 —— V}
+- id: WS2812B.t0h
+  parameter: Data code 0, high time
+  category: timing
+  condition:
+    tolerance: {value: 150, unit: ns}
+  typ: 0.4
+  unit: us
+  source: {page: 3, locator: Data transfer time, quote: 'T0H 0 code ,high voltage time 0.4us ±150ns'}
+- id: WS2812B.t1h
+  parameter: Data code 1, high time
+  category: timing
+  condition:
+    tolerance: {value: 150, unit: ns}
+  typ: 0.8
+  unit: us
+  source: {page: 3, locator: Data transfer time, quote: 'T1H 1 code ,high voltage time 0.8us ±150ns'}
+- id: WS2812B.t0l
+  parameter: Data code 0, low time
+  category: timing
+  condition:
+    tolerance: {value: 150, unit: ns}
+  typ: 0.85
+  unit: us
+  source: {page: 3, locator: Data transfer time, quote: 'T0L 0 code , low voltage time 0.85us ±150ns'}
+- id: WS2812B.t1l
+  parameter: Data code 1, low time
+  category: timing
+  condition:
+    tolerance: {value: 150, unit: ns}
+  typ: 0.45
+  unit: us
+  source: {page: 3, locator: Data transfer time, quote: 'T1L 1 code ,low voltage time 0.45us ±150ns'}
+- id: WS2812B.t_res
+  parameter: Reset (latch) low time
+  category: timing
+  min: 50
+  unit: us
+  source: {page: 3, locator: Data transfer time, quote: RES low voltage time Above 50µs}
+- id: WS2812B.i_led
+  parameter: Supply current per LED at full brightness
+  category: electrical
+  status: source-missing
+  notes: 'Searched the 5-page document: no supply current figure (mA) is given for the LED or the control circuit. Power budget cannot use this document.'
+- id: WS2812B.vdd_min_operating
+  parameter: Minimum supply voltage for correct operation
+  category: recommended
+  status: source-missing
+  notes: The only supply range is the abs. max +3.5 to +5.3 V and the electrical-characteristic condition 4.5 to 5.5 V; no separate recommended operating range is printed.

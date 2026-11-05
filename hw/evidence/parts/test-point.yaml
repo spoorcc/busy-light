@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Test points TP1 to TP6 (PCB pads, no component).
+schema_version: 1
+part:
+  key: TEST-POINT
+  mpn: none (PCB pad)
+  manufacturer: none
+  description: Bare test pad, 1.5 mm
+  selection: placeholder
+  used_in:
+  - TP1
+  - TP2
+  - TP3
+  - TP4
+  - TP5
+  - TP6
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: TEST-POINT.pad
+  parameter: Test points TP1 to TP6 are PCB pads (footprint TestPoint_Pad_D1.5mm)
+  category: other
+  status: source-missing
+  notes: 'They are a PCB footprint only: no purchased component and no datasheet. Entered so that every reference of the netlist has an evidence entry.'

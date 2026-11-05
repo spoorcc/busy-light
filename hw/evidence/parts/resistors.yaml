@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence placeholder for all resistors (R1 to R17, R_VD, R_ILIM1 to R_ILIM3). Design values come from the netlist; no resistor datasheet is in the folder.
+schema_version: 1
+part:
+  key: RESISTORS
+  mpn: family (0603 resistors, parts not chosen)
+  manufacturer: not chosen
+  description: 0603 chip resistors; 0.1 percent for R_ILIM1..3
+  selection: family
+  package:
+    code: '0603'
+    name: R_0603_1608Metric
+    pin_count: 2
+  used_in:
+  - R1
+  - R2
+  - R3
+  - R4
+  - R5
+  - R6
+  - R7
+  - R8
+  - R9
+  - R10
+  - R11
+  - R12
+  - R13
+  - R14
+  - R15
+  - R16
+  - R17
+  - R_VD
+  - R_ILIM1
+  - R_ILIM2
+  - R_ILIM3
+  schematic_symbol: Device:R
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: RESISTORS.ilim_tolerance
+  parameter: 'Tolerance of R_ILIM1 (47k), R_ILIM2 (56.9k), R_ILIM3 (27.7k): design value 0.1 percent'
+  category: electrical
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact). TPS2553 limit equations exclude resistor tolerance (see TPS2553.ios_max_eq), so this value enters the current-limit
+    window.
+- id: RESISTORS.ilim_tcr
+  parameter: Temperature coefficient of the ILIM resistors
+  category: electrical
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact). Needed for the current-limit window over temperature.
+- id: RESISTORS.ilim_e96_availability
+  parameter: Availability of 47.0k, 56.9k and 27.7k at 0.1 percent (E192 values)
+  category: other
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).
+- id: RESISTORS.vd_tolerance
+  parameter: 'Tolerance of R_VD (887k): design value; TUSB321 allows 855 to 920 kohm in total'
+  category: electrical
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).
+- id: RESISTORS.holdoff_rpullup
+  parameter: Tolerance of R6 (150k, hold-off related) and R7/R14/R15 (100k pull-ups)
+  category: electrical
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).
+- id: RESISTORS.readback_dividers
+  parameter: Tolerance of readback resistors R2/R3/R9/R11/R13/R16/R17 (10k) and R12 (1k), R10 (330)
+  category: electrical
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).
+- id: RESISTORS.power_rating
+  parameter: Power rating and voltage rating of the 0603 resistors
+  category: electrical
+  status: source-missing
+  notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).

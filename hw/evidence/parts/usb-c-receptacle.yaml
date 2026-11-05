@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the USB-C receptacle (J1). The part is not chosen; only the USB-IF compliance document is available. See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: USB-C-RECEPTACLE
+  mpn: not chosen (footprint GCT USB4085)
+  manufacturer: not chosen
+  description: USB 2.0 Type-C receptacle, 16 contacts, SMT
+  selection: placeholder
+  package:
+    code: USB4085
+    name: Footprint Connector_USB:USB_C_Receptacle_GCT_USB4085
+  used_in:
+  - J1
+  schematic_symbol: Connector:USB_C_Receptacle_USB2.0_16P
+documents:
+- id: usb-c-cts-21b
+  title: Universal Serial Bus Type-C Locking Connector Specification Compliance Document
+  doc_number: Revision 2.1b
+  revision_date: June 2021
+  origin: third-party
+  file: usb-c-receptacle-usbc21b.pdf
+  sha256: cd842acfa6a83b4289bbaee519a748ea21460c7e662c203672b0f7b765893404
+  pages: 86
+  retrieved_on: '2026-11-05'
+  notes: USB-IF compliance document, a standard. It is not the datasheet of a connector.
+- id: amphenol-cutsheet
+  title: Amphenol USB TYPE C cut sheet (file name suffix -rs)
+  doc_number: (no document number)
+  revision_date: 2015 (PDF metadata)
+  origin: distributor
+  file: usb-c-receptacle-rs.pdf
+  sha256: c433976ef7c1870ce041287276c938a40e81b35ad869e6a974efdb1e3c625aef
+  pages: 2
+  retrieved_on: '2026-11-05'
+  notes: Probably obtained through RS Components (from the file name; not recorded). Content is an Amphenol cut sheet for other part numbers. The text layer is font-encoded and cannot be read by pdftotext; no claim cites it.
+defaults:
+  source_document: usb-c-cts-21b
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+claims:
+- id: USB-C-RECEPTACLE.contacts_usb2
+  parameter: Contacts of a USB 2.0 Type-C receptacle
+  category: mechanical
+  statement: 'A USB 2.0 Type-C receptacle has 16 contacts: A1, A4 to A9, A12, B1, B4 to B9 and B12 (matches the 16 pins of J1 in the netlist; the shell pin SH is separate).'
+  notes: From the USB-IF compliance document (a standard, not a vendor datasheet for the chosen part).
+  source: {page: 28, locator: Section 4.10.1.1.1, quote: '16 contacts: A1, A4, A5, A6, A7, A8, A9, A12, B1, B4, B5, B6, B7, B8, B9, and B12.'}
+- id: USB-C-RECEPTACLE.llcr_initial
+  parameter: Low level contact resistance, initial
+  category: electrical
+  max: 40
+  unit: mohm
+  notes: Compliance requirement for the mated connector from the USB-IF document; a part datasheet value is still needed. The quote ends mid-sentence by the one-row limit.
+  source: {page: 14, locator: Table 3-1, quote: '40 mΩ (max) initial for VBUS, GND and all'}
+- id: USB-C-RECEPTACLE.pin_names
+  parameter: Pin names and functions (A1 GND ... B12 GND)
+  category: function
+  status: source-missing
+  notes: The USB Type-C Cable and Connector Specification (the document that names the pins) is not in the datasheets folder, and the vendor datasheet of the chosen receptacle is missing. The contact numbers are known only from the compliance
+    document (claim contacts_usb2).
+- id: USB-C-RECEPTACLE.vbus_current_rating
+  parameter: VBUS contact current rating
+  category: electrical
+  status: source-missing
+  notes: No datasheet for the chosen receptacle in the folder. Required for the 3 A step.
+- id: USB-C-RECEPTACLE.mpn
+  parameter: Manufacturer part number
+  category: other
+  status: source-missing
+  notes: The footprint is Connector_USB:USB_C_Receptacle_GCT_USB4085 but the schematic value is only 'USB-C receptacle'. No GCT datasheet is in the folder. The Amphenol cut sheet usb-c-receptacle-rs.pdf is for other part numbers (12401610E4#2A
+    etc.) and its text is not extractable (font-encoded), so nothing was taken from it.

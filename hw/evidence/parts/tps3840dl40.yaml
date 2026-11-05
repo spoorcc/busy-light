@@ -1,0 +1,328 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the TPS3840DL40 supervisor (U5, VBUS hold-off). The datasheet covers the whole TPS3840 family; claims are for the DL (open-drain, active-low) variant with option 40 (VIT- 4.0 V). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: TPS3840DL40
+  mpn: TPS3840DL40DBVR
+  manufacturer: Texas Instruments
+  description: Nano-power high-input-voltage supervisor with MR and programmable delay, open-drain active-low, VIT- 4.0 V
+  selection: chosen
+  package:
+    code: DBV
+    name: SOT-23-5
+    pin_count: 5
+  used_in:
+  - U5
+documents:
+- id: tps3840-ds
+  title: TPS3840 Nano Power, High Input Voltage Supervisor With MR and Programmable Delay
+  doc_number: SNVSB03E
+  revision_date: December 2018, revised May 2026
+  origin: manufacturer
+  url: https://www.ti.com/lit/ds/symlink/tps3840.pdf
+  file: tps3840.pdf
+  sha256: bc66e11c84e5f3be2cded37ee6935c1b69d2b26e8fbc5f194099df6569381685
+  pages: 51
+  retrieved_on: '2026-11-05'
+  notes: Printed page numbers equal PDF page numbers up to page 31; later pages are the packaging addendum. Orderable part number TPS3840DL40DBVR is listed on page 34.
+defaults:
+  source_document: tps3840-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: DBV
+pins:
+- id: TPS3840DL40.pin.1
+  pin: '1'
+  name: RESET
+  pin_type: open_drain
+  function: Active-low reset output (DL variant is open drain)
+  source: {page: 4, locator: Table 5-1, quote: 'RESET 1 N/A O Active-Low Output Reset Signal: This pin is asserted to logic low when either'}
+- id: TPS3840DL40.pin.2
+  pin: '2'
+  name: VDD
+  pin_type: power
+  source: {page: 4, locator: Table 5-1, quote: VDD 2 2 I Input Supply Voltage.}
+- id: TPS3840DL40.pin.3
+  pin: '3'
+  name: GND
+  pin_type: ground
+  source: {page: 4, locator: Table 5-1, quote: GND 3 3 _ Ground}
+- id: TPS3840DL40.pin.4
+  pin: '4'
+  name: MR
+  pin_type: input
+  function: Manual reset, internal pull-up RMR; may be left floating
+  source: {page: 4, locator: Table 5-1, quote: MR / NC 4 4 I Manual Reset.}
+- id: TPS3840DL40.pin.5
+  pin: '5'
+  name: CT
+  pin_type: passive
+  function: Delay capacitor to GND; floating gives the smallest delay
+  source: {page: 4, locator: Table 5-1, quote: CT 5 5 - Capacitor Time Delay Pin.}
+claims:
+- id: TPS3840DL40.abs_max_vdd
+  parameter: VDD
+  category: abs_max
+  min: -0.3
+  max: 12
+  unit: V
+  source: {page: 5, locator: Section 6.1, quote: VDD –0.3 12}
+- id: TPS3840DL40.abs_max_reset_dl
+  parameter: RESET (TPS3840DL)
+  category: abs_max
+  min: -0.3
+  max: 12
+  unit: V
+  source: {page: 5, locator: Section 6.1, quote: RESET (TPS3840DL) –0.3 12}
+- id: TPS3840DL40.abs_max_mr
+  parameter: MR
+  category: abs_max
+  min: -0.3
+  max: 12
+  unit: V
+  notes: 'Footnote 2: VMR must not be higher than VDD.'
+  source: {page: 5, locator: Section 6.1, quote: MR (2) –0.3 12}
+- id: TPS3840DL40.abs_max_ct
+  parameter: CT
+  category: abs_max
+  min: -0.3
+  max: 5.5
+  unit: V
+  source: {page: 5, locator: Section 6.1, quote: CT –0.3 5.5}
+- id: TPS3840DL40.abs_max_i_reset
+  parameter: RESET pin current
+  category: abs_max
+  min: -70
+  max: 70
+  unit: mA
+  source: {page: 5, locator: Section 6.1, quote: RESET pin and RESET pin ±70 mA}
+- id: TPS3840DL40.esd_hbm
+  parameter: ESD, human body model
+  category: abs_max
+  max: 2000
+  unit: V
+  source: {page: 5, locator: Section 6.2, quote: JS-001(1) ± 2000}
+- id: TPS3840DL40.rec_vdd
+  parameter: Input supply voltage
+  category: recommended
+  min: 1.5
+  max: 10
+  unit: V
+  source: {page: 5, locator: Section 6.3, quote: VDD Input supply voltage 1.5 10 V}
+- id: TPS3840DL40.rec_vreset
+  parameter: RESET pin voltage
+  category: recommended
+  min: 0
+  max: 10
+  unit: V
+  source: {page: 5, locator: Section 6.3, quote: 'VRESET , VRESET RESET pin and RESET pin voltage 0 10 V'}
+- id: TPS3840DL40.rec_ireset
+  parameter: RESET pin current
+  category: recommended
+  min: 0
+  max: 5
+  unit: mA
+  notes: Printed as 0 to +-5 mA.
+  source: {page: 5, locator: Section 6.3, quote: 'IRESET , IRESET RESET pin and RESET pin current 0 ±5 mA'}
+- id: TPS3840DL40.rec_tj
+  parameter: Junction temperature (free air temperature)
+  category: recommended
+  min: -40
+  max: 125
+  unit: degC
+  source: {page: 5, locator: Section 6.3, quote: TJ Junction temperature (free air temperature) –40 125 °C}
+- id: TPS3840DL40.vit_minus
+  parameter: Negative-going threshold VIT-, option 40
+  category: electrical
+  typ: 4.0
+  unit: V
+  notes: 'Typical value from the device-threshold table. The row has two numbers: threshold 4.0 V and hysteresis 0.200 V.'
+  source: {page: 30, locator: Table 9-2, quote: TPS3840DL40 TPS3840PL40 TPS3840PH40 4.0 0.200}
+- id: TPS3840DL40.vhys.dl40
+  parameter: Hysteresis, option 40 (typical)
+  category: electrical
+  typ: 0.2
+  unit: V
+  source: {page: 30, locator: Table 9-2, quote: TPS3840DL40 TPS3840PL40 TPS3840PH40 4.0 0.200}
+- id: TPS3840DL40.vit_accuracy
+  parameter: Negative-going input threshold accuracy
+  category: electrical
+  condition:
+    temperature: {min: -40, max: 125, unit: degC}
+  min: -1.5
+  typ: 1
+  max: 1.5
+  unit: percent
+  source: {page: 6, locator: Section 6.5, quote: VIT- Negative-going input threshold accuracy(1) -40°C to 125°C –1.5 1 1.5 %}
+- id: TPS3840DL40.vhys.vit_3v1_4v9
+  parameter: Hysteresis on VIT-
+  category: electrical
+  condition:
+    vit_minus: {min: 3.1, max: 4.9, unit: V}
+  min: 175
+  typ: 200
+  max: 225
+  unit: mV
+  source: {page: 6, locator: Section 6.5, quote: VHYS Hysteresis on VIT- pin VIT- = 3.1V to 4.9V 175 200 225 mV}
+- id: TPS3840DL40.idd
+  parameter: Supply current into VDD
+  category: electrical
+  condition:
+    supply_voltage: VDD > VIT+
+    temperature: {min: -40, max: 125, unit: degC}
+  typ: 300
+  max: 700
+  unit: nA
+  source: {page: 6, locator: Section 6.5, quote: IDD Supply current into VDD pin VDD > VIT+ (3) 300 700 nA}
+- id: TPS3840DL40.vmr_l
+  parameter: Manual reset logic low input
+  category: electrical
+  max: 600
+  unit: mV
+  source: {page: 6, locator: Section 6.5, quote: V MR_L Manual reset logic low input(2) 600 mV}
+- id: TPS3840DL40.rmr
+  parameter: Manual reset internal pull-up resistance
+  category: electrical
+  typ: 100
+  unit: kohm
+  source: {page: 6, locator: Section 6.5, quote: RMR Manual reset internal pull-up resistance 100 kΩ}
+- id: TPS3840DL40.rct
+  parameter: CT pin internal resistance
+  category: electrical
+  min: 350
+  typ: 500
+  max: 650
+  unit: kohm
+  source: {page: 6, locator: Section 6.5, quote: RCT CT pin internal resistance 350 500 650 kΩ}
+- id: TPS3840DL40.vpor_dl
+  parameter: Power-on-reset voltage, open-drain
+  category: electrical
+  condition:
+    output_sink: {value: 5.6, unit: uA}
+  max: 950
+  unit: mV
+  notes: The TPS3840DL (open-drain) block of the table; some quoted rows also occur in the push-pull blocks. VPOR is the minimum VDD for a controlled output state.
+  source: {page: 6, locator: Section 6.5, quote: VPOR Power on Reset Voltage(4) 950 mV}
+- id: TPS3840DL40.vol_dl
+  parameter: Low-level output voltage, open-drain
+  category: electrical
+  condition:
+    supply_voltage: {min: 1.5, max: 5, unit: V}
+    output_sink: {value: 2, unit: mA}
+    state: VDD < VIT-
+  max: 200
+  unit: mV
+  notes: The TPS3840DL (open-drain) block of the table; some quoted rows also occur in the push-pull blocks.
+  source: {page: 6, locator: Section 6.5, quote: VOL VDD < VIT- 200 mV}
+- id: TPS3840DL40.ilkg_od
+  parameter: Open-drain output leakage current
+  category: electrical
+  condition:
+    supply_voltage: {value: 5.5, unit: V}
+  max: 90
+  unit: nA
+  source: {page: 7, locator: Section 6.5, quote: Ilkg(OD) Open-Drain output leakage current VDD = VRESET = 5.5V 90 nA}
+- id: TPS3840DL40.t_strt
+  parameter: Startup delay, CT open
+  category: timing
+  min: 100
+  typ: 220
+  max: 350
+  unit: us
+  source: {page: 7, locator: Section 6.6, quote: tSTRT Startup Delay(1) CT pin open 100 220 350 µs}
+- id: TPS3840DL40.t_p_hl
+  parameter: Propagation detect delay, VDD falling below VIT-
+  category: timing
+  condition:
+    vdd_step: VIT+ to (VIT-) - 10%
+  typ: 15
+  max: 30
+  unit: us
+  source: {page: 7, locator: Section 6.6, quote: tP_HL VDD = VIT+ to (VIT-) - 10%(2) 15 30 µs}
+- id: TPS3840DL40.t_d.ct_open
+  parameter: Reset time delay, CT open
+  category: timing
+  condition:
+    ct: open
+  max: 50
+  unit: us
+  notes: Value sits in the MAX column. The row label 'CT pin = open' is on the line above.
+  source: {page: 7, locator: Section 6.6, quote: 50 µs}
+- id: TPS3840DL40.t_d.ct_10nf
+  parameter: Reset time delay, CT = 10 nF
+  category: timing
+  condition:
+    ct: {value: 10, unit: nF}
+  typ: 6.2
+  unit: ms
+  source: {page: 7, locator: Section 6.6, quote: CT pin = 10nF 6.2 ms}
+- id: TPS3840DL40.t_d.ct_1uf
+  parameter: Reset time delay, CT = 1 uF
+  category: timing
+  condition:
+    ct: {value: 1, unit: uF}
+  typ: 619
+  unit: ms
+  source: {page: 7, locator: Section 6.6, quote: CT pin = 1 µF 619 ms}
+- id: TPS3840DL40.t_d_eq3
+  parameter: Reset time delay, equation 3 (typical)
+  category: timing
+  unit: second
+  formula:
+    expression: -ln(0.29)*R*C+t0
+    variables:
+      R: ohm
+      C: farad
+      t0: second
+    unit: second
+  notes: R is RCT, C is CCT_EXT, t0 is tD(no cap).
+  source: {page: 18, locator: Equation 3, quote: tD = − ln 0.29 × RCT × CCT_EXT + tD no cap}
+- id: TPS3840DL40.t_d_eq4
+  parameter: Reset time delay, equation 4 (typical, with RCT = 500 kohm)
+  category: timing
+  unit: second
+  formula:
+    expression: 618937*C+50e-6
+    variables:
+      C: farad
+    unit: second
+  source: {page: 18, locator: Equation 4, quote: tD = 618937 × CCT_EXT + 50μs}
+- id: TPS3840DL40.t_d_min_eq6
+  parameter: Reset time delay minimum, equation 6
+  category: timing
+  unit: second
+  formula:
+    expression: -ln(0.36)*R*C+t0
+    variables:
+      R: ohm
+      C: farad
+      t0: second
+    unit: second
+  notes: R is RCT min (350 kohm), C is the minimum capacitor value including its tolerance, t0 is tD(no cap) min. The datasheet table gives no tD(no cap) minimum, so t0 must be taken as 0 or measured; this is an open point.
+  source: {page: 18, locator: Equation 6, quote: 'tD minimum = − ln 0.36 × RCT min × CCT min + tD no cap, min'}
+- id: TPS3840DL40.t_d_max_eq7
+  parameter: Reset time delay maximum, equation 7
+  category: timing
+  unit: second
+  formula:
+    expression: -ln(0.26)*R*C+t0
+    variables:
+      R: ohm
+      C: farad
+      t0: second
+    unit: second
+  notes: R is RCT max (650 kohm), C is the maximum capacitor value including its tolerance, t0 is tD(no cap) max (50 us).
+  source: {page: 18, locator: Equation 7, quote: 'tD maximum = − ln 0.26 × RCT max × CCT max + tD no cap, max'}
+- id: TPS3840DL40.rec_cct_max
+  parameter: Largest recommended delay capacitor
+  category: recommended
+  max: 10
+  unit: uF
+  source: {page: 18, locator: Section 7.3.2, quote: The reset time delay (tD) can be programmed by connecting a capacitor no larger than 10µF between CT pin and GND.}
+- id: TPS3840DL40.od_pullup_required
+  parameter: Open-drain pull-up
+  category: function
+  statement: The DL variant needs an external pull-up resistor on RESET.
+  source: {page: 19, locator: Section 7.4, quote: 'The TPS3840DL (Open-Drain) version, denoted with "D" in the device name, requires a pull-up resistor to hold'}

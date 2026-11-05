@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence placeholder for all capacitors (C1, C1B, C2 to C23). Design values come from the netlist; no capacitor datasheet is in the folder.
+schema_version: 1
+part:
+  key: CAPACITORS
+  mpn: family (0603 capacitors, parts not chosen)
+  manufacturer: not chosen
+  description: 0603 capacitors; C0G for C1 and C1B
+  selection: family
+  package:
+    code: '0603'
+    name: C_0603_1608Metric
+    pin_count: 2
+  used_in:
+  - C1
+  - C1B
+  - C2
+  - C3
+  - C4
+  - C5
+  - C6
+  - C7
+  - C8
+  - C9
+  - C10
+  - C11
+  - C12
+  - C13
+  - C14
+  - C15
+  - C16
+  - C17
+  - C18
+  - C19
+  - C20
+  - C21
+  - C22
+  - C23
+  schematic_symbol: Device:C
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: CAPACITORS.c1_tolerance
+  parameter: 'C1 470n C0G 5 percent 25 V: capacitance tolerance, temperature drift and DC-bias behaviour of C0G'
+  category: electrical
+  status: source-missing
+  notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact). Sets the TPS3840
+    hold-off delay together with RCT.
+- id: CAPACITORS.c1b_tolerance
+  parameter: 'C1B 150n C0G 5 percent 50 V: capacitance tolerance and drift'
+  category: electrical
+  status: source-missing
+  notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).
+- id: CAPACITORS.c0g_insulation_resistance
+  parameter: Insulation resistance / leakage of C0G capacitors at the CT pin (leakage shifts the delay)
+  category: electrical
+  status: source-missing
+  notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).
+- id: CAPACITORS.c0g_package
+  parameter: 'C1 and C1B are 1206 in the spike gate and 0603 in the full-board netlist: availability of 470n and 150n C0G in 0603'
+  category: other
+  status: source-missing
+  notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).
+- id: CAPACITORS.bulk_decoupling
+  parameter: 'C2 (1u), C3 (10u), C4 (bulk), C5, C6 (tbd): values and DC-bias derating are not chosen'
+  category: recommended
+  status: source-missing
+  notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).
+- id: CAPACITORS.led_decoupling
+  parameter: C8 to C23 100n decoupling for D1 to D16
+  category: recommended
+  status: source-missing
+  notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).

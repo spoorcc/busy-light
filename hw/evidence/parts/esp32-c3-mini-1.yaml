@@ -1,0 +1,372 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the ESP32-C3-MINI-1 module (U9). The module datasheet is the main document; the chip datasheet is cited for pin drive strength and chip limits. See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: ESP32-C3-MINI-1
+  mpn: ESP32-C3-MINI-1
+  manufacturer: Espressif Systems
+  description: Wi-Fi and Bluetooth LE module with ESP32-C3 (flash variant not decided in the design)
+  selection: chosen
+  package:
+    code: MINI-1
+    name: Module, 53 pads
+    pin_count: 53
+  used_in:
+  - U9
+  schematic_symbol: RF_Module:ESP32-C3-MINI-1
+documents:
+- id: esp32-mini-ds
+  title: ESP32-C3-MINI-1 & MINI-1U Datasheet
+  doc_number: v2.2
+  revision_date: '2026'
+  origin: manufacturer
+  file: esp32-c3-mini-1.pdf
+  sha256: de7361381348d82a1abd337f10170be7a420675987568f71fe3c5b100deed270
+  pages: 48
+  retrieved_on: '2026-11-05'
+  notes: Espressif page numbers equal PDF page numbers for the pages cited. Download URL not recorded.
+- id: esp32-c3-ds
+  title: ESP32-C3 Series Datasheet
+  doc_number: v2.4
+  revision_date: '2026'
+  origin: manufacturer
+  file: esp32-c3-datasheet.pdf
+  sha256: 833fc000b4b3c3d39c496fcbd597fed5806956503ce7390b19cc8ae82f19f968
+  pages: 76
+  retrieved_on: '2026-11-05'
+  notes: Chip datasheet. Download URL not recorded.
+defaults:
+  source_document: esp32-mini-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: MINI-1
+pins:
+- id: ESP32-C3-MINI-1.pin.GND
+  pin: 1,2,11,14,36-53
+  name: GND
+  pin_type: ground
+  function: Ground pads
+  source: {page: 11, locator: Table 3-1, quote: GND P Ground}
+- id: ESP32-C3-MINI-1.pin.3V3
+  pin: '3'
+  name: 3V3
+  pin_type: power
+  source: {page: 11, locator: Table 3-1, quote: 3V3 3 P Power supply}
+- id: ESP32-C3-MINI-1.pin.NC
+  pin: 4,7,9,10,15,17,24,25,28,29,32-35
+  name: NC
+  pin_type: nc
+  source: {page: 11, locator: Table 3-1, quote: NC — NC}
+- id: ESP32-C3-MINI-1.pin.IO2
+  pin: '5'
+  name: IO2
+  pin_type: io
+  function: Strapping pin
+  source: {page: 11, locator: Table 3-1, quote: 'IO2 5 I/O/T GPIO2, ADC1_CH2, FSPIQ'}
+  aliases:
+  - GPIO2
+- id: ESP32-C3-MINI-1.pin.IO3
+  pin: '6'
+  name: IO3
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO3 6 I/O/T GPIO3, ADC1_CH3'}
+  aliases:
+  - GPIO3
+- id: ESP32-C3-MINI-1.pin.EN
+  pin: '8'
+  name: EN
+  pin_type: input
+  function: Chip enable, high = on
+  source: {page: 11, locator: Table 3-1, quote: 'EN 8 I Low: off, the chip powers off.'}
+- id: ESP32-C3-MINI-1.pin.IO0
+  pin: '12'
+  name: IO0
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO0 12 I/O/T GPIO0, ADC1_CH0, XTAL_32K_P'}
+  aliases:
+  - GPIO0
+- id: ESP32-C3-MINI-1.pin.IO1
+  pin: '13'
+  name: IO1
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO1 13 I/O/T GPIO1, ADC1_CH1, XTAL_32K_N'}
+  aliases:
+  - GPIO1
+- id: ESP32-C3-MINI-1.pin.IO10
+  pin: '16'
+  name: IO10
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO10 16 I/O/T GPIO10, FSPICS0'}
+  aliases:
+  - GPIO10
+- id: ESP32-C3-MINI-1.pin.IO4
+  pin: '18'
+  name: IO4
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO4 18 I/O/T GPIO4, ADC1_CH4, FSPIHD, MTMS'}
+  aliases:
+  - GPIO4
+- id: ESP32-C3-MINI-1.pin.IO5
+  pin: '19'
+  name: IO5
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO5 19 I/O/T GPIO5, ADC2_CH0, FSPIWP, MTDI'}
+  aliases:
+  - GPIO5
+- id: ESP32-C3-MINI-1.pin.IO6
+  pin: '20'
+  name: IO6
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO6 20 I/O/T GPIO6, FSPICLK, MTCK'}
+  aliases:
+  - GPIO6
+- id: ESP32-C3-MINI-1.pin.IO7
+  pin: '21'
+  name: IO7
+  pin_type: io
+  source: {page: 11, locator: Table 3-1, quote: 'IO7 21 I/O/T GPIO7, FSPID, MTDO'}
+  aliases:
+  - GPIO7
+- id: ESP32-C3-MINI-1.pin.IO8
+  pin: '22'
+  name: IO8
+  pin_type: io
+  function: Strapping pin
+  source: {page: 11, locator: Table 3-1, quote: IO8 22 I/O/T GPIO8}
+  aliases:
+  - GPIO8
+- id: ESP32-C3-MINI-1.pin.IO9
+  pin: '23'
+  name: IO9
+  pin_type: io
+  function: Strapping pin, boot button
+  source: {page: 11, locator: Table 3-1, quote: IO9 23 I/O/T GPIO9}
+  aliases:
+  - GPIO9
+- id: ESP32-C3-MINI-1.pin.IO18
+  pin: '26'
+  name: IO18
+  pin_type: io
+  function: USB D-
+  source: {page: 11, locator: Table 3-1, quote: 'IO18 26 I/O/T GPIO18, USB_D-'}
+  aliases:
+  - GPIO18
+  - GPIO18 USB_D-
+- id: ESP32-C3-MINI-1.pin.IO19
+  pin: '27'
+  name: IO19
+  pin_type: io
+  function: USB D+
+  source: {page: 11, locator: Table 3-1, quote: 'IO19 27 I/O/T GPIO19, USB_D+'}
+  aliases:
+  - GPIO19
+  - GPIO19 USB_D+
+- id: ESP32-C3-MINI-1.pin.RXD0
+  pin: '30'
+  name: RXD0
+  pin_type: io
+  function: UART0 RX
+  source: {page: 11, locator: Table 3-1, quote: 'RXD0 30 I/O/T GPIO20, U0RXD'}
+  aliases:
+  - GPIO20
+  - GPIO20 U0RXD
+- id: ESP32-C3-MINI-1.pin.TXD0
+  pin: '31'
+  name: TXD0
+  pin_type: io
+  function: UART0 TX
+  source: {page: 11, locator: Table 3-1, quote: 'TXD0 31 I/O/T GPIO21, U0TXD'}
+  aliases:
+  - GPIO21
+  - GPIO21 U0TXD
+claims:
+- id: ESP32-C3-MINI-1.abs_max_vdd33
+  parameter: Power supply voltage VDD33
+  category: abs_max
+  min: -0.3
+  max: 3.6
+  unit: V
+  source: {page: 21, locator: Table 6-1, quote: VDD33 Power supply voltage –0.3 3.6 V}
+- id: ESP32-C3-MINI-1.rec_vdd33
+  parameter: Power supply voltage VDD33
+  category: recommended
+  min: 3.0
+  typ: 3.3
+  max: 3.6
+  unit: V
+  source: {page: 21, locator: Table 6-2, quote: VDD33 Power supply voltage 3.0 3.3 3.6 V}
+- id: ESP32-C3-MINI-1.rec_ivdd
+  parameter: Current delivered by external power supply
+  category: recommended
+  min: 0.5
+  unit: A
+  source: {page: 21, locator: Table 6-2, quote: IV DD Current delivered by external power supply 0.5 — — A}
+- id: ESP32-C3-MINI-1.rec_ta_85
+  parameter: Operating ambient temperature, 85 degC version
+  category: recommended
+  max: 85
+  unit: degC
+  notes: The lower limit -40 degC is on the next line of the table. Which version (85 or 105 degC) is ordered is not decided.
+  source: {page: 21, locator: Table 6-2, quote: 85 °C version 85}
+- id: ESP32-C3-MINI-1.vih
+  parameter: High-level input voltage, factor of VDD
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+    supply_voltage: {value: 3.3, unit: V}
+  min: 0.75
+  unit: dimensionless
+  notes: Datasheet value is 0.75 x VDD (VDD = voltage of the respective power pin); the maximum VDD + 0.3 V is on the next line. Stored here as a factor.
+  source: {page: 21, locator: Table 6-3, quote: VIH High-level input voltage 0.75 × VDD 1 — 1}
+- id: ESP32-C3-MINI-1.vil
+  parameter: Low-level input voltage, factor of VDD
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+    supply_voltage: {value: 3.3, unit: V}
+  max: 0.25
+  unit: dimensionless
+  notes: Datasheet value is 0.25 x VDD. Stored here as a factor.
+  source: {page: 21, locator: Table 6-3, quote: VIL Low-level input voltage –0.3 — 0.25 × VDD 1 V}
+- id: ESP32-C3-MINI-1.iih
+  parameter: High-level input current
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+    supply_voltage: {value: 3.3, unit: V}
+  max: 50
+  unit: nA
+  source: {page: 21, locator: Table 6-3, quote: IIH High-level input current — — 50 nA}
+- id: ESP32-C3-MINI-1.iil
+  parameter: Low-level input current
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+    supply_voltage: {value: 3.3, unit: V}
+  max: 50
+  unit: nA
+  source: {page: 21, locator: Table 6-3, quote: IIL Low-level input current — — 50 nA}
+- id: ESP32-C3-MINI-1.voh
+  parameter: High-level output voltage, factor of VDD
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+    supply_voltage: {value: 3.3, unit: V}
+    load: high-impedance
+  min: 0.8
+  unit: dimensionless
+  notes: Datasheet value is 0.8 x VDD, measured with a high-impedance load.
+  source: {page: 21, locator: Table 6-3, quote: High-level output voltage 0.8 × VDD 1 — — V}
+- id: ESP32-C3-MINI-1.vol
+  parameter: Low-level output voltage, factor of VDD
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+    supply_voltage: {value: 3.3, unit: V}
+    load: high-impedance
+  max: 0.1
+  unit: dimensionless
+  notes: Datasheet value is 0.1 x VDD, measured with a high-impedance load.
+  source: {page: 21, locator: Table 6-3, quote: Low-level output voltage — — 0.1 × VDD 1 V}
+- id: ESP32-C3-MINI-1.ioh
+  parameter: High-level source current
+  category: electrical
+  condition:
+    supply_voltage: {value: 3.3, unit: V}
+    voh: VOH >= 2.64 V
+    pad_driver: 3
+  typ: 40
+  unit: mA
+  notes: Typical value only; no minimum or maximum is given.
+  source: {page: 21, locator: Table 6-3, quote: IOH — 40 — mA}
+- id: ESP32-C3-MINI-1.iol
+  parameter: Low-level sink current
+  category: electrical
+  condition:
+    supply_voltage: {value: 3.3, unit: V}
+    vol: {value: 0.495, unit: V}
+    pad_driver: 3
+  typ: 28
+  unit: mA
+  notes: Typical value only; no minimum or maximum is given.
+  source: {page: 21, locator: Table 6-3, quote: IOL — 28 — mA}
+- id: ESP32-C3-MINI-1.rpu
+  parameter: Internal weak pull-up resistor
+  category: electrical
+  typ: 45
+  unit: kohm
+  source: {page: 21, locator: Table 6-3, quote: RP U Internal weak pull-up resistor — 45 — kΩ}
+- id: ESP32-C3-MINI-1.rpd
+  parameter: Internal weak pull-down resistor
+  category: electrical
+  typ: 45
+  unit: kohm
+  source: {page: 21, locator: Table 6-3, quote: RP D Internal weak pull-down resistor — 45 — kΩ}
+- id: ESP32-C3-MINI-1.vih_nrst
+  parameter: Chip reset release voltage (CHIP_EN), factor of VDD
+  category: electrical
+  min: 0.75
+  unit: dimensionless
+  notes: Datasheet value is 0.75 x VDD minimum on the CHIP_EN pin (EN).
+  source: {page: 21, locator: Table 6-3, quote: 0.75 × VDD 1 — VDD 1 + 0.3 V}
+- id: ESP32-C3-MINI-1.vil_nrst
+  parameter: Chip reset voltage (CHIP_EN), factor of VDD
+  category: electrical
+  max: 0.25
+  unit: dimensionless
+  notes: Datasheet value is 0.25 x VDD maximum on the CHIP_EN pin (EN).
+  source: {page: 22, locator: Table 6-3, quote: VIL_nRST –0.3 — 0.25 × VDD 1 V}
+- id: ESP32-C3-MINI-1.i_wifi_tx_peak
+  parameter: Peak Wi-Fi transmit current, 802.11b 1 Mbps at 20.5 dBm
+  category: electrical
+  condition:
+    supply_voltage: {value: 3.3, unit: V}
+    temperature: {value: 25, unit: degC}
+  max: 350
+  unit: mA
+  notes: Table header says Peak (mA). The word peak is taken as a maximum for the power budget.
+  source: {page: 22, locator: Table 6-4, quote: '802.11b, 1 Mbps, @20.5 dBm 350'}
+- id: ESP32-C3-MINI-1.en_not_floating
+  parameter: EN pin
+  category: function
+  statement: The EN pin must not float.
+  source: {page: 11, locator: Table 3-1, quote: 'Note: Do not leave the EN pin floating.'}
+- id: ESP32-C3-MINI-1.strap_gpio9
+  parameter: Default strapping state of GPIO9
+  category: function
+  statement: GPIO9 has a weak pull-up at reset (bit value 1); GPIO2 and GPIO8 float by default.
+  source: {page: 12, locator: Table 4-1, quote: GPIO9 Weak pull-up 1}
+- id: ESP32-C3-MINI-1.drive_usb_pins
+  parameter: Default drive strength of GPIO18 and GPIO19
+  category: electrical
+  typ: 40
+  unit: mA
+  notes: From the ESP32-C3 chip datasheet, not the module datasheet. Footnote lists the default drive strength per pin; other pins 20 mA, GPIO2/GPIO3/MTMS/MTDI 10 mA.
+  source: {page: 17, locator: Table 2-1 note 4, quote: 'GPIO18, GPIO19: 40 mA', document: esp32-c3-ds}
+- id: ESP32-C3-MINI-1.abs_max_input_power_pins
+  parameter: Input power pins, allowed input voltage (chip)
+  category: abs_max
+  min: -0.3
+  max: 3.6
+  unit: V
+  notes: Chip datasheet. Table 5-1 lists only this row, the cumulative output current and the storage temperature.
+  source: {page: 54, locator: Table 5-1, quote: Input power pins 1 Allowed input voltage –0.3 3.6 V, document: esp32-c3-ds}
+- id: ESP32-C3-MINI-1.abs_max_io_output_current
+  parameter: Cumulative IO output current (chip)
+  category: abs_max
+  max: 1000
+  unit: mA
+  source: {page: 54, locator: Table 5-1, quote: Ioutput 2 Cumulative IO output current — 1000 mA, document: esp32-c3-ds}
+- id: ESP32-C3-MINI-1.abs_max_gpio_voltage
+  parameter: Absolute maximum voltage on a GPIO pin
+  category: abs_max
+  status: source-missing
+  notes: 'Searched the module datasheet (v2.2) Table 6-1 and the chip datasheet (v2.4) Table 5-1: no separate absolute maximum for a GPIO input pin is listed. The only related figure is VIH max = VDD + 0.3 V (Table 6-3). A 5 V signal on a GPIO
+    pin is not covered.'
+- id: ESP32-C3-MINI-1.gpio_max_current_per_pin
+  parameter: Absolute maximum current per GPIO pin
+  category: abs_max
+  status: source-missing
+  notes: Not found in the module datasheet v2.2 or the chip datasheet v2.4. Only IOH/IOL typical values and the cumulative 1000 mA are given.

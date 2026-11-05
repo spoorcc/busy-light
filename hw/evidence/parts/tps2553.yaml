@@ -1,0 +1,256 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the TPS2553 adjustable current-limit switch (U7). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: TPS2553
+  mpn: TPS2553
+  manufacturer: Texas Instruments
+  description: Precision adjustable current-limited power-distribution switch, active-high enable, auto-retry
+  selection: chosen
+  package: {code: DBV, name: SOT-23-6, pin_count: 6}
+  used_in: [U7]
+documents:
+  - id: tps2553-ds
+    title: TPS2552, TPS2552-1, TPS2553, TPS2553-1 datasheet
+    doc_number: SLVS841G
+    revision_date: November 2008, revised October 2026
+    origin: manufacturer
+    url: https://www.ti.com/lit/ds/symlink/tps2553.pdf
+    file: tps2553.pdf
+    sha256: edd76d150b073ae8d4addbf85f6845b8c722fbd0b35ef025ac3c9e704a6a3385
+    pages: 46
+    retrieved_on: "2026-11-05"
+    notes: PDF page numbers equal printed page numbers for the pages cited here. The datasheet covers the TPS2552 and TPS2553 families; the TPS2553 column of the pin table is used.
+defaults:
+  source_document: tps2553-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: "2026-11-05"
+  status: unverified
+  package: DBV
+pins:
+  - {id: TPS2553.pin.1, pin: "1", name: IN, pin_type: power, source: {page: 4, locator: Table 5-1, quote: "IN 1 6 1 6 I Input voltage; connect a 0.1µF or greater ceramic"}}
+  - {id: TPS2553.pin.2, pin: "2", name: GND, pin_type: ground, source: {page: 4, locator: Table 5-1, quote: "GND 2 5 2 5 — Ground connection; connect externally to PowerPAD™"}}
+  - {id: TPS2553.pin.3, pin: "3", name: EN, pin_type: input, function: "Enable, active high on the TPS2553", source: {page: 4, locator: Table 5-1, quote: "EN — — 3 4 I Enable input, logic high turns on power switch"}}
+  - {id: TPS2553.pin.4, pin: "4", name: FAULT, pin_type: open_drain, function: Active-low fault flag, source: {page: 4, locator: Table 5-1, quote: "FAULT 4 3 4 3 O Active-low open-drain output, asserted during"}}
+  - {id: TPS2553.pin.5, pin: "5", name: ILIM, pin_type: passive, function: Resistor to GND sets the current limit, source: {page: 4, locator: Table 5-1, quote: "ILIM 5 2 5 2 O External resistor used to set current-limit threshold;"}}
+  - {id: TPS2553.pin.6, pin: "6", name: OUT, pin_type: output, source: {page: 4, locator: Table 5-1, quote: "OUT 6 1 6 1 O Power-switch output"}}
+claims:
+  - id: TPS2553.abs_max_v_pins
+    parameter: Voltage range on IN, OUT, EN, ILIM, FAULT
+    category: abs_max
+    min: -0.3
+    max: 7
+    unit: V
+    source: {page: 5, locator: Section 6.1, quote: "Voltage range on IN, OUT, EN or EN, ILIM, FAULT –0.3 7 V"}
+  - id: TPS2553.abs_max_v_in_out
+    parameter: Voltage range from IN to OUT
+    category: abs_max
+    min: -7
+    max: 7
+    unit: V
+    source: {page: 5, locator: Section 6.1, quote: "Voltage range from IN to OUT –7 7 V"}
+  - id: TPS2553.abs_max_i_ilim_source
+    parameter: ILIM source current
+    category: abs_max
+    min: 0
+    max: 1
+    unit: mA
+    notes: The 2N7002 drains in the ILIM network must not drive ILIM (they only switch resistors to GND).
+    source: {page: 5, locator: Section 6.1, quote: "ILIM source current 0 1 mA"}
+  - id: TPS2553.abs_max_i_fault_sink
+    parameter: Continuous FAULT sink current
+    category: abs_max
+    min: 0
+    max: 25
+    unit: mA
+    source: {page: 5, locator: Section 6.1, quote: "Continuous FAULT sink current 0 25 mA"}
+  - id: TPS2553.rec_vin
+    parameter: Input voltage, IN
+    category: recommended
+    min: 2.5
+    max: 6.5
+    unit: V
+    source: {page: 5, locator: Section 6.3, quote: "VIN Input voltage, IN 2.5 6.5 V"}
+  - id: TPS2553.rec_ven
+    parameter: Enable voltage, TPS2553/53-1
+    category: recommended
+    min: 0
+    max: 6.5
+    unit: V
+    source: {page: 5, locator: Section 6.3, quote: "VEN Enable voltage TPS2553/53-1 0 6.5 V"}
+  - id: TPS2553.rec_vih_en
+    parameter: High-level input voltage on EN
+    category: recommended
+    min: 1.1
+    unit: V
+    source: {page: 5, locator: Section 6.3, quote: "VIH High-level input voltage on EN or EN 1.1"}
+  - id: TPS2553.rec_vil_en
+    parameter: Low-level input voltage on EN
+    category: recommended
+    max: 0.66
+    unit: V
+    source: {page: 5, locator: Section 6.3, quote: "VIL Low-level input voltage on EN or EN 0.66"}
+  - id: TPS2553.rec_iout.tj125
+    parameter: Continuous output current, OUT
+    category: recommended
+    condition: {temperature: {min: -40, max: 125, unit: degC}}
+    max: 1.2
+    unit: A
+    source: {page: 5, locator: Section 6.3, quote: "IOUT -40°C ≤ TJ ≤ 125°C 1.2 A"}
+  - id: TPS2553.rec_iout.tj105
+    parameter: Continuous output current, OUT
+    category: recommended
+    condition: {temperature: {min: -40, max: 105, unit: degC}}
+    max: 1.5
+    unit: A
+    source: {page: 5, locator: Section 6.3, quote: "IOUT -40°C ≤ TJ ≤ 105°C 1.5 A"}
+  - id: TPS2553.rec_rilim
+    parameter: Current-limit threshold resistor range (nominal 1%), ILIM to GND
+    category: recommended
+    min: 15
+    max: 232
+    unit: kohm
+    notes: The datasheet states the range for a nominal 1% resistor. The design uses 0.1% resistors and switches parallel resistors, so every resulting combination must lie in this range.
+    source: {page: 5, locator: Section 6.3, quote: "RILIM Current-limit threshold resistor range (nominal 1%) from ILIM to GND 15 232 kΩ"}
+  - id: TPS2553.rec_i_fault_sink
+    parameter: Continuous FAULT sink current
+    category: recommended
+    min: 0
+    max: 10
+    unit: mA
+    source: {page: 5, locator: Section 6.3, quote: "IO Continuous FAULT sink current 0 10 mA"}
+  - id: TPS2553.rec_cin
+    parameter: Input decoupling capacitance, IN to GND
+    category: recommended
+    min: 0.1
+    unit: uF
+    source: {page: 5, locator: Section 6.3, quote: "Input de-coupling capacitance, IN to GND 0.1 µF"}
+  - id: TPS2553.rds_on.dbv_25c
+    parameter: Static drain-source on-state resistance, DBV package
+    category: electrical
+    condition: {temperature: {value: 25, unit: degC}}
+    typ: 85
+    max: 95
+    unit: mohm
+    source: {page: 6, locator: Section 6.5, quote: "DBV package, TJ = 25°C 85 95 mΩ"}
+  - id: TPS2553.rds_on.dbv_125c
+    parameter: Static drain-source on-state resistance, DBV package
+    category: electrical
+    condition: {temperature: {min: -40, max: 125, unit: degC}}
+    max: 135
+    unit: mohm
+    source: {page: 6, locator: Section 6.5, quote: "DBV package, –40°C ≤ TJ ≤125°C 135 mΩ"}
+  - id: TPS2553.i_en
+    parameter: EN input current
+    category: electrical
+    condition: {test: VEN = 0 V or 6.5 V}
+    min: -0.5
+    max: 0.5
+    unit: uA
+    source: {page: 6, locator: Section 6.5, quote: "IEN Input current VEN = 0V or 6.5V, VEN = 0V or 6.5V -0.5 0.5 µA"}
+  - id: TPS2553.ios.rilim_15k
+    parameter: Current-limit threshold IOS
+    category: electrical
+    condition: {rilim: {value: 15, unit: kohm}, temperature: {min: -40, max: 105, unit: degC}}
+    min: 1610
+    typ: 1700
+    max: 1800
+    unit: mA
+    source: {page: 7, locator: Section 6.5, quote: "RILIM = 15kΩ, –40°C ≤ TJ ≤105°C 1610 1700 1800"}
+  - id: TPS2553.ios.rilim_20k
+    parameter: Current-limit threshold IOS
+    category: electrical
+    condition: {rilim: {value: 20, unit: kohm}, temperature: {min: -40, max: 125, unit: degC}}
+    min: 1200
+    typ: 1295
+    max: 1375
+    unit: mA
+    source: {page: 7, locator: Section 6.5, quote: "–40°C ≤ TJ ≤ 125°C 1200 1295 1375"}
+  - id: TPS2553.ios.rilim_49k9
+    parameter: Current-limit threshold IOS
+    category: electrical
+    condition: {rilim: {value: 49.9, unit: kohm}, temperature: {min: -40, max: 125, unit: degC}}
+    min: 475
+    typ: 520
+    max: 565
+    unit: mA
+    source: {page: 7, locator: Section 6.5, quote: "–40°C ≤ TJ ≤ 125°C 475 520 565"}
+  - id: TPS2553.ios.rilim_210k
+    parameter: Current-limit threshold IOS
+    category: electrical
+    condition: {rilim: {value: 210, unit: kohm}}
+    min: 110
+    typ: 130
+    max: 150
+    unit: mA
+    source: {page: 7, locator: Section 6.5, quote: "RILIM = 210kΩ 110 130 150"}
+  - id: TPS2553.ios.ilim_to_in
+    parameter: Current-limit threshold with ILIM shorted to IN
+    category: electrical
+    min: 50
+    typ: 75
+    max: 100
+    unit: mA
+    source: {page: 7, locator: Section 6.5, quote: "ILIM shorted to IN 50 75 100"}
+  - id: TPS2553.uvlo_rising
+    parameter: Undervoltage lockout, VIN rising
+    category: electrical
+    typ: 2.35
+    max: 2.45
+    unit: V
+    notes: Column assignment (typ, max) checked by the x position of the numbers under the MIN/TYP/MAX headers.
+    source: {page: 7, locator: Section 6.5, quote: "UVLO VIN rising 2.35 2.45 V"}
+  - id: TPS2553.vol_fault
+    parameter: FAULT output low voltage
+    category: electrical
+    condition: {load: {value: 1, unit: mA}}
+    max: 180
+    unit: mV
+    source: {page: 7, locator: Section 6.5, quote: "VOL I/FAULT = 1mA 180 mV"}
+  - id: TPS2553.i_leak_fault
+    parameter: FAULT off-state leakage
+    category: electrical
+    condition: {v_fault: {value: 6.5, unit: V}}
+    max: 1
+    unit: uA
+    source: {page: 7, locator: Section 6.5, quote: "Off-state leakage V/FAULT = 6.5V 1 µA"}
+  - id: TPS2553.t_fault_deglitch.overcurrent
+    parameter: FAULT deglitch, overcurrent
+    category: timing
+    min: 3
+    typ: 7.5
+    max: 11
+    unit: ms
+    source: {page: 7, locator: Section 6.5, quote: "FAULT assertion or de-assertion due to overcurrent condition 3 7.5 11 ms"}
+  - id: TPS2553.ios_max_eq
+    parameter: Current-limit threshold maximum, equation (1)
+    category: electrical
+    condition: {rilim: {min: 15, max: 232, unit: kohm}}
+    formula: {expression: "22980 / R**0.94", variables: {R: kohm}, unit: mA}
+    notes: The equation includes temperature and process but not the tolerance of the external resistor (section 8.5.1, same page). The exponent 0.94 is on the line below the quoted number.
+    source: {page: 16, locator: Equation (1), quote: "22980V"}
+  - id: TPS2553.ios_nom_eq
+    parameter: Current-limit threshold nominal, equation (2)
+    category: electrical
+    condition: {rilim: {min: 15, max: 232, unit: kohm}}
+    formula: {expression: "23950 / R**0.977", variables: {R: kohm}, unit: mA}
+    notes: Exponent 0.977 is on the line below the quoted number.
+    source: {page: 17, locator: Equation (2), quote: "23950V"}
+  - id: TPS2553.ios_min_eq
+    parameter: Current-limit threshold minimum, equation (3)
+    category: electrical
+    condition: {rilim: {min: 15, max: 232, unit: kohm}}
+    formula: {expression: "25230 / R**1.016", variables: {R: kohm}, unit: mA}
+    notes: Exponent 1.016 is on the line below the quoted number.
+    source: {page: 17, locator: Equation (3), quote: "25230V"}
+  - id: TPS2553.en_active_high
+    parameter: EN polarity of the TPS2553
+    category: function
+    statement: EN is active high on the TPS2553 (active low on the TPS2552).
+    source: {page: 4, locator: Figure 5-1, quote: "EN = Active High for the TPS2553"}
+  - id: TPS2553.variant_suffix
+    parameter: Latch-off and QOD variants
+    category: function
+    statement: "A suffix -1 selects the latch-off version and 0 the QOD version. Which variant the design needs is not decided by the generator (value text is TPS2553)."
+    source: {page: 4, locator: Figure 5-1, quote: "Add –1 to part number for latch-off version"}

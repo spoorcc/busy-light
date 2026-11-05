@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence placeholder for the tactile switch SW1 (footprint SW_SPST_TL3342). No datasheet in the folder.
+schema_version: 1
+part:
+  key: SW-TL3342
+  mpn: not chosen (footprint TL3342)
+  manufacturer: not chosen
+  description: SMD tactile switch, boot/user button
+  selection: placeholder
+  package:
+    code: TL3342
+    name: SW_SPST_TL3342
+    pin_count: 2
+  used_in:
+  - SW1
+  schematic_symbol: Switch:SW_Push
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: SW-TL3342.mpn
+  parameter: 'Part number: footprint SW_SPST_TL3342 only'
+  category: other
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: SW-TL3342.contact_rating
+  parameter: Contact rating and bounce time
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: SW-TL3342.lifetime
+  parameter: Mechanical life
+  category: other
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.

@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the 74LVC1G02 NOR gate (U13). No datasheet is available, so every claim is source-missing.
+schema_version: 1
+part:
+  key: 74LVC1G02
+  mpn: 74LVC1G02
+  manufacturer: not chosen
+  description: Single 2-input NOR gate (board value 74LVC1G02, U13 NOR for the exclusive step logic)
+  selection: candidate
+  package:
+    code: DBV
+    name: SOT-23-5
+    pin_count: 5
+  used_in:
+  - U13
+  schematic_symbol: 74xGxx:74LVC1G02
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: 74LVC1G02.pinout
+  parameter: Pin table (DBV SOT-23-5)
+  category: function
+  status: source-missing
+  notes: No 74LVC1G02 datasheet is in the datasheets folder. No value is entered.
+- id: 74LVC1G02.abs_max_vi
+  parameter: Absolute maximum input voltage
+  category: abs_max
+  status: source-missing
+  notes: No 74LVC1G02 datasheet is in the datasheets folder. No value is entered.
+- id: 74LVC1G02.rec_vcc
+  parameter: Recommended supply voltage range
+  category: recommended
+  status: source-missing
+  notes: No 74LVC1G02 datasheet is in the datasheets folder. No value is entered.
+- id: 74LVC1G02.rec_vih
+  parameter: High-level input voltage at VCC = 3 to 3.6 V
+  category: recommended
+  status: source-missing
+  notes: No 74LVC1G02 datasheet is in the datasheets folder. No value is entered.
+- id: 74LVC1G02.ioff
+  parameter: Ioff / partial power down
+  category: electrical
+  status: source-missing
+  notes: No 74LVC1G02 datasheet is in the datasheets folder. No value is entered.
+- id: 74LVC1G02.tpd
+  parameter: Propagation delay at 3.3 V
+  category: timing
+  status: source-missing
+  notes: No 74LVC1G02 datasheet is in the datasheets folder. No value is entered.
