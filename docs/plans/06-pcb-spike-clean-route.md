@@ -1,0 +1,167 @@
+# 06 -- Clean routing of the PCB spike board (design doc)
+
+- **Status:** Approved by the owner on 2026-11-05 (answer in the planning session, with R6(a) to (c) confirmed and no fourth readiness run; the third readiness review said NO-GO and its fixes were not re-reviewed, see RV-009)
+- **Date:** 2026-11-05  **Owner:** Ben Spoor
+- **Area:** hw (spike only, `hw/kicad/spike-gate/`)
+- **Requirements addressed:** HW-001 (LED ring), HW-003 (CC and attach path), HW-005 (antenna keep-out), HW-010 (USB input, proposed amendment), HW-012 (part evidence, follow-up only). All Draft or proposed; nothing here is Approved. No product file is created.
+- **Branch and base:** branch `spike/pcb-clean-route` (worktree `../busy-light-pcbfix`), base `origin/main` at `a4ec0fb`. The spike is never merged as-is (process README).
+- **EGM review record:** [RV-009](../reviews/RV-009-pcb-clean-route-goldfish.md) (comprehension, three antagonistic, three readiness runs; readiness NO-GO three times, last fixes not re-reviewed)
+
+## 1. Problem definition
+
+The README caption under the board render says: "Freerouting left 40 nets unrouted ... 252 violations and 57 unconnected items on 4 nets ... A spike result, not a clean board." The spike report (`docs/verification/reports/spike-pcb-placement-routing.md` section 10) and the consolidation record say the same.
+
+Goal: on the spike board (4 layers, outline of mechanical concept V1) reach, measured by the metrics of section 4:
+1. **0 unrouted:** KiCad DRC `unconnected_items` = 0 on the imported (routed) board, before stitching, except items that stitching is designed to close; see metric M1.
+2. **0 unconnected:** KiCad DRC `unconnected_items` = 0 on the stitched board (metric M2).
+3. **Every DRC class except the allowed ones is 0** on the stitched board.
+4. **Allowed DRC classes**, each capped by a number and (where it names refs) by an allow-list of reference designators, each with a written reason and a `DEV-nnn`: `lib_footprint_issues` (no project library table; no ref check, number only), `ignored_checks` (the pseudo-class that `kicad_strict.tally` counts when the project file ignores checks; 5 today; number only; G4 tries to explain it, and if it cannot be removed it stays with a reason), `net_conflict` and `footprint_symbol_mismatch` (only the stand-in refs U1, U8, U9, C1, C1B, C3, C4, D1 to D16 (LED footprint substitution, section 5), the test points (pattern `TP*`) and the mounting holes (pattern `H*`: H1 to H3); any other ref fails; the allow-list accepts exact refs and `*`-suffix patterns). ERC is unchanged by this plan; its waivers stay and are re-run to record counts (the LED swap may change them; a rise is reported, not hidden).
+5. README images and caption regenerated from that one run, last, and only with numbers from the run directory.
+
+Out of scope: product schematic or layout; EMC, antenna, thermal, signal-integrity analysis; fabricator DFM; changing Approved requirements; regulator choice; the TUSB321 and C3-module land patterns (stand-ins); updating `mech/` or the mech spike report (stated as "not updated" in the report).
+
+## 2. Constraints and assumptions
+
+Owner decisions of 2026-11-05 (this session, from the owner's answers):
+- **D1.** Use a smaller addressable LED footprint with 16 LEDs on the D40 ring. HW-001 (count, 22.5 degree spacing, circle at least 38 mm) is unchanged. **HW-001 gives no phase**: the 3.75 degree phase is an assumption of the mech spike (`mech_outline.py`). HW-001's radius and angle tolerances ([0.2] mm, [1] degree) are bracketed placeholders; T2 uses them as spike constraints and does not claim HW-001 acceptance.
+- **D2.** Keep variant V1. The housing size excess against MECH-001 (58 mm) is an open owner item.
+- **D3.** "Done" means real fixes; waivers only for the classes of section 1 item 4.
+- Layers: 4.
+
+Assumptions:
+- A1. The failures come mostly from geometry (5 x 5 mm LEDs; courtyards, hook lugs, notch), not from router settings. Evidence: report 10.2; DRC `courtyards_overlap` 50, `items_not_allowed` 5.
+- A2. **Checked 2026-11-05:** the KiCad 10 system library has `LED_SK6812MINI`, `LED_WS2812B-Mini_PLCC4_3.5x3.5mm` and `LED_WS2812B-2020_PLCC4_2.0x2.0mm`. Choice: `LED_WS2812B-2020_PLCC4_2.0x2.0mm` (smallest; matches the mech spike's 2 mm placeholder). Fallback if 2020 does not route: `LED_WS2812B-Mini_PLCC4_3.5x3.5mm`. G0 verifies its pin numbers and pin 1 position against the netlist and against the vendor drawing by a second check before use; if the second check cannot be done, work continues with the footprint marked "stand-in, unverified" (see the A2 bullet of section 5); only a claim about the part is withheld. If the pad numbers do not match the netlist, that is a stop (owner).
+- A3. The Freerouting v2.5.0 jar: two copies exist in scratchpads of earlier sessions; both have sha256 `f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7`, equal to the pinned value (checked now). One copy is copied (`\cp -f`, not moved) to `~/Programming/busy-light-tools/freerouting-2.5.0.jar` (outside the repository, not committed), because `/tmp` is not stable. `run_pcb.sh` gets the full 64-character hash and fails on a missing or wrong file.
+- A4. Freerouting is not deterministic (39 and 40 unrouted). The routing itself is therefore not reproducible. The stored session makes one result reproducible; it does not prove routability margin.
+- A5. 0 unrouted may be unreachable on this outline. The loop budget of section 4 ends the work; no waiver is used to hide the result.
+- A6. The LED part is a stand-in for the footprint only. No claim on electrical suitability (current, data timing, thermal). The `ws2812b.yaml` evidence file describes the 5 x 5 part; no 2020 evidence exists (HW-012 follow-up).
+- A7. Planes option for the final run: `none` (the router sees no pour; inner GND/power planes are completed by `pcb_stitch.py`). This makes the routing close to a 2-layer problem plus stitching and is a known reason for the GND failures. `inner` is tried once if G4 stalls.
+- A8. Via-in-pad on U9 GND pads is what the existing stitcher does (vendor practice). It needs filled or capped vias at the fabricator. That is a manufacturing assumption that this plan does not validate. It is stated in the report and the README caption; "clean" never claims it is fabricable.
+
+## 3. Alternatives considered
+
+| Option | For | Against |
+|---|---|---|
+| **A. Smaller LED, keep V1, tune placement and router (chosen)** | Smallest change; follows owner decisions; removes the root cause in A1 | LED is a stand-in; V1 size conflict stays |
+| B. Fewer LEDs (for example 12) | Easy routing | Changes HW-001 and the product; owner declined |
+| C. Larger board | Easy routing | Breaks the housing envelope; owner declined |
+| D. Variant V2 (plain disc, receptacle underside) | Removes the tab | Conflicts with SYS-022; needs a second mech spike; owner declined |
+| E. Lower counts with waivers only | Fast | Hides findings; against D3 and the guardrails document |
+| F. Do nothing, keep the honest caption | No risk | Board stays unfinished |
+
+No ADR: spike-internal and reversible; the LED footprint substitution is recorded in the spike report. The real LED part is an ADR-0004 follow-up for the owner.
+
+## 4. Technical plan
+
+**Authoritative metrics** (one definition each; the router log line is not a criterion):
+- **M1 unrouted:** count of `unconnected_items` in `kicad-cli pcb drc` JSON of `routed.kicad_pcb` (after SES import and zone refill, before stitching), restricted to items whose net is not in `pcb_rules.PLANE_NETS`. `PLANE_NETS` is the set of nets that `pcb_stitch.py` completes (its default today is `GND,+5V`); the stitcher, the DSN export and `count_unrouted` all read this one constant. Items on those nets are counted in M2 only. CC1, CC2, the strap net and every other net must be routed by the router (M1).
+- **M2 unconnected:** count of `unconnected_items` in the DRC JSON of `stitched.kicad_pcb`, all nets.
+- `pcb_check.count_unrouted(drc_json_path: str, plane_nets: frozenset[str]) -> int` computes M1: every `unconnected_items` entry names its items (pad, via, track or zone) with a net name in brackets; the net of an entry is the first such name; an entry with no net name counts as non-plane; a fixture test (T10) checks it against `tests/data/drc_expected.json`. The earlier numbers 241, 121 and 57 are history and are not asserted; they are raw totals, and M1 is a restricted count.
+- **M3 pad-net agreement:** `pcb_check.py` reports 0 differences; its exit code counts (the `|| true` in `run_pcb.sh` is removed for the final gate).
+
+**Gates** (a gate that fails stops the work and goes to the owner):
+- **G0 Baseline and feasibility.** Log tool versions (`kicad-cli version`, `pcbnew`, `java -version`, jar hash). Record the base commit. Reproduce the README run and record placed, routed and stitched counts. Check A2 (pad numbers, pin 1, rotation) and write a free-area estimate for the ring (LED courtyards, hook lugs, notch, module keep-out) so A5 rests on a number. Pass: counts recorded; A2 check done.
+- **G1 Geometry.** Swap the LED footprint (and the helper that assumes the 5 x 5 pin layout: `mech_outline.led_rotation_deg`, and the `H_LED` entry of the `MECH` table; `led_cap_shift_mm` depends only on post azimuths and stays unless T3 shows otherwise), recompute the J1 offset, fix hook, notch and courtyard overlaps. Pass on the placed board: 0 `courtyards_overlap`, 0 `items_not_allowed`, 0 `copper_edge_clearance`, 0 `pth_inside_courtyard`, M3 = 0, the antenna strip stays free (`test_antenna_strip_is_free`), housing `largest_dim_mm` is reported and **does not exceed 59.8 mm** (the old value); if it would grow, stop and tell the owner. ERC re-run, counts recorded.
+- **G2 Rules (separate commit; owner reviews the values before G3).** All rule numbers move into `pcb_rules.py` (pure Python, no `pcbnew`): clearance, track, via size and drill, annular ring, hole-to-hole, copper-to-edge, edge and stitch margins, net widths. `pcb_full.py` (project file and constants), `pcb_full.write_project` (it already writes the `PWR_*` net classes from `NET_WIDTH` into `.kicad_pro`; KiCad's DSN export derives the router classes from them, `pcb_dsn.py` is a 40-line wrapper and needs no class code) and `pcb_stitch.py` (`CLR`, `TRACK_W`, via) import them. The stitcher width for `+5V` becomes `NET_WIDTH["+5V"]` (0.6 mm; today `TRACK_W` says 0.4); if 0.6 mm does not fit at a pad, the narrower neck-down is listed by T17 as a finding and not hidden. GND has no current rating in `NET_WIDTH`; its stitch width stays 0.25 mm as `pcb_rules.STITCH_W["GND"]`. A `.kicad_dru` is written by `pcb_rules.write_dru`. **The values are not loosened**: the floor is the current `.kicad_pro` (clearance 0.15, hole-to-hole 0.4, annular 0.1, hole clearance 0.25); T4 fails if any value is looser than that floor. Guardrails section 3 values (hole-to-hole 0.5, annular 0.25) are the stricter target; if tightening to them blocks routing, that is a stop condition reported to the owner, not a silent choice. The net width basis is one source: I_TOP_STEP_MAX_A = 1.577 A (`pcb_rules.py`), so VBUS_IC needs 0.56 mm at 1 oz outer layer; `NET_WIDTH` keeps 0.6 mm.
+- **G3 Routing.** Freerouting (jar of A3, passes and threads recorded) on the placed board, SES import, M1. Then `pcb_stitch.py` inside `run_pcb.sh`, which writes `stitched.kicad_pcb` and copies `routed.kicad_pro` and the schematic next to it under the `stitched` names that `render_readme_images.sh` reads. Stitching **exits non-zero if any pad is in `failed`**. Pass: M1 = 0 and M2 = 0 on that board, with a new waiver profile `stitched-4l` in `known-open-violations.json`.
+- **G4 Violations.** Remove the remaining classes in section 1 item 3 in the generator: `track_width`, `via_dangling`, `hole_to_hole`, `isolated_copper`, `silk_*`, clearance. Silk: the generator moves or hides reference text only where assembly marking is not lost; if silk can only reach 0 by dropping reference designators from the board, stop and ask the owner. Stitching may add violations; DRC after stitching is the gate, so a G4 fix may repeat G3. The 22 GND module pads: the stitcher's via-in-pad for U9 stays (A8); if pads still fail, try `inner` planes (A7), then a U9 move.
+- **Loop and budget.** Any placement change repeats G1 to G3. Budget: at most 4 placement variants, at most 3 Freerouting runs each, `-mp` at most 200, at most 30 minutes per run. All runs are recorded in the report (count per run, including failures). When the budget ends without M1 = M2 = 0, the deliverable is the best state with its numbers; the README says "N unrouted", never "clean".
+- **G5 Waiver list (proposal; the owner approves the file).** Profiles `placed-4l`, `routed-4l`, `stitched-4l`. For every class that must be 0, an explicit `max: 0` is written. Allowed classes get the observed count as `max`, an allow-list of refs, a specific reason (replacing the boilerplate "cause not analysed") and a `DEV-nnn`. The owner decides an expiry event for the list (guardrails open question 2); until then the list is stated as spike-only.
+- **G6 Reproducibility.** `hw/kicad/spike-gate/expected/` (new) holds `routed.ses` and `routed.meta.json` with: sha256 of the placed board, sha256 of the DSN, KiCad version, jar sha256, `FR_PASSES`, thread count, Java version, wall time. Importing the SES into a fresh generated board reproduces the stitched board; the compared artefact is a **board dump** (tracks, vias, zones, net classes, as a sorted JSON) written by a new `pcb_check.dump_board(path) -> dict`, plus the DRC counts, in two runs. (The earlier spike's dump lives on `spike/hw-kicad` and is not used.) T7 fails with a "stale session" message if the placed-board hash differs.
+- **G7 Docs, last, only after G3 to G6 pass or the budget ends.** Render with `render_readme_images.sh`; caption numbers come from the JSON of one run directory (placed, routed, stitched counts, the run command, KiCad and jar versions); the report gets section 11; `CHANGELOG.md` entry; grep `docs/` and README for "57.43", "40 unrouted", "252" and update every place; run `check_traceability.py`, `check_docs_style.py`, `build_diagrams.sh --check`. Caption wording when all gates pass: "no unrouted nets and no DRC findings beyond the listed waivers on a spike board; stand-in LED and land patterns; not checked by a fabricator". It never says "clean" or "compliant".
+
+Failure behaviour: stop rule as in the loop. NFRs: testability (numeric gates, fixtures), auditability (all runs recorded with versions and hashes), manufacturing (A8; not fabricator-checked; guardrails section 2 items such as fiducials, 3D fit and test-pad size are listed as not run), safety and security (no firmware, no change). Power margin: routed widths on VBUS_IC and +5V are measured against 0.56 mm; narrower segments (including neck-downs at pads, and any inner-layer segment with half the capacity) are **listed as a finding** in the report, not counted as a pass; the +5V LED current is not analysed.
+
+Regulatory check (skill `regulatory-check`, applied to this plan by the Elephant): spike only; no product, no placing on the market; no new CRA, RED, LVD, EMCD or RoHS obligation arises from it. Moving U9 (G4, last step) changes the antenna environment on the spike board; no RF statement is made. This is guidance, not legal advice.
+
+## 5. Detailed implementation plan
+
+All paths under `hw/kicad/spike-gate/` unless stated. Nothing is committed until the owner asks (CLAUDE.md rule 14); the G2 commit is separate from the rest.
+
+**Files to change**
+- `src/pcb_rules.py` (exists, 19 lines): add all rule constants (today inline in `write_project` of `pcb_full.py` and in `pcb_stitch.py`: `CLR`, `TRACK_W`, `VIA_D`); `write_dru(path: str, layers: int = 4) -> None`; `net_class_widths() -> dict[str, float]`; stays free of `pcbnew`.
+- `src/pcb_full.py`: the LED footprint is set by an entry in the existing `FOOTPRINT_OVERRIDE` dict for D1 to D16 (`LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm`). The schematic and netlist (`src/layout_full.py` line 47, `tests/data/full.net`) are **not** changed, so the schematic still names the 5 x 5 footprint; this is one more stand-in substitution (like U1, U8, U9) and adds 16 `footprint_symbol_mismatch` items on D1 to D16, which are allowed for that class (refs D1 to D16 are added to the allow-list); LED pad map check, ring placement, the J1 offset (`mouth_r = max(J1_MOUTH_R, led_pad_x + J1_LED_GAP + rear)`) recomputed with the new pad reach, existing hook and post rule areas kept (only their LED clearances checked), `.kicad_dru` call, constants imported from `pcb_rules.py`.
+- `src/mech_outline.py`: LED size constants, `led_rotation_deg`, source note "stand-in".
+- `src/pcb_place.py`: `cost_of(ref, st, pen)` uses `max(pen, OVERLAP_PEN_FLOOR)` as the overlap weight, with the named constant `OVERLAP_PEN_FLOOR = 2000.0` (the annealing schedule `pen0=2.0` to `pen1=60.0` in `run()` is unchanged); fixed seed unchanged.
+- `src/pcb_dsn.py`: unchanged except that its `planes` option stays; `planes=inner` (A7 fallback) is **not specified here**: it zeroes zones by layer today, not by net, and using it needs a plan amendment, so it is out of the deliverables.
+- `src/pcb_stitch.py`: numbers from `pcb_rules.py`; non-zero exit if `failed` is not empty.
+- `src/pcb_check.py`: `count_unrouted`, `dump_board`; its exit code is honoured. Both parse the board text (as `layout_rules` does), because the SWIG track iterator is broken in this Python.
+- `src/pcb_replay.py` (new, G6): `replay(placed_pcb: str, ses: str, out_pcb: str) -> None` (import the SES into a copy of the placed board, refill zones, run the stitcher), `write_meta(path: str, **fields) -> None` for `routed.meta.json` and `run_meta.json`, `check_stale(placed_pcb: str, meta_json: str) -> None` (raises with "stale session" if the sha256 of the placed board differs).
+- `tests/test_pcb_full.py`: `test_substitutions_are_the_documented_ones` is updated to list D1 to D16 in `FOOTPRINT_OVERRIDE`.
+- `src/kicad_strict.py`: per-ref allow-list for `net_conflict`, `footprint_symbol_mismatch` and `lib_footprint_issues`; explicit `max: 0` classes fail.
+- `run_pcb.sh`: full jar hash check, stitch step and file copies, `|| true` removed from the `pcb_check.py` call (the `filter` helper keeps its own), `stitched-${LAYERS}l` strict DRC, record `java -version`, passes, threads, wall time in `<out>/a/run_meta.json`; a `SPIKE_ALLOW_KNOWN_OPEN=0` mode for T8.
+- `known-open-violations.json`: proposal (G5).
+- `expected/routed.ses`, `expected/routed.meta.json` (new, G6).
+- Outside the spike: `README.md` (caption), `docs/verification/reports/spike-pcb-placement-routing.md` (section 11), `CHANGELOG.md`, `docs/plans/06-...md`, `docs/reviews/RV-009-pcb-clean-route-goldfish.md`, a `DEV-nnn` entry in the deviation register for each allowed class.
+
+**Specification details (closing the readiness findings)**
+
+- *Fixtures (T6, T10).* G0 produces stored DRC JSON files by running the baseline (`run_pcb.sh` with the jar) once and copying `drc_placed.json`, `drc_routed.json` and the stitched DRC to `tests/data/drc_placed.json`, `drc_routed.json`, `drc_stitched.json`. G0 also writes `tests/data/drc_expected.json` with, per file, the raw `unconnected_items` total and the M1 count; T10 expects those values (the numbers 241, 121 and 57 of the earlier runs are not asserted). G0 has no stitch step in `run_pcb.sh` yet, so it runs `pcb_stitch.py <routed.kicad_pcb> <drc_routed.json> <stitched.kicad_pcb>` by hand once, runs `kicad_strict.py drc <stitched.kicad_pcb> stitched-4l --out drc_stitched.json` on the result, and records both commands in the report; G3 puts the step into the script. T6 uses a copy of `drc_stitched.json` with one extra `unconnected_items` entry added by a test helper.
+- *Waiver file schema.* Per profile: `{"<class>": {"max": int, "reason": str, "dev": "DEV-nnn", "refs": ["U1", ...]}}`. `refs` is optional (classes without it count by number only). `max: 0` entries are explicit. `kicad_strict.py` strict mode (`SPIKE_ALLOW_KNOWN_OPEN=0`, its default) ignores the file today; the per-ref allow-list therefore moves to a new key `"strict_allow"` per profile that strict mode **does** read (only the allowed classes with their refs and maxima). T8 runs strict with that key. The placed-4l and routed-4l maxima for classes that must reach 0 (including `unconnected_items`) are replaced by `max: 0` only in the `stitched-4l` profile; the older profiles keep their recorded numbers as history until the owner removes them.
+- *M1 plane rule.* Plane nets are named in `pcb_rules.PLANE_NETS = frozenset({"GND", "+5V"})` (the current stitcher default). With the `none` setting of A7 the router sees no pour and the stitcher completes these two nets after import. (`inner` planes: see the file list, not specified.)
+- *`dump_board(path) -> dict`.* Keys: `tracks` (sorted list of `[layer, net, x1, y1, x2, y2, width]` in nm), `vias` (sorted `[net, x, y, size, drill, layers]`), `zones` (sorted `[layer, net, priority, filled_area_nm2]`), `net_classes` (name to `{clearance, track, via}`), `outline_hash` (sha256 of Edge.Cuts coordinates).
+- *`routed.meta.json` keys.* `placed_board_sha256`, `dsn_sha256`, `kicad_version`, `jar_sha256`, `fr_passes`, `fr_threads`, `java_version`, `wall_time_s`, `planes`, `created`. `run_meta.json` has the same keys for every run.
+- *Per-ref parsing.* `kicad_strict.py` extracts refs from each DRC item description with the regular expression style of `pcb_stitch.py` (`of (\S+)`, `Footprint (\S+)`); an item with several refs passes only if all refs are in the class's allow-list. Classes with no `refs` key (for example `lib_footprint_issues`) are capped by number only. Counts are per (profile, class) as today; the `strict_allow` key lists the same fields as the waiver entries. Tested by T14 on a stored DRC JSON fixture with an item on a foreign ref.
+- *Tests without a named test.* The `pcb_rules`-to-`pcb_dsn` net-class derivation is covered by T4 extended to read the DSN text; the `dump_board` schema and the `run_meta.json` keys by a schema test in `tests/test_pcb_rules.py` (T16); caption numbers by a check in the G7 step that compares the caption numbers to `run_meta.json` (a documented command, not a new script); the width listing by T17 (lists every VBUS_IC and +5V segment narrower than 0.56 mm on a fixture board).
+- *DRU.* `write_dru` writes KiCad custom-rule syntax `(version 1)` with `(rule "<name>" (constraint <clearance|track_width|via_diameter|annular_width|hole_to_hole|edge_clearance> (min <value>mm)))`. Rule names: `spike_clearance`, `spike_track`, `spike_via`, `spike_annular`, `spike_hole_to_hole`, `spike_edge`. T11 sets the minimum track in the DRU above an existing track width on a canary board and expects a `track_width` violation citing the rule `spike_track`.
+- *G0 free-area estimate.* Method: compute the area of the board disc minus the module body and antenna strip, the J1 tab area, and the hook and notch regions, and the summed LED, capacitor and other courtyard areas; the ratio (courtyard area divided by free area) is reported. No numeric threshold is claimed; it is evidence for A5, not a gate.
+- *A2 second check.* The vendor drawing for the WS2812B-2020 (Worldsemi datasheet) is read by the owner or a second reader; if the owner cannot supply it, the footprint stays "stand-in, unverified" in the report and caption, and the work continues (no stop): only a claim about the part is withheld.
+- *Fixture boards (T9, T11, T17).* They are built in the test setup by `pcbnew` calls (a few pads, tracks and vias); no `.kicad_pcb` file is committed or hand-edited.
+- *Runner.* The tests run with plain `pytest` inside a venv made by `python -m pip install --group hw --group dev` (the system Python has no pytest); G0 creates it. The jar copy outside the repository needs the owner's approval of the write.
+- *Unattended running.* Owner stop points (R6 confirmations, G2 DRU review, G5 waiver file, silk, size over 59.8 mm) are real stops: the run ends there with a written status and waits. Agents do not continue past them.
+- *CI wiring.* `ci.yml` gets no new job. T5 and the unit tests run with `pytest hw/kicad/spike-gate/tests` (venv) locally and through the existing hw step where the venv has `pcbnew`; tests that need `pcbnew`, `kicad-cli` or the jar are SKIPPED visibly when missing. T5 is `tests/test_run_pcb_jar.py` (Python, calls the shell script) so that one runner covers it.
+- *Deviations.* `docs/standards/deviations.md` has no entries yet; G5 appends `DEV-001` upward in the format of `docs/templates/deviation.md`, one per allowed class plus one for the added D1 to D16 `footprint_symbol_mismatch` items.
+
+**Order of work:** G0; failing tests for G1 first; G1; G2 (stop for owner review of values); G3; G4; G5 (proposal); G6; G7.
+
+## 6. Test and verification plan
+
+Test IDs are plan-local (T1 to T17). `TC-nnn` numbers are reserved from the register when the tests are written and recorded in the report; whether spike tests need a TC at all is owner item R6. Tools per test are listed; a skipped test is printed as SKIPPED, never passed.
+
+| ID | What | Level / tools | Pass criterion |
+|---|---|---|---|
+| T1 | LED footprint pads map to the netlist nets; pin 1, rotation and the cap shift are right for the new pinout | unit (`pcbnew`) in `tests/test_pcb_full.py` | 0 differences |
+| T2 | LED ring: radius within 0.2 mm and angle within 1 degree of 3.75 + 22.5 k (mech-spike constraint, not HW-001) | unit (`pcbnew`) | all 16 |
+| T3 | No LED, cap or J1 courtyard overlaps another courtyard, a hook area or the notch; chord and pad geometry fit the arc | unit (`pcbnew`) | 0 findings |
+| T4 | `write_dru` deterministic; `pcb_full` (project file and constants) and `pcb_stitch` read the same clearance, track, via, annular, hole, edge values from `pcb_rules.py`; a DSN exported from a built board carries the `PWR_*` widths equal to `NET_WIDTH`; no value is looser than `pcb_rules.FLOOR` (the current values, copied at G2 from `write_project` and the stitcher constants and listed in the report: clearance 0.15, hole-to-hole 0.4, annular 0.1, hole clearance 0.25, plus the track, via and edge values found there). The stitcher margin is a separate constant `STITCH_MARGIN = 0.06` added to the base clearance | unit, pure Python, `tests/test_pcb_rules.py` | equal and not looser |
+| T5 | `run_pcb.sh` exits 1 on a missing or wrong jar | `tests/test_run_pcb_jar.py` (pytest, calls the script) | exit 1 |
+| T6 | Canary: a stored DRC JSON with one injected `unconnected_items` entry makes `kicad_strict.py` exit 1 | unit, fixture `tests/data/drc_stitched.json` + one injected entry | exit 1 |
+| T7 | Stored session: import reproduces the board dump and DRC counts in two runs; a changed placed board gives "stale session" | system (`pcbnew`, `kicad-cli`) | identical; stale detected |
+| T8 | Final gate: strict DRC of `stitched.kicad_pcb` with `SPIKE_ALLOW_KNOWN_OPEN=0` against the minimal allow-list, M3 = 0 | system (`kicad-cli`, `pcbnew`; jar for a fresh run, not for the stored session) | M1 = M2 = 0, only allowed classes |
+| T9 | Stitcher on a small fixture board: no output violation; non-zero exit when a pad fails | unit (`pcbnew`) | as stated |
+| T10 | `count_unrouted` on the stored fixtures; expected values are in `tests/data/drc_expected.json`, written by G0 from the same runs (raw `unconnected_items` total and M1 count per file) | unit | equal to `drc_expected.json` |
+| T11 | DRU canary: a board with one track under the minimum produces the expected rule violation type (proves KiCad loads the file) | system (`kicad-cli`) | violation present |
+| T12 | `largest_dim_mm` is computed from the board (not asserted) and the G1 limit check fails above 59.8 mm | unit | as stated |
+| T13 | Placement cost: `cost_of` is called with `pen=2.0` (the old `pen0`) on a constructed two-candidate case (a placement with a small overlap and a short wire length against a clean placement with a longer one); the clean one must score lower. The test fails on the current code first | unit, pure Python | as stated |
+| T14 | Per-ref allow-list: a `net_conflict` on another ref fails | unit | exit 1 |
+| T15 | Antenna strip free of tracks, vias and zones on the **routed and stitched** board (new test `test_antenna_strip_free_after_routing`; the existing `test_antenna_strip_is_free` covers placed pads only) | system (`pcbnew`) | 0 items; rule-area `items_not_allowed` = 0 |
+| T16 | Schemas: `dump_board` keys and `routed.meta.json` / `run_meta.json` keys as specified | unit, `tests/test_pcb_rules.py` | keys present, types right |
+| T17 | Width listing: every VBUS_IC and +5V segment under 0.56 mm on a fixture board is listed | unit (`pcbnew`) | list equals fixture truth |
+
+Deliverables without their own unit test, and how they are verified: the jar copy by the `sha256sum` line in the G0 log; the stitch step and file copies in `run_pcb.sh` by T8 on a real run; `run_meta.json` writing by T16 plus a check of the file after a real G3 run; the G7 documentation steps by the commands named there (`check_traceability.py`, `check_docs_style.py`, `build_diagrams.sh --check`, the greps). `planes=inner` is not a deliverable.
+
+Analysis and evidence: all run counts, versions and hashes in the report; the width listing of section 4; items not run (SI, EMC, antenna, thermal, fabricator DFM, fiducials, test-pad size, 3D fit, SPICE, bench) stated in the report.
+
+## 7. Risks and open questions
+
+- R1. 0 unrouted may be unreachable (A5). Mitigation: gates, budget, honest caption.
+- R2. Freerouting is not deterministic (A4). Mitigation: G6; the stored result is one point.
+- R3. The stand-in LED changes pads, optics and thermal behaviour; the real part may differ. Mitigation: A6 and the caption wording.
+- R4. Tightening placement near the module may break the antenna strip. Mitigation: T15 and no RF claim.
+- R5. `known-open-violations.json`, the DRU values and the `DEV-nnn` entries need the owner.
+- R6. **Owner confirmations (answered 2026-11-05: (a) yes, exempt; (b) yes, spike branch, no as-is merge; (c) no TC numbers, T1 to T17 are plan-local):** (a) rule 1: the spike is exempt from "Approved requirement first" for this plan, as for the earlier spike work; (b) the work stays on `spike/pcb-clean-route` and is not merged as-is; (c) spike tests are exempt from TC registration, or the owner wants TC numbers.
+- R7. The housing size (59.8 mm against 58 mm) and the 57.43 mm of the mech spike remain open; `mech/` is not updated.
+- R8. Silk at 0 may conflict with assembly marking (G4).
+- Open: the real LED part and its evidence (HW-012); whether the DRU should follow guardrails section 3 values.
+
+## 8. Rollout / rollback and traceability
+
+IDs touched: HW-001, HW-003, HW-005, HW-010, HW-012 (follow-up), ADR-0004 and ADR-0012 (reference only). Per-ID trace: HW-001: ring geometry (T2, T3); HW-003 and HW-010: CC1, CC2 and VBUS_IC nets routed (M1, M3, width listing); HW-005: antenna strip (T15, R4); HW-012: stand-in footprint, no evidence claim (A6).
+Rollback: delete the branch; nothing on `main` changes. Documentation edits happen last (G7), so a failed run leaves no "clean" claim. Build output (`.kicad_pcb`, `.kicad_pro`, jar, renders) is not committed (spike convention); the stored session and its metadata are.
+
+## 9. Amendments during implementation
+
+- **A-1 (2026-11-05, G1, owner answer "Yes" to the waiver recommendation).** After the 2020 LED swap the placed board has 13 `courtyards_overlap` errors and 1 `items_not_allowed` error (`hook_150`), all on U9. Cause: the ESP32-C6-MINI-1 library courtyard (x -25 to +6.9 mm, y +-21.6 mm from the housing axis) is the module antenna keep-out, and the mech design puts ring LEDs D6 to D12, SW1, R2, R3 and R_ILIM1 to 3 inside it. Espressif's guidance (no copper and no components in the keep-out, module at the board edge, 15 mm housing clearance) says this is an RF design problem, not a routing problem. Decision: the U9 courtyard is **not** shrunk; the class is waived for pairs that include U9, with refs, a DEV entry and an open RF item against HW-005 (G5, owner approves the waiver file). The G1 pass criterion "0 `courtyards_overlap`, 0 `items_not_allowed`" is therefore read as "0 outside the U9 keep-out". Follow-ups for the owner, not done here: a board cutout around the antenna, a separate antenna board, the U.FL variant, or moving the module to the edge (each needs a mech or HW-005 decision). Nothing is claimed about antenna performance.
+- **A-2 (G1).** Placer extents now use the footprint courtyard (U9 excluded); J1 mouth radius also clears the LED courtyards; ADR-0016 proximity rules are one constant, `pcb_full.LAYOUT_RULES`, used by both the placer (seed accept) and the test.
+- **A-3 (G1 result).** Housing largest dimension 59.24 mm (mouth 31.64 mm): above MECH-001 (58 mm), below the 59.8 mm limit of D2. Placed DRC (strict): 241 unconnected, 13+1 on U9, 5 ignored checks, lib/silk warnings (G4/G5).
+
