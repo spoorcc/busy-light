@@ -41,6 +41,7 @@ if [ -n "$FREEROUTING_JAR" ]; then
   grep -E "Auto-routing stage completed" "$OUT/a/freerouting.log" | tail -1 | cut -c1-300
   "$PY" "$HERE/src/pcb_dsn.py" import "$OUT/a/busy_light_spike.kicad_pcb" "$OUT/a/b.ses" "$OUT/a/routed.kicad_pcb" 2>&1 | filter
   cp -f "$OUT/a/busy_light_spike.kicad_pro" "$OUT/a/routed.kicad_pro"
+  cp -f "$OUT/a/busy_light_spike.kicad_dru" "$OUT/a/routed.kicad_dru"
   cp -f "$IN/full.kicad_sch" "$OUT/a/routed.kicad_sch"
   "$PY" "$HERE/src/kicad_strict.py" drc "$OUT/a/routed.kicad_pcb" "routed-${LAYERS}l" --out "$OUT/a/drc_routed.json"
   "$PY" "$HERE/src/pcb_check.py" "$NET" "$OUT/a/routed.kicad_pcb" "$OUT/a/drc_routed.json" > "$OUT/a/check_routed.json" 2>/dev/null \
