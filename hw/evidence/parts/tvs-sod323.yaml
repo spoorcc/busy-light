@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence placeholder for the TVS/ESD diodes TVS1 (VBUS) and TVS2 (ESD diode). Parts not chosen (schematic values 'TVS' and 'ESD diode', footprint D_SOD-323).
+schema_version: 1
+part:
+  key: TVS-SOD323
+  mpn: not chosen
+  manufacturer: not chosen
+  description: Unidirectional TVS (TVS1) and ESD diode (TVS2) in SOD-323
+  selection: placeholder
+  package:
+    code: SOD-323
+    name: D_SOD-323
+    pin_count: 2
+  used_in:
+  - TVS1
+  - TVS2
+  schematic_symbol: Device:D_TVS
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: TVS-SOD323.vrwm
+  parameter: Reverse stand-off voltage (VBUS clamp TVS1)
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: TVS-SOD323.vbr
+  parameter: Breakdown voltage
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: TVS-SOD323.vc_ipp
+  parameter: Clamping voltage at peak pulse current
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: TVS-SOD323.cj
+  parameter: Junction capacitance (ESD diode TVS2)
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: TVS-SOD323.iec61000_4_2
+  parameter: IEC 61000-4-2 contact/air rating
+  category: abs_max
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
