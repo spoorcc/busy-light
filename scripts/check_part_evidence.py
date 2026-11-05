@@ -12,7 +12,8 @@ Run when --netlist is given: every 'used_in' reference exists in the KiCad netli
 is compared with the pins of each reference (report; use --fail-on-pin-mismatch to fail on it).
 
 Exit status: 0 no errors, 1 errors found, 2 a required tool is missing (reported as NOT RUN).
-Command: python3 scripts/check_part_evidence.py [--netlist PATH] [--evidence-dir DIR]
+Command: python3 scripts/check_part_evidence.py [--netlist PATH [--subset-netlist]]
+         [--evidence-dir DIR]
 """
 
 from __future__ import annotations
@@ -30,7 +31,16 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-import part_evidence as pe
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # python3 -I does not add this folder
+try:
+    import part_evidence as pe  # noqa: E402
+except ImportError as exc:  # PyYAML is missing
+    print(
+        f"check_part_evidence: NOT RUN - missing package ({exc.name}). "
+        "Install with: pip install --group dev",
+        file=sys.stderr,
+    )
+    sys.exit(2)
 
 QUOTE_MAX = 300
 FUNCTIONS = {"ln", "log", "exp", "sqrt"}
@@ -94,9 +104,15 @@ def check_formula(entry: dict[str, Any]) -> list[str]:
     allowed = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant, ast.Name, ast.Load, ast.Call)
     allowed_ops = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.USub, ast.UAdd)
     out = []
-    funcs = {n.func.id for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)}
+    funcs = {
+        n.func.id
+        for n in ast.walk(tree)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+    }
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and not (isinstance(node.func, ast.Name) and node.func.id in FUNCTIONS):
+        if isinstance(node, ast.Call) and not (
+            isinstance(node.func, ast.Name) and node.func.id in FUNCTIONS
+        ):
             out.append("formula calls a function; only ln, log, exp and sqrt are allowed")
         elif isinstance(node, ast.Name):
             if node.id in funcs and node.id in FUNCTIONS:
@@ -108,7 +124,21 @@ def check_formula(entry: dict[str, Any]) -> list[str]:
     return out
 
 
-def semantic_errors(item: dict[str, Any], ureg: Any) -> list[str]:
+NUMBER = re.compile(r"\d+(?:\.\d+)?")
+
+
+def number_errors(item: dict[str, Any], quote: str) -> list[str]:
+    """Each stored min, typ and max must occur as a number in the quote (catches typing errors)."""
+    found = {float(n) for n in NUMBER.findall(normalise(quote))}
+    out = []
+    for key in ("min", "typ", "max"):
+        value = item.get(key)
+        if value is not None and abs(float(value)) not in found:
+            out.append(f"{key} {value} does not occur as a number in the quote")
+    return out
+
+
+def semantic_errors(item: dict[str, Any], ureg: Any) -> list[str]:  # noqa: PLR0912
     """Checks that JSON Schema cannot express."""
     out: list[str] = []
     values = [item.get(k) for k in ("min", "typ", "max")]
@@ -133,13 +163,16 @@ def semantic_errors(item: dict[str, Any], ureg: Any) -> list[str]:
         if v_by and e_by and v_by.get("kind") != "human" and v_by == e_by:
             out.append("status verified: verified_by equals extracted_by and is not a human")
         if v_by and e_by and v_by.get("kind") != "human" and v_by.get("name") == e_by.get("name"):
-            out.append("status verified: an AI verifier must have a different name from the extractor")
+            out.append(
+                "status verified: an AI verifier must have a different name from the extractor"
+            )
         if item.get("method") == "extracted" and not v_by:
             out.append("status verified without verified_by")
     elif item.get("verified_by") and item.get("status") in ("unverified", "source-missing"):
         out.append(f"verified_by is set but status is '{item['status']}'")
     quote = (item.get("source") or {}).get("quote")
     if quote:
+        out.extend(number_errors(item, quote))
         if "\n" in quote:
             out.append("quote has a line break (one sentence or one table row on one line)")
         if SENTENCE_END.search(quote):
@@ -176,7 +209,16 @@ class Datasheets:
             texts = []
             for mode in ("-layout", "-raw"):
                 res = subprocess.run(
-                    ["pdftotext", mode, "-f", str(page), "-l", str(page), str(self.folder / name), "-"],
+                    [
+                        "pdftotext",
+                        mode,
+                        "-f",
+                        str(page),
+                        "-l",
+                        str(page),
+                        str(self.folder / name),
+                        "-",
+                    ],
                     capture_output=True,
                     text=True,
                     check=False,
@@ -212,9 +254,13 @@ def check_documents(
             rep.error(where, f"document '{doc['id']}': page count differs from 'pages: {pages}'")
 
 
-def check_quote(
-    where: str, item: dict[str, Any], ds: Datasheets, docs: dict[str, dict[str, Any]],
-    rep: Report, stats: Counter[str]
+def check_quote(  # noqa: PLR0913, PLR0917
+    where: str,
+    item: dict[str, Any],
+    ds: Datasheets,
+    docs: dict[str, dict[str, Any]],
+    rep: Report,
+    stats: Counter[str],
 ) -> None:
     src = item.get("source")
     if not src or src.get("document") not in docs:
@@ -252,7 +298,9 @@ def pin_report(
         return 0
     mismatches = 0
     by_number: set[str] = {p["pin"] for p in table}
-    by_name: set[str] = {p["name"] for p in table} | {a for p in table for a in p.get("aliases", [])}
+    by_name: set[str] = {p["name"] for p in table} | {
+        a for p in table for a in p.get("aliases", [])
+    }
     for ref in part["used_in"]:
         net_pins = pins_by_ref.get(ref)
         if net_pins is None:
@@ -267,8 +315,14 @@ def pin_report(
         for pin, fn in sorted(net_pins):
             if pin not in by_number and pin not in by_name:
                 mismatches += 1
-                lines.append(f"  {ref}: netlist pin '{pin}' ({fn}) is not in the {part['mpn']} table")
-        covered = {p["pin"] for p in table if p["pin"] in in_net or {p["name"], *p.get("aliases", [])} & in_net}
+                lines.append(
+                    f"  {ref}: netlist pin '{pin}' ({fn}) is not in the {part['mpn']} table"
+                )
+        covered = {
+            p["pin"]
+            for p in table
+            if p["pin"] in in_net or {p["name"], *p.get("aliases", [])} & in_net
+        }
         missing = [p["pin"] for p in table if p["pin"] not in covered]
         if missing:
             lines.append(f"  {ref}: table pins not in the netlist: {', '.join(sorted(missing))}")
@@ -280,8 +334,11 @@ def run(args: argparse.Namespace) -> int:  # noqa: PLR0912, PLR0915
         import jsonschema  # noqa: PLC0415
         import pint  # noqa: PLC0415
     except ImportError as exc:
-        print(f"check_part_evidence: NOT RUN - missing package ({exc.name}). "
-              "Install with: pip install --group dev", file=sys.stderr)
+        print(
+            f"check_part_evidence: NOT RUN - missing package ({exc.name}). "
+            "Install with: pip install --group dev",
+            file=sys.stderr,
+        )
         return 2
     rep = Report()
     stats: Counter[str] = Counter()
@@ -326,7 +383,9 @@ def run(args: argparse.Namespace) -> int:  # noqa: PLR0912, PLR0915
                 rep.error(where, f"{iid}: id must start with '{part['key']}.'")
             src = item.get("source")
             if src and src.get("document") not in docs:
-                rep.error(where, f"{iid}: source.document '{src.get('document')}' is not in documents")
+                rep.error(
+                    where, f"{iid}: source.document '{src.get('document')}' is not in documents"
+                )
             for msg in semantic_errors(item, ureg):
                 rep.error(where, f"{iid}: {msg}")
             stats[f"{item_kind}:{item.get('status')}"] += 1
@@ -349,8 +408,10 @@ def run(args: argparse.Namespace) -> int:  # noqa: PLR0912, PLR0915
     elif not ds.have_tool:
         rep.note("NOT RUN: quote-on-page checks (pdftotext not installed); sha256 also skipped")
     else:
-        rep.note(f"datasheets folder {ds.folder}: {stats['documents_hash_checked']} document hashes "
-                 f"and {stats['quotes_checked']} quotes checked")
+        rep.note(
+            f"datasheets folder {ds.folder}: {stats['documents_hash_checked']} document hashes "
+            f"and {stats['quotes_checked']} quotes checked"
+        )
 
     pin_lines: list[str] = []
     if args.netlist:
@@ -359,18 +420,32 @@ def run(args: argparse.Namespace) -> int:  # noqa: PLR0912, PLR0915
         else:
             pins_by_ref = parse_netlist(args.netlist)
             mism = 0
+            absent: list[str] = []
             for path, data in all_data:
                 for r in data["part"]["used_in"]:
                     if r not in pins_by_ref:
-                        rep.error(path.name, f"used_in '{r}' is not in the netlist {args.netlist.name}")
+                        if args.subset_netlist:
+                            absent.append(r)
+                        else:
+                            rep.error(
+                                path.name,
+                                f"used_in '{r}' is not in the netlist {args.netlist.name}",
+                            )
                 pin_lines.append(f"{path.name} ({data['part']['mpn']}):")
                 before = len(pin_lines)
                 mism += pin_report(data, pins_by_ref, pin_lines)
                 if len(pin_lines) == before:
                     pin_lines.pop()
             if mism and args.fail_on_pin_mismatch:
-                rep.error(args.netlist.name, f"{mism} netlist pin(s) not in the datasheet pin table")
+                rep.error(
+                    args.netlist.name, f"{mism} netlist pin(s) not in the datasheet pin table"
+                )
             rep.note(f"netlist {args.netlist.name}: used_in checked; pin mismatches: {mism}")
+            if absent:
+                rep.note(
+                    f"{len(absent)} used_in reference(s) not in the subset netlist "
+                    "(allowed by --subset-netlist)"
+                )
     else:
         rep.note("NOT RUN: used_in and pin-table checks (no --netlist given)")
 
@@ -380,16 +455,27 @@ def run(args: argparse.Namespace) -> int:  # noqa: PLR0912, PLR0915
         print("Pin table vs netlist:")
         print("\n".join(pin_lines))
     summary = ", ".join(f"{k}={v}" for k, v in sorted(stats.items()) if ":" in k)
-    print(f"check_part_evidence: {len(files)} files, {len(ids)} ids; {summary or 'no entries'}; "
-          f"{len(rep.errors)} error(s)")
+    print(
+        f"check_part_evidence: {len(files)} files, {len(ids)} ids; {summary or 'no entries'}; "
+        f"{len(rep.errors)} error(s)"
+    )
     return 1 if rep.errors else 0
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    ap.add_argument("--evidence-dir", type=Path, default=None, help="folder with the part YAML files")
-    ap.add_argument("--netlist", type=Path, default=None, help="KiCad .net file for used_in and pins")
+    ap.add_argument(
+        "--evidence-dir", type=Path, default=None, help="folder with the part YAML files"
+    )
+    ap.add_argument(
+        "--netlist", type=Path, default=None, help="KiCad .net file for used_in and pins"
+    )
     ap.add_argument("--fail-on-pin-mismatch", action="store_true")
+    ap.add_argument(
+        "--subset-netlist",
+        action="store_true",
+        help="netlist covers only part of the board (for example gate.net): absent refs are a note",
+    )
     return run(ap.parse_args(argv))
 
 

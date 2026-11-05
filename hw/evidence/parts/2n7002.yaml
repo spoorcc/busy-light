@@ -98,6 +98,28 @@ claims:
   max: 100
   unit: nA
   source: {page: 2, locator: DC Electrical Characteristics, quote: 'Gate Body Leakage Current IGSS — — ±100 nA VGS = ±20V, VDS = 0V'}
+- id: 2N7002.idss.25c
+  parameter: Zero-gate-voltage drain current
+  category: electrical
+  condition:
+    vgs: {value: 0, unit: V}
+    vds: maximum rating
+    temperature: {value: 25, unit: degC}
+  max: 1
+  unit: uA
+  notes: Matches the raw text extraction (reading order), not the layout extraction.
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'Zero-Gate Voltage Drain Current IDSS — — 1 µA VGS = 0V, VDS = Maximum Rating'}
+- id: 2N7002.idss.125c
+  parameter: Zero-gate-voltage drain current, hot
+  category: electrical
+  condition:
+    vgs: {value: 0, unit: V}
+    vds: 0.8 x maximum rating
+    temperature: {value: 125, unit: degC}
+  max: 500
+  unit: uA
+  notes: Characterised, not 100 percent tested (Note 2). Matches the raw text extraction.
+  source: {page: 2, locator: DC Electrical Characteristics, quote: '— — 500 VGS = 0V, VDS = 0.8 Maximum Rating, TA = 125°C (Note 2)'}
 - id: 2N7002.id_on
   parameter: On-state drain current
   category: electrical

@@ -155,6 +155,15 @@
 - **Automated:** TBD
 - **Evidence:** TBD
 
+### TC-212 Datasheet evidence for analysed part values
+
+- **Verifies:** HW-012
+- **Level:** Inspection
+- **Procedure:** TBD (draft: run `python3 -I scripts/check_part_evidence.py --netlist <board netlist>` with the datasheets folder present; list the claims used by each script in `hw/sim/` and their status)
+- **Expected result / pass criteria:** see acceptance criteria of HW-012
+- **Automated:** `scripts/check_part_evidence.py` and `scripts/test_check_part_evidence.py` (pytest) cover the format checks; the review of claim values is manual
+- **Evidence:** TBD
+
 ### TC-307 Back mounting interface
 
 - **Verifies:** MECH-007

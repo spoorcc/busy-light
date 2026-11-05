@@ -149,3 +149,16 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Draft
+
+### HW-012 Datasheet evidence for analysed part values
+
+- **Statement:** Every value that a hardware analysis in `hw/sim/` or a schematic or PCB check takes from a vendor document shall be recorded as a claim in `hw/evidence/parts/`, with the document hash, page, and a quote of at most one sentence or one table row, and shall have status `verified` (checked by a human or by an agent other than the extractor) before the analysis result supports a released design.
+- **Rationale:** Analyses of the USB current-limit chain (HW-010) and the hold-off gate depend on datasheet numbers, and earlier reports copied them by hand and could not show where each came from. A checked record per value makes the source auditable (process rule 11) and keeps vendor documents out of the public repository (ADR-0015 item 8). Proposed by the assistant, not Approved.
+- **Parent:** SYS-020, SYS-022
+- **Acceptance criteria:** `python3 -I scripts/check_part_evidence.py --netlist <board netlist>` exits 0 with the datasheets folder present; every reference designator of the netlist has an evidence file; no analysis script reads a claim with status other than `verified` unless it prints that it did so; claims without a document have status `source-missing` and no number.
+- **Verification method:** Inspection
+- **Verified by:** TC-212
+- **Category:** Auditability
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft
