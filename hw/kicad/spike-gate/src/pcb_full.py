@@ -18,10 +18,16 @@ import os
 import re
 import sys
 import uuid
+from pathlib import Path
 
 import pcbnew
 
+import custom_fp
+import lib_tables
+
 FP_ROOT = os.environ.get("KICAD_FOOTPRINT_DIR", "/usr/share/kicad/footprints/")
+_IO = pcbnew.PCB_IO_KICAD_SEXPR()      # one plugin object for the whole run (a temporary one breaks pcbnew.FootprintLoad)
+CUSTOM_DIR = ""                   # set by build(): the output directory that holds CUSTOM.pretty
 
 # ----------------------------------------------------------------------------- board parameters
 J1_MOUTH_R = 29.85                        # V1: receptacle mouth radius of the mech spike (mech_outline.USB_MOUTH_R)
@@ -45,7 +51,7 @@ STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 FOOTPRINT_OVERRIDE = {
     "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
     "U8": "Package_TO_SOT_SMD:SOT-223-3_TabPin2",     # schematic field empty (REG_3V3 placeholder)
-    "U9": "RF_Module:ESP32-C6-MINI-1",                # ESP32-C3-MINI-1 not in the libraries; same 13.2x16.6 module family
+    "U9": "CUSTOM:ESP32-C6-MINI-1_NO_KEEPOUT",        # ESP32-C3-MINI-1 not in the libraries; ESP32-C6-MINI-1 (same 13.2x16.6 module family) without its keep-out zone
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
@@ -113,39 +119,6 @@ def vec(x, y):
     return pcbnew.VECTOR2I(mm(x), mm(y))
 
 
-def x2qfn12_rwb():
-    """TUSB321 RWB (X2QFN-12, 1.6 x 1.6 mm). PROVISIONAL land pattern read from a text extract of the TI
-    drawing RWB0012A (pads 0.2 wide; 8 side pads at 0.5 pitch, 4 end pads at 0.4 pitch). Verify against the
-    drawing before any use: the system KiCad libraries have no X2QFN footprint."""
-    fp = pcbnew.FOOTPRINT(None)
-    pads = {}
-    pads["1"] = (0.2, -0.7, 0.2, 0.4)
-    pads["2"] = (-0.2, -0.7, 0.2, 0.4)
-    for i, y in enumerate((-0.75, -0.25, 0.25, 0.75)):
-        pads[str(3 + i)] = (-0.65, y, 0.4, 0.2)
-    pads["7"] = (-0.2, 0.7, 0.2, 0.4)
-    pads["8"] = (0.2, 0.7, 0.2, 0.4)
-    for i, y in enumerate((0.75, 0.25, -0.25, -0.75)):
-        pads[str(9 + i)] = (0.65, y, 0.4, 0.2)
-    for num, (x, y, w, h) in pads.items():
-        p = pcbnew.PAD(fp)
-        p.SetNumber(num)
-        p.SetShape(pcbnew.PAD_SHAPE_RECT)
-        p.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
-        p.SetLayerSet(p.SMDMask())
-        p.SetSize(vec(w, h))
-        p.SetPosition(vec(x, y))
-        fp.Add(p)
-    cy = pcbnew.PCB_SHAPE(fp)
-    cy.SetShape(pcbnew.SHAPE_T_RECT)
-    cy.SetStart(vec(-1.05, -1.05))
-    cy.SetEnd(vec(1.05, 1.05))
-    cy.SetLayer(pcbnew.F_CrtYd)
-    cy.SetWidth(mm(0.05))
-    fp.Add(cy)
-    return fp
-
-
 _SEEN = {}
 
 
@@ -156,13 +129,26 @@ def id_counter(ref, num):
     return _SEEN[k]
 
 
+def derive_u9_footprint(outdir):
+    """Write CUSTOM.pretty/ESP32-C6-MINI-1_NO_KEEPOUT: the stock RF_Module footprint without its own keep-out zone
+    (the board has its own rule areas). A named project footprint instead of a silent change of the stock one, so
+    that the board footprint equals its library copy (no lib_footprint_mismatch)."""
+    fp = _IO.FootprintLoad(FP_ROOT + "RF_Module.pretty", "ESP32-C6-MINI-1")
+    for z in list(fp.Zones()):
+        fp.Remove(z)
+    fp.SetFPID(pcbnew.LIB_ID("", "ESP32-C6-MINI-1_NO_KEEPOUT"))
+    pretty = os.path.join(outdir, custom_fp.NICK + ".pretty")
+    _IO.FootprintSave(pretty, fp)
+    mod = os.path.join(pretty, "ESP32-C6-MINI-1_NO_KEEPOUT.kicad_mod")
+    normalise_uuids(mod)
+
+
 def load_fp(spec):
     lib, name = spec.split(":", 1)
-    if lib == "CUSTOM":
-        if name == "X2QFN-12_RWB":
-            return x2qfn12_rwb()
-        raise KeyError(spec)
-    fp = pcbnew.FootprintLoad(FP_ROOT + lib + ".pretty", name)
+    if lib == custom_fp.NICK:       # generated library in the project directory (custom_fp.write_library)
+        fp = _IO.FootprintLoad(CUSTOM_DIR + "/" + lib + ".pretty", name)
+    else:
+        fp = _IO.FootprintLoad(FP_ROOT + lib + ".pretty", name)
     if fp is None:
         raise FileNotFoundError(spec)
     return fp
@@ -298,6 +284,11 @@ def add_rule_area(board, name, layers, pts, tracks=True, vias=True, pours=True, 
 
 
 def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
+    global CUSTOM_DIR
+    os.makedirs(outdir, exist_ok=True)
+    CUSTOM_DIR = os.path.abspath(outdir)
+    custom_fp.write_library(outdir)
+    derive_u9_footprint(outdir)
     comps, nets = read_netlist(netlist)
     board = pcbnew.BOARD()
     board.SetCopperLayerCount(layers)
@@ -342,9 +333,9 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         board.Add(fp)                       # Flip() needs the footprint on a board
         fps[ref] = fp
 
-    # the module's own keep-out zone (43 x 20 mm) is replaced by the board-level rule areas below
-    for z in list(fps["U9"].Zones()):
-        fps["U9"].Remove(z)
+    # the module's own keep-out zone (43 x 20 mm) is replaced by the board-level rule areas below (the footprint
+    # of U9 is the library one without that zone, written to CUSTOM.pretty by derive_u9_footprint)
+    assert not list(fps["U9"].Zones())
 
     fixed = set()
     fixed_pins = {}          # (ref, pad) -> (x, y) in the SA frame (KiCad axes, origin at the housing axis)
@@ -553,6 +544,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     pcbnew.SaveBoard(pcb, board)
     normalise_uuids(pcb)
     write_project(os.path.join(outdir, name + ".kicad_pro"), name)
+    used = sorted({str(fp.GetFPID().GetLibNickname()) for fp in board.GetFootprints()})
+    lib_tables.write_text(Path(outdir) / "fp-lib-table", lib_tables.fp_lib_table(used))
     pcb_rules.write_dru(os.path.join(outdir, name + ".kicad_dru"), layers)
     with open(os.path.join(outdir, name + ".placement.json"), "w", encoding="utf-8") as f:
         json.dump(dict(placement_info, sa_iters=sa_iters or SA_ITERS, cx=CX, cy=CY, j1_mouth_r=round(mouth_r, 2), tab_r=round(tab_r, 2), largest_dim_mm=round(MO.check_largest_dim(mouth_r), 2)), f, indent=1, sort_keys=True)
