@@ -38,6 +38,7 @@ R = ("Device", "R", "Resistor_SMD:R_0603_1608Metric")
 C = ("Device", "C", "Capacitor_SMD:C_0603_1608Metric")
 TVS = ("Device", "D_TVS", "Diode_SMD:D_SOD-323")
 G04 = ("74xGxx", "74LVC1G04", "Package_TO_SOT_SMD:SOT-23-5")
+G02 = ("74xGxx", "74LVC1G02", "Package_TO_SOT_SMD:SOT-23-5")
 G11 = ("74xGxx", "74LVC1G11", "Package_TO_SOT_SMD:SOT-23-6")
 G125 = ("74xGxx", "74LVC1G125", "Package_TO_SOT_SMD:SOT-23-5")
 AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-23-5")
@@ -51,10 +52,11 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "U1": (None, None, "Package_X2QFN:X2QFN-12", "TUSB321"),
     "R_VD": (*R, "887k"), "R1": (*R, "100k"), "R7": (*R, "100k"),
     "U2": (*G04, "74LVC1G04"), "U12": (*G04, "74LVC1G04"),
+    "U13": (*G02, "74LVC1G02"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
     "R4": (*R, "100k"), "R5": (*R, "100k"), "R2": (*R, "10k"), "R3": (*R, "10k"),
     "Q2": (*Q, "2N7002"), "Q3": (*Q, "2N7002"),
-    "R_ILIM2": (*R, "tbd"), "R_ILIM3": (*R, "tbd"), "R_ILIM1": (*R, "tbd"),
+    "R_ILIM2": (*R, "56.9k 0.1%"), "R_ILIM3": (*R, "27.7k 0.1%"), "R_ILIM1": (*R, "47k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
     "R6": (*R, "150k"), "C1": (*C, "620n C0G 5%"),
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
@@ -117,7 +119,7 @@ LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
 PLACE = {
     "J1": (30, 78.74, 0), "TVS1": (57.15, 63.5, 0), "U6": (68, 118, 0),
     "U1": (gx(50.8), 71.12, 0), "R_VD": (gx(50.8) + 2.54, 49.53, 0), "R1": (gx(76.2), 62.23, 0),
-    "R7": (125.0, 87.63, 0), "U2": (gx(104.14), 66.04, 0), "U12": (143.0, 91.44, 0),
+    "R7": (125.0, 87.63, 0), "U2": (gx(104.14), 66.04, 0), "U13": (gx(121.92), 40.64, 0), "U12": (143.0, 91.44, 0),
     "U3": (gx(162.56), 50.8, 0), "R4": (gx(137.16), 59.69, 0), "R2": (gx(198.12), 54.61, 0),
     "Q2": (gx(210.82), 50.8, 0), "R_ILIM2": (gx(213.36), 41.91, 180),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
@@ -136,7 +138,7 @@ TEXT = {
     "J1": (-7.62, 26.0, "left"), "TVS1": (-3.81, -5.5, "left"), "U6": (6.0, 8.0, "left"),
     "U1": (-7.62, 20.5, "left"), "U5": (-5.08, 19.5, "left"), "U7": (-7.62, 17.0, "left"),
     "U8": (-7.62, 15.0, "left"), "U9": (-22.86, -40.0, "left"),
-    "U2": (3.81, 7.62, "left"), "U12": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"),
+    "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U12": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
     "Q2": (7.62, -1.27, "left"), "Q3": (7.62, -1.27, "left"),
     "R_ILIM2": (2.54, -1.27, "right"), "R_ILIM3": (2.54, -1.27, "right"),
@@ -292,8 +294,8 @@ def _build():
 
     # ------------------------------------------------------------ captions
     s.caption("USB-C input (HW-003)", 18, 12)
-    s.caption("CC detection and gate (ADR-0016): OUT1_N low = 1.5 A or more advertised", gx(38.1), 31.0)
-    s.caption("Gate: step enable = select AND CC OK AND hold-off done", gx(128.27), 25.4)
+    s.caption("CC detection and gate (ADR-0016): OUT1_N low = 1.5 A or more advertised", gx(38.1), 27.0)
+    s.caption("Gate: step enable = select AND CC OK AND hold-off done; step 2 also AND NOT step 3 enable (U13)", gx(128.27), 20.0)
     s.caption("Hold-off after VBUS returns (HW-010: 200 to 600 ms)", gx(38.1), 111.76)
     s.caption("Current limit: TPS2553 (ADR-0010 option A); pins per SLVS841G", 262, 8)
     s.caption("3.3 V regulator (part not chosen)", 305, 78)
@@ -364,6 +366,7 @@ def _build():
     s.pw("VBUS_IC", ("R_VD", "1"))
     o1 = P("U1", "7")
     s.ends("CC_OUT1_N", ("U1", "7"), ("U2", "2"))
+    s.label("CC_OUT1_N", *P("U2", "2"), 180)   # the same net also feeds U13 (exclusive steps)
     s.pw("VBUS_IC", ("R1", "1"))
     s.bind("CC_OUT1_N", "R1", 2)
     s.j(("R1", "2"))
@@ -394,9 +397,10 @@ def _build():
     for g, rsel, ren, q, rl, sel, en in (("U3", "R4", "R2", "Q2", "R_ILIM2", "SEL_STEP2_GPIO", "ILIM_STEP2_EN"),
                                          ("U4", "R5", "R3", "Q3", "R_ILIM3", "SEL_STEP3_GPIO", "ILIM_STEP3_EN")):
         a, b, c, yo = P(g, 1), P(g, 3), P(g, 6), P(g, 4)
+        okn = "CC_OK_1A5" if g == "U4" else "CC_OK_NOT_S3"   # step 2 sees CC OK AND NOT step 3 enable
         s.wire(a, (a[0] - 7.62, a[1]))
-        s.bind("CC_OK_1A5", g, 1)
-        s.label("CC_OK_1A5", a[0] - 7.62, a[1], 180)
+        s.bind(okn, g, 1)
+        s.label(okn, a[0] - 7.62, a[1], 180)
         s.wire(c, (c[0] - 7.62, c[1]))
         s.bind("HOLD_OK", g, 6)
         s.label("HOLD_OK", c[0] - 7.62, c[1], 180)
@@ -419,6 +423,14 @@ def _build():
         s.bind("ILIM_D_" + q, q, 3)
         s.bind("ILIM_D_" + q, rl, 1)
         s.wire(P(q, 3), P(rl, 1))
+    # exclusive steps (owner decision 2026-11-05): U13 = NOR(CC_OUT1_N, ILIM_STEP3_EN) = CC OK AND NOT step 3
+    # enable; it replaces CC OK on the step 2 AND, so step 3 on forces step 2 off. Unpowered -> low -> step 2 off.
+    a, b, y = P("U13", 1), P("U13", 2), P("U13", 4)
+    s.stub("CC_OUT1_N", ("U13", 1), -5.08, 0, 180)
+    s.stub("ILIM_STEP3_EN", ("U13", 2), -5.08, 0, 180)
+    s.stub("CC_OK_NOT_S3", ("U13", 4), 5.08, 0, 0)
+    s.pw("+3V3", ("U13", "5"), True)
+    s.pw("GND", ("U13", "3"), True)
     # ILIM bus to the TPS2553
     t2, t3 = P("R_ILIM2", 2), P("R_ILIM3", 2)
     bx, by = gx(226.06), t2[1] - 5.08

@@ -54,16 +54,46 @@ def step_enable(out1_n, sel, pullup_present=True, gate_logic_powered=True,
     return ok and sel and hold
 
 
+def steps(cc_ok, sel2, sel3, hold, nor_powered=True, u3_powered=True, u4_powered=True,
+          en3_open=False, en3_short_high=False, en3_short_low=False, nor_out_stuck_high=False):
+    """Logic of both steps as drawn: U4 = AND3(cc_ok, sel3, hold) -> en3;
+    U13 = NOR(NOT cc_ok, en3) -> ok2; U3 = AND3(ok2, sel2, hold) -> en2. Returns (en2, en3).
+    cc_ok is the level of CC_OK_1A5 (= NOT CC_OUT1_N, so NOR input A is NOT cc_ok).
+    Faults act on the net ILIM_STEP3_EN (open: R3 pulls the net low)."""
+    en3_gate = bool(u4_powered and cc_ok and sel3 and hold)
+    if en3_short_high:
+        en3 = True
+    elif en3_short_low or en3_open:
+        en3 = False
+    else:
+        en3 = en3_gate
+    ok2 = bool(nor_powered and not ((not cc_ok) or en3))
+    if nor_out_stuck_high:
+        ok2 = True
+    en2 = bool(u3_powered and ok2 and sel2 and hold)
+    return en2, en3
+
+
 class GateNetlist(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.nets = load(os.environ["GATE_NET"])
 
-    def test_ok_net_feeds_both_ands(self):
+    def test_ok_net_feeds_step_3_and_nor_feeds_step_2(self):
         ok = net_of(self.nets, "U2", "4")
         self.assertEqual(ok, "CC_OK_1A5")
-        self.assertEqual(net_of(self.nets, "U3", "1"), ok)
         self.assertEqual(net_of(self.nets, "U4", "1"), ok)
+        self.assertEqual(net_of(self.nets, "U3", "1"), "CC_OK_NOT_S3")   # step 2: CC OK AND NOT step 3 enable
+
+    def test_exclusive_steps_nor_wiring(self):
+        # U13 74LVC1G02: A=1, B=2, GND=3, Y=4, VCC=5. Y = NOT(CC_OUT1_N OR ILIM_STEP3_EN).
+        n = self.nets
+        self.assertEqual(net_of(n, "U13", "1"), net_of(n, "U1", "3"))     # IC output CC_OUT1_N
+        self.assertEqual(net_of(n, "U13", "2"), net_of(n, "U4", "4"))     # step 3 gate output, not the select line
+        self.assertEqual(net_of(n, "U13", "4"), "CC_OK_NOT_S3")
+        self.assertEqual(net_of(n, "U13", "3"), "GND")
+        self.assertEqual(net_of(n, "U13", "5"), "+3V3")
+        self.assertEqual(net_of(n, "Q3", "1"), net_of(n, "U13", "2"))     # the NOR sees the real Q3 gate drive
 
     def test_ic_output_has_pullup_to_ic_supply(self):
         out = net_of(self.nets, "U1", "3")
@@ -120,9 +150,11 @@ class GateNetlist(unittest.TestCase):
             self.assertIn("SOT-23-6", blk)
         self.assertIn("SOT-23-5", text[text.index('(ref "U5")'):][:600])   # supervisor: 5-pin package
 
-    def test_both_ands_share_the_same_ic_path(self):
+    def test_both_steps_share_the_same_ic_path(self):
         # Finding H1 of RV-008: one IC fault reaches both steps and the firmware read.
-        self.assertEqual(net_of(self.nets, "U3", "1"), net_of(self.nets, "U4", "1"))
+        n = self.nets
+        self.assertEqual(net_of(n, "U13", "1"), net_of(n, "U2", "2"))
+        self.assertEqual(net_of(n, "U4", "1"), net_of(n, "U2", "4"))
 
 
 class TruthTable(unittest.TestCase):
@@ -152,6 +184,49 @@ class TruthTable(unittest.TestCase):
     def test_not_covered_fault_is_visible(self):
         # IC output shorted low: both the gate and the firmware see "1.5 A" (RISK-042).
         self.assertTrue(step_enable("short_low", True))
+
+
+class ExclusiveSteps(unittest.TestCase):
+    """Owner decision 2026-11-05: Q2 and Q3 must never both be on (HW-010 proposal, ADR-0016)."""
+
+    def test_truth_table_all_input_combinations(self):
+        for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
+            en2, en3 = steps(cc_ok, sel2, sel3, hold)
+            ok = cc_ok and hold
+            self.assertEqual(en3, ok and sel3, (cc_ok, hold, sel2, sel3))
+            self.assertEqual(en2, ok and sel2 and not sel3, (cc_ok, hold, sel2, sel3))
+
+    def test_never_both_on_for_any_input_combination(self):
+        for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
+            self.assertFalse(all(steps(cc_ok, sel2, sel3, hold)), (cc_ok, hold, sel2, sel3))
+
+    def test_both_selects_resolve_to_the_top_step(self):
+        self.assertEqual(steps(True, True, True, True), (False, True))
+
+    def test_gate_logic_unpowered_is_lowest_step(self):
+        for sel2, sel3 in itertools.product((False, True), repeat=2):
+            self.assertEqual(steps(True, sel2, sel3, True, nor_powered=False, u3_powered=False, u4_powered=False),
+                             (False, False))
+
+    def test_unpowered_nor_alone_cannot_enable_step_2(self):
+        self.assertFalse(steps(True, True, False, True, nor_powered=False)[0])
+
+    def test_en3_open_or_shorted_low_cannot_make_both_on(self):
+        # R3 pulls the net low and Q3 is off: step 2 may be on (single step), never both.
+        for kw in ({"en3_open": True}, {"en3_short_low": True}):
+            for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
+                self.assertFalse(all(steps(cc_ok, sel2, sel3, hold, **kw)))
+
+    def test_en3_short_high_forces_step_2_off(self):
+        for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
+            en2, en3 = steps(cc_ok, sel2, sel3, hold, en3_short_high=True)
+            self.assertFalse(en2)
+            self.assertTrue(en3)    # Q3 on by the fault: not covered by the gate (the top step alone)
+
+    def test_not_covered_nor_output_stuck_high_can_make_both_on(self):
+        # Single fault in U13 (output stuck high) removes the exclusion; only the readbacks show it.
+        en2, en3 = steps(True, True, True, True, nor_out_stuck_high=True)
+        self.assertTrue(en2 and en3)
 
 
 if __name__ == "__main__":

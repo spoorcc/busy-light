@@ -4,7 +4,7 @@
 Generic parts only: no part number is fixed (ADR-0016 item 3). Placeholder reference
 designators. Output: gate.net and gate.kicad_sch in the output directory.
 Traces to HW-010 (Approved 2026-11-04), HW-003 (Approved 2026-11-04), ADR-0016.
-Version 3: IC supplied from VBUS, supervisor-type hold-off (restarts after a VBUS dip), 3-input AND.
+Version 3 (+ exclusive steps via U13): IC supplied from VBUS, supervisor-type hold-off (restarts after a VBUS dip), 3-input AND.
 """
 import os
 import sys
@@ -78,11 +78,20 @@ r_hp[2] += hold_ok
 # Pin numbers are those of the KiCad symbol 74LVC1G11 (A=1, B=3, C=6, Y=4); check against the datasheet.
 sel2, sel3 = Net("SEL_STEP2_GPIO"), Net("SEL_STEP3_GPIO")
 en2, en3 = Net("ILIM_STEP2_EN"), Net("ILIM_STEP3_EN")
-for ref, sel, en in (("U3", sel2, en2), ("U4", sel3, en3)):
+# Exclusive steps (owner decision 2026-11-05): step 2 uses ok2 = NOR(CC_OUT1_N, ILIM_STEP3_EN) = CC OK AND
+# NOT step 3 enable instead of ok, so step 3 on forces step 2 off. U13 is a 74LVC1G02 (A=1, B=2, GND=3, Y=4, VCC=5).
+ok2 = Net("CC_OK_NOT_S3")
+nor = Part("74xGxx", "74LVC1G02", ref="U13", footprint="Package_TO_SOT_SMD:SOT-23-5")
+nor[5] += V3
+nor[3] += GND
+nor[1] += out1_n
+nor[2] += en3
+nor[4] += ok2
+for ref, sel, en, okn in (("U3", sel2, en2, ok2), ("U4", sel3, en3, ok)):
     g = Part("74xGxx", "74LVC1G11", ref=ref, footprint="Package_TO_SOT_SMD:SOT-23-6")
     g[5] += V3
     g[2] += GND
-    g[1] += ok
+    g[1] += okn
     g[3] += sel
     g[6] += hold_ok
     g[4] += en

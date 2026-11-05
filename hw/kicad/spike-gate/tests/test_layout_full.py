@@ -92,8 +92,9 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(layout_full.PARTS["U7"][2], "Package_TO_SOT_SMD:SOT-23-6")
 
     def test_gate_inputs_and_readbacks(self):
+        self.assertEqual(self.pin_net[("U4", "1")], "CC_OK_1A5")
+        self.assertEqual(self.pin_net[("U3", "1")], "CC_OK_NOT_S3")
         for g in ("U3", "U4"):
-            self.assertEqual(self.pin_net[(g, "1")], "CC_OK_1A5")
             self.assertEqual(self.pin_net[(g, "6")], "HOLD_OK")
         self.assertEqual(self.pin_net[("U9", "GPIO0")], "CC_OK_1A5")
         self.assertEqual(self.pin_net[("U9", "GPIO1")], "CC_OK_3A")
@@ -134,6 +135,22 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(self.pin_net[("U9", "GPIO21")], "STEP3_EN_RB")
         self.assertEqual({self.pin_net[("R14", "1")], self.pin_net[("R14", "2")]}, {"ILIM_STEP2_EN", "STEP2_EN_RB"})
         self.assertEqual({self.pin_net[("R15", "1")], self.pin_net[("R15", "2")]}, {"ILIM_STEP3_EN", "STEP3_EN_RB"})
+
+    def test_exclusive_steps_nor_gate(self):
+        """U13 74LVC1G02 (A=1, B=2, GND=3, Y=4, VCC=5): NOR(CC_OUT1_N, ILIM_STEP3_EN) feeds U3 pin 1."""
+        pn = self.pin_net
+        self.assertEqual([pn[("U13", str(i))] for i in (1, 2, 3, 4, 5)],
+                         ["CC_OUT1_N", "ILIM_STEP3_EN", "GND", "CC_OK_NOT_S3", "+3V3"])
+        self.assertEqual(layout_full.PARTS["U13"][1], "74LVC1G02")
+        self.assertEqual(layout_full.PARTS["U13"][2], "Package_TO_SOT_SMD:SOT-23-5")
+        self.assertEqual(pn[("Q3", "1")], "ILIM_STEP3_EN")
+        for ref, val in (("R2", "10k"), ("R3", "10k"), ("R14", "100k"), ("R15", "100k")):
+            self.assertEqual(layout_full.PARTS[ref][-1], val)
+
+    def test_ilim_resistor_values(self):
+        P = layout_full.PARTS
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
+                         ("47k 0.1%", "56.9k 0.1%", "27.7k 0.1%"))
 
     def test_no_uart_test_points(self):
         self.assertFalse({"UART_TX", "UART_RX"} & set(self.pin_net.values()))

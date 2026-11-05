@@ -12,6 +12,7 @@ import layout_full  # noqa: E402
 
 
 def ohms(s):
+    s = s.split()[0]   # a value string may carry a tolerance, e.g. "47k 0.1%"
     return float(s[:-1]) * 1e3 if s.endswith("k") else float(s)
 
 

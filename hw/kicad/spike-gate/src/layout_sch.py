@@ -69,7 +69,7 @@ BOX = {"U1": CC_IC, "U5": SUPERVISOR}
 
 # (x, y, rotation) of every part; pin ends are derived from the library symbols.
 PLACE = {
-    "U1": (50.8, 71.12, 0), "R1": (76.2, 62.23, 0), "U2": (104.14, 66.04, 0),
+    "U1": (50.8, 71.12, 0), "R1": (76.2, 62.23, 0), "U2": (104.14, 66.04, 0), "U13": (121.92, 40.64, 0),
     "U3": (162.56, 50.8, 0), "R4": (137.16, 59.69, 0), "R2": (198.12, 54.61, 0),
     "Q2": (210.82, 50.8, 0), "R_ILIM2": (213.36, 41.91, 180),
     "U4": (162.56, 91.44, 0), "R5": (137.16, 100.33, 0), "R3": (198.12, 95.25, 0),
@@ -78,7 +78,7 @@ PLACE = {
 }
 # where the reference and value text goes: (dx, dy, justify) relative to the part
 TEXT = {"U1": (-2.54, -13.97, "right"), "U5": (-2.54, -13.97, "right"),
-        "U2": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"), "U4": (3.81, 8.89, "left"),
+        "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U3": (3.81, 8.89, "left"), "U4": (3.81, 8.89, "left"),
         "Q2": (7.62, -1.27, "left"), "Q3": (7.62, -1.27, "left"),
         "R_ILIM2": (-5.08, -1.27, "right"), "R_ILIM3": (-5.08, -1.27, "right")}
 DEFAULT_TEXT = (2.54, -1.27, "left")
@@ -209,8 +209,8 @@ def build(netlist_text):
     P = s.pin
 
     # captions
-    s.text("CC detection (ADR-0016): OUT1_N low = 1.5 A or more advertised", 38.1, 41.91)
-    s.text("Gate: step enable = select AND CC OK AND hold-off done", 128.27, 25.4)
+    s.text("CC detection (ADR-0016): OUT1_N low = 1.5 A or more advertised", 38.1, 27.0)
+    s.text("Gate: step enable = select AND CC OK AND hold-off done; step 2 also AND NOT step 3 enable (U13)", 128.27, 20.0)
     s.text("Current-limit switches (ADR-0010 option A, values are placeholders)", 183.0, 17.78)
     s.text("Hold-off after VBUS returns (HW-010: 200 to 600 ms; supervisor part not chosen)",
            38.1, 111.76)
@@ -221,6 +221,7 @@ def build(netlist_text):
     s.power("GND", *P("U1", 2))
     o1 = P("U1", 3)
     s.wire(o1, P("U2", 2))
+    s.label("CC_OUT1_N", *P("U2", 2), 180)   # same net feeds U13 (exclusive steps)
     s.power("VBUS_IC", *P("R1", 1))
     s.junction(*P("R1", 2))
     s.nc(*P("U1", 4))
@@ -238,8 +239,9 @@ def build(netlist_text):
                                          ("U4", "R5", "R3", "Q3", "R_ILIM3", "SEL_STEP3_GPIO",
                                           "ILIM_STEP3_EN")):
         a, b, c, yo = P(g, 1), P(g, 3), P(g, 6), P(g, 4)
+        okn = "CC_OK_1A5" if g == "U4" else "CC_OK_NOT_S3"   # step 2: CC OK AND NOT step 3 enable
         s.wire(a, (a[0] - 7.62, a[1]))
-        s.label("CC_OK_1A5", a[0] - 7.62, a[1], 180)
+        s.label(okn, a[0] - 7.62, a[1], 180)
         s.wire(c, (c[0] - 7.62, c[1]))
         s.label("HOLD_OK", c[0] - 7.62, c[1], 180)
         bs = P(rsel, 1)
@@ -255,6 +257,14 @@ def build(netlist_text):
         s.power("GND", *P(ren, 2))
         s.power("GND", *P(q, 2))
         s.wire(P(q, 3), P(rl, 1))
+    # exclusive steps: U13 = NOR(CC_OUT1_N, ILIM_STEP3_EN) = CC OK AND NOT step 3 enable
+    for pin, net, dx, ang in ((1, "CC_OUT1_N", -5.08, 180), (2, "ILIM_STEP3_EN", -5.08, 180),
+                              (4, "CC_OK_NOT_S3", 5.08, 0)):
+        x, y = P("U13", pin)
+        s.wire((x, y), (x + dx, y))
+        s.label(net, x + dx, y, ang)
+    s.power("+3V3", *P("U13", 5))
+    s.power("GND", *P("U13", 3))
     # ILIM bus: both switched resistors meet and leave to the current-limit part
     t2, t3 = P("R_ILIM2", 2), P("R_ILIM3", 2)
     bx, by = 226.06, t2[1] - 5.08
