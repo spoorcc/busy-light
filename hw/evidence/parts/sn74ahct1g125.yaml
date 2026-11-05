@@ -1,0 +1,194 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the SN74AHCT1G125 buffer (U11, LED data buffer on +5V). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: SN74AHCT1G125
+  mpn: SN74AHCT1G125
+  manufacturer: Texas Instruments
+  description: Single bus buffer gate with 3-state output, TTL-compatible inputs
+  selection: chosen
+  package:
+    code: DBV
+    name: SOT-23-5
+    pin_count: 5
+  used_in:
+  - U11
+  schematic_symbol: 74xGxx:74AHCT1G125
+documents:
+- id: sn74ahct1g125-ds
+  title: SN74AHCT1G125 Single Bus Buffer Gate With 3-State Output
+  doc_number: SCLS378P
+  revision_date: August 1997, revised March 2024
+  origin: manufacturer
+  url: https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf
+  file: sn74ahct1g125.pdf
+  sha256: 564b239f73ff629f960832fa7e1c64f6a651eea28f64115ecefcdb7af22ca416
+  pages: 26
+  retrieved_on: '2026-11-05'
+  notes: The pin table has one numbering for all packages (DBV, DCK, DRL).
+defaults:
+  source_document: sn74ahct1g125-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: DBV
+pins:
+- id: SN74AHCT1G125.pin.1
+  pin: '1'
+  name: OE
+  pin_type: input
+  function: Output enable, active low
+  source: {page: 3, locator: Table 4-1, quote: 1 OE I Output Enable}
+- id: SN74AHCT1G125.pin.2
+  pin: '2'
+  name: A
+  pin_type: input
+  source: {page: 3, locator: Table 4-1, quote: 2 A I Input A}
+- id: SN74AHCT1G125.pin.3
+  pin: '3'
+  name: GND
+  pin_type: ground
+  source: {page: 3, locator: Table 4-1, quote: 3 GND — Ground Pin}
+- id: SN74AHCT1G125.pin.4
+  pin: '4'
+  name: Y
+  pin_type: output
+  source: {page: 3, locator: Table 4-1, quote: 4 Y O Output Y}
+- id: SN74AHCT1G125.pin.5
+  pin: '5'
+  name: VCC
+  pin_type: power
+  source: {page: 3, locator: Table 4-1, quote: 5 VCC — Power Pin}
+claims:
+- id: SN74AHCT1G125.abs_max_vcc
+  parameter: Supply voltage range
+  category: abs_max
+  min: -0.5
+  max: 7
+  unit: V
+  source: {page: 4, locator: Section 5.1, quote: VCC Supply voltage range –0.5 7 V}
+- id: SN74AHCT1G125.abs_max_vi
+  parameter: Input voltage range
+  category: abs_max
+  min: -0.5
+  max: 7
+  unit: V
+  source: {page: 4, locator: Section 5.1, quote: VI (2) Input voltage range –0.5 7 V}
+- id: SN74AHCT1G125.abs_max_iik
+  parameter: Input clamp current, VI < 0
+  category: abs_max
+  max: -20
+  unit: mA
+  source: {page: 4, locator: Section 5.1, quote: IIK Input clamp current VI < 0 –20 mA}
+- id: SN74AHCT1G125.esd_hbm
+  parameter: ESD, human-body model
+  category: abs_max
+  max: 1000
+  unit: V
+  source: {page: 4, locator: Section 5.2, quote: 'Human body model (HBM), per ANSI/ESDA/JEDEC JS-001, all pins(1) ±1000'}
+- id: SN74AHCT1G125.rec_vcc
+  parameter: Supply voltage
+  category: recommended
+  min: 4.5
+  max: 5.5
+  unit: V
+  notes: The part is specified only for 4.5 to 5.5 V; no value is given for 3.3 V operation.
+  source: {page: 4, locator: Section 5.3, quote: VCC Supply voltage 4.5 5.5 V}
+- id: SN74AHCT1G125.rec_vih
+  parameter: High-level input voltage
+  category: recommended
+  condition:
+    supply_voltage: {min: 4.5, max: 5.5, unit: V}
+  min: 2
+  unit: V
+  source: {page: 4, locator: Section 5.3, quote: VIH High-level input voltage 2 V}
+- id: SN74AHCT1G125.rec_vil
+  parameter: Low-level input voltage
+  category: recommended
+  condition:
+    supply_voltage: {min: 4.5, max: 5.5, unit: V}
+  max: 0.8
+  unit: V
+  source: {page: 4, locator: Section 5.3, quote: VIL Low-level input voltage 0.8 V}
+- id: SN74AHCT1G125.rec_vi
+  parameter: Input voltage
+  category: recommended
+  min: 0
+  max: 5.5
+  unit: V
+  source: {page: 4, locator: Section 5.3, quote: VI Input voltage 0 5.5 V}
+- id: SN74AHCT1G125.rec_ioh
+  parameter: High-level output current
+  category: recommended
+  max: -8
+  unit: mA
+  source: {page: 4, locator: Section 5.3, quote: IOH High-level output current –8 mA}
+- id: SN74AHCT1G125.rec_ta
+  parameter: Operating free-air temperature
+  category: recommended
+  min: -40
+  max: 125
+  unit: degC
+  source: {page: 4, locator: Section 5.3, quote: TA Operating free-air temperature –40 125 °C}
+- id: SN74AHCT1G125.voh.ioh_8ma
+  parameter: High-level output voltage
+  category: electrical
+  condition:
+    supply_voltage: {value: 4.5, unit: V}
+    load_current: {value: -8, unit: mA}
+    temperature: {min: -40, max: 125, unit: degC}
+  min: 3.8
+  unit: V
+  notes: Minimum over -40 to 125 degC is 3.8 V (the 25 degC minimum is 3.94 V).
+  source: {page: 5, locator: Section 5.5, quote: IOH = –8 mA 3.94 3.8 3.8}
+- id: SN74AHCT1G125.vol.iol_8ma
+  parameter: Low-level output voltage
+  category: electrical
+  condition:
+    supply_voltage: {value: 4.5, unit: V}
+    load_current: {value: 8, unit: mA}
+    temperature: {min: -40, max: 125, unit: degC}
+  max: 0.44
+  unit: V
+  source: {page: 5, locator: Section 5.5, quote: IOL = 8 mA 0.36 0.44 0.44}
+- id: SN74AHCT1G125.ii
+  parameter: Input leakage current
+  category: electrical
+  condition:
+    supply_voltage: {min: 0, max: 5.5, unit: V}
+    temperature: {min: -40, max: 125, unit: degC}
+  min: -1
+  max: 1
+  unit: uA
+  source: {page: 5, locator: Section 5.5, quote: VI = 5.5 V or GND ±0.1 ±1 ±1 µA}
+- id: SN74AHCT1G125.icc
+  parameter: Supply current
+  category: electrical
+  condition:
+    supply_voltage: {value: 5.5, unit: V}
+    temperature: {min: -40, max: 125, unit: degC}
+  max: 10
+  unit: uA
+  source: {page: 5, locator: Section 5.5, quote: ICC Supply current IO = 0 5.5 V 1 10 10 µA}
+- id: SN74AHCT1G125.tp_a_y.cl15
+  parameter: Propagation delay A to Y (tPLH), 25 degC
+  category: timing
+  condition:
+    supply_voltage: {min: 4.5, max: 5.5, unit: V}
+    load: CL = 15 pF
+    temperature: {value: 25, unit: degC}
+  typ: 3.8
+  max: 5.5
+  unit: ns
+  source: {page: 6, locator: Section 5.6, quote: tPLH 3.8 5.5 1 6.5 1 7}
+- id: SN74AHCT1G125.oe_active_low
+  parameter: Output enable polarity
+  category: function
+  statement: 'OE is active low: OE high gives a high-impedance output; OE low gives Y = A.'
+  source: {page: 8, locator: Table 7-1, quote: H X Z}
+- id: SN74AHCT1G125.ioff
+  parameter: Partial power down (Ioff) and 3.3 V operation
+  category: function
+  status: source-missing
+  notes: 'Searched the text of SCLS378P for Ioff, partial power down and power-down: no occurrence, and no VIH or VOH row below VCC = 4.5 V. The behaviour with VCC absent and a driven input is not specified by this document.'

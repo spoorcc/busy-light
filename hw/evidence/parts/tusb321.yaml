@@ -1,0 +1,186 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the TUSB321 USB Type-C CC logic (U1). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: TUSB321
+  mpn: TUSB321
+  manufacturer: Texas Instruments
+  description: USB Type-C configuration channel logic and port control with VCONN
+  selection: chosen
+  package: {code: RWB, name: X2QFN-12, pin_count: 12}
+  used_in: [U1]
+documents:
+  - id: tusb321-ds
+    title: TUSB321 USB Type-C Configuration Channel Logic and Port Control with VCONN
+    doc_number: SLLSEO6C
+    revision_date: June 2015, revised August 2018
+    origin: manufacturer
+    url: https://www.ti.com/lit/ds/symlink/tusb321.pdf
+    file: tusb321.pdf
+    sha256: ef1cea96d1e85a985410e1316a6b52381cf50a482681dbb91da9a9920025305e
+    pages: 25
+    retrieved_on: "2026-11-05"
+    notes: PDF page numbers equal printed page numbers for the pages cited here. Rev C is from 2018; no newer revision was checked.
+defaults:
+  source_document: tusb321-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: "2026-11-05"
+  status: unverified
+  package: RWB
+pins:
+  - {id: TUSB321.pin.1, pin: "1", name: CC1, pin_type: io, source: {page: 3, locator: Pin Functions, quote: "CC1 1 I/O Type-C configuration channel signal 1"}}
+  - {id: TUSB321.pin.2, pin: "2", name: CC2, pin_type: io, source: {page: 3, locator: Pin Functions, quote: "CC2 2 I/O Type-C configuration channel signal 2"}}
+  - {id: TUSB321.pin.3, pin: "3", name: CURRENT_MODE, pin_type: input, source: {page: 3, locator: Pin Functions, quote: "CURRENT_MODE 3 I L - Default Current."}}
+  - {id: TUSB321.pin.4, pin: "4", name: PORT, pin_type: input, source: {page: 3, locator: Pin Functions, quote: "PORT 4 I"}}
+  - {id: TUSB321.pin.5, pin: "5", name: VBUS_DET, pin_type: input, source: {page: 3, locator: Pin Functions, quote: "VBUS_DET 5 I"}}
+  - {id: TUSB321.pin.6, pin: "6", name: VCONN_FAULT, pin_type: open_drain, source: {page: 3, locator: Pin Functions, quote: "VCONN_FAULT 6 O"}}
+  - {id: TUSB321.pin.7, pin: "7", name: OUT1, pin_type: open_drain, function: UFP current detect output 1 (open drain), source: {page: 3, locator: Pin Functions, quote: "OUT1 7 I/O device is in UFP mode."}}
+  - {id: TUSB321.pin.8, pin: "8", name: OUT2, pin_type: open_drain, function: UFP current detect output 2 (open drain), source: {page: 3, locator: Pin Functions, quote: "OUT2 8 I/O device is in UFP mode: default or medium current mode detected (H); high current mode"}}
+  - {id: TUSB321.pin.9, pin: "9", name: ID, pin_type: open_drain, source: {page: 3, locator: Pin Functions, quote: "ID 9 O"}}
+  - {id: TUSB321.pin.10, pin: "10", name: GND, pin_type: ground, source: {page: 3, locator: Pin Functions, quote: "GND 10 G Ground"}}
+  - {id: TUSB321.pin.11, pin: "11", name: DIR, pin_type: open_drain, source: {page: 3, locator: Pin Functions, quote: "DIR 11 O"}}
+  - {id: TUSB321.pin.12, pin: "12", name: VDD, pin_type: power, source: {page: 3, locator: Pin Functions, quote: "VDD 12 P Positive supply voltage"}}
+claims:
+  - id: TUSB321.abs_max_vdd
+    parameter: Supply voltage VDD
+    category: abs_max
+    min: -0.3
+    max: 6
+    unit: V
+    source: {page: 4, locator: Section 6.1, quote: "Supply voltage VDD –0.3 6 V"}
+  - id: TUSB321.abs_max_cc
+    parameter: Voltage on CC1, CC2
+    category: abs_max
+    min: -0.3
+    max: 6
+    unit: V
+    source: {page: 4, locator: Section 6.1, quote: "CC1, CC2 –0.3 6 V"}
+  - id: TUSB321.abs_max_out
+    parameter: Voltage on OUT1, OUT2
+    category: abs_max
+    min: -0.3
+    unit: V
+    statement: Maximum is VDD + 0.3 V (a relative limit, so no absolute number is stored).
+    source: {page: 4, locator: Section 6.1, quote: "OUT1, OUT2 –0.3 VDD + 0.3"}
+  - id: TUSB321.abs_max_vbus_det
+    parameter: Voltage on VBUS_DET
+    category: abs_max
+    min: -0.3
+    max: 4
+    unit: V
+    notes: Reached through the external RVBUS resistor, not directly from VBUS.
+    source: {page: 4, locator: Section 6.1, quote: "VBUS_DET –0.3 4"}
+  - id: TUSB321.rec_vdd
+    parameter: Supply voltage range VDD
+    category: recommended
+    min: 4.5
+    max: 5.5
+    unit: V
+    source: {page: 4, locator: Section 6.3, quote: "VDD Supply voltage range 4.5 5.5 V"}
+  - id: TUSB321.rec_vbus
+    parameter: System VBUS voltage
+    category: recommended
+    min: 4
+    typ: 5
+    max: 28
+    unit: V
+    source: {page: 4, locator: Section 6.3, quote: "VBUS System VBUS voltage 4 5 28 V"}
+  - id: TUSB321.rec_ta
+    parameter: Operating free-air temperature range
+    category: recommended
+    min: 0
+    typ: 25
+    max: 70
+    unit: degC
+    notes: The range is 0 to 70 degC. Industrial range (-40 to 85) was deleted in a revision (page 2). Check against the product temperature requirement.
+    source: {page: 4, locator: Section 6.3, quote: "TA Operating free air temperature range 0 25 70 °C"}
+  - id: TUSB321.vbus_thr
+    parameter: VBUS threshold range
+    category: electrical
+    min: 2.95
+    typ: 3.30
+    max: 3.80
+    unit: V
+    source: {page: 6, locator: Section 6.5, quote: "VBUS_THR VBUS threshold range 2.95 3.30 3.80 V"}
+  - id: TUSB321.rvbus
+    parameter: External resistor between VBUS and VBUS_DET
+    category: electrical
+    min: 855
+    typ: 887
+    max: 920
+    unit: kohm
+    notes: The design value R_VD is 887k; the tolerance of the part must keep it inside 855 to 920 kohm.
+    source: {page: 6, locator: Section 6.5, quote: "RVBUS External resistor between VBUS and VBUS_DET pin 855 887 920 KΩ"}
+  - id: TUSB321.rvbus_pd
+    parameter: Internal pulldown resistance for VBUS_DET
+    category: electrical
+    typ: 95
+    unit: kohm
+    source: {page: 6, locator: Section 6.5, quote: "RVBUS_PD Internal pulldown resistance for VBUS_DET 95 KΩ"}
+  - id: TUSB321.vol_od
+    parameter: Low-level output voltage (VCONN_FAULT, ID, OUT1, OUT2)
+    category: electrical
+    condition: {load: "IOL = -1.6 mA (sign as printed)"}
+    max: 0.4
+    unit: V
+    source: {page: 5, locator: Section 6.5, quote: "VOL IOL = –1.6 mA 0.4 V"}
+  - id: TUSB321.rp_od_ext
+    parameter: External pullup resistor on open-drain IOs
+    category: electrical
+    typ: 200
+    unit: kohm
+    notes: The number sits in the TYP column of the table (checked by x position). The table does not say whether it is a minimum or a recommended value.
+    source: {page: 5, locator: Section 6.5, quote: "Rp_ODext 200 kΩ"}
+  - id: TUSB321.rcc_d
+    parameter: CC pulldown resistor in UFP or DRP mode
+    category: electrical
+    min: 4.6
+    typ: 5.1
+    max: 5.6
+    unit: kohm
+    source: {page: 5, locator: Section 6.5, quote: "RCC_D Pulldown resistor when in UFP or DRP mode. 4.6 5.1 5.6 kΩ"}
+  - id: TUSB321.vil_ctrl
+    parameter: Low-level input voltage (PORT, CURRENT_MODE)
+    category: electrical
+    max: 0.4
+    unit: V
+    source: {page: 5, locator: Section 6.5, quote: "VIL 0.4 V"}
+  - id: TUSB321.i_unattached_ufp
+    parameter: Supply current, unattached UFP
+    category: electrical
+    condition: {supply_voltage: {value: 5, unit: V}, port: "PORT = L"}
+    typ: 100
+    unit: uA
+    source: {page: 5, locator: Section 6.5, quote: "IUNATTACHED_UFP unconnected and waiting for connection. (VDD = 5 V, PORT 100 µA"}
+  - id: TUSB321.t_vbus_db
+    parameter: Debounce of VBUS_DET after valid VBUS_THR
+    category: timing
+    typ: 2
+    unit: ms
+    source: {page: 6, locator: Section 6.5, quote: "tVBUS_DB Debounce of VBUS_DET pin after valid VBUS_THR (See Figure 1.) 2 ms"}
+  - id: TUSB321.port_ufp
+    parameter: PORT pin level for UFP mode
+    category: function
+    statement: PORT low (pull-down or tie to GND) selects UFP mode.
+    source: {page: 3, locator: Pin Functions, quote: "L - UFP (Pull-down or tie to GND if UFP mode is desired)"}
+  - id: TUSB321.out_default_current
+    parameter: OUT1 for default USB current (UFP)
+    category: function
+    statement: Default current (500 mA USB 2.0) is signalled by OUT1 high.
+    source: {page: 11, locator: Table 2, quote: "500 mA (USB2.0) OUT1 = High"}
+  - id: TUSB321.out_medium_current
+    parameter: OUT1 and OUT2 for 1.5 A (UFP)
+    category: function
+    statement: A DFP advertising 1.5 A gives OUT1 low and OUT2 high (see Table 2).
+    source: {page: 11, locator: Table 2, quote: "Medium - 1.5 A"}
+  - id: TUSB321.out_high_current
+    parameter: OUT1 and OUT2 for 3 A (UFP)
+    category: function
+    statement: A DFP advertising 3 A gives OUT1 low and OUT2 low (see Table 2).
+    source: {page: 11, locator: Table 2, quote: "High - 3 A"}
+  - id: TUSB321.vbus_det_resistor_required
+    parameter: VBUS detection resistor
+    category: function
+    statement: In UFP or DRP mode the system VBUS must go through the RVBUS resistor to VBUS_DET.
+    source: {page: 11, locator: Section 7.3.3, quote: "The system VBUS voltage must be routed through a RVBUS resistor to the VBUS_DET pin on the TUSB321 device"}

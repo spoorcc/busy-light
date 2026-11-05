@@ -1,0 +1,212 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the 2N7002 N-channel MOSFET (Q2, Q3: ILIM select switches). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: 2N7002
+  mpn: 2N7002
+  manufacturer: Microchip Technology
+  description: N-channel enhancement-mode vertical DMOS FET, 60 V
+  selection: chosen
+  package:
+    code: SOT-23
+    name: 3-lead SOT-23
+    pin_count: 3
+  used_in:
+  - Q2
+  - Q3
+  schematic_symbol: Transistor_FET:2N7002
+documents:
+- id: 2n7002-mchp-ds
+  title: 2N7002 N-Channel Enhancement-Mode Vertical DMOS FET Data Sheet
+  doc_number: DS20005797A
+  revision_date: '2018'
+  origin: owner-supplied
+  file: 2n7002-microchip-20005797A.pdf
+  sha256: cf16820bf5ccb653b169bda2d38c05bce2af4bd6955780836b7dded39e6050cc
+  pages: 14
+  retrieved_on: '2026-11-05'
+  notes: Supplied by the owner on 2026-11-05. It is a Microchip document, but the download source is not recorded. The board value 2N7002 is generic; other vendors (onsemi, Nexperia, Diodes) have different limits and are not covered.
+defaults:
+  source_document: 2n7002-mchp-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: SOT-23
+pins:
+- id: 2N7002.pin.1
+  pin: '1'
+  name: G
+  pin_type: input
+  function: Gate
+  source: {page: 6, locator: Table 3-1, quote: 1 Gate Gate}
+- id: 2N7002.pin.2
+  pin: '2'
+  name: S
+  pin_type: passive
+  function: Source
+  source: {page: 6, locator: Table 3-1, quote: 2 Source Source}
+- id: 2N7002.pin.3
+  pin: '3'
+  name: D
+  pin_type: passive
+  function: Drain
+  source: {page: 6, locator: Table 3-1, quote: 3 Drain Drain}
+claims:
+- id: 2N7002.abs_max_vgs
+  parameter: Gate-to-source voltage
+  category: abs_max
+  min: -30
+  max: 30
+  unit: V
+  source: {page: 2, locator: Absolute Maximum Ratings, quote: Gate-to-Source Voltage ......................................................................................................................................... ±30V}
+- id: 2N7002.abs_max_ta
+  parameter: Operating ambient temperature
+  category: abs_max
+  min: -55
+  max: 150
+  unit: degC
+  source: {page: 2, locator: Absolute Maximum Ratings, quote: 'Operating Ambient Temperature, TA ................................................................................................... –55°C to +150°C'}
+- id: 2N7002.bvdss
+  parameter: Drain-to-source breakdown voltage
+  category: electrical
+  condition:
+    vgs: {value: 0, unit: V}
+    id: {value: 10, unit: uA}
+    temperature: {value: 25, unit: degC}
+  min: 60
+  unit: V
+  notes: The absolute-maximum lines for drain-source and drain-gate voltage name BVDSS and BVDGS and give no number of their own.
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'Drain-to-Source Breakdown Voltage BVDSS 60 — — V VGS = 0V, ID = 10 µA'}
+- id: 2N7002.vgs_th
+  parameter: Gate threshold voltage
+  category: electrical
+  condition:
+    id: {value: 250, unit: uA}
+    temperature: {value: 25, unit: degC}
+  min: 1
+  max: 2.5
+  unit: V
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'Gate Threshold Voltage VGS(th) 1 — 2.5 V VGS = VDS, ID = 250 µA'}
+- id: 2N7002.igss
+  parameter: Gate body leakage current
+  category: electrical
+  condition:
+    vgs: {value: 20, unit: V}
+    temperature: {value: 25, unit: degC}
+  min: -100
+  max: 100
+  unit: nA
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'Gate Body Leakage Current IGSS — — ±100 nA VGS = ±20V, VDS = 0V'}
+- id: 2N7002.id_on
+  parameter: On-state drain current
+  category: electrical
+  condition:
+    vgs: {value: 10, unit: V}
+    vds: {value: 25, unit: V}
+  min: 500
+  unit: mA
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'On-State Drain Current ID(ON) 500 — — mA VGS = 10V, VDS = 25V'}
+- id: 2N7002.rds_on.vgs_5v
+  parameter: Static drain-to-source on-state resistance
+  category: electrical
+  condition:
+    vgs: {value: 5, unit: V}
+    id: {value: 50, unit: mA}
+    temperature: {value: 25, unit: degC}
+  max: 7.5
+  unit: ohm
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'Static Drain-to-Source On-State — — 7.5 VGS = 5V, ID = 50 mA'}
+- id: 2N7002.rds_on.vgs_10v
+  parameter: Static drain-to-source on-state resistance
+  category: electrical
+  condition:
+    vgs: {value: 10, unit: V}
+    id: {value: 500, unit: mA}
+    temperature: {value: 25, unit: degC}
+  max: 7.5
+  unit: ohm
+  source: {page: 2, locator: DC Electrical Characteristics, quote: 'Resistance — — 7.5 VGS = 10V, ID = 500 mA'}
+- id: 2N7002.rds_on.vgs_3v3
+  parameter: On-state resistance at VGS = 3.3 V or below
+  category: electrical
+  status: source-missing
+  notes: 'Searched DS20005797A: RDS(ON) is specified only at VGS = 5 V and 10 V. No value for a 3.3 V gate drive. The ILIM switch gates are driven from a 3.3 V logic output.'
+- id: 2N7002.ciss
+  parameter: Input capacitance
+  category: electrical
+  condition:
+    vds: {value: 25, unit: V}
+    f: {value: 1, unit: MHz}
+  max: 50
+  unit: pF
+  source: {page: 3, locator: AC Electrical Characteristics, quote: 'Input Capacitance CISS — — 50 VGS = 0V,'}
+- id: 2N7002.coss
+  parameter: Common-source output capacitance
+  category: electrical
+  condition:
+    vds: {value: 25, unit: V}
+    f: {value: 1, unit: MHz}
+  max: 25
+  unit: pF
+  source: {page: 3, locator: AC Electrical Characteristics, quote: 'Common Source Output Capacitance COSS — — 25 pF VDS = 25V,'}
+- id: 2N7002.crss
+  parameter: Reverse transfer capacitance
+  category: electrical
+  condition:
+    vds: {value: 25, unit: V}
+    f: {value: 1, unit: MHz}
+  max: 5
+  unit: pF
+  source: {page: 3, locator: AC Electrical Characteristics, quote: Reverse Transfer Capacitance CRSS — — 5 f = 1 MHz}
+- id: 2N7002.t_on
+  parameter: Turn-on time
+  category: timing
+  condition:
+    vdd: {value: 30, unit: V}
+    id: {value: 200, unit: mA}
+    rgen: {value: 25, unit: ohm}
+  max: 20
+  unit: ns
+  source: {page: 3, locator: AC Electrical Characteristics, quote: 'Turn-On Time t(ON) — — 20 VDD = 30V,'}
+- id: 2N7002.t_off
+  parameter: Turn-off time
+  category: timing
+  condition:
+    vdd: {value: 30, unit: V}
+    id: {value: 200, unit: mA}
+    rgen: {value: 25, unit: ohm}
+  max: 20
+  unit: ns
+  source: {page: 3, locator: AC Electrical Characteristics, quote: Turn-Off Time t(OFF) — — 20 RGEN = 25Ω}
+- id: 2N7002.vsd
+  parameter: Diode forward voltage drop
+  category: electrical
+  condition:
+    vgs: {value: 0, unit: V}
+    isd: {value: 200, unit: mA}
+  typ: 1.2
+  unit: V
+  source: {page: 3, locator: Diode parameter, quote: 'Diode Forward Voltage Drop VSD — 1.2 — V VGS = 0V, ISD = 200 mA (Note 1)'}
+- id: 2N7002.ta_range
+  parameter: Operating ambient temperature range
+  category: recommended
+  min: -55
+  max: 150
+  unit: degC
+  source: {page: 3, locator: Temperature specifications, quote: Operating Ambient Temperature TA –55 — +150 °C}
+- id: 2N7002.rth_ja
+  parameter: Thermal resistance junction to ambient, SOT-23
+  category: thermal
+  typ: 203
+  unit: K/W
+  source: {page: 3, locator: Package thermal resistance, quote: 3-lead SOT-23 JA — 203 — °C/W}
+- id: 2N7002.id_cont
+  parameter: Continuous drain current, SOT-23, TA = 25 degC
+  category: abs_max
+  condition:
+    temperature: {value: 25, unit: degC}
+  max: 115
+  unit: mA
+  notes: 'Row columns: ID continuous 115 mA, ID pulsed 800 mA, power dissipation 0.36 W, IDR 115 mA, IDRM 800 mA.'
+  source: {page: 3, locator: Thermal characteristics, quote: 3-lead SOT-23 115 800 0.36 115 800}
