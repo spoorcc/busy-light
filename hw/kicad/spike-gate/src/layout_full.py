@@ -33,16 +33,19 @@ def gx(x):
     return round(x + DX, 4)
 
 
+BUSX_FULL = g(gx(L.BUSX))   # x of the ILIM bus (grid-snapped, as the parts are)
+
+
 # ------------------------------------------------------------------ part table
 R = ("Device", "R", "Resistor_SMD:R_0603_1608Metric")
 C = ("Device", "C", "Capacitor_SMD:C_0603_1608Metric")
+C1206 = ("Device", "C", "Capacitor_SMD:C_1206_3216Metric")
 TVS = ("Device", "D_TVS", "Diode_SMD:D_SOD-323")
 G04 = ("74xGxx", "74LVC1G04", "Package_TO_SOT_SMD:SOT-23-5")
 G02 = ("74xGxx", "74LVC1G02", "Package_TO_SOT_SMD:SOT-23-5")
 G11 = ("74xGxx", "74LVC1G11", "Package_TO_SOT_SMD:SOT-23-6")
 G125 = ("74xGxx", "74LVC1G125", "Package_TO_SOT_SMD:SOT-23-5")
 AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-23-5")
-Q = ("Transistor_FET", "2N7002", "Package_TO_SOT_SMD:SOT-23")
 TP = ("Connector", "TestPoint", "TestPoint:TestPoint_Pad_D1.5mm")
 LED = ("LED", "WS2812B", "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
 
@@ -55,10 +58,15 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "U13": (*G02, "74LVC1G02"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
     "R4": (*R, "100k"), "R5": (*R, "100k"), "R2": (*R, "10k"), "R3": (*R, "10k"),
-    "Q2": (*Q, "2N7002"), "Q3": (*Q, "2N7002"),
-    "R_ILIM2": (*R, "56.9k 0.1%"), "R_ILIM3": (*R, "27.7k 0.1%"), "R_ILIM1": (*R, "47k 0.1%"),
+    "U14": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
+    "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
+    "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
+    # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
+    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R_ILIM3B": (*R, "301 0.1%"),
+    "R_ILIM1": (*R, "47.0k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
-    "R6": (*R, "150k"), "C1": (*C, "470n C0G 5% 25V"), "C1B": (*C, "150n C0G 5% 50V"),
+    "R6": (*R, "150k"), "C1": (*C1206, "220n C0G 5% 50V"), "C1B": (*C1206, "220n C0G 5% 50V"),
+    "C1C": (*C1206, "100n C0G 5% 50V"), "C1D": (*C1206, "68n C0G 5% 50V"),
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
     "C2": (*C, "1u tbd"), "C3": (*C, "10u tbd"), "R8": (*R, "100k"),
     "U8": (None, None, "", "REG_3V3"),
@@ -90,6 +98,7 @@ BOXES = {
         ("3", "CURRENT_MODE", "right", -5.08, "passive"), ("6", "VCONN_FAULT", "right", -7.62, "open_collector"),
         ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")], half_h=15.24),
     "U5": L.SUPERVISOR,
+    "U14": L.TMUX1101, "U15": L.TMUX1101,
     "U7": L.box_symbol("TPS2553_BOX", [
         ("1", "IN", "top", -2.54, "power_in"), ("3", "EN", "top", 2.54, "input"),
         ("2", "GND", "bottom", 0, "power_in"), ("5", "ILIM", "left", 5.08, "passive"),
@@ -112,7 +121,7 @@ BOXES = {
         ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")],
         half_w=22.86, half_h=33.02, hide_numbers=True),
 }
-BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U7": "TPS2553_BOX", "U8": "REG_3V3_PLACEHOLDER",
+BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "REG_3V3_PLACEHOLDER",
            "U9": "ESP32_C3_MINI_1"}
 
 LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
@@ -121,11 +130,14 @@ PLACE = {
     "U1": (gx(50.8), 71.12, 0), "R_VD": (gx(50.8) + 2.54, 49.53, 0), "R1": (gx(76.2), 62.23, 0),
     "R7": (125.0, 87.63, 0), "U2": (gx(104.14), 66.04, 0), "U13": (gx(121.92), 40.64, 0), "U12": (143.0, 91.44, 0),
     "U3": (gx(162.56), 50.8, 0), "R4": (gx(137.16), 59.69, 0), "R2": (gx(198.12), 54.61, 0),
-    "Q2": (gx(210.82), 50.8, 0), "R_ILIM2": (gx(213.36), 41.91, 180),
+    "U14": (gx(223.52), 50.8, 0), "R18": (gx(208.28), 54.61, 0), "C24": (gx(228.6), 38.1, 0),
+    "R_ILIM2": (gx(250.19), 50.8, 90),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
-    "Q3": (gx(210.82), 91.44, 0), "R_ILIM3": (gx(213.36), 82.55, 180),
+    "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
+    "R_ILIM3B": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
     "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C1B": (gx(86.36), 146.05, 0),
-    "U7": (330.0, 38.1, 0), "R_ILIM1": (304.8, 36.83, 0), "C2": (296.0, 20.0, 0),
+    "C1C": (gx(93.98), 146.05, 0), "C1D": (gx(101.6), 146.05, 0),
+    "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
     "C3": (350.5, 24.0, 0), "R8": (364.0, 36.83, 0),
     "U8": (335.0, 100.0, 0), "C5": (317.0, 103.81, 0), "C6": (353.0, 103.81, 0),
     "U9": (85.0, 222.0, 0), "R9": (48.0, 225.81, 0), "C7": (43.0, 233.43, 0),
@@ -140,8 +152,9 @@ TEXT = {
     "U8": (-7.62, 15.0, "left"), "U9": (-22.86, -40.0, "left"),
     "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U12": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
-    "Q2": (7.62, -1.27, "left"), "Q3": (7.62, -1.27, "left"),
-    "R_ILIM2": (2.54, -1.27, "right"), "R_ILIM3": (2.54, -1.27, "right"),
+    "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
+    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R_ILIM3B": (-2.54, 2.54, "left"),
+    "R_ILIM1": (-2.54, -1.27, "right"),
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
     "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
 }
@@ -394,8 +407,8 @@ def _build():
     s.label("CC_OK_3A", y12[0] + 5.08, y12[1])
 
     # ------------------------------------------------------------ gates and ILIM switches
-    for g, rsel, ren, q, rl, sel, en in (("U3", "R4", "R2", "Q2", "R_ILIM2", "SEL_STEP2_GPIO", "ILIM_STEP2_EN"),
-                                         ("U4", "R5", "R3", "Q3", "R_ILIM3", "SEL_STEP3_GPIO", "ILIM_STEP3_EN")):
+    for g, rsel, ren, sw, rpd, cap, sel, en in (("U3", "R4", "R2", "U14", "R18", "C24", "SEL_STEP2_GPIO", "ILIM_STEP2_EN"),
+                                                ("U4", "R5", "R3", "U15", "R19", "C25", "SEL_STEP3_GPIO", "ILIM_STEP3_EN")):
         a, b, c, yo = P(g, 1), P(g, 3), P(g, 6), P(g, 4)
         okn = "CC_OK_1A5" if g == "U4" else "CC_OK_NOT_S3"   # step 2 sees CC OK AND NOT step 3 enable
         s.wire(a, (a[0] - 7.62, a[1]))
@@ -412,17 +425,41 @@ def _build():
         s.pw("GND", (rsel, "2"), True)
         s.pw("+3V3", (g, "5"), True)
         s.pw("GND", (g, "2"), True)
+        # owner decision 2026-11-05 (a): the gate output drives SEL of a TMUX1101 (high = on); R2/R3 (10k) and the
+        # 100 kohm pull-down R18/R19 hang on the net, so an open gate output means switch off (step 1)
         s.bind(en, g, 4)
-        s.bind(en, q, 1)
-        s.wire(yo, P(q, 1))
-        s.bind(en, ren, 1)
-        s.junction(*P(ren, 1))
+        s.bind(en, sw, 4)
+        s.wire(yo, P(sw, 4))
+        for r_ in (ren, rpd):
+            s.bind(en, r_, 1)
+            s.junction(*P(r_, 1))
+            s.pw("GND", (r_, "2"), True)
         s.label(en, yo[0] + 2.54, yo[1])
-        s.pw("GND", (ren, "2"), True)
-        s.pw("GND", (q, "2"), True)
-        s.bind("ILIM_D_" + q, q, 3)
-        s.bind("ILIM_D_" + q, rl, 1)
-        s.wire(P(q, 3), P(rl, 1))
+        # switch supply with 0.1 uF; S and GND pins to ground
+        vdd = P(sw, 5)
+        ty = P(cap, 1)[1]
+        s.bind("+3V3", sw, 5)
+        s.bind("+3V3", cap, 1)
+        s.wire(vdd, (vdd[0], ty), P(cap, 1))
+        s.junction(vdd[0], ty)
+        s.pw("+3V3", (vdd[0], ty), True)
+        s.pw("GND", (cap, "2"), True)
+        s.bind("GND", sw, 3)
+        s.bind("GND", sw, 2)
+        s.pw("GND", (sw, "3"), True)
+        s.wire(P(sw, 2), P(sw, 3))
+    # step 2: switch - 56.2 k - ILIM; step 3: switch - 301 ohm - 27.4 k - ILIM (decision (b))
+    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3B", "R_ILIM3"), "ILIM_D_U15")):
+        prev, prev_pin = P(sw, 1), (sw, 1)
+        for k, rl in enumerate(chain):
+            (lo_pin, lo), (hi_pin, hi) = sorted((("1", P(rl, 1)), ("2", P(rl, 2))), key=lambda e: e[1][0])
+            net = tag if k == 0 else tag + "_MID"
+            s.bind(net, *prev_pin)
+            s.bind(net, rl, lo_pin)
+            s.wire(prev, lo)
+            prev, prev_pin = hi, (rl, hi_pin)
+        s.bind("ILIM", *prev_pin)
+        s.wire(prev, (BUSX_FULL, prev[1]))
     # exclusive steps (owner decision 2026-11-05): U13 = NOR(CC_OUT1_N, ILIM_STEP3_EN) = CC OK AND NOT step 3
     # enable; it replaces CC OK on the step 2 AND, so step 3 on forces step 2 off. Unpowered -> low -> step 2 off.
     a, b, y = P("U13", 1), P("U13", 2), P("U13", 4)
@@ -431,21 +468,17 @@ def _build():
     s.stub("CC_OK_NOT_S3", ("U13", 4), 5.08, 0, 0)
     s.pw("+3V3", ("U13", "5"), True)
     s.pw("GND", ("U13", "3"), True)
-    # ILIM bus to the TPS2553
-    t2, t3 = P("R_ILIM2", 2), P("R_ILIM3", 2)
-    bx, by = gx(226.06), t2[1] - 5.08
-    s.wire(t2, (t2[0], by), (bx, by))
-    s.wire(t3, (bx, t3[1]), (bx, by))
-    s.bind("ILIM", "R_ILIM2", 2)
-    s.bind("ILIM", "R_ILIM3", 2)
-    s.junction(bx, by)
+    # ILIM bus: both switched resistor chains meet on a vertical bus that runs up to the TPS2553 ILIM pin
+    y2, y3 = P("R_ILIM2", 1)[1], P("R_ILIM3", 1)[1]
     il = P("U7", "5")
-    s.wire((bx, by), il)
+    s.wire((BUSX_FULL, y3), (BUSX_FULL, il[1]), il)
+    s.junction(BUSX_FULL, y2)
     s.bind("ILIM", "U7", 5)
-    s.label("ILIM", bx + 6.0, by)
+    s.label("ILIM", BUSX_FULL, il[1] + 5.08 * 2, 90)
     s.bind("ILIM", "R_ILIM1", 1)
-    s.junction(*P("R_ILIM1", 1))
-    s.pw("GND", ("R_ILIM1", "2"), True)
+    s.wire(P("R_ILIM1", 1), (BUSX_FULL, il[1]))
+    s.junction(BUSX_FULL, il[1])
+    s.pw("GND", ("R_ILIM1", "2"), True, 180)
 
     # ------------------------------------------------------------ hold-off supervisor
     s.pw("VBUS_IC", ("U5", "2"), True)
@@ -463,11 +496,14 @@ def _build():
     s.bind("SUP_CT", "C1", 1)
     s.wire(ct, P("C1", 1))
     s.bind("SUP_CT", "C1B", 1)
-    s.wire(P("C1", 1), P("C1B", 1))
-    s.junction(*P("C1", 1))
+    for a_, b_ in (("C1", "C1B"), ("C1B", "C1C"), ("C1C", "C1D")):   # parallel C0G set, one rail wire
+        s.bind("SUP_CT", b_, 1)
+        s.wire(P(a_, 1), P(b_, 1))
+    for r_ in ("C1", "C1B", "C1C"):
+        s.junction(*P(r_, 1))
     s.label("SUP_CT", gx(68.58), ct[1])
-    s.pw("GND", ("C1", "2"), True)
-    s.pw("GND", ("C1B", "2"), True)
+    for r_ in ("C1", "C1B", "C1C", "C1D"):
+        s.pw("GND", (r_, "2"), True)
 
     # ------------------------------------------------------------ TPS2553 and 5 V output
     uin, uen = P("U7", "1"), P("U7", "3")
@@ -537,7 +573,7 @@ def _build():
     s.bind("BOOT", "TP6", 1)
     # gate-enable readbacks on GPIO20 / GPIO21 (HW-010 proposed amendment); 100k series resistor
     # because GPIO21 (U0TXD) is an output while the ROM prints boot messages;
-    # 100k series with 10k pull-downs R2/R3 keeps an open gate output below the 2N7002 Vgs(th) min (N1,
+    # 100k series with 10k pull-downs R2/R3 keeps an open gate output below the TMUX1101 SEL VIL max (and the old 2N7002 Vgs(th) min) (N1,
     # analysis-n1-n2-readback-backfeed.md); firmware must switch the internal pull-ups of GPIO20/21 off
     for pin, net, rb, ref in (("GPIO20", "ILIM_STEP2_EN", "STEP2_EN_RB", "R14"),
                               ("GPIO21", "ILIM_STEP3_EN", "STEP3_EN_RB", "R15")):

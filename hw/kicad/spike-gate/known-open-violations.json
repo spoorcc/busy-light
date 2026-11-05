@@ -57,8 +57,36 @@
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       },
       "footprint_symbol_mismatch": {
-        "max": 13,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "max": 29,
+        "reason": "stand-in footprints that differ from the schematic footprint field: U1, U8, U9, C1, C1B, C3, C4, test points, mounting holes and the 16 ring LEDs D1 to D16 (2020 LED stand-in, plan 06 section 5); only these refs are tolerated; spike only, not an acceptance of the parts",
+        "dev": "DEV-002",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ]
       },
       "isolated_copper": {
         "max": 1,
@@ -70,7 +98,35 @@
       },
       "net_conflict": {
         "max": 84,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ],
+        "dev": "DEV-002"
       },
       "silk_edge_clearance": {
         "max": 46,
@@ -115,8 +171,36 @@
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       },
       "footprint_symbol_mismatch": {
-        "max": 13,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "max": 29,
+        "reason": "stand-in footprints that differ from the schematic footprint field: U1, U8, U9, C1, C1B, C3, C4, test points, mounting holes and the 16 ring LEDs D1 to D16 (2020 LED stand-in, plan 06 section 5); only these refs are tolerated; spike only, not an acceptance of the parts",
+        "dev": "DEV-002",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ]
       },
       "lib_footprint_issues": {
         "max": 86,
@@ -124,7 +208,35 @@
       },
       "net_conflict": {
         "max": 84,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ],
+        "dev": "DEV-002"
       },
       "silk_edge_clearance": {
         "max": 46,
@@ -141,6 +253,144 @@
       "via_dangling": {
         "max": 4,
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      }
+    },
+    "stitched-4l": {
+      "strict_allow": {
+        "unconnected_items": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "track_width": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "via_dangling": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "hole_to_hole": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "isolated_copper": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "clearance": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "copper_edge_clearance": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "pth_inside_courtyard": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "silk_edge_clearance": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "silk_over_copper": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "silk_overlap": {
+          "max": 0,
+          "reason": "must be 0 (plan 06 section 1 item 3)"
+        },
+        "lib_footprint_issues": {
+          "max": 93,
+          "reason": "no project library table: the footprints come from the system library by name; number only (plan 06 section 1 item 4); observed 2026-11-05",
+          "dev": "DEV-003"
+        },
+        "ignored_checks": {
+          "max": 5,
+          "reason": "the generated project file ignores checks; cause not yet explained (G4); number only; observed 2026-11-05",
+          "dev": "DEV-003"
+        },
+        "footprint_symbol_mismatch": {
+          "max": 27,
+          "reason": "stand-in footprints (U1, U8, U9, C3, C4, D1 to D16 LED stand-in, test points, mounting holes); only these refs; observed 27 on 2026-11-05",
+          "dev": "DEV-002",
+          "refs": [
+            "U1",
+            "U8",
+            "U9",
+            "C1",
+            "C1B",
+            "C3",
+            "C4",
+            "D1",
+            "D2",
+            "D3",
+            "D4",
+            "D5",
+            "D6",
+            "D7",
+            "D8",
+            "D9",
+            "D10",
+            "D11",
+            "D12",
+            "D13",
+            "D14",
+            "D15",
+            "D16",
+            "TP*",
+            "H*"
+          ]
+        },
+        "net_conflict": {
+          "max": 84,
+          "reason": "pads of stand-in footprints with no pin in the schematic symbol; only the stand-in refs; observed 84 on 2026-11-05",
+          "dev": "DEV-002",
+          "refs": [
+            "U1",
+            "U8",
+            "U9",
+            "C1",
+            "C1B",
+            "C3",
+            "C4",
+            "D1",
+            "D2",
+            "D3",
+            "D4",
+            "D5",
+            "D6",
+            "D7",
+            "D8",
+            "D9",
+            "D10",
+            "D11",
+            "D12",
+            "D13",
+            "D14",
+            "D15",
+            "D16",
+            "TP*",
+            "H*"
+          ]
+        },
+        "courtyards_overlap": {
+          "max": 16,
+          "reason": "courtyard of the ESP32-C6-MINI-1 library footprint is the antenna keep-out; ring LEDs and parts of the mech design lie inside it (plan 06 amendment A-1; an RF design item against HW-005, not a routing item); only pairs that include U9; observed 16 on 2026-11-05",
+          "dev": "DEV-004",
+          "refs_any": [
+            "U9"
+          ]
+        },
+        "items_not_allowed": {
+          "max": 1,
+          "reason": "module U9 inside the hook rule area (amendment A-1); only findings on U9; observed 1 on 2026-11-05",
+          "dev": "DEV-004",
+          "refs_any": [
+            "U9"
+          ]
+        }
       }
     }
   }

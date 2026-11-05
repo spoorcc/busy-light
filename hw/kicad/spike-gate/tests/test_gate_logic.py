@@ -93,7 +93,7 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(n, "U13", "4"), "CC_OK_NOT_S3")
         self.assertEqual(net_of(n, "U13", "3"), "GND")
         self.assertEqual(net_of(n, "U13", "5"), "+3V3")
-        self.assertEqual(net_of(n, "Q3", "1"), net_of(n, "U13", "2"))     # the NOR sees the real Q3 gate drive
+        self.assertEqual(net_of(n, "U15", "4"), net_of(n, "U13", "2"))    # the NOR sees the real step 3 switch control
 
     def test_ic_output_has_pullup_to_ic_supply(self):
         out = net_of(self.nets, "U1", "3")
@@ -107,9 +107,34 @@ class GateNetlist(unittest.TestCase):
             self.assertEqual(net_of(self.nets, ref, "2"), "GND")
             self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, *gate_pin))
 
-    def test_enable_drives_mosfet_gate(self):
-        self.assertEqual(net_of(self.nets, "Q2", "1"), net_of(self.nets, "U3", "4"))
-        self.assertEqual(net_of(self.nets, "Q3", "1"), net_of(self.nets, "U4", "4"))
+    def test_enable_drives_switch_control_pin(self):
+        # TMUX1101DCK (SCDS410D tab. 5-1): 1 D, 2 S, 3 GND, 4 SEL, 5 VDD; SEL high = on (tab. 8-1)
+        self.assertEqual(net_of(self.nets, "U14", "4"), net_of(self.nets, "U3", "4"))
+        self.assertEqual(net_of(self.nets, "U15", "4"), net_of(self.nets, "U4", "4"))
+        self.assertNotIn("Q2", {r for pins in self.nets.values() for r, _ in pins})
+        self.assertNotIn("Q3", {r for pins in self.nets.values() for r, _ in pins})
+
+    def test_switch_power_and_ground(self):
+        for sw, cap in (("U14", "C24"), ("U15", "C25")):
+            self.assertEqual(net_of(self.nets, sw, "5"), "+3V3")
+            self.assertEqual(net_of(self.nets, sw, "3"), "GND")
+            self.assertEqual(net_of(self.nets, sw, "2"), "GND")      # source side to ground, drain side to the resistor
+            self.assertEqual(net_of(self.nets, cap, "1"), "+3V3")
+            self.assertEqual(net_of(self.nets, cap, "2"), "GND")
+
+    def test_control_pin_pulldowns_100k(self):
+        for ref, sw, gate in (("R18", "U14", "U3"), ("R19", "U15", "U4")):
+            self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, sw, "4"))
+            self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, gate, "4"))
+            self.assertEqual(net_of(self.nets, ref, "2"), "GND")
+
+    def test_step_3_resistor_is_a_series_pair(self):
+        n = self.nets
+        self.assertEqual(net_of(n, "U15", "1"), net_of(n, "R_ILIM3B", "1"))
+        self.assertEqual(net_of(n, "R_ILIM3B", "2"), net_of(n, "R_ILIM3", "1"))
+        self.assertEqual(net_of(n, "R_ILIM3", "2"), "ILIM")
+        self.assertNotEqual(net_of(n, "R_ILIM3B", "2"), "ILIM")
+        self.assertEqual(net_of(n, "U14", "1"), net_of(n, "R_ILIM2", "1"))
 
     def test_ic_is_supplied_from_vbus_not_3v3(self):
         self.assertEqual(net_of(self.nets, "U1", "1"), "VBUS_IC")
@@ -131,6 +156,9 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(self.nets, "C1", "2"), "GND")
         self.assertEqual(net_of(self.nets, "C1B", "1"), net_of(self.nets, "U5", "5"))   # parallel C0G part
         self.assertEqual(net_of(self.nets, "C1B", "2"), "GND")
+        for ref in ("C1C", "C1D"):     # decision (c): 220 + 220 + 100 + 68 nF
+            self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, "U5", "5"))
+            self.assertEqual(net_of(self.nets, ref, "2"), "GND")
 
     def test_no_single_pin_named_nets_except_placeholders(self):
         # Review finding: Net("ILIM") created twice gave two one-pin nets that parity ignored.
@@ -189,7 +217,7 @@ class TruthTable(unittest.TestCase):
 
 
 class ExclusiveSteps(unittest.TestCase):
-    """Owner decision 2026-11-05: Q2 and Q3 must never both be on (HW-010 proposal, ADR-0016)."""
+    """Owner decision 2026-11-05: the step 2 and step 3 ILIM switches must never both be on (HW-010 proposal, ADR-0016)."""
 
     def test_truth_table_all_input_combinations(self):
         for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
@@ -214,7 +242,7 @@ class ExclusiveSteps(unittest.TestCase):
         self.assertFalse(steps(True, True, False, True, nor_powered=False)[0])
 
     def test_en3_open_or_shorted_low_cannot_make_both_on(self):
-        # R3 pulls the net low and Q3 is off: step 2 may be on (single step), never both.
+        # R3 pulls the net low and the step 3 switch is off: step 2 may be on (single step), never both.
         for kw in ({"en3_open": True}, {"en3_short_low": True}):
             for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
                 self.assertFalse(all(steps(cc_ok, sel2, sel3, hold, **kw)))
@@ -223,7 +251,7 @@ class ExclusiveSteps(unittest.TestCase):
         for cc_ok, hold, sel2, sel3 in itertools.product((False, True), repeat=4):
             en2, en3 = steps(cc_ok, sel2, sel3, hold, en3_short_high=True)
             self.assertFalse(en2)
-            self.assertTrue(en3)    # Q3 on by the fault: not covered by the gate (the top step alone)
+            self.assertTrue(en3)    # step 3 switch on by the fault: not covered by the gate (the top step alone)
 
     def test_not_covered_nor_output_stuck_high_can_make_both_on(self):
         # Single fault in U13 (output stuck high) removes the exclusion; only the readbacks show it.

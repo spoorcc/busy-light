@@ -2,6 +2,7 @@
 """Spike: check a generated board against the schematic netlist and summarise a DRC JSON report.
 
 Usage: python3 pcb_check.py <netlist.net> <board.kicad_pcb> [drc.json]
+       python3 pcb_check.py m1|m2 <drc.json>      (print the M1 / M2 count of plan 06)
 Prints a JSON summary: refs and nets compared, pad/net differences, unconnected count, DRC counts by type and
 severity, and the layout-rule measurements (ILIM net length, Q3 gate star, VBUS track width).
 Exit code 1 when the board and the netlist differ.
@@ -90,7 +91,34 @@ def drc_summary(path):
     return out
 
 
+def count_unrouted(drc_json_path, plane_nets):
+    """M1 of plan 06: `unconnected_items` of a KiCad DRC JSON whose net is not in plane_nets. The net of an entry is the
+    first bracketed name in its item descriptions (`Pad 1 [/CC1] of U1`, `Track [GND] on F.Cu`); an entry without one
+    counts as non-plane. The stitcher completes the plane nets, so they are counted in M2 only."""
+    d = json.load(open(drc_json_path, encoding="utf-8"))
+    n = 0
+    for e in d.get("unconnected_items", []):
+        net = None
+        for it in e.get("items", []):
+            m = re.search(r"\[([^\]]*)\]", it.get("description", ""))
+            if m:
+                net = m.group(1)
+                break
+        if net not in plane_nets:
+            n += 1
+    return n
+
+
+def count_unconnected(drc_json_path):
+    """M2 of plan 06: every `unconnected_items` entry, all nets."""
+    return len(json.load(open(drc_json_path, encoding="utf-8")).get("unconnected_items", []))
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 3 and sys.argv[1] in ("m1", "m2"):        # print one metric of a DRC JSON
+        import pcb_rules
+        print(count_unrouted(sys.argv[2], pcb_rules.PLANE_NETS) if sys.argv[1] == "m1" else count_unconnected(sys.argv[2]))
+        sys.exit(0)
     if len(sys.argv) < 3:
         sys.exit(__doc__)
     res, board = compare(sys.argv[1], sys.argv[2])

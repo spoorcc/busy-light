@@ -30,6 +30,9 @@ RDS_ON_MAX_OHM = 15.0                    # [ASSUME] conservative at Vgs 3.3 V (u
 RDS_ON_MIN_OHM = 0.0                     # [ASSUME] worst case for the maximum current
 I_LEAK_A = 1e-6                          # [ASSUME] IDSS max 1 uA at 25 C (Vds 60 V, Vgs 0) as commonly listed; far above the true value at Vds ~1 V
 I_LEAK_HOT_A = 10e-6                     # [ASSUME] sensitivity case, hot, not a datasheet number
+# ---- TMUX1101 (U14, U15; owner decision 2026-11-05 (a)), [DS] SCDS410D tab. 6.6 (VDD 3.3 V +-10 %), -40 to +85 degC
+TMUX_RDS_ON_MAX_OHM = 9.5                # [DS] ron max at 85 degC, ISD 10 mA (8.8 ohm at 25 degC)
+TMUX_LEAK_A = 0.2e-9                     # [DS] IS(OFF), ID(OFF) max to 85 degC, VD 3 V / VS 1 V and swapped (2 V across the open switch)
 V_ILIM_V = 1.0                           # [ASSUME] ILIM regulation voltage: not stated in the SLVS841G text read; sensitivity 0.8 .. 1.2 V
 
 E96 = [100, 102, 105, 107, 110, 113, 115, 118, 121, 124, 127, 130, 133, 137, 140, 143, 147, 150, 154, 158, 162,
@@ -80,11 +83,17 @@ def limits(r1_k, tol, branches=(), n_off=0, leak_a=I_LEAK_A, v_ilim=V_ILIM_V, rd
 
 
 def three_steps(r1, r2, r3, tol, **kw):
-    """Step 1: Q2, Q3 off. Step 2: Q2 on. Step 3: Q3 on (Q2 off, ADR-0010 table). 'Both': Q2 and Q3 on (extra state)."""
+    """Step 1: both select switches off. Step 2: switch 2 on. Step 3: switch 3 on (switch 2 off, ADR-0010 table). "Both": extra state."""
     return {"1": limits(r1, tol, (), 2, **kw),
             "2": limits(r1, tol, (r2,), 1, **kw),
             "3": limits(r1, tol, (r3,), 1, **kw),
             "both": limits(r1, tol, (r2, r3), 0, **kw)}
+
+
+def step_windows(r1, r2, r3, tol, **kw):
+    """{step: (min mA, max mA)} for steps 1, 2 and 3 (the extra 'both' state is left out)."""
+    t = three_steps(r1, r2, r3, tol, **kw)
+    return {k: (t[k][0], t[k][2]) for k in ("1", "2", "3")}
 
 
 def margins(r1, r2, r3, tol, **kw):
@@ -138,7 +147,7 @@ def print_table(r1, r2, r3, tol, label, **kw):
     t = three_steps(r1, r2, r3, tol, **kw)
     print(f"{label}: R1={r1:g}k R2={r2:g}k R3={r3:g}k tol +-{tol*100:g} %")
     print(f"  {'state':22s}{'Rtot kohm hi/nom/lo':25s}{'min mA':>8s}{'nom mA':>8s}{'max mA':>8s}")
-    for k, nm in (("1", "step 1 (Q2,Q3 off)"), ("2", "step 2 (Q2 on)"), ("3", "step 3 (Q3 on)"), ("both", "Q2+Q3 on (extra)")):
+    for k, nm in (("1", "step 1 (both off)"), ("2", "step 2 (S2 on)"), ("3", "step 3 (S3 on)"), ("both", "S2+S3 on (extra)")):
         print(rule_of_thumb_row(nm, t[k]))
 
 
@@ -149,6 +158,14 @@ def candidate_a():
 
 
 # Candidate B: E96 1 %. R1 is the smallest value whose step 1 maximum meets 623 mA; R3 the largest value whose step 3 minimum reaches the floor
+# Candidate C: the owner decision of 2026-11-05 (b): R1 47.0 k, R2 56.2 k, R3 = 27.4 k + 301 ohm in series (all 0.1 %)
+R3_PARTS_K = (27.4, 0.301)
+
+
+def candidate_c():
+    return 47.0, 56.2, round(sum(R3_PARTS_K), 6)
+
+
 def candidate_b():
     r1 = min(r for r in e96(44.0, 50.0) if limits(r, TOL_1PCT, (), 2, leak_a=0.0)[2] <= STEP1_MAX_MA)
     r3 = max(r for r in e96(10.0, 232.0) if limits(r1, TOL_1PCT, (r,), 1, leak_a=0.0)[0] >= STEP3_MIN_MA)
@@ -194,7 +211,27 @@ def main():
         print(f"  Rds {rds:g} ohm: {t[0]:.1f} / {t[2]:.1f} mA")
     ok = all(v >= 0 for v in margins(*ca, TOL_01PCT, leak_a=0.0).values())
     print("\ncandidate A meets all four HW-010 numbers with no leakage:", ok)
-    return 0 if ok else 1
+
+    print("\n-- candidate C (owner decision 2026-11-05): R1 47.0k, R2 56.2k, R3 27.4k + 301 ohm, 0.1 %, TMUX1101 switches")
+    cc = candidate_c()
+    kw = dict(leak_a=TMUX_LEAK_A, rds_max=TMUX_RDS_ON_MAX_OHM)
+    print(f"  switch: leakage {TMUX_LEAK_A*1e9:g} nA per off switch at V_ILIM {V_ILIM_V:g} V, Rds(on) max {TMUX_RDS_ON_MAX_OHM:g} ohm [DS SCDS410D]")
+    for lbl, kws in (("ideal switch (no leakage, Rds 0)", dict(leak_a=0.0, rds_max=0.0)), ("TMUX1101 limits", kw)):
+        print_table(*cc, TOL_01PCT, f"Candidate C, {lbl}", **kws)
+        w = step_windows(*cc, TOL_01PCT, **kws)
+        for k, req in (("1", f"HW-010: max {STEP1_MAX_MA:g}, min {STEP1_MIN_MA:g} (ADR-0010)"),
+                       ("2", f"proposed window {STEP2_BAND_MA[0]:g}..{STEP2_BAND_MA[1]:g}"),
+                       ("3", f"HW-010: {STEP3_MIN_MA:g}..{STEP3_MAX_MA:g}")):
+            print(f"  step {k} window {w[k][0]:.1f} .. {w[k][1]:.1f} mA   ({req})")
+        mg = margins(*cc, TOL_01PCT, **kws)
+        print("  margins mA (negative = number not met): " + ", ".join(f"{k} {v:.1f}" for k, v in mg.items()))
+        print(f"  step 2 inside the proposed window: {STEP2_BAND_MA[0] <= w['2'][0] and w['2'][1] <= STEP2_BAND_MA[1]} "
+              f"(margin {w['2'][0]-STEP2_BAND_MA[0]:.1f} mA low side, {STEP2_BAND_MA[1]-w['2'][1]:.1f} mA high side)")
+    print("  leakage budget per off switch at V_ILIM 1.0 V / 0.8 V / 1.2 V: "
+          + " / ".join(f"{leakage_budget_a(*cc, TOL_01PCT, v_ilim=v)*1e9:.0f} nA" for v in (1.0, 0.8, 1.2)))
+    okc = all(v >= 0 for v in margins(*cc, TOL_01PCT, **kw).values())
+    print("candidate C meets all four HW-010 numbers with the TMUX1101 limits:", okc)
+    return 0 if ok and okc else 1
 
 
 if __name__ == "__main__":
