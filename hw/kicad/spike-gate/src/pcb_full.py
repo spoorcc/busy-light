@@ -33,13 +33,14 @@ VIA_DIA, VIA_DRILL = 0.6, 0.3             # mm
 EDGE_CLEARANCE = 0.3                      # mm
 # Net classes by net name: width in mm. IPC-2221 external layer, 1 oz (35 um), 10 K rise:
 # 1.5 A -> 0.53 mm, 2.0 A -> 0.78 mm (see report). The power nets are routed at 0.8 mm where space allows.
+import pcb_rules                  # noqa: E402
 from pcb_rules import NET_WIDTH   # noqa: E402  (shared with the tests; values and basis in pcb_rules.py)
 GND = "GND"
 # Signal nets that touch the 0.4 mm-pitch pads of U1 use the minimum width (0.15 mm).
 NET_TRACK = {"/CC1": 0.15, "/CC2": 0.15}
 # Star nets: every pad is routed straight to the named pad, so the branch point is at that pad.
-# ADR-0016 layout rule: the Q3 gate pin is the tap point of U13 pin 2, R3 and the readback R15.
-STAR = {"/ILIM_STEP3_EN": ("Q3", "1")}
+# ADR-0016 layout rule: the step 3 switch control pin (U15 SEL) is the tap point of U13 pin 2, R3, R19 and the readback R15.
+STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 
 # ----------------------------------------------------------------------------- provisional substitutions
 # ref -> footprint (lib:name) used instead of the schematic's footprint field
@@ -47,8 +48,6 @@ FOOTPRINT_OVERRIDE = {
     "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
     "U8": "Package_TO_SOT_SMD:SOT-223-3_TabPin2",     # schematic field empty (REG_3V3 placeholder)
     "U9": "RF_Module:ESP32-C6-MINI-1",                # ESP32-C3-MINI-1 not in the libraries; same 13.2x16.6 module family
-    "C1": "Capacitor_SMD:C_1206_3216Metric",          # 470 nF C0G, N4 addendum
-    "C1B": "Capacitor_SMD:C_1206_3216Metric",         # 150 nF C0G, N4 addendum
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
@@ -444,11 +443,17 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         if len(lst) >= 2:
             sa_nets[n] = lst
 
+    weights = {n: w for n, w in pcb_rules.NET_WEIGHT.items() if n in sa_nets}
+    for tie, (a, b, w) in pcb_rules.PIN_TIES.items():      # bypass capacitor at the supply pin (pseudo-net, not on the board)
+        if a[0] in comps and b[0] in comps:
+            sa_nets[tie] = [a, b]
+            weights[tie] = w
+
     def region_ok(side, x0, y0, x1, y1):       # SA frame (y down) -> mechanical frame (y up)
         return MO.region_rect_ok(side, x0, -y1, x1, -y0, R_MOVE, tab_r)
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
-                                          seeds=SA_SEEDS, iters=sa_iters or SA_ITERS)
+                                          seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, weights=weights)
     for ref, (x, y, rot, side) in sorted(state.items()):
         fp = fps[ref]
         fp.SetPosition(vec(0, 0))

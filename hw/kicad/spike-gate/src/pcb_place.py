@@ -24,13 +24,14 @@ def rot_xy(dx, dy, rot):
 
 
 class Placer:
-    def __init__(self, parts, nets, fixed_pins, fixed_rects, region_ok, margin=0.3, seed=1):
+    def __init__(self, parts, nets, fixed_pins, fixed_rects, region_ok, margin=0.3, seed=1, weights=None):
         """parts: {ref: {'w','h','pads':{num:(dx,dy) from the rect centre}, 'sides':'FB'|'F'|'B'}}.
         nets: {name: [(ref, pad)]}; fixed_pins: {(ref, pad): (x, y)}; fixed_rects: [(side, x0, y0, x1, y1)].
         region_ok(side, x0, y0, x1, y1) -> bool."""
         self.parts, self.nets, self.fixed_pins = parts, nets, fixed_pins
         self.fixed_rects, self.region_ok, self.margin = fixed_rects, region_ok, margin
         self.rng = random.Random(seed)
+        self.weights = weights or {}     # net name -> factor on the half-perimeter wire length (default 1)
         self.refs = sorted(parts)
         self.state = {}
         self.net_of = {}
@@ -98,7 +99,7 @@ class Placer:
     def cost_of(self, ref, st, pen):
         c = 0.0
         for n in self.net_of.get(ref, ()):
-            c += self.net_hpwl(n)
+            c += self.weights.get(n, 1.0) * self.net_hpwl(n)
         return c + pen * self.part_overlap(ref, st)
 
     # ---- annealing
@@ -154,12 +155,12 @@ class Placer:
         return sum(self.net_hpwl(n) for n in self.nets)
 
 
-def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000):
+def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000, weights=None):
     """Run the annealer for successive seeds; return the first overlap-free result (else the best), with
     (state, seed, hpwl, overlap)."""
     best = None
     for s in seeds:
-        pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, seed=s)
+        pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, seed=s, weights=weights)
         pl.run(iters=iters)
         ov, wl = pl.total_overlap(), pl.total_hpwl()
         if best is None or (ov, wl) < (best[3], best[2]):
