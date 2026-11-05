@@ -299,7 +299,7 @@ def _build():
     s.caption("3.3 V regulator (part not chosen)", 305, 78)
     s.caption("TUSB321: pins 3, 6, 7, 8, 9, 11 numbered; others named", gx(38.1), 99.0, 1.27)
     s.caption("TPS3840DL40 is a candidate, not chosen", gx(38.1), 164.0, 1.27)
-    s.caption("ESP32-C3-MINI-1 module (pin numbers not read; GPIO names from the chip)", 15, 172)
+    s.caption("ESP32-C3-MINI-1 module (box uses GPIO names, module pin numbers not drawn)", 15, 172)
     s.caption("Button (HW-007; GPIO5 is not a strapping pin)", 128, 172)
     s.caption("HOLD_OK is 5 V: buffered to 3.3 V for the MCU", 128, 211)
     s.caption("OE tied to GND (symbol drawn pointing up)", 160.0, 215.5, 1.0)
