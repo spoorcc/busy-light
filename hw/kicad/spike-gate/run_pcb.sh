@@ -30,8 +30,9 @@ cmp "$OUT/a/busy_light_spike.kicad_pro" "$OUT/b/busy_light_spike.kicad_pro"
 rm -rf "$OUT/b"
 cp -f "$IN/full.kicad_sch" "$OUT/a/busy_light_spike.kicad_sch"
 
-kicad-cli pcb drc --format json --severity-all --schematic-parity --refill-zones \
-  -o "$OUT/a/drc_placed.json" "$OUT/a/busy_light_spike.kicad_pcb" 2>&1 | tail -2
+# Strict DRC (no `| tail`): a finding that is not in known-open-violations.json fails the script.
+export SPIKE_ALLOW_KNOWN_OPEN=${SPIKE_ALLOW_KNOWN_OPEN:-1}
+"$PY" "$HERE/src/kicad_strict.py" drc "$OUT/a/busy_light_spike.kicad_pcb" "placed-${LAYERS}l" --out "$OUT/a/drc_placed.json"
 
 if [ -n "$FREEROUTING_JAR" ]; then
   "$PY" "$HERE/src/pcb_dsn.py" export "$OUT/a/busy_light_spike.kicad_pcb" "$OUT/a/b.dsn" "$PLANES" 2>&1 | filter
@@ -40,8 +41,7 @@ if [ -n "$FREEROUTING_JAR" ]; then
   "$PY" "$HERE/src/pcb_dsn.py" import "$OUT/a/busy_light_spike.kicad_pcb" "$OUT/a/b.ses" "$OUT/a/routed.kicad_pcb" 2>&1 | filter
   cp -f "$OUT/a/busy_light_spike.kicad_pro" "$OUT/a/routed.kicad_pro"
   cp -f "$IN/full.kicad_sch" "$OUT/a/routed.kicad_sch"
-  kicad-cli pcb drc --format json --severity-all --schematic-parity --refill-zones \
-    -o "$OUT/a/drc_routed.json" "$OUT/a/routed.kicad_pcb" 2>&1 | tail -2
+  "$PY" "$HERE/src/kicad_strict.py" drc "$OUT/a/routed.kicad_pcb" "routed-${LAYERS}l" --out "$OUT/a/drc_routed.json"
   "$PY" "$HERE/src/pcb_check.py" "$NET" "$OUT/a/routed.kicad_pcb" "$OUT/a/drc_routed.json" > "$OUT/a/check_routed.json" 2>/dev/null || true
   echo "wrote $OUT/a/check_routed.json"
 fi

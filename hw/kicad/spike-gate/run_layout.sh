@@ -7,5 +7,6 @@ rm -rf "$OUT"; mkdir -p "$OUT"
 "$PY" "$HERE/src/gen_gate.py" "$OUT" --netlist-only >"$OUT/gen.log" 2>&1 || { echo "netlist FAIL"; exit 1; }
 "$PY" "$HERE/src/layout_sch.py" "$OUT/gate.net" "$OUT/gate.kicad_sch" || exit 1
 "$PY" "$HERE/src/check_gate.py" "$OUT" || exit 1
+SPIKE_ALLOW_KNOWN_OPEN=${SPIKE_ALLOW_KNOWN_OPEN:-1} "$PY" "$HERE/src/kicad_strict.py" erc "$OUT/gate.kicad_sch" gate-layout || exit 1
 "$PY" "$HERE/src/layout_sch.py" "$OUT/gate.net" "$OUT/second.kicad_sch" || exit 1
 cmp "$OUT/gate.kicad_sch" "$OUT/second.kicad_sch" && echo "deterministic: identical" || exit 1
