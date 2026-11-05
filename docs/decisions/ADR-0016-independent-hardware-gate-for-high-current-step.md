@@ -104,3 +104,73 @@ The goldfish review RV-008 found points that this text did not state. They clari
 Strongest objection: "A CC IC is the same CC reading with a different part; if it misclassifies a charger, the limit is wrong and no firmware second opinion exists."
 Answer: accepted. The gain is independence from firmware faults and a vendor-specified threshold, not a better reading of a bad source. A firmware ADC read could be kept as a second opinion (option C style) at the cost of more parts; the owner decides whether the second opinion is worth it.
 Second objection: "A hung firmware at the high step still draws 1350 mA." Answer: yes, from a source that advertises it; that is a heat question, not a source-overload question, and belongs to the thermal requirement.
+
+## Amendment 2 (Proposed, 2026-11-06): ILIM select switch, ILIM resistors and hold-off capacitor set
+
+- **Status of this amendment:** Proposed. Not Accepted and not Approved; only the owner (Ben Spoor) decides. The sections above are unchanged, including the Accepted status of the decision (option B).
+- **Origin:** owner decisions of 2026-11-05 (`docs/verification/reports/owner-decisions-2026-11-05-b.md`, decisions 2 to 4), which asked for a part change on a safety-relevant limit to be recorded as an ADR-0016 amendment. This amendment adds no new numbers: every figure is taken from `docs/verification/reports/analysis-ilim-switch-replacement.md` (section and addendum A), the owner-decisions record, HW-010 (Proposed amendment), DEV-001 and RISK-045.
+- **Related:** SYS-020, HW-010, SW-005, SW-009, RISK-027, RISK-045, DEV-001, TC-210, ADR-0010.
+- **Scope:** the gate decision of ADR-0016 (option B, CC IC and AND) is not touched. This amendment covers what sets the three current limits that the gate selects: the two analog switches that replaced the 2N7002 transistors Q2 and Q3 on the ILIM node of the TPS2553, the three ILIM resistors, and the capacitor set of the hold-off timer.
+
+### Context
+The 2N7002 transistors have a stated off leakage ceiling of 1 uA (comparison row of the analysis, section 5). The leakage budget for the HW-010 limits is 118 nA per off switch at 1.0 V (94 nA at 0.8 V, 142 nA at 1.2 V; the 1.0 V ILIM node is an ASSUMPTION, not found in the SLVS841G text read). With 1 uA the step 1 maximum is 670.9 mA against the 623 mA of HW-010 (margin -47.9 mA) and the step 3 maximum is 1592.3 mA against 1577 mA (-15.3 mA). So the transistor must change. No MOSFET with leakage stated at low drain voltage was found (the BSS138N states 0.1 uA at 60 V and 25 degC only).
+
+Not known (owner and bench decide): the ILIM pin voltage, the 3V3 ramp (regulator not chosen), stock and price at LCSC and JLCPCB of every part named here, the JLCPCB Extended-part fee, the behaviour of the TMUX1101 signal pin above VDD + 0.5 V.
+
+### Decision criteria
+Weights are my judgement, derived from the analysis report (leakage budget, section 1; margins, section 5; open item, section 4 and addendum).
+| Criterion | Weight (1-5) | Source |
+|-----------|--------------|--------|
+| Off leakage stated near 1 V and to 85 degC (evidence that the 118 nA budget holds) | 5 | analysis section 1, 3, 4; HW-010 limits |
+| Retention of the HW-010 step margins with 3V3 on | 5 | analysis section 5; HW-010, SYS-020 |
+| Behaviour with 3V3 off (ILIM node about 1 V, 3V3 below about 0.5 V) | 4 | analysis section 4 and A.3 to A.5; RISK-045 |
+| Drive margin from the 74LVC gate (2.9 V loaded, 2.5 V ideal) | 3 | analysis section 4 |
+| Availability, class and fee (stock not verified) | 3 | analysis section 7; RISK-030 |
+| Package and assembly | 2 | analysis section 3 |
+
+### Alternatives considered
+**A. TMUX1101DCKR (LCSC C2673506), fallback TS5A3166DBVR (owner choice).** Off leakage max 0.05 nA at 25 degC and 0.2 nA at -40 to 85 degC, at VDD 3.3 V with 3 V / 1 V across the switch (SCDS410D, section 6.6, p. 6); about 590 times below the budget. VIH min 1.35 V, so it works from a 2.5 V gate; SEL is fail-safe; Rds max 9.5 ohm at 85 degC is irrelevant against the 56 kohm branch. Strongest case: the only candidate whose leakage is stated near 1 V over temperature and that leaves the margins unchanged (table row "TMUX1101": step 1 504.2 to 616.6 mA, step 3 1381.2 to 1566.7 mA). Cons: **no behaviour is stated for a signal above VDD + 0.5 V** and that case occurs at every power-up (open condition below); SC70-5; JLCPCB Extended (class inferred from the twin TMUX1102DCKR, not seen for C2673506); stock not verified.
+
+**B. TS5A3166DBVR (C353035) as the primary part.** Off leakage max 2 nA at 25 degC and 20 nA at -40 to 85 degC (SCDS186E, p. 6), 5.9 times below the budget; powered-off leakage is stated (1 uA at 25 degC, 5 uA full range). Strongest case: the 3V3-off behaviour is specified, so no deviation of an absolute maximum is needed on paper; SOT-23-5; JLCPCB page fetched, Extended. Cons: with 20 nA the step 1 maximum is 617.7 mA (margin 5.3 mA, 1.1 mA less than option A); VIH min 2.0 V leaves 0.9 V from a 2.9 V gate and it needs its 2.5 V supply table below that; if the TPS2553 is enabled with 3V3 absent, 1 uA gives step 1 maximum 670.9 mA and 5 uA gives 885.4 mA, which breaks the HW-010 numbers (margin -47.9 and -262.4 mA). The window exists by architecture (addendum A.5), so B replaces "not specified" by "stated and out of limit" and does not remove it.
+
+**C. A MOSFET with a bench leakage measurement (BSS138N or similar).** Switch off at any rail with the gate low, so the 3V3-off case is not an issue. Strongest case: no abs. max. question, a basic-class part may exist (class of C94638 not seen). Cons: no part states leakage at 1 V; BSS138N leakage is a 60 V, 25 degC ceiling (0.1 uA); with an assumed 100 nA the margin is 1.0 mA at the step 1 maximum on an unverified number; Rds is not stated below 4.5 V; the search was not exhaustive (analysis section 7). Stays open only with a bench leakage measurement at 70 degC.
+
+**D. Do nothing / defer: keep the 2N7002.** Same as A with respect to the window, but the stated 1 uA ceiling breaks the step 1 and step 3 maximum (rows above). Strongest case: no change, a known part. It cannot meet HW-010 on paper; it is listed because the owner may keep it for a first bench build and measure its real leakage.
+
+### Comparison
+Scores 0 to 5, my judgement. Evidence: analysis report sections 3 to 5 and addendum A (desk research of datasheets; nothing measured). Max 110.
+| Criterion (weight) | A TMUX1101 | B TS5A3166 | C MOSFET | D 2N7002 |
+|--------------------|------------|------------|----------|----------|
+| Leakage stated near 1 V, to 85 degC (5) | 5 | 4 | 1 | 1 |
+| Step margins with 3V3 on (5) | 5 | 4 | 2 | 0 |
+| Behaviour with 3V3 off (4) | 1 | 3 | 5 | 5 |
+| Drive from 2.9 V / 2.5 V gate (3) | 5 | 3 | 2 | 3 (not re-assessed) |
+| Availability, class, fee (3) | 2 | 2 | 2 | 3 (not checked) |
+| Package and assembly (2) | 3 | 4 | 5 | 5 |
+| **Weighted sum (max 110)** | **81** | 75 | 60 | 53 |
+
+A leads B by 6 points, which is within my scoring error. Sensitivity: if the weight of "behaviour with 3V3 off" rises from 4 to 7 the two tie, and above that B leads. The table therefore depends on how the 3V3-off condition is judged. The recommendation is conditional (see Decision).
+
+### Decision (proposed)
+**Proposed: option A, TMUX1101DCKR for Q2 and Q3, conditional on the bench check TC-210 point (d); fallback TS5A3166DBVR.** The owner has chosen this on 2026-11-05; this text records it for acceptance.
+1. **Switch:** TMUX1101DCKR (C2673506), supply pin on 3V3 with 0.1 uF, active-high control driven by the 74LVC gate, a 100 kohm pull-down on each control pin (an open control reads "off", step 1). These circuit points are ASSUMPTIONS of the analysis (schematic not re-read) and the readback divider is to be checked against the pull-down.
+2. **ILIM resistors,** 0.1 % 0603 thin film: step 1 47.0 kohm; step 2 56.2 kohm; step 3 27.4 kohm plus 301 ohm in series (HW-010 Proposed amendment (b)). Calculated limits (owner-decisions record, section 2; Rds 0 to 9.5 ohm, 0.2 nA, 1.0 V assumed): step 1 504.2 to 616.6 mA (maximum 623, margin 6.4 mA); step 2 934.9 to 1091.7 mA (proposed window 850 to 1150 mA); step 3 1381.2 to 1566.6 mA (window 1366 to 1577, margins 15.2 and 10.4 mA); Q2 and Q3 both on 1817.4 to 2019.5 mA, excluded by the exclusive gate. Alternatives for the resistors: (i) the earlier set 47.0 / 56.9 / 27.7 kohm gives step 2 929.6 to 1085.9 mA and step 3 1381.2 to 1566.7 mA with the TMUX1101, so it also meets the numbers; the records read do not state why the owner changed the step 2 value to 56.2 kohm or split the step 3 value (the sum 27.701 kohm gives the same limits as 27.7 kohm; stock of E192 values is not checked, which may be the reason, the owner confirms); (ii) 27.4 kohm alone gives a step 3 maximum of 1576.8 mA, margin 0.2 mA, rejected for that reason. The margins of 6.4, 10.4 and 15.2 mA are small against resistor temperature coefficient, ageing and layout leakage, which are not modelled.
+3. **Hold-off capacitor C1:** 220 + 220 + 100 + 68 nF C0G 5 % in parallel (608 nF). Calculated window 205.9 to 560.6 ms (TPS3840 constants k_min 357.6 kohm, k_max 875.6 kohm; 205.2 to 562.2 ms with the 0.6 % allowance of `analysis-n4-holdoff-capacitor.md`), inside the [200] to [600] ms of ADR-0016 and HW-010; the margin to the typical CC debounce (133 ms) is 72.9 ms, and the maximum debounce is not found. Alternatives from the N4 report: 3 x 220 nF (660 nF) gives 222.8 to 610.3 ms and misses the 600 ms limit; 220 + 220 + 150 nF (590 nF) gives 199.2 ms and misses 200 ms; 220 + 220 + 150 + 33 nF (623 nF) gives 210.3 to 576.0 ms and also fits (the earlier example, replaced by the owner set; the report read does not state why). A single 620 nF C0G part was not found. Ageing, DC bias and leakage of C0G are taken as 0 (not checked); the 68 nF C0G availability is not checked.
+4. **Open condition, the 3V3-off window (not closed by design).** The TPS2553 is enabled from VBUS_IC and 3V3 comes from its output through the regulator, so at every power-up the ILIM node (about 1 V, assumed) can exceed the TMUX1101 absolute maximum VDD + 0.5 V while 3V3 is below about 0.5 V. The hold-off does not hold EN low (addendum A.2 finding 1, which corrects the earlier assumption), and an enable on 3V3 would be circular. The datasheet states no leakage, clamp current or switch state in that case; first-order estimate up to about 7 uA, taken from the ILIM node (assumed 0.6 V clamp), against 21 uA of step 1, so the effect on the limit is unknown, not zero. Recorded as DEV-001 (Proposed, prototype only) and RISK-045 (Open, initial risk 9). Compensating measures: the switch is off in the window (pull-down, fail-safe control), the firmware starts at the lowest step, the window is short.
+5. **Bench check, TC-210 point (d):** with a scope, VBUS_IC, +5V, 3V3 and the ILIM node (one high-impedance probe) at plug-in and at VBUS dropout, for each build, with repeated plug-ins: time with 3V3 below 0.5 V, peak of the ILIM node minus 3V3, limit error in that window. Other TC-210 points: (a) hold-off measured against 205.9 to 560.6 ms and against the CC IC debounce with at least [20] ms margin; (b) each step measured against the numbers in item 2, also at 70 degC if possible. Nothing of this has been run; the procedure stays "TBD" until approval.
+6. **Branch on the bench result:** if the effect in the window is acceptable, DEV-001 closes or becomes a permanent deviation with the evidence; if not, use TS5A3166DBVR and review its 1 to 5 uA powered-off leakage, or add a series resistor or clamp once the bench numbers exist (not analysed), or withdraw to option C with a leakage measurement.
+
+### Consequences
+- Positive: the leakage of the select switch leaves the margins unchanged (0.2 nA against 118 nA); the 2N7002 problem of HW-010 is removed on paper; the fallback is a drop-in on one package change.
+- **Negative / trade-offs accepted:** a rated maximum is exceeded at every power-up on a safety-relevant limit with no datasheet support, accepted for the prototype only (DEV-001); two Extended parts or more, per-type fee not checked, stock not verified (earlier undated snippets showed TMUX1101DCKR out of stock and TS5A3166 at 0 stock); small step margins (6.4 to 15.2 mA) that rest on 0.1 % resistors and unmodelled temperature effects; more parts in the hold-off (four capacitors).
+- New risks: RISK-045 (added, Open). Existing: RISK-027 (limit band), RISK-030 (availability), RISK-044 and RISK-042 (gate).
+- Requirements and records changed or to be changed on approval: HW-010 (Proposed amendment (a) to (e)), SW-005 and SW-009 (Proposed amendments, unchanged by this text), TC-210 (outline, point (d)), DEV-001, RISK-045. No hardware file is changed (CLAUDE.md rules 1 and 12).
+
+### Verification and revisit
+Bench TC-210 points (a), (b), (d) as above; leakage at 70 degC if the setup allows. Revisit when: the TC-210 (d) record shows a limit error or damage; stock or fee make the part unusable; the real ILIM voltage or the regulator changes the window; the maximum CC debounce is 200 ms or more (then the hold-off minimum needs a new decision).
+
+### Critical review notes
+Strongest objection: "The primary part is chosen although the datasheet gives no behaviour for the case that occurs at every power-up, and the fallback has the better paper behaviour; a rated maximum on a safety limit is exceeded by design."
+Answer: partly accepted. The TMUX1101 is the only part with stated leakage near 1 V and unchanged margins, and the fallback does not remove the window (its stated 5 uA breaks the step 1 and step 3 maxima if the TPS2553 runs with 3V3 absent), so the choice is between an unknown effect and a known out-of-limit one. The scores do not separate A from B (6 points, tie at weight 7 for the 3V3-off criterion). The decision is therefore conditional: prototype only, DEV-001 and the TC-210 (d) record decide, and the fallback stays ready. If the owner weighs a rating exceedance as unacceptable without evidence, option B is the consistent choice.
+Second objection: "The 118 nA budget and every margin rest on an assumed 1.0 V ILIM node." Answer: yes; the SLVS841G text read does not state it, and TC-210 point (d) measures it. Third: "Stock and fees are unchecked." Answer: yes; unchecked, stated here, and a reason to revisit.
+Not run: no SPICE, no bench, no firmware; scores and numbers are desk results as reported in the cited analyses and were not re-checked against the datasheets by this amendment.
