@@ -91,3 +91,11 @@ of U4 touches its reference text, and on U1 and U2 the pin labels and no-connect
 For this fragment the own writer removes the retry loop and the router hang, in about 220 lines, with ERC 0
 errors and 0 parity differences. Whether labels-only output is acceptable as the review document is the user's
 call; a hierarchical, block-placed layout is the next step if it is not.
+
+## Addendum: hand-laid-out version (2026-11-04)
+The labels-only grid of `write_sch.py` was judged not good enough to read ("a human would make a better looking schema"). `src/layout_sch.py` writes the same fragment with an explicit layout: signal flow left to right (CC IC, pull-up, inverter, the two AND gates, pull-downs, MOSFET switches), real wires for local connections, net labels only for the nets that cross the sheet (`CC_OK_1A5`, `HOLD_OK`, the select lines), power symbols, section captions and a title block. The two placeholder ICs are drawn as boxes with named pins (generated symbols, not hand-edited files). The coordinates are in the script; the SKiDL netlist stays the source of values, footprints and symbols.
+- **Run:** `run_layout.sh`: ERC errors 0, netlist parity 0 differences (the drawn wiring is the netlist wiring), second generation byte-identical. 23 tests pass (new: `tests/test_layout_sch.py`: determinism, every component placed, every connected pin is the end of a wire, a junction, a no-connect or a power symbol).
+- **Looked at:** the PDF render by eye. Remaining cosmetic issues: the placeholder text of `R_ILIM2` and `R_ILIM3` sits close to the MOSFET pins, and pin names inside the placeholder boxes are close to the wire ends.
+- **Limits:** the layout is hand-coded for this one fragment (about 15 parts); it is not a general placer. A new part needs coordinates. This is the honest cost of a good-looking sheet and a point for ADR-0012: a generated schematic that people read needs either a layout description per sheet or manual work in the KiCad GUI.
+- **Not run:** opening the file in the KiCad GUI, other KiCad versions.
+

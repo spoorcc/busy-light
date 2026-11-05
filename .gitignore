@@ -15,6 +15,10 @@ hw/kicad/**/_autosave-*
 hw/kicad/**/*.bak
 hw/kicad/**/*.lck
 hw/kicad/**/*-rescue.*
+# SKiDL / KiCad ERC tool output
+hw/kicad/**/*.erc
+hw/kicad/**/skidl_REPL.*
+hw/kicad/**/gen_gate.log
 
 # FreeCAD
 *.FCStd1
