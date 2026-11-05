@@ -62,6 +62,32 @@ class Constants(unittest.TestCase):
         self.assertEqual(len(w), 1 + len(R.NET_WIDTH))
 
 
+class RunMeta(unittest.TestCase):
+    """T16 (meta part): run_meta.json has exactly the specified keys; a missing key is an error."""
+
+    FIELDS = dict(placed_board_sha256="a", dsn_sha256="b", kicad_version="10", jar_sha256="c", fr_passes=60,
+                  fr_threads=4, java_version="21", wall_time_s=1.5, planes="none")
+
+    def test_keys(self):
+        import pcb_replay
+
+        with tempfile.TemporaryDirectory() as t:
+            p = Path(t) / "run_meta.json"
+            pcb_replay.write_meta(str(p), **self.FIELDS)
+            data = json.loads(p.read_text())
+        self.assertEqual(sorted(data), sorted(pcb_replay.META_KEYS))
+        self.assertIsInstance(data["fr_passes"], int)
+        self.assertIsInstance(data["wall_time_s"], float)
+
+    def test_missing_key_raises(self):
+        import pcb_replay
+
+        fields = dict(self.FIELDS)
+        del fields["jar_sha256"]
+        with self.assertRaises(ValueError):
+            pcb_replay.write_meta("/nonexistent/x.json", **fields)
+
+
 class Dru(unittest.TestCase):
     def test_write_dru_is_deterministic_and_complete(self):
         with tempfile.TemporaryDirectory() as t:

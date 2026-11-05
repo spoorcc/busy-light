@@ -163,4 +163,5 @@ def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None):
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         sys.exit(__doc__)
-    main(sys.argv[1], sys.argv[2], sys.argv[3], tuple((sys.argv[4] if len(sys.argv) > 4 else ",".join(R.PLANE_NET_ORDER)).split(",")))
+    rep = main(sys.argv[1], sys.argv[2], sys.argv[3], tuple((sys.argv[4] if len(sys.argv) > 4 else ",".join(R.PLANE_NET_ORDER)).split(",")))
+    sys.exit(1 if rep["failed"] else 0)      # a pad that could not be stitched is a failure (plan 06 G3)

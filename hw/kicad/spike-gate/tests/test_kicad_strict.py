@@ -60,7 +60,9 @@ class Judge(unittest.TestCase):
         data = json.loads(K.ALLOW_FILE.read_text())
         for kind in ("erc", "drc"):
             for profile, types in data[kind].items():
-                for typ, entry in types.items():
+                flat = {k: v for k, v in types.items() if k != "strict_allow"}
+                flat.update({"strict_allow/" + k: v for k, v in types.get("strict_allow", {}).items()})
+                for typ, entry in flat.items():
                     self.assertIsInstance(entry["max"], int, f"{kind}/{profile}/{typ}")
                     self.assertTrue(entry["reason"], f"{kind}/{profile}/{typ}")
 
@@ -105,6 +107,15 @@ class RefAllowList(unittest.TestCase):
     def test_class_without_refs_key_is_number_only(self):
         r = self.report(parity_item("lib_footprint_issues", "ZZ9"))
         self.assertEqual(K.foreign_refs(r, "drc", {"lib_footprint_issues": {"max": 1, "reason": "x"}}), {})
+
+    def test_refs_any_needs_one_listed_ref(self):
+        allow = {"courtyards_overlap": {"max": 9, "reason": "x", "refs_any": ["U9"]}}
+        ok = self.report(parity_item("courtyards_overlap", "D8"))
+        ok["schematic_parity"][0]["items"].append({"description": "Footprint U9"})
+        self.assertEqual(K.foreign_refs(ok, "drc", allow), {})
+        bad = self.report(parity_item("courtyards_overlap", "D8"))
+        bad["schematic_parity"][0]["items"].append({"description": "Footprint D9"})
+        self.assertEqual(K.foreign_refs(bad, "drc", allow), {"courtyards_overlap": {"D8", "D9"}})
 
     def test_pattern_matches_only_with_star_suffix(self):
         self.assertTrue(K.ref_ok("TP7", ["TP*"]))

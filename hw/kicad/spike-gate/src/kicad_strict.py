@@ -82,7 +82,8 @@ def item_refs(violation: dict) -> set[str]:
 
 
 def foreign_refs(report: dict, kind: str, allowed: dict[str, dict]) -> dict[str, set[str]]:
-    """For classes whose entry has a `refs` list: refs of findings that are not in that list, per class."""
+    """For classes whose entry has `refs` (all refs of a finding must be listed) or `refs_any` (one listed ref is enough):
+    the refs of findings that fail, per class."""
     bad: dict[str, set[str]] = {}
     if kind != "drc":
         return bad
@@ -92,9 +93,13 @@ def foreign_refs(report: dict, kind: str, allowed: dict[str, dict]) -> dict[str,
             continue
         for v in items:
             entry = allowed.get(v.get("type", ""))
-            if entry is None or "refs" not in entry:
+            if entry is None or not ("refs" in entry or "refs_any" in entry):
                 continue
-            extra = {r for r in item_refs(v) if not ref_ok(r, entry["refs"])}
+            found = item_refs(v)
+            if "refs_any" in entry:      # pair findings: tolerated when at least one ref is listed (for example U9)
+                extra = set() if any(ref_ok(r, entry["refs_any"]) for r in found) else found
+            else:
+                extra = {r for r in found if not ref_ok(r, entry["refs"])}
             if extra:
                 bad.setdefault(v["type"], set()).update(extra)
     return bad
