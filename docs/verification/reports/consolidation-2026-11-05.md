@@ -61,6 +61,7 @@ Notes on these results:
 - The CI run on GitHub was not executed. The checks above ran locally with a virtual environment built from the `dev` and `hw` dependency groups.
 - The system `python3 -I scripts/check_part_evidence.py` exits 2 (`NOT RUN - missing package (jsonschema)`) because the system Python lacks the package. CI installs it with `pip install --group hw --group dev`.
 - Freerouting is not deterministic: this run left 40 unrouted connections, the run in the PCB report left 39. The 4-layer DRC counts in `known-open-violations.json` are from this run. 121 unconnected items remain after routing here, because the plane-via step (`pcb_stitch.py`) is not part of `run_pcb.sh`; the report's 57 figure includes that step.
+- README images (commit after e06536e) come from a different, later routing: Freerouting left 40 nets unrouted; after plane stitching KiCad DRC reports 252 violations and 57 unconnected items on 4 nets (+5V, GND, CC2, one strap net). The strict waiver check (475 waived items, above) was run on an earlier routing and has not been rerun on the README routing.
 - `.kicad_pcb`, `.kicad_pro`, renders and the Freerouting jar are not committed (spike convention).
 
 Not run: any GitHub CI job; KiCad GUI; `run_gate.sh` (the SKiDL schematic writer hung on this machine during the C1 regeneration and is not wired to the strict check); a 2-layer routed run; the grid router on the new outline; SPICE; bench measurements; a goldfish review of ADR-0017 and the guardrails document; signal-integrity, EMC, antenna, thermal and fabricator checks.

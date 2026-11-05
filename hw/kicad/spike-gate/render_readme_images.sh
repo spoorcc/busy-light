@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: Apache-2.0
-# Spike: export the README images (schematic, board layers, board 3D view) from a routed and stitched spike board.
+# Spike: export the README images (schematic in two crops, board layers, board 3D view) from a routed and stitched spike board.
 # Usage: render_readme_images.sh <board dir> <out dir>
 #   <board dir> holds stitched.kicad_pcb, stitched.kicad_pro and stitched.kicad_sch. Make it with:
 #     run_full.sh (netlist and schematic), run_pcb.sh <full dir> <dir> 4 (placement, Freerouting, DRC), then
@@ -21,7 +21,10 @@ kicad-cli pcb export svg --mode-single --layers "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Silks
 rsvg-convert -w 2400 -b white "$T/layers.svg" -o "$T/layers.png"
 kicad-cli pcb render --side top --width 2400 --height 1800 --quality high --background opaque \
   -o "$T/top3d.png" "$IN/stitched.kicad_pcb"
-convert "$T/sch.png" -strip "$OUT/spike-full-board-schematic.png"
+# The sheet is one dense A3 page. Two fixed crops (pixel boxes of the 3000 px wide export) keep the text legible in the README:
+# gate and power path (USB-C, CC detection, current-step gate, hold-off, regulator) and MCU, button and LED chain.
+convert "$T/sch.png" -crop 2700x1160+60+40 +repage -strip "$OUT/spike-schematic-gate-power.png"
+convert "$T/sch.png" -crop 2790x820+60+1200 +repage -strip "$OUT/spike-schematic-mcu-leds.png"
 convert "$T/layers.png" -strip "$OUT/spike-pcb-4layer-layers.png"
 convert "$T/top3d.png" -resize 1600x -strip "$OUT/spike-pcb-4layer-top3d.png"
-ls -l "$OUT"/spike-full-board-schematic.png "$OUT"/spike-pcb-4layer-layers.png "$OUT"/spike-pcb-4layer-top3d.png
+ls -l "$OUT"/spike-schematic-gate-power.png "$OUT"/spike-schematic-mcu-leds.png "$OUT"/spike-pcb-4layer-layers.png "$OUT"/spike-pcb-4layer-top3d.png
