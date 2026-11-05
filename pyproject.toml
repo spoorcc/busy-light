@@ -1,7 +1,8 @@
 # Tooling for the busy-light repository (documentation checks and hardware-as-code, ADR-0012).
 # This file does not describe a distributable package. Install the tools with:
 #   python3 -m venv --system-site-packages .venv   (system site packages give access to KiCad's `pcbnew`)
-#   .venv/bin/pip install --group hw --group dev
+#   .venv/bin/pip install --group hw --group dev   (the dev group includes the evidence group:
+#   pyyaml, jsonschema and pint for scripts/check_part_evidence.py)
 [project]
 name = "busy-light-tools"
 version = "0.0.0"
@@ -13,16 +14,35 @@ dependencies = []
 hw = [
     "kiutils==1.4.8",
 ]
+evidence = [
+    "pyyaml",
+    "jsonschema",
+    "pint",
+]
 dev = [
     "reuse",
     "pytest",
     "ruff",
     "mypy",
+    "types-PyYAML",
+    "types-jsonschema",
+    {include-group = "evidence"},
 ]
 
 [tool.ruff]
 line-length = 100
-extend-exclude = [".claude", "sw/modules", "modules", "zephyr", "bootloader", "tools"]
+extend-exclude = [
+    ".claude",
+    "sw/modules",
+    "modules",
+    "zephyr",
+    "bootloader",
+    "tools",
+    # Spike code (ADR-0012 is Proposed): exploratory, not yet under the lint policy.
+    # 449 findings at consolidation (docs/verification/reports/consolidation-2026-11-05.md).
+    # Bring it under ruff before it is promoted out of spike-gate.
+    "hw/kicad/spike-gate",
+]
 target-version = "py311"
 
 [tool.ruff.lint]

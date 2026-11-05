@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence placeholder for the 3.3 V regulator (U8, symbol REG_3V3_PLACEHOLDER). No part is chosen, so every claim is source-missing.
+schema_version: 1
+part:
+  key: REG-3V3
+  mpn: not chosen
+  manufacturer: not chosen
+  description: 3.3 V regulator placeholder (IN, OUT, GND)
+  selection: placeholder
+  used_in:
+  - U8
+  schematic_symbol: REG_3V3_PLACEHOLDER
+documents: []
+defaults:
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: source-missing
+claims:
+- id: REG-3V3.mpn
+  parameter: Regulator part and topology (LDO or buck) is not chosen
+  category: other
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: REG-3V3.vin_range
+  parameter: Input voltage range
+  category: recommended
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: REG-3V3.vout
+  parameter: Output voltage and accuracy
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: REG-3V3.iout_max
+  parameter: Maximum output current (ESP32-C3 Wi-Fi TX needs at least 0.5 A supply per the module datasheet)
+  category: recommended
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: REG-3V3.dropout
+  parameter: Dropout voltage at full load
+  category: electrical
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+- id: REG-3V3.cout_stability
+  parameter: Output capacitor range for stability (C5, C6 are 'tbd')
+  category: recommended
+  status: source-missing
+  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.

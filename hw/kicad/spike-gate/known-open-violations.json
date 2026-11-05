@@ -1,0 +1,147 @@
+{
+  "_comment": "Waiver list of the spike (docs/process/hw-generated-design-guardrails.md section 5). Maxima are the counts observed on 2026-11-05; they are not a claim that the findings are acceptable. Changing this file needs the owner. SPIKE_ALLOW_KNOWN_OPEN=0 ignores it.",
+  "erc": {
+    "full": {
+      "ignored_checks": {
+        "max": 4,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "footprint_link_issues": {
+        "max": 89,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "lib_symbol_issues": {
+        "max": 226,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      }
+    },
+    "gate-layout": {
+      "ignored_checks": {
+        "max": 4,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "footprint_link_issues": {
+        "max": 21,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "lib_symbol_issues": {
+        "max": 46,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      }
+    }
+  },
+  "drc": {
+    "placed-4l": {
+      "copper_edge_clearance": {
+        "max": 1,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "courtyards_overlap": {
+        "max": 50,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "items_not_allowed": {
+        "max": 5,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "pth_inside_courtyard": {
+        "max": 1,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "unconnected_items": {
+        "max": 241,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "ignored_checks": {
+        "max": 5,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "footprint_symbol_mismatch": {
+        "max": 13,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "isolated_copper": {
+        "max": 1,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "lib_footprint_issues": {
+        "max": 86,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "net_conflict": {
+        "max": 84,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "silk_edge_clearance": {
+        "max": 46,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "silk_over_copper": {
+        "max": 12,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "silk_overlap": {
+        "max": 43,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      }
+    },
+    "routed-4l": {
+      "copper_edge_clearance": {
+        "max": 2,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "courtyards_overlap": {
+        "max": 51,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "items_not_allowed": {
+        "max": 5,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "pth_inside_courtyard": {
+        "max": 1,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "track_width": {
+        "max": 2,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "unconnected_items": {
+        "max": 121,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "ignored_checks": {
+        "max": 5,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "footprint_symbol_mismatch": {
+        "max": 13,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "lib_footprint_issues": {
+        "max": 86,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "net_conflict": {
+        "max": 84,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "silk_edge_clearance": {
+        "max": 46,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "silk_over_copper": {
+        "max": 12,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "silk_overlap": {
+        "max": 43,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      },
+      "via_dangling": {
+        "max": 4,
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+      }
+    }
+  }
+}

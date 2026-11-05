@@ -1,0 +1,236 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the SN74LVC1G11 3-input AND gate (U3, U4; board value 74LVC1G11). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: SN74LVC1G11
+  mpn: SN74LVC1G11
+  manufacturer: Texas Instruments
+  description: Single 3-input positive-AND gate
+  selection: chosen
+  package:
+    code: DBV
+    name: SOT-23-6
+    pin_count: 6
+  used_in:
+  - U3
+  - U4
+  schematic_symbol: 74xGxx:74LVC1G11
+documents:
+- id: sn74lvc1g11-ds
+  title: SN74LVC1G11 Single 3-Input Positive-AND Gate
+  doc_number: SCES487I
+  revision_date: September 2003, revised November 2024
+  origin: manufacturer
+  url: https://www.ti.com/lit/ds/symlink/sn74lvc1g11.pdf
+  file: sn74lvc1g11.pdf
+  sha256: ffd953703273b43844eae23cfbf31cfc801a3b9443f2c863d49dde62f5a9232b
+  pages: 37
+  retrieved_on: '2026-11-05'
+  notes: The board value is the generic 74LVC1G11. The vendor is not chosen; this evidence is the TI part and applies to other vendors only if their datasheet is added.
+defaults:
+  source_document: sn74lvc1g11-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: DBV
+pins:
+- id: SN74LVC1G11.pin.1
+  pin: '1'
+  name: A
+  pin_type: input
+  source: {page: 3, locator: Table 4-1, quote: A 1 A1 I A Input}
+- id: SN74LVC1G11.pin.2
+  pin: '2'
+  name: GND
+  pin_type: ground
+  source: {page: 3, locator: Table 4-1, quote: GND 2 B1 — Ground}
+- id: SN74LVC1G11.pin.3
+  pin: '3'
+  name: B
+  pin_type: input
+  source: {page: 3, locator: Table 4-1, quote: B 3 C1 I B Input}
+- id: SN74LVC1G11.pin.4
+  pin: '4'
+  name: Y
+  pin_type: output
+  source: {page: 3, locator: Table 4-1, quote: Y 4 C2 O Y Output}
+- id: SN74LVC1G11.pin.5
+  pin: '5'
+  name: VCC
+  pin_type: power
+  source: {page: 3, locator: Table 4-1, quote: VCC 5 B2 — Power Supply}
+- id: SN74LVC1G11.pin.6
+  pin: '6'
+  name: C
+  pin_type: input
+  source: {page: 3, locator: Table 4-1, quote: C 6 A2 I C Input}
+claims:
+- id: SN74LVC1G11.abs_max_vcc
+  parameter: Supply voltage range
+  category: abs_max
+  min: -0.5
+  max: 6.5
+  unit: V
+  source: {page: 4, locator: Section 5.1, quote: VCC Supply voltage –0.5 6.5 V}
+- id: SN74LVC1G11.abs_max_vi
+  parameter: Input voltage range
+  category: abs_max
+  min: -0.5
+  max: 6.5
+  unit: V
+  notes: Negative limits may be exceeded if the current ratings are observed (table footnote).
+  source: {page: 4, locator: Section 5.1, quote: VI Input voltage(2) –0.5 6.5 V}
+- id: SN74LVC1G11.abs_max_vo_hiz
+  parameter: Voltage applied to any output in the high-impedance or power-off state
+  category: abs_max
+  min: -0.5
+  max: 6.5
+  unit: V
+  source: {page: 4, locator: Section 5.1, quote: VO Voltage applied to any output in the high-impedance or power-off state(2) –0.5 6.5 V}
+- id: SN74LVC1G11.abs_max_iik
+  parameter: Input clamp current, VI < 0
+  category: abs_max
+  max: -50
+  unit: mA
+  notes: Printed as -50 in the MAX column.
+  source: {page: 4, locator: Section 5.1, quote: IIK Input clamp current VI < 0 –50 mA}
+- id: SN74LVC1G11.esd_hbm
+  parameter: ESD, human-body model
+  category: abs_max
+  max: 2000
+  unit: V
+  source: {page: 4, locator: Section 5.2, quote: 'Human-body model (HBM), per ANSI/ESDA/JEDEC JS-001(1) ±2000'}
+- id: SN74LVC1G11.rec_vcc
+  parameter: Supply voltage, operating
+  category: recommended
+  min: 1.65
+  max: 5.5
+  unit: V
+  source: {page: 4, locator: Section 5.3, quote: Operating 1.65 5.5}
+- id: SN74LVC1G11.rec_vih.vcc_3v
+  parameter: High-level input voltage
+  category: recommended
+  condition:
+    supply_voltage: {min: 3, max: 3.6, unit: V}
+  min: 2
+  unit: V
+  source: {page: 4, locator: Section 5.3, quote: VCC = 3 V to 3.6 V 2}
+- id: SN74LVC1G11.rec_vil.vcc_3v
+  parameter: Low-level input voltage
+  category: recommended
+  condition:
+    supply_voltage: {min: 3, max: 3.6, unit: V}
+  max: 0.8
+  unit: V
+  source: {page: 4, locator: Section 5.3, quote: VCC = 3 V to 3.6 V 0.8}
+- id: SN74LVC1G11.rec_vih.vcc_5v
+  parameter: High-level input voltage, factor of VCC
+  category: recommended
+  condition:
+    supply_voltage: {min: 4.5, max: 5.5, unit: V}
+  min: 0.7
+  unit: dimensionless
+  notes: The datasheet value is 0.7 x VCC; this claim stores the factor.
+  source: {page: 4, locator: Section 5.3, quote: VCC = 4.5 V to 5.5 V 0.7 × VCC}
+- id: SN74LVC1G11.rec_vi
+  parameter: Input voltage
+  category: recommended
+  min: 0
+  max: 5.5
+  unit: V
+  notes: Valid with VCC in the operating range; the row carries no VCC condition.
+  source: {page: 4, locator: Section 5.3, quote: VI Input voltage 0 5.5 V}
+- id: SN74LVC1G11.rec_ta
+  parameter: Operating free-air temperature
+  category: recommended
+  min: -40
+  max: 125
+  unit: degC
+  notes: The BGA package (not used) is limited to 85 degC.
+  source: {page: 5, locator: Section 5.3, quote: All other packages –40 125}
+- id: SN74LVC1G11.voh.vcc_3v.ioh_24ma
+  parameter: High-level output voltage
+  category: electrical
+  condition:
+    supply_voltage: {value: 3, unit: V}
+    load_current: {value: -24, unit: mA}
+  min: 2.3
+  unit: V
+  source: {page: 5, locator: Section 5.5, quote: IOH = –24 mA 2.3}
+- id: SN74LVC1G11.vol.vcc_3v.iol_24ma
+  parameter: Low-level output voltage
+  category: electrical
+  condition:
+    supply_voltage: {value: 3, unit: V}
+    load_current: {value: 24, unit: mA}
+  max: 0.55
+  unit: V
+  source: {page: 5, locator: Section 5.5, quote: IOL = 24 mA 0.55}
+- id: SN74LVC1G11.ii
+  parameter: Input leakage current
+  category: electrical
+  condition:
+    input: VI = 5.5 V or GND
+    supply_voltage: {min: 0, max: 5.5, unit: V}
+  min: -5
+  max: 5
+  unit: uA
+  source: {page: 5, locator: Section 5.5, quote: II All inputs VI = 5.5 V or GND 0 to 5.5 V ±5 μA}
+- id: SN74LVC1G11.ioff
+  parameter: Partial-power-down output/input leakage
+  category: electrical
+  condition:
+    supply_voltage: {value: 0, unit: V}
+    voltage: VI or VO = 5.5 V
+  min: -10
+  max: 10
+  unit: uA
+  source: {page: 5, locator: Section 5.5, quote: Ioff VI or VO = 5.5 V 0 ±10 μA}
+- id: SN74LVC1G11.icc
+  parameter: Supply current
+  category: electrical
+  condition:
+    input: VI = 5.5 V or GND, IO = 0
+    supply_voltage: {min: 1.65, max: 5.5, unit: V}
+  max: 10
+  unit: uA
+  source: {page: 5, locator: Section 5.5, quote: 'ICC VI = 5.5 V or GND, IO = 0 1.65 V to 5.5 V 10 μA'}
+- id: SN74LVC1G11.ci
+  parameter: Input capacitance
+  category: electrical
+  condition:
+    supply_voltage: {value: 3.3, unit: V}
+  typ: 3.5
+  unit: pF
+  source: {page: 5, locator: Section 5.5, quote: Ci VI = VCC or GND 3.3 V 3.5 pF}
+- id: SN74LVC1G11.tpd.vcc_3v3
+  parameter: Propagation delay
+  category: timing
+  condition:
+    supply_voltage: {min: 3, max: 3.6, unit: V}
+    load: CL = 15 pF, TA = -40 to 85 degC, A, B or C to Y
+  min: 1.2
+  max: 4.1
+  unit: ns
+  source: {page: 6, locator: Section 5.6, quote: VCC = 3.3 V ± 0.3 V 1.2 4.1}
+- id: SN74LVC1G11.ioff_function
+  parameter: Partial power down function
+  category: function
+  statement: The Ioff circuitry disables the outputs when the supply is 0 V, so there is no current backflow.
+  source: {page: 9, locator: Section 7.3, quote: 'The Ioff circuitry disables the outputs, preventing damaging current backflow through the device when it is powered down.'}
+- id: SN74LVC1G11.unused_inputs
+  parameter: Unused inputs
+  category: function
+  statement: Unused inputs must be tied to VCC or GND.
+  source: {page: 5, locator: Section 5.3 footnote 1, quote: All unused inputs of the device must be held at VCC or GND to ensure proper device operation.}
+- id: SN74LVC1G11.tpd.vcc_3v3.125c
+  parameter: Propagation delay, 125 degC range
+  category: timing
+  condition:
+    supply_voltage: {min: 3, max: 3.6, unit: V}
+    load: CL = 30 pF or 50 pF, TA = -40 to 125 degC
+  min: 1.3
+  max: 6.2
+  unit: ns
+  source: {page: 6, locator: Section 5.8, quote: VCC = 3.3 V ± 0.3 V 1.3 6.2}

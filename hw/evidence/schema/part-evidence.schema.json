@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spoorcc/busy-light/hw/evidence/schema/part-evidence.schema.json",
+  "title": "busy-light part evidence file",
+  "description": "One file per part (or per passive family). Claims are facts read from a vendor document, with a short quote, a page and a hash of the document, so that a reviewer can check each fact. Vendor documents stay outside the repository (ADR-0015 item 8): a claim may hold the hash, the page and one SHORT quote (one sentence or one table row, at most 300 characters). Units are strings that the Python package pint can parse (see README). The 'source' object is modelled on W3C Web Annotation selectors (FragmentSelector page, TextQuoteSelector exact, optional bounding box). Provenance fields are modelled on W3C PROV (agent, activity, time).",
+  "type": "object",
+  "required": ["schema_version", "part", "documents"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "part": { "$ref": "#/$defs/part" },
+    "documents": {
+      "description": "Vendor documents that claims cite. May be empty when every claim is source-missing.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/document" }
+    },
+    "defaults": {
+      "description": "Values that each pin or claim inherits when it does not set them itself. The checker merges them before it checks the 'resolved' rules.",
+      "$ref": "#/$defs/defaults"
+    },
+    "pins": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pin" }
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    }
+  },
+
+  "$defs": {
+    "id": {
+      "description": "<PART>.<param>[.<cond>], for example TPS2553.vil_en.max or TPS2553.pin.4. PART is the part key, the rest are lower-case words joined by dots.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*(\\.[A-Za-z0-9_-]+)+$",
+      "maxLength": 120
+    },
+    "unit": {
+      "description": "A unit string that pint parses, for example V, mA, kohm, uF, ns, degC, K/W, percent, dimensionless. ASCII only.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_/*^. %()-]+$",
+      "maxLength": 40
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "agent": {
+      "description": "PROV agent. kind ai, human or tool. An AI agent name must say the model and the role, for example 'claude-sonnet-5.5/extractor'.",
+      "type": "object",
+      "required": ["kind", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["ai", "human", "tool"] },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "session": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "method": {
+      "description": "extracted: copied from the document by a tool or an AI. human-read: read by a person. computed-from: calculated from other claims (list them in derived_from).",
+      "enum": ["extracted", "human-read", "computed-from"]
+    },
+    "status": {
+      "description": "unverified: not checked by a second party. verified: checked by a human, or by an agent other than the extractor. disputed: a check found a difference. source-missing: no document in hand, no number recorded.",
+      "enum": ["unverified", "verified", "disputed", "source-missing"]
+    },
+
+    "part": {
+      "type": "object",
+      "required": ["key", "mpn", "manufacturer", "selection", "used_in"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "description": "Prefix of every claim id and the file name stem (lower case).",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*$"
+        },
+        "mpn": { "type": "string", "minLength": 1 },
+        "manufacturer": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "selection": {
+          "description": "chosen: the design names this part. candidate: under evaluation. placeholder: the design has a symbol or value but no part is chosen. family: several parts of one kind (passives).",
+          "enum": ["chosen", "candidate", "placeholder", "family"]
+        },
+        "package": {
+          "type": "object",
+          "required": ["code"],
+          "additionalProperties": false,
+          "properties": {
+            "code": { "description": "Package code as the document names it, for example DBV or RWB.", "type": "string" },
+            "name": { "type": "string" },
+            "pin_count": { "type": "integer", "minimum": 1 },
+            "source": { "$ref": "#/$defs/source" }
+          }
+        },
+        "ids": {
+          "description": "Other identifiers (LCSC, distributor, order code). Enter one only when it is read from a cited source.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scheme", "value", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "scheme": { "type": "string" },
+              "value": { "type": "string" },
+              "source": { "$ref": "#/$defs/source" }
+            }
+          }
+        },
+        "used_in": {
+          "description": "Reference designators on the board (from the netlist).",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9_]*$" },
+          "uniqueItems": true
+        },
+        "schematic_symbol": {
+          "description": "KiCad library symbol or value text of the part in the design, for the netlist check.",
+          "type": "string"
+        }
+      }
+    },
+
+    "document": {
+      "type": "object",
+      "required": ["id", "title", "origin", "file", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+        "title": { "type": "string" },
+        "doc_number": { "description": "The manufacturer's document number and revision, for example SLVS841G.", "type": "string" },
+        "revision_date": { "description": "As printed on the document (free text).", "type": "string" },
+        "origin": {
+          "description": "manufacturer: downloaded from the manufacturer. distributor: from a distributor or a re-seller. owner-supplied: given by the owner (origin not known). third-party: a standard or a compliance document.",
+          "enum": ["manufacturer", "distributor", "owner-supplied", "third-party", "unknown"]
+        },
+        "url": { "type": "string" },
+        "file": { "description": "File name inside the datasheets folder (outside the repository).", "type": "string" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "pages": { "type": "integer", "minimum": 1 },
+        "retrieved_on": { "$ref": "#/$defs/date" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "bbox": {
+      "description": "Optional box around the quote on the page, in PDF points: [x0, y0, x1, y1], origin at the bottom-left corner of the page.",
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 4,
+      "maxItems": 4
+    },
+
+    "source": {
+      "description": "Where the fact is in the vendor document. Modelled on W3C Web Annotation: page = FragmentSelector (page=N), quote = TextQuoteSelector (exact), bbox = optional region. 'page' counts physical PDF pages from 1; 'printed_page' is the number printed on the page, when it differs. The quote is ONE sentence or ONE table row, at most 300 characters (ADR-0015 item 8).",
+      "type": "object",
+      "required": ["document", "page", "quote"],
+      "additionalProperties": false,
+      "properties": {
+        "document": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+        "page": { "type": "integer", "minimum": 1 },
+        "printed_page": { "type": "string" },
+        "locator": { "description": "Table, figure or section name, for example 'Table 6.3' or 'Section 8.5.1'.", "type": "string" },
+        "quote": { "type": "string", "minLength": 3, "maxLength": 300 },
+        "bbox": { "$ref": "#/$defs/bbox" }
+      }
+    },
+
+    "sourcePartial": {
+      "description": "A source object as written in a file: document may be left out when defaults.source_document is set.",
+      "type": "object",
+      "required": ["page", "quote"],
+      "additionalProperties": false,
+      "properties": {
+        "document": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+        "page": { "type": "integer", "minimum": 1 },
+        "printed_page": { "type": "string" },
+        "locator": { "type": "string" },
+        "quote": { "type": "string", "minLength": 3, "maxLength": 300 },
+        "bbox": { "$ref": "#/$defs/bbox" }
+      }
+    },
+
+    "condValue": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "required": ["unit"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "number" },
+            "min": { "type": "number" },
+            "typ": { "type": "number" },
+            "max": { "type": "number" },
+            "unit": { "$ref": "#/$defs/unit" }
+          }
+        }
+      ]
+    },
+
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_document": { "type": "string" },
+        "method": { "$ref": "#/$defs/method" },
+        "extracted_by": { "$ref": "#/$defs/agent" },
+        "extracted_on": { "$ref": "#/$defs/date" },
+        "status": { "$ref": "#/$defs/status" },
+        "package": { "description": "Package code that the pin entries belong to.", "type": "string" }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "method": { "$ref": "#/$defs/method" },
+        "extracted_by": { "$ref": "#/$defs/agent" },
+        "extracted_on": { "$ref": "#/$defs/date" },
+        "derived_from": {
+          "description": "PROV wasDerivedFrom: claim ids (other files allowed) that a computed-from claim uses.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "minItems": 1
+        },
+        "verified_by": { "$ref": "#/$defs/agent" },
+        "verified_on": { "$ref": "#/$defs/date" },
+        "status": { "$ref": "#/$defs/status" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "statusRules": {
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "verified" } }, "required": ["status"] },
+          "then": { "required": ["verified_by", "verified_on"] }
+        },
+        {
+          "if": { "properties": { "status": { "const": "source-missing" } }, "required": ["status"] },
+          "then": {
+            "required": ["notes"],
+            "not": {
+              "anyOf": [
+                { "required": ["min"] },
+                { "required": ["typ"] },
+                { "required": ["max"] },
+                { "required": ["formula"] },
+                { "required": ["name"] },
+                { "required": ["pin_type"] },
+                { "required": ["source"] }
+              ]
+            }
+          }
+        }
+      ]
+    },
+
+    "pin": {
+      "description": "One pin of the part: number, name and type as the document lists them, so that schematic symbols and PCB pads can be checked against it.",
+      "allOf": [
+        { "$ref": "#/$defs/provenance" },
+        { "$ref": "#/$defs/statusRules" }
+      ],
+      "type": "object",
+      "required": ["id", "pin"],
+      "unevaluatedProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "package": { "description": "Package code (part.package.code) that this numbering belongs to.", "type": "string" },
+        "pin": { "description": "Pin number or ball name as printed, for example '4' or 'A2'.", "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "pin_type": {
+          "description": "Type as the document gives it, mapped to: input, output, io, power, ground, open_drain, nc, passive, other.",
+          "enum": ["input", "output", "io", "power", "ground", "open_drain", "nc", "passive", "other"]
+        },
+        "aliases": {
+          "description": "Other names the schematic symbol may use for this pin (for example GPIO0 for IO0). Used only by the netlist comparison.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "function": { "description": "Short function text in own words (not a quote).", "type": "string", "maxLength": 200 },
+        "source": { "$ref": "#/$defs/sourcePartial" }
+      }
+    },
+
+    "claim": {
+      "description": "One fact. A claim is quantitative (unit with min, typ and/or max, or a formula) or qualitative (statement).",
+      "allOf": [
+        { "$ref": "#/$defs/provenance" },
+        { "$ref": "#/$defs/statusRules" }
+      ],
+      "type": "object",
+      "required": ["id", "parameter"],
+      "unevaluatedProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "parameter": { "description": "Parameter name and symbol as the document uses it.", "type": "string", "minLength": 1 },
+        "category": {
+          "enum": ["abs_max", "recommended", "electrical", "timing", "thermal", "function", "mechanical", "other"]
+        },
+        "condition": {
+          "description": "Structured test conditions. Preferred keys: supply_voltage, temperature, load, input, output, other (see README). Values: text, number, or an object with unit.",
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/condValue" }
+        },
+        "min": { "type": "number" },
+        "typ": { "type": "number" },
+        "max": { "type": "number" },
+        "unit": { "$ref": "#/$defs/unit" },
+        "formula": {
+          "description": "For a claim that is an equation in the document. expression uses Python syntax and the variables below; unit is the unit of the result.",
+          "type": "object",
+          "required": ["expression", "variables", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "expression": { "type": "string", "maxLength": 200 },
+            "variables": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/unit" }
+            },
+            "unit": { "$ref": "#/$defs/unit" }
+          }
+        },
+        "statement": {
+          "description": "Qualitative fact in own words, for example 'EN is active high'.",
+          "type": "string",
+          "maxLength": 300
+        },
+        "source": { "$ref": "#/$defs/sourcePartial" }
+      }
+    },
+
+    "resolvedProvenance": {
+      "description": "Rules that hold after defaults are merged into a pin or claim.",
+      "type": "object",
+      "required": ["method", "extracted_by", "extracted_on", "status"],
+      "properties": { "source": { "$ref": "#/$defs/source" } },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "source-missing" } }, "required": ["status"] },
+          "then": {},
+          "else": { "required": ["source"] }
+        },
+        {
+          "if": { "properties": { "method": { "const": "computed-from" } }, "required": ["method"] },
+          "then": { "required": ["derived_from"] }
+        }
+      ]
+    },
+
+    "resolvedClaim": {
+      "allOf": [
+        { "$ref": "#/$defs/resolvedProvenance" },
+        {
+          "if": { "properties": { "status": { "const": "source-missing" } }, "required": ["status"] },
+          "then": {},
+          "else": {
+            "anyOf": [
+              { "required": ["unit", "min"] },
+              { "required": ["unit", "typ"] },
+              { "required": ["unit", "max"] },
+              { "required": ["formula"] },
+              { "required": ["statement"] }
+            ]
+          }
+        }
+      ]
+    },
+
+    "resolvedPin": {
+      "allOf": [
+        { "$ref": "#/$defs/resolvedProvenance" },
+        {
+          "if": { "properties": { "status": { "const": "source-missing" } }, "required": ["status"] },
+          "then": {},
+          "else": { "required": ["name", "pin_type", "package"] }
+        }
+      ]
+    }
+  }
+}

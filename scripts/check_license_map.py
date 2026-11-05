@@ -19,7 +19,30 @@ CODE_SUFFIXES = {".py", ".sh", ".c", ".h", ".cmake", ".overlay", ".conf", ".yml"
 CODE_NAMES = {"CMakeLists.txt", "Kconfig", "west.yml"}
 DOC_LICENCE = "CC-BY-NC-SA-4.0"
 # Files with a code-like suffix that are data or documentation (add with a reason).
-ALLOW: set[str] = set()
+ALLOW: set[str] = {
+    # Datasheet evidence data (HW-012, ADR-0017): repository-authored data with short vendor quotes,
+    # treated as documentation (CC-BY-NC-SA-4.0). Owner/lawyer to confirm; see consolidation report.
+    "hw/evidence/parts/2n7002.yaml",
+    "hw/evidence/parts/74lvc1g02.yaml",
+    "hw/evidence/parts/capacitors.yaml",
+    "hw/evidence/parts/esp32-c3-mini-1.yaml",
+    "hw/evidence/parts/reg-3v3.yaml",
+    "hw/evidence/parts/resistors.yaml",
+    "hw/evidence/parts/sn74ahct1g125.yaml",
+    "hw/evidence/parts/sn74lvc1g04.yaml",
+    "hw/evidence/parts/sn74lvc1g11.yaml",
+    "hw/evidence/parts/sn74lvc1g125.yaml",
+    "hw/evidence/parts/sw-tl3342.yaml",
+    "hw/evidence/parts/test-point.yaml",
+    "hw/evidence/parts/tps2553.yaml",
+    "hw/evidence/parts/tps3840dl40.yaml",
+    "hw/evidence/parts/tusb321.yaml",
+    "hw/evidence/parts/tvs-sod323.yaml",
+    "hw/evidence/parts/usb-c-receptacle.yaml",
+    "hw/evidence/parts/usblc6-2p6.yaml",
+    "hw/evidence/parts/ws2812b.yaml",
+    "hw/evidence/schema/part-evidence.schema.json",
+}
 
 
 def is_code(path: str) -> bool:

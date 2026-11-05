@@ -1,0 +1,586 @@
+# SPDX-License-Identifier: Apache-2.0
+"""Spike: generate a placed (not routed) PCB of the full board from the schematic netlist.
+
+Exploratory, not a product design (ADR-0012 is Proposed; mechanics, LED count and peg azimuth are open,
+so the outline and the LED field are provisional). The board file is written only by this script
+(KiCad pcbnew Python API); it is never edited by hand.
+
+Usage: python3 pcb_full.py <netlist.net> <out dir> [name] [layers 2|4]
+  writes <out dir>/<name>.kicad_pcb (default name busy_light_spike) and <name>.kicad_pro
+
+The netlist comes from `kicad-cli sch export netlist` on the output of run_full.sh, so every ref, value
+and net is the schematic's. Where the schematic names a footprint that the system KiCad libraries do not
+have, or a pin name that is not a pad number, the tables below say what was substituted (all PROVISIONAL).
+"""
+import json
+import math
+import os
+import re
+import sys
+import uuid
+
+import pcbnew
+
+FP_ROOT = os.environ.get("KICAD_FOOTPRINT_DIR", "/usr/share/kicad/footprints/")
+
+# ----------------------------------------------------------------------------- board parameters
+J1_MOUTH_R = 29.85                        # V1: receptacle mouth radius of the mech spike (mech_outline.USB_MOUTH_R)
+J1_LED_GAP = 0.45                         # mm between the rear J1 pad edge and the nearest LED pad
+J1_TAB_BEHIND_MOUTH = 0.85                # mech: tab ends 0.85 mm before the mouth (29.0 vs 29.85)
+CLEARANCE = 0.15                          # mm, default net class (J1 pad gap is 0.15 mm)
+TRACK = 0.2                               # mm, default signal width
+VIA_DIA, VIA_DRILL = 0.6, 0.3             # mm
+EDGE_CLEARANCE = 0.3                      # mm
+# Net classes by net name: width in mm. IPC-2221 external layer, 1 oz (35 um), 10 K rise:
+# 1.5 A -> 0.53 mm, 2.0 A -> 0.78 mm (see report). The power nets are routed at 0.8 mm where space allows.
+from pcb_rules import NET_WIDTH   # noqa: E402  (shared with the tests; values and basis in pcb_rules.py)
+GND = "GND"
+# Signal nets that touch the 0.4 mm-pitch pads of U1 use the minimum width (0.15 mm).
+NET_TRACK = {"/CC1": 0.15, "/CC2": 0.15}
+# Star nets: every pad is routed straight to the named pad, so the branch point is at that pad.
+# ADR-0016 layout rule: the Q3 gate pin is the tap point of U13 pin 2, R3 and the readback R15.
+STAR = {"/ILIM_STEP3_EN": ("Q3", "1")}
+
+# ----------------------------------------------------------------------------- provisional substitutions
+# ref -> footprint (lib:name) used instead of the schematic's footprint field
+FOOTPRINT_OVERRIDE = {
+    "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
+    "U8": "Package_TO_SOT_SMD:SOT-223-3_TabPin2",     # schematic field empty (REG_3V3 placeholder)
+    "U9": "RF_Module:ESP32-C6-MINI-1",                # ESP32-C3-MINI-1 not in the libraries; same 13.2x16.6 module family
+    "C1": "Capacitor_SMD:C_1206_3216Metric",          # 470 nF C0G, N4 addendum
+    "C1B": "Capacitor_SMD:C_1206_3216Metric",         # 150 nF C0G, N4 addendum
+    "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
+    "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
+}
+# schematic pin name -> pad number, where the schematic box symbol uses names (datasheet pin tables)
+PADMAP = {
+    "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},   # TUSB321 SLLSEZ? pin table
+    "U8": {"GND": "1", "OUT": "2", "IN": "3"},                                                  # PROVISIONAL (AMS1117-style)
+    "U9": {"GPIO0": "12", "GPIO1": "13", "GPIO2": "5", "GPIO3": "6", "GPIO4": "18", "GPIO5": "19",
+           "GPIO6": "20", "GPIO7": "21", "GPIO8": "22", "GPIO9": "23", "GPIO10": "16",
+           "GPIO18": "26", "GPIO19": "27", "GPIO20": "30", "GPIO21": "31", "3V3": "3", "EN": "8",
+           "GND": ("1", "2", "11", "14", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46",
+                   "47", "48", "49", "50", "51", "52", "53")},   # ESP32-C3-MINI-1 datasheet v2.2 table 3-1
+}
+
+# ----------------------------------------------------------------------------- netlist parsing
+def parse_sexpr(text):
+    toks = re.findall(r'\(|\)|"(?:[^"\\]|\\.)*"|[^\s()]+', text)
+    stack = [[]]
+    for t in toks:
+        if t == "(":
+            stack.append([])
+        elif t == ")":
+            x = stack.pop()
+            stack[-1].append(x)
+        else:
+            stack[-1].append(t[1:-1].replace('\\"', '"') if t[0] == '"' else t)
+    return stack[0][0]
+
+
+def _find(node, key):
+    return [x for x in node if isinstance(x, list) and x and x[0] == key]
+
+
+def read_netlist(path):
+    """Return (comps, nets): comps {ref: (value, footprint, symbol uuid)}, nets {name: [(ref, pin)]} in file order."""
+    with open(path, encoding="utf-8") as f:
+        root = parse_sexpr(f.read())
+    comps = {}
+    for c in _find(_find(root, "components")[0], "comp"):
+        ref = _find(c, "ref")[0][1]
+        value = _find(c, "value")[0][1] if _find(c, "value") else ""
+        fp = _find(c, "footprint")[0][1] if _find(c, "footprint") else ""
+        ts = _find(c, "tstamps")
+        comps[ref] = (value, fp, ts[0][1] if ts else "")
+    nets = {}
+    for n in _find(_find(root, "nets")[0], "net"):
+        name = _find(n, "name")[0][1]
+        nets[name] = [(_find(nd, "ref")[0][1], _find(nd, "pin")[0][1]) for nd in _find(n, "node")]
+    return comps, nets
+
+
+def short_net(name):
+    """Net name used on the board: the schematic's own name (root-sheet slash kept, so parity matches)."""
+    return name
+
+
+# ----------------------------------------------------------------------------- footprint helpers
+mm = pcbnew.FromMM
+
+
+def vec(x, y):
+    return pcbnew.VECTOR2I(mm(x), mm(y))
+
+
+def x2qfn12_rwb():
+    """TUSB321 RWB (X2QFN-12, 1.6 x 1.6 mm). PROVISIONAL land pattern read from a text extract of the TI
+    drawing RWB0012A (pads 0.2 wide; 8 side pads at 0.5 pitch, 4 end pads at 0.4 pitch). Verify against the
+    drawing before any use: the system KiCad libraries have no X2QFN footprint."""
+    fp = pcbnew.FOOTPRINT(None)
+    pads = {}
+    pads["1"] = (0.2, -0.7, 0.2, 0.4)
+    pads["2"] = (-0.2, -0.7, 0.2, 0.4)
+    for i, y in enumerate((-0.75, -0.25, 0.25, 0.75)):
+        pads[str(3 + i)] = (-0.65, y, 0.4, 0.2)
+    pads["7"] = (-0.2, 0.7, 0.2, 0.4)
+    pads["8"] = (0.2, 0.7, 0.2, 0.4)
+    for i, y in enumerate((0.75, 0.25, -0.25, -0.75)):
+        pads[str(9 + i)] = (0.65, y, 0.4, 0.2)
+    for num, (x, y, w, h) in pads.items():
+        p = pcbnew.PAD(fp)
+        p.SetNumber(num)
+        p.SetShape(pcbnew.PAD_SHAPE_RECT)
+        p.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+        p.SetLayerSet(p.SMDMask())
+        p.SetSize(vec(w, h))
+        p.SetPosition(vec(x, y))
+        fp.Add(p)
+    cy = pcbnew.PCB_SHAPE(fp)
+    cy.SetShape(pcbnew.SHAPE_T_RECT)
+    cy.SetStart(vec(-1.05, -1.05))
+    cy.SetEnd(vec(1.05, 1.05))
+    cy.SetLayer(pcbnew.F_CrtYd)
+    cy.SetWidth(mm(0.05))
+    fp.Add(cy)
+    return fp
+
+
+_SEEN = {}
+
+
+def id_counter(ref, num):
+    """Counter for pads that share a number (U9 pad 49, U8 pad 2)."""
+    k = (ref, num)
+    _SEEN[k] = _SEEN.get(k, -1) + 1
+    return _SEEN[k]
+
+
+def load_fp(spec):
+    lib, name = spec.split(":", 1)
+    if lib == "CUSTOM":
+        if name == "X2QFN-12_RWB":
+            return x2qfn12_rwb()
+        raise KeyError(spec)
+    fp = pcbnew.FootprintLoad(FP_ROOT + lib + ".pretty", name)
+    if fp is None:
+        raise FileNotFoundError(spec)
+    return fp
+
+
+def bbox_mm(fp):
+    b = fp.GetBoundingBox(False)
+    return pcbnew.ToMM(b.GetX()), pcbnew.ToMM(b.GetY()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())
+
+
+def pad_bbox_mm(fp):
+    xs0, ys0, xs1, ys1 = [], [], [], []
+    for p in fp.Pads():
+        b = p.GetBoundingBox()
+        xs0.append(b.GetX())
+        ys0.append(b.GetY())
+        xs1.append(b.GetRight())
+        ys1.append(b.GetBottom())
+    return tuple(pcbnew.ToMM(v) for v in (min(xs0), min(ys0), max(xs1), max(ys1)))
+
+
+# ----------------------------------------------------------------------------- placement (mechanical frame)
+# Origin of the housing axis on the board sheet. KiCad y points down, the mechanical frame has y up (seen from
+# above), so KiCad (x, y) = (CX + mx, CY - my). All numbers of the envelope are in mech_outline.py with sources.
+CX, CY = 40.0, 40.0
+BOARD_W, BOARD_H = 2 * CX, 2 * CY       # sheet extent only (the router grid and the checks use it)
+import mech_outline as MO   # noqa: E402
+import pcb_place            # noqa: E402
+
+SW1_POS = (13.0, 240.0)       # (radius, azimuth): inside the LED ring; a side-actuated switch would sit at the edge
+MODULE_ROT = 90               # antenna end towards -X (footprint antenna is at the top, rotation 90 turns it left)
+MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the courtyard)
+R_MOVE = 16.6                 # movable parts stay inside this radius (the LED ring pads start at about 17.8)
+SA_ITERS = 160000
+SA_SEEDS = tuple(range(1, 7))
+
+
+def K(mx, my):
+    x, y = MO.kicad_xy(mx, my, CX, CY)
+    return x, y
+
+
+def mech_of(x_mm, y_mm):
+    return x_mm - CX, CY - y_mm
+
+
+def pad_extent_mm(fp, margin=0.0):
+    x0, y0, x1, y1 = pad_bbox_mm(fp)
+    return x0 - margin, y0 - margin, x1 + margin, y1 + margin
+
+
+def centre_at(fp, cx, cy, margin=MARGIN_EXT):
+    """Move fp so the centre of its pad extent is at (cx, cy) mm."""
+    x0, y0, x1, y1 = pad_extent_mm(fp, margin)
+    p = fp.GetPosition()
+    fp.SetPosition(pcbnew.VECTOR2I(p.x + mm(cx - (x0 + x1) / 2), p.y + mm(cy - (y0 + y1) / 2)))
+
+
+def orient(fp, rot, side):
+    """Set side and rotation (the rotation as seen on the board sheet, counter-clockwise)."""
+    if side == "B":
+        fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+    fp.SetOrientationDegrees(rot)
+
+
+def led_ring_refs():
+    return [("D%d" % (i + 1), "C%d" % (i + 8), i) for i in range(16)]
+
+
+def polar_rect_to_bbox(az, r0, r1, half_w, cx, cy):
+    """Bounding box (KiCad mm) of a polar rectangle: radial r0..r1, tangential +-half_w at azimuth az."""
+    pts = []
+    for r in (r0, r1):
+        for t in (-half_w, half_w):
+            a = math.radians(az)
+            mx = r * math.cos(a) - t * math.sin(a)
+            my = r * math.sin(a) + t * math.cos(a)
+            pts.append((cx + mx, cy - my))
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return min(xs), min(ys), max(xs), max(ys), pts
+
+
+def corner_points(az, r0, r1, half_w):
+    out = []
+    for r, t in ((r0, -half_w), (r1, -half_w), (r1, half_w), (r0, half_w)):
+        a = math.radians(az)
+        out.append(K(r * math.cos(a) - t * math.sin(a), r * math.sin(a) + t * math.cos(a)))
+    return out
+
+
+# ----------------------------------------------------------------------------- build
+def add_rule_area(board, name, layers, pts, tracks=True, vias=True, pours=True, footprints=False):
+    z = pcbnew.ZONE(board)
+    z.SetIsRuleArea(True)
+    z.SetZoneName(name)
+    ls = pcbnew.LSET()
+    for l in layers:
+        ls.AddLayer(l)
+    z.SetLayerSet(ls)
+    z.SetDoNotAllowTracks(tracks)
+    z.SetDoNotAllowVias(vias)
+    z.SetDoNotAllowZoneFills(pours)
+    z.SetDoNotAllowPads(False)
+    z.SetDoNotAllowFootprints(footprints)
+    z.SetUuid(det_uuid("rule:" + name))
+    ol = z.Outline()
+    ol.NewOutline()
+    for x, y in pts:
+        ol.Append(mm(x), mm(y))
+    board.Add(z)
+    return z
+
+
+def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
+    comps, nets = read_netlist(netlist)
+    board = pcbnew.BOARD()
+    board.SetCopperLayerCount(layers)
+    ds = board.GetDesignSettings()
+    ds.m_MinClearance = mm(CLEARANCE)
+    ds.m_CopperEdgeClearance = mm(EDGE_CLEARANCE)
+
+    netitems = {}
+    for n in nets:
+        ni = pcbnew.NETINFO_ITEM(board, short_net(n))
+        board.Add(ni)
+        netitems[n] = ni
+
+    pad_net = {}
+    for n, nodes in nets.items():
+        for ref, pin in nodes:
+            mp = PADMAP.get(ref, {}).get(pin, pin)
+            for pn in (mp if isinstance(mp, tuple) else (mp,)):
+                pad_net[(ref, pn)] = n
+
+    # ---- load all footprints
+    fps = {}
+    for ref in sorted(comps):
+        value, fpname, sym_uuid = comps[ref]
+        spec = FOOTPRINT_OVERRIDE.get(ref, fpname)
+        if not spec:
+            raise ValueError("no footprint for " + ref)
+        fp = load_fp(spec)
+        fp.SetFPID(pcbnew.LIB_ID(*spec.split(":", 1)))
+        fp.SetReference(ref)
+        fp.SetValue(value)
+        if sym_uuid:
+            fp.SetPath(pcbnew.KIID_PATH("/" + sym_uuid))
+        fp.Reference().SetLayer(pcbnew.F_Fab)
+        fp.Value().SetLayer(pcbnew.F_Fab)
+        fp.SetUuid(det_uuid("fp:" + ref))
+        for p in fp.Pads():
+            p.SetUuid(det_uuid("pad:%s:%s:%d" % (ref, p.GetNumber(), id_counter(ref, p.GetNumber()))))
+            key = (ref, p.GetNumber())
+            if key in pad_net:
+                p.SetNet(netitems[pad_net[key]])
+        board.Add(fp)                       # Flip() needs the footprint on a board
+        fps[ref] = fp
+
+    # the module's own keep-out zone (43 x 20 mm) is replaced by the board-level rule areas below
+    for z in list(fps["U9"].Zones()):
+        fps["U9"].Remove(z)
+
+    fixed = set()
+    fixed_pins = {}          # (ref, pad) -> (x, y) in the SA frame (KiCad axes, origin at the housing axis)
+    fixed_rects = []         # (side, x0, y0, x1, y1) in the SA frame
+
+    def note_fixed(ref, side, margin=MARGIN_EXT):
+        fixed.add(ref)
+        fp = fps[ref]
+        x0, y0, x1, y1 = pad_extent_mm(fp, margin)
+        fixed_rects.append((side, x0 - CX, y0 - CY, x1 - CX, y1 - CY))
+        for p in fp.Pads():
+            fixed_pins[(ref, p.GetNumber())] = (pcbnew.ToMM(p.GetPosition().x) - CX, pcbnew.ToMM(p.GetPosition().y) - CY)
+
+    # ---- LED ring (top) and bypass caps (bottom), mech ring radius and phase
+    for k, (dref, cref, i) in enumerate(led_ring_refs()):
+        az = MO.led_azimuths()[i]
+        x, y = K(*MO.polar(MO.R_RING, az))
+        rot = MO.led_rotation_deg(az)
+        d = fps[dref]
+        d.SetPosition(vec(0, 0))
+        orient(d, rot, "F")
+        centre_at(d, x, y, 0.0)
+        # centre on the LED body centre rather than the pad extent: pads are symmetric, so they coincide
+        note_fixed(dref, "F")
+        shift = MO.led_cap_shift_mm(i, az)
+        r_cap = MO.R_RING
+        a2 = az + math.degrees(shift / r_cap)
+        cx_, cy_ = K(*MO.polar(r_cap, a2))
+        c = fps[cref]
+        c.SetPosition(vec(0, 0))
+        orient(c, rot, "B")
+        # keep the cap pad axis tangential: try the rotation and its quarter turn
+        for tr in (rot, (rot + 90) % 360):
+            c.SetOrientationDegrees(tr)
+            pp = [q.GetPosition() for q in c.Pads()]
+            tang = (math.cos(math.radians(az)), -math.sin(math.radians(az)))   # radial in KiCad axes
+            vx, vy = pcbnew.ToMM(pp[0].x - pp[1].x), pcbnew.ToMM(pp[0].y - pp[1].y)
+            n = math.hypot(vx, vy) or 1.0
+            if abs((vx * tang[0] + vy * tang[1]) / n) < 0.3:          # pad axis mostly tangential
+                break
+        centre_at(c, cx_, cy_, 0.0)
+        note_fixed(cref, "B")
+
+    # ---- USB-C receptacle (variant V1: on the tab, mating face towards +X, outside the LED ring)
+    j1 = fps["J1"]
+    j1.SetPosition(vec(0, 0))
+    for rot in (90, 270):
+        j1.SetOrientationDegrees(rot)
+        shell = [p for p in j1.Pads() if p.GetNumber() == "SH"]
+        a1 = [p for p in j1.Pads() if p.GetNumber() == "A1"][0]
+        if min(s.GetPosition().x for s in shell) > a1.GetPosition().x:     # shell (front) is right of the pad grid
+            break
+    x0, y0, x1, y1 = bbox_mm(j1)
+    px0, py0, px1, py1 = pad_bbox_mm(j1)
+    # The mech spike places the mouth at R 29.85 (receptacle body R 22.5..29.85, placeholder LEDs 2 mm). The real
+    # LED pads (WS2812B 5 x 5) reach R 22.3 and the footprint pads start 9.5 mm behind the mouth, so the mouth is
+    # moved out until the rear pad edge clears the nearest LED pads by J1_LED_GAP. Both numbers go in the report.
+    led_pad_x = max(pcbnew.ToMM(p.GetBoundingBox().GetRight()) for r in ("D1", "D16") for p in fps[r].Pads()) - CX
+    rear = (x1 - px0)                                   # mouth to rear pad edge, mm
+    mouth_r = max(J1_MOUTH_R, led_pad_x + J1_LED_GAP + rear)
+    tab_r = mouth_r - J1_TAB_BEHIND_MOUTH
+    j1.SetPosition(vec(CX + mouth_r - x1, CY - (py0 + py1) / 2))
+    note_fixed("J1", "F", 0.3)
+    # through-hole shell pins also occupy the bottom side
+    fixed_rects.append(("B",) + tuple(v - c for v, c in zip(pad_extent_mm(j1, 0.3), (CX, CY, CX, CY))))
+
+    # ---- module (top, centre of the PCB, antenna end towards -X)
+    u9 = fps["U9"]
+    u9.SetPosition(vec(0, 0))
+    orient(u9, MODULE_ROT, "F")
+    mx0, my0, mx1, my1 = MO.module_rect()
+    mcx, mcy = K((mx0 + mx1) / 2, (my0 + my1) / 2)
+    centre_at(u9, mcx, mcy, 0.0)
+    note_fixed("U9", "F", 0.0)
+    ax0, ay0, ax1, ay1 = MO.antenna_strip()
+    # module body as a top-side obstacle
+    kx0, ky0 = K(mx0, my1)
+    kx1, ky1 = K(mx1, my0)
+    fixed_rects.append(("F", kx0 - CX - 0.3, ky0 - CY - 0.3, kx1 - CX + 0.3, ky1 - CY + 0.3))
+
+    # ---- button
+    sw = fps["SW1"]
+    sw.SetPosition(vec(0, 0))
+    orient(sw, 0, "F")
+    sx, sy = K(*MO.polar(*SW1_POS))
+    centre_at(sw, sx, sy)
+    note_fixed("SW1", "F")
+
+    # ---- keep-out rectangles from the base posts (bottom) and hook lugs (top)
+    for az, r0, r1, hw in MO.post_keepouts():
+        bx0, by0, bx1, by1, _ = polar_rect_to_bbox(az, r0, r1, hw, CX, CY)
+        fixed_rects.append(("B", bx0 - CX, by0 - CY, bx1 - CX, by1 - CY))
+
+    # ---- movable parts: simulated annealing
+    parts = {}
+    for ref, fp in fps.items():
+        if ref in fixed:
+            continue
+        fp.SetPosition(vec(0, 0))
+        orient(fp, 0, "F")
+        x0, y0, x1, y1 = pad_extent_mm(fp, MARGIN_EXT)
+        ox, oy = (x0 + x1) / 2, (y0 + y1) / 2
+        pads = {}
+        for p in fp.Pads():
+            pads.setdefault(p.GetNumber(), (pcbnew.ToMM(p.GetPosition().x) - ox, pcbnew.ToMM(p.GetPosition().y) - oy))
+        parts[ref] = {"w": x1 - x0 - 2 * MARGIN_EXT, "h": y1 - y0 - 2 * MARGIN_EXT, "pads": pads}
+        if ref.startswith("TP"):
+            parts[ref]["sides"] = "B"
+    sa_nets = {}
+    for n, nodes in nets.items():
+        if n == GND or n.startswith("unconnected-"):
+            continue
+        lst = []
+        for ref, pin in nodes:
+            mp = PADMAP.get(ref, {}).get(pin, pin)
+            for pn in (mp if isinstance(mp, tuple) else (mp,)):
+                lst.append((ref, pn))
+        if len(lst) >= 2:
+            sa_nets[n] = lst
+
+    def region_ok(side, x0, y0, x1, y1):       # SA frame (y down) -> mechanical frame (y up)
+        return MO.region_rect_ok(side, x0, -y1, x1, -y0, R_MOVE, tab_r)
+
+    state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
+                                          seeds=SA_SEEDS, iters=sa_iters or SA_ITERS)
+    for ref, (x, y, rot, side) in sorted(state.items()):
+        fp = fps[ref]
+        fp.SetPosition(vec(0, 0))
+        orient(fp, rot, side)
+        centre_at(fp, CX + x, CY + y)
+    placement_info = {"seed": seed, "hpwl_mm": round(wl, 1), "overlap_mm2": round(ov, 3)}
+
+    # ---- outline (mechanical V1 envelope)
+    for i, seg in enumerate(MO.outline_segments(tab_r)):
+        if seg[0] == "arc":
+            s = pcbnew.PCB_SHAPE(board)
+            s.SetShape(pcbnew.SHAPE_T_ARC)
+            s.SetArcGeometry(vec(*K(*seg[1])), vec(*K(*seg[2])), vec(*K(*seg[3])))
+        else:
+            s = pcbnew.PCB_SHAPE(board)
+            s.SetShape(pcbnew.SHAPE_T_SEGMENT)
+            s.SetStart(vec(*K(*seg[1])))
+            s.SetEnd(vec(*K(*seg[2])))
+        s.SetLayer(pcbnew.Edge_Cuts)
+        s.SetWidth(mm(0.1))
+        s.SetUuid(det_uuid("edge:%d" % i))
+        board.Add(s)
+
+    # ---- GND pours on both layers (the outline polygon; the fill keeps its own edge clearance)
+    hw, xj = MO.tab_half_intersection()
+    poly = []
+    b = math.degrees(math.asin(hw / MO.R_PCB))
+    n_arc = 120
+    for k in range(n_arc + 1):
+        a = b + (360.0 - 2 * b) * k / n_arc
+        poly.append(K(*MO.polar(MO.R_PCB - 0.01, a)))
+    poly.append(K(tab_r - 0.01, -hw + 0.01))
+    poly.append(K(tab_r - 0.01, hw - 0.01))
+    if layers == 2:
+        pours = ((pcbnew.B_Cu, "B", GND), (pcbnew.F_Cu, "F", GND))
+    else:       # 4 layers: In1 = GND plane, In2 = +5V plane, +3V3 and signals routed on the outer layers
+        pours = ((pcbnew.In1_Cu, "In1", GND), (pcbnew.In2_Cu, "In2", "+5V"))
+    for k, (layer, lname, pnet) in enumerate(pours):
+        z = pcbnew.ZONE(board)
+        z.SetLayer(layer)
+        z.SetUuid(det_uuid("zone:%s:%s" % (pnet, lname)))
+        z.SetNet(netitems[pnet])
+        z.SetMinThickness(mm(0.2))
+        z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+        z.SetThermalReliefGap(mm(0.3))
+        z.SetThermalReliefSpokeWidth(mm(0.3))
+        z.SetAssignedPriority(len(pours) - k)
+        ol = z.Outline()
+        ol.NewOutline()
+        for x, y in poly:
+            ol.Append(mm(x), mm(y))
+        board.Add(z)
+
+    # ---- rule areas: antenna strip (no copper on either layer), hooks (top) and posts (bottom)
+    ap = [K(ax0, ay0), K(ax1, ay0), K(ax1, ay1), K(ax0, ay1)]
+    add_rule_area(board, "antenna_strip", (pcbnew.F_Cu, pcbnew.B_Cu) + ((pcbnew.In1_Cu, pcbnew.In2_Cu) if layers == 4 else ()), ap, footprints=False)   # U9 itself sits here
+    for az, r0, r1, hw_ in MO.hook_keepouts():
+        add_rule_area(board, "hook_%d" % az, (pcbnew.F_Cu,), corner_points(az, r0, r1, hw_),
+                      tracks=False, vias=False, pours=False, footprints=True)
+    for az, r0, r1, hw_ in MO.post_keepouts():
+        add_rule_area(board, "post_%d" % az, (pcbnew.B_Cu,), corner_points(az, r0, r1, hw_),
+                      tracks=False, vias=False, pours=False, footprints=True)
+
+    os.makedirs(outdir, exist_ok=True)
+    pcb = os.path.join(outdir, name + ".kicad_pcb")
+    pcbnew.SaveBoard(pcb, board)
+    normalise_uuids(pcb)
+    write_project(os.path.join(outdir, name + ".kicad_pro"), name)
+    with open(os.path.join(outdir, name + ".placement.json"), "w", encoding="utf-8") as f:
+        json.dump(dict(placement_info, sa_iters=sa_iters or SA_ITERS, cx=CX, cy=CY, j1_mouth_r=round(mouth_r, 2), tab_r=round(tab_r, 2), largest_dim_mm=round(MO.largest_dim_mm(mouth_r), 2)), f, indent=1, sort_keys=True)
+        f.write("\n")
+    return pcb
+
+
+_NS = uuid.UUID("5b0c2f0e-0000-4000-8000-00000000b051")
+
+
+def det_uuid(key):
+    """Deterministic KIID from a key, so KiCad's uuid-ordered containers are written in a fixed order."""
+    return pcbnew.KIID(str(uuid.uuid5(_NS, key)))
+
+
+def normalise_uuids(path):
+    """KiCad gives every item a random uuid; replace them in file order so two builds are identical."""
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    ns = _NS
+    seen = {}
+
+    def sub(m):
+        old = m.group(2)
+        if old not in seen:
+            seen[old] = str(uuid.uuid5(ns, str(len(seen))))
+        return m.group(1) + seen[old] + '"'
+
+    text = re.sub(r'((?:uuid|tstamp) ")([0-9a-fA-F-]{36})"', sub, text)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
+def write_project(path, name):
+    """Design rules and net classes (spike values, provisional). Written by script, never by hand."""
+    power = sorted(NET_WIDTH)
+    classes = [
+        {"name": "Default", "clearance": CLEARANCE, "track_width": TRACK, "via_diameter": VIA_DIA,
+         "via_drill": VIA_DRILL, "priority": 2147483647, "pcb_color": "rgba(0, 0, 0, 0.000)",
+         "schematic_color": "rgba(0, 0, 0, 0.000)", "wire_width": 6, "bus_width": 12,
+         "diff_pair_width": 0.2, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "line_style": 0,
+         "microvia_diameter": 0.3, "microvia_drill": 0.1},
+    ]
+    for i, n in enumerate(power):
+        c = dict(classes[0])
+        c.update({"name": "PWR_" + n.strip("+"), "track_width": NET_WIDTH[n], "priority": i})
+        classes.append(c)
+    patterns = [{"netclass": "PWR_" + n.strip("+"), "pattern": n} for n in power]
+    pro = {
+        "board": {"design_settings": {"rules": {
+            "min_clearance": CLEARANCE, "min_track_width": 0.15, "min_via_diameter": 0.5,
+            "min_through_hole_diameter": 0.3, "min_via_annular_width": 0.1, "min_copper_edge_clearance": EDGE_CLEARANCE,
+            "min_hole_clearance": 0.25, "min_hole_to_hole": 0.4, "min_connection": 0.1, "min_silk_clearance": 0.0,
+            "min_text_height": 0.8, "min_text_thickness": 0.08, "min_resolved_spokes": 2}}},
+        "meta": {"filename": name + ".kicad_pro", "version": 3},
+        "net_settings": {"classes": classes, "meta": {"version": 3}, "net_colors": None,
+                         "netclass_assignments": None, "netclass_patterns": patterns},
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(pro, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        sys.exit(__doc__)
+    out = build(sys.argv[1], sys.argv[2], *(sys.argv[3:4] or ["busy_light_spike"]), layers=int(sys.argv[4]) if len(sys.argv) > 4 else 2)
+    print("wrote", out)

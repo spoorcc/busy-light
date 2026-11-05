@@ -1,0 +1,41 @@
+* SPDX-License-Identifier: Apache-2.0
+* Spike (version 3): power-up and VBUS dip of the ADR-0016 gate with a supervisor-type hold-off.
+* Behavioural, ideal logic with thresholds at 50 % of VCC. ALL numbers below are assumptions, not datasheet values.
+* VBUS (5 V) feeds the CC IC and the supervisor; the 3V3 rail feeds the inverter and the AND gates.
+* Supervisor: reset (hold low) while VBUS < 4.2 V; after VBUS >= 4.2 V the delay node charges
+* through 893 kohm into CT (delay 0.693*893k*CT = 0.619 s/uF, TPS3840 typical formula); output released at half rail, pulled up to VBUS_IC.
+* Scenarios: A default advertised; B IC glitch, select high; C glitch, no hold-off; D to G hold-off;
+* H VBUS dip to 3.5 V after the hold-off was done, then IC glitch while it debounces again.
+.param tr=1m
+Vrail 3v3 0 PWL(0 0 {tr} 3.3)
+Vbus vbus 0 PWL(0 0 {tr} 5 {d0} 5 {d0+1m} {dv} {d1} {dv} {d1+1m} 5)
+Vsel sel 0 PWL(0 0 {tsel} 0 {tsel+10u} 3.3)
+Rpu vbus out1n 100k
+Cpin out1n 0 20p
+Sic out1n 0 icdrv 0 SWM
+Bdrv icdrv 0 V = {glitch} * ((time > {tgs} && time < {tgend}) ? 1 : 0)
+.model SWM SW(Vt=0.5 Vh=0.05 Ron=100 Roff=1e9)
+Binv invraw 0 V = {V(3v3)} * (V(out1n) < 0.5*V(3v3) ? 1 : 0)
+Rinv invraw ok 1k
+Cinv ok 0 10p
+* supervisor: delay node; fast discharge while in reset
+Btd tdraw 0 V = (V(vbus) > 4.2) ? 5 : 0
+Rtd tdraw td R = '(V(tdraw) > 2.5) ? 893k : 1k'
+Ctd td 0 {chold}
+* open-drain output: pulled down while the delay node is below half rail or VBUS is low; pull-up to VBUS
+Rhp vbus hold 150k
+Shd hold 0 rst 0 SWM
+Brst rst 0 V = (V(td) < 2.5) ? 1 : 0
+Band enraw 0 V = {V(3v3)} * ((V(ok) > 0.5*V(3v3) && V(sel) > 0.5*V(3v3) && V(hold) > 0.5*V(3v3)) ? 1 : 0)
+Ren enraw en 1k
+Cen en 0 10p
+Rpd en 0 100k
+.param glitch=GLITCH tgs=TGS tgend=TGEND tsel=TSEL chold=CHOLD d0=DIP0 d1=DIP1 dv=DIPV
+.control
+set noaskquit
+tran 20u 1200m
+meas tran en_max MAX v(en)
+meas tran ok_max MAX v(ok)
+meas tran en_t WHEN v(en)=1.65 RISE=1
+.endc
+.end

@@ -1,0 +1,182 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the USBLC6-2P6 ESD protection (U6, USB D+/D- and VBUS). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: USBLC6-2P6
+  mpn: USBLC6-2P6
+  manufacturer: STMicroelectronics
+  description: Very low capacitance ESD protection for two data lines and VBUS
+  selection: chosen
+  package:
+    code: SOT-666
+    name: SOT-666 (order code suffix P6)
+    pin_count: 6
+  used_in:
+  - U6
+  schematic_symbol: Power_Protection:USBLC6-2P6
+documents:
+- id: usblc6-2-ds
+  title: USBLC6-2 Very low capacitance ESD protection
+  doc_number: DS4260 Rev 7
+  revision_date: December 2021
+  origin: manufacturer
+  file: usblc6-2.pdf
+  sha256: bc30154f310cd631043214ed52571daefe04270587ec55072d49a23bd18b9068
+  pages: 20
+  retrieved_on: '2026-11-05'
+  notes: ST datasheet; the download URL was not recorded. The pinout comes from the functional diagram on page 1, not a package-specific pin table.
+defaults:
+  source_document: usblc6-2-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-05'
+  status: unverified
+  package: SOT-666
+pins:
+- id: USBLC6-2P6.pin.1
+  pin: '1'
+  name: I/O1
+  pin_type: io
+  function: Data line 1 (pins 1 and 6 are the same line)
+  source: {page: 1, locator: Functional diagram, quote: I/O1 1 6 I/O1}
+- id: USBLC6-2P6.pin.2
+  pin: '2'
+  name: GND
+  pin_type: ground
+  source: {page: 1, locator: Functional diagram, quote: GND 2 5 VBUS}
+- id: USBLC6-2P6.pin.3
+  pin: '3'
+  name: I/O2
+  pin_type: io
+  function: Data line 2 (pins 3 and 4 are the same line)
+  source: {page: 1, locator: Functional diagram, quote: I/O2 3 4 I/O2}
+- id: USBLC6-2P6.pin.4
+  pin: '4'
+  name: I/O2
+  pin_type: io
+  source: {page: 1, locator: Functional diagram, quote: I/O2 3 4 I/O2}
+- id: USBLC6-2P6.pin.5
+  pin: '5'
+  name: VBUS
+  pin_type: power
+  function: Protected supply line
+  source: {page: 1, locator: Functional diagram, quote: GND 2 5 VBUS}
+- id: USBLC6-2P6.pin.6
+  pin: '6'
+  name: I/O1
+  pin_type: io
+  source: {page: 1, locator: Functional diagram, quote: I/O1 1 6 I/O1}
+claims:
+- id: USBLC6-2P6.vpp_air
+  parameter: Peak pulse voltage, IEC 61000-4-2 level 4 air discharge
+  category: abs_max
+  condition:
+    temperature: {value: 25, unit: degC}
+  max: 15
+  unit: kV
+  source: {page: 2, locator: Table 1, quote: Air discharge 15}
+- id: USBLC6-2P6.vpp_contact
+  parameter: Peak pulse voltage, IEC 61000-4-2 level 4 contact discharge
+  category: abs_max
+  condition:
+    temperature: {value: 25, unit: degC}
+  max: 15
+  unit: kV
+  notes: The table prints 15 kV for contact discharge; the first page prints 8 kV (contact) as the compliance level.
+  source: {page: 2, locator: Table 1, quote: Contact discharge 15}
+- id: USBLC6-2P6.vpp_mil
+  parameter: Peak pulse voltage, MIL STD883G method 3015-7
+  category: abs_max
+  max: 25
+  unit: kV
+  source: {page: 2, locator: Table 1, quote: MIL STD883G-Method 3015-7 25}
+- id: USBLC6-2P6.tj_range
+  parameter: Operating junction temperature range
+  category: abs_max
+  min: -40
+  max: 150
+  unit: degC
+  source: {page: 2, locator: Table 1, quote: Tj Operating junction temperature range -40 to +150 °C}
+- id: USBLC6-2P6.irm
+  parameter: Leakage current
+  category: electrical
+  condition:
+    vrm: {value: 5.25, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 10
+  max: 150
+  unit: nA
+  source: {page: 2, locator: Table 2, quote: IRM Leakage current VRM = 5.25 V 10 150 nA}
+- id: USBLC6-2P6.vbr
+  parameter: Breakdown voltage between VBUS and GND
+  category: electrical
+  condition:
+    ir: {value: 1, unit: mA}
+    temperature: {value: 25, unit: degC}
+  min: 6
+  unit: V
+  source: {page: 2, locator: Table 2, quote: IR = 1 mA 6 V}
+- id: USBLC6-2P6.vf
+  parameter: Forward voltage
+  category: electrical
+  condition:
+    if: {value: 10, unit: mA}
+    temperature: {value: 25, unit: degC}
+  max: 1.1
+  unit: V
+  source: {page: 2, locator: Table 2, quote: VF Forward voltage IF = 10 mA 1.1 V}
+- id: USBLC6-2P6.vcl.ipp_1a
+  parameter: Clamping voltage, any I/O pin to GND, IPP = 1 A 8/20 us
+  category: electrical
+  condition:
+    ipp: {value: 1, unit: A}
+    pulse: 8/20 us
+    temperature: {value: 25, unit: degC}
+  max: 12
+  unit: V
+  notes: The quote matches the raw (reading order) text extraction, not the layout extraction.
+  source: {page: 2, locator: Table 2, quote: 'IPP = 1 A, 8/20 μs Any I/O pin to GND 12 V'}
+- id: USBLC6-2P6.vcl.ipp_5a
+  parameter: Clamping voltage, any I/O pin to GND, IPP = 5 A 8/20 us
+  category: electrical
+  condition:
+    ipp: {value: 5, unit: A}
+    pulse: 8/20 us
+    temperature: {value: 25, unit: degC}
+  max: 17
+  unit: V
+  notes: The quote matches the raw (reading order) text extraction, not the layout extraction.
+  source: {page: 2, locator: Table 2, quote: 'IPP = 5 A, 8/20 μs Any I/O pin to GND 17'}
+- id: USBLC6-2P6.c_io_gnd
+  parameter: Capacitance between I/O and GND
+  category: electrical
+  condition:
+    vr: {value: 1.65, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 2.5
+  max: 3.5
+  unit: pF
+  source: {page: 2, locator: Table 2, quote: Ci/o-GND between I/O and VR = 1.65 V 2.5 3.5}
+- id: USBLC6-2P6.c_io_io
+  parameter: Capacitance between I/O and I/O
+  category: electrical
+  condition:
+    vr: {value: 1.65, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 1.2
+  max: 1.7
+  unit: pF
+  source: {page: 2, locator: Table 2, quote: Ci/o-i/o VR = 1.65 V 1.2 1.7}
+- id: USBLC6-2P6.dc_io_gnd
+  parameter: Capacitance matching I/O to GND
+  category: electrical
+  condition:
+    vr: {value: 1.65, unit: V}
+  typ: 0.015
+  unit: pF
+  source: {page: 2, locator: Table 2, quote: ΔCi/o-GND 0.015}
+- id: USBLC6-2P6.max_vbus_rating
+  parameter: Maximum continuous VBUS pin voltage
+  category: abs_max
+  status: source-missing
+  notes: 'Searched DS4260 Rev 7 Table 1 (absolute ratings): no continuous voltage rating for the VBUS pin is listed; only VRM = 5.25 V (leakage test point) and VBR min 6 V. Whether VBUS up to 5.5 V is allowed is not stated.'
