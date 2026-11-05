@@ -52,7 +52,7 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R_VD": (*R, "887k"), "R1": (*R, "100k"), "R7": (*R, "100k"),
     "U2": (*G04, "74LVC1G04"), "U12": (*G04, "74LVC1G04"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
-    "R4": (*R, "100k"), "R5": (*R, "100k"), "R2": (*R, "100k"), "R3": (*R, "100k"),
+    "R4": (*R, "100k"), "R5": (*R, "100k"), "R2": (*R, "10k"), "R3": (*R, "10k"),
     "Q2": (*Q, "2N7002"), "Q3": (*Q, "2N7002"),
     "R_ILIM2": (*R, "tbd"), "R_ILIM3": (*R, "tbd"), "R_ILIM1": (*R, "tbd"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
@@ -75,8 +75,8 @@ for i, n in enumerate(("TP_5V", "TP_3V3", "TP_GND", "TP_LED", "TP_EN", "TP_BOOT"
     PARTS[f"TP{i}"] = (*TP, n)
 PARTS["R16"] = (*R, "10k")
 PARTS["R17"] = (*R, "10k")
-PARTS["R14"] = (*R, "1k")
-PARTS["R15"] = (*R, "1k")
+PARTS["R14"] = (*R, "100k")
+PARTS["R15"] = (*R, "100k")
 
 S = L.SIZE
 BOXES = {
@@ -519,8 +519,10 @@ def _build():
     PLACE["TP6"] = (36.0, a[1], 0)
     s.put("TP6")
     s.bind("BOOT", "TP6", 1)
-    # gate-enable readbacks on GPIO20 / GPIO21 (HW-010 proposed amendment); 1 k series resistor
-    # because GPIO21 (U0TXD) is an output while the ROM prints boot messages
+    # gate-enable readbacks on GPIO20 / GPIO21 (HW-010 proposed amendment); 100k series resistor
+    # because GPIO21 (U0TXD) is an output while the ROM prints boot messages;
+    # 100k series with 10k pull-downs R2/R3 keeps an open gate output below the 2N7002 Vgs(th) min (N1,
+    # analysis-n1-n2-readback-backfeed.md); firmware must switch the internal pull-ups of GPIO20/21 off
     for pin, net, rb, ref in (("GPIO20", "ILIM_STEP2_EN", "STEP2_EN_RB", "R14"),
                               ("GPIO21", "ILIM_STEP3_EN", "STEP3_EN_RB", "R15")):
         a = P("U9", pin)
