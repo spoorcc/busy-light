@@ -31,7 +31,18 @@ dev = [
 
 [tool.ruff]
 line-length = 100
-extend-exclude = [".claude", "sw/modules", "modules", "zephyr", "bootloader", "tools"]
+extend-exclude = [
+    ".claude",
+    "sw/modules",
+    "modules",
+    "zephyr",
+    "bootloader",
+    "tools",
+    # Spike code (ADR-0012 is Proposed): exploratory, not yet under the lint policy.
+    # 449 findings at consolidation (docs/verification/reports/consolidation-2026-11-05.md).
+    # Bring it under ruff before it is promoted out of spike-gate.
+    "hw/kicad/spike-gate",
+]
 target-version = "py311"
 
 [tool.ruff.lint]

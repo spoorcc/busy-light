@@ -21,6 +21,7 @@ path = [
   "hw/kicad/spike/src/**",
   "hw/kicad/spike/tests/**",
   "hw/kicad/spike/run_spike.sh",
+  "hw/kicad/spike-gate/**/*.sh",
   "mech/freecad/**/*.py",
   "mech/analysis/**/*.py",
   "mech/analysis/**/*.sh",
