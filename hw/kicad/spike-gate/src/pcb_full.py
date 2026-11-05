@@ -31,13 +31,14 @@ J1_TAB_BEHIND_MOUTH = 0.85                # mech: tab ends 0.85 mm before the mo
 from pcb_rules import CLEARANCE, TRACK, VIA_DIA, VIA_DRILL, EDGE_CLEARANCE   # noqa: E402  (rule values: pcb_rules.py)
 # Net classes by net name: width in mm. IPC-2221 external layer, 1 oz (35 um), 10 K rise:
 # 1.5 A -> 0.53 mm, 2.0 A -> 0.78 mm (see report). The power nets are routed at 0.8 mm where space allows.
+import pcb_rules                  # noqa: E402
 from pcb_rules import NET_WIDTH   # noqa: E402  (shared with the tests; values and basis in pcb_rules.py)
 GND = "GND"
 from pcb_rules import NET_TRACK   # noqa: E402  (signal nets at the 0.4 mm pitch pads of U1 use the minimum width)
 import pcb_rules                  # noqa: E402
 # Star nets: every pad is routed straight to the named pad, so the branch point is at that pad.
-# ADR-0016 layout rule: the Q3 gate pin is the tap point of U13 pin 2, R3 and the readback R15.
-STAR = {"/ILIM_STEP3_EN": ("Q3", "1")}
+# ADR-0016 layout rule: the step 3 switch control pin (U15 SEL) is the tap point of U13 pin 2, R3, R19 and the readback R15.
+STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 
 # ----------------------------------------------------------------------------- provisional substitutions
 # ref -> footprint (lib:name) used instead of the schematic's footprint field
@@ -45,8 +46,6 @@ FOOTPRINT_OVERRIDE = {
     "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
     "U8": "Package_TO_SOT_SMD:SOT-223-3_TabPin2",     # schematic field empty (REG_3V3 placeholder)
     "U9": "RF_Module:ESP32-C6-MINI-1",                # ESP32-C3-MINI-1 not in the libraries; same 13.2x16.6 module family
-    "C1": "Capacitor_SMD:C_1206_3216Metric",          # 470 nF C0G, N4 addendum
-    "C1B": "Capacitor_SMD:C_1206_3216Metric",         # 150 nF C0G, N4 addendum
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
@@ -197,12 +196,14 @@ SW1_POS = (13.0, 240.0)       # (radius, azimuth): inside the LED ring; a side-a
 MODULE_ROT = 90               # antenna end towards -X (footprint antenna is at the top, rotation 90 turns it left)
 MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the courtyard)
 # ADR-0016 proximity rules (centre distance, mm); the placer rejects a seed that breaks one, the test checks the board
-LAYOUT_RULES = (("R3", "Q3", 6.0), ("R2", "Q2", 6.0), ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0),
-                ("R_ILIM3", "U7", 15.0), ("C1", "U5", 8.0), ("C1B", "U5", 12.0))
+LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R19", "U15", 6.0),
+                ("C24", "U14", 6.0), ("C25", "U15", 6.0),         # bypass capacitor at the switch supply pin
+                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0), ("R_ILIM3B", "U7", 15.0),
+                ("C1", "U5", 8.0), ("C1B", "U5", 12.0), ("C1C", "U5", 14.0), ("C1D", "U5", 14.0))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 16.6                 # movable parts stay inside this radius (the LED ring pads start at about 17.8)
 SA_ITERS = 160000
-SA_SEEDS = tuple(range(1, 17))      # seed 12 is the first that is overlap-free and meets LAYOUT_RULES with OVERLAP_PEN_FLOOR
+SA_SEEDS = tuple(range(1, 17))
 
 
 def K(mx, my):
@@ -468,6 +469,12 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         if len(lst) >= 2:
             sa_nets[n] = lst
 
+    weights = {n: w for n, w in pcb_rules.NET_WEIGHT.items() if n in sa_nets}
+    for tie, (a, b, w) in pcb_rules.PIN_TIES.items():      # bypass capacitor at the supply pin (pseudo-net, not on the board)
+        if a[0] in comps and b[0] in comps:
+            sa_nets[tie] = [a, b]
+            weights[tie] = w
+
     def region_ok(side, x0, y0, x1, y1):       # SA frame (y down) -> mechanical frame (y up)
         return MO.region_rect_ok(side, x0, -y1, x1, -y0, R_MOVE, tab_r)
 
@@ -477,7 +484,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
                                           seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
-                                          accept=layout_rules_ok)
+                                          accept=layout_rules_ok, weights=weights, rules=LAYOUT_RULES)
     for ref, (x, y, rot, side) in sorted(state.items()):
         fp = fps[ref]
         fp.SetPosition(vec(0, 0))

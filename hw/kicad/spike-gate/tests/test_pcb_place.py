@@ -33,5 +33,26 @@ class OverlapPenaltyFloor(unittest.TestCase):
         self.assertEqual(P.OVERLAP_PEN_FLOOR, 2000.0)
 
 
+class ProximityRules(unittest.TestCase):
+    """A proximity rule (ref, ref, limit) adds a cost for the distance beyond the limit (ADR-0016 rules in the cost)."""
+
+    def make(self):
+        parts = {"A": {"w": 2.0, "h": 2.0, "pads": {"1": (0.0, 0.0)}, "sides": "F"},
+                 "B": {"w": 2.0, "h": 2.0, "pads": {"1": (0.0, 0.0)}, "sides": "F"}}
+        return P.Placer(parts, {}, {}, [], lambda *a: True, rules=(("A", "B", 6.0),))
+
+    def test_no_cost_within_limit_and_cost_beyond(self):
+        pl = self.make()
+        pl.state["B"] = (0.0, 0.0, 0, "F")
+        near, far = (5.0, 0.0, 0, "F"), (10.0, 0.0, 0, "F")
+        self.assertEqual(pl.cost_of("A", near, 2.0), 0.0)
+        self.assertGreater(pl.cost_of("A", far, 2.0), 0.0)
+        self.assertGreater(pl.cost_of("A", (20.0, 0.0, 0, "F"), 2.0), pl.cost_of("A", far, 2.0))
+
+    def test_rule_with_unplaced_partner_costs_nothing(self):
+        pl = self.make()
+        self.assertEqual(pl.cost_of("A", (50.0, 0.0, 0, "F"), 2.0), 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

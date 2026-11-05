@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """N4: the parallel C0G hold-off set must keep tD inside 200 to 600 ms. Uses the netlist for the value present."""
 import os
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -33,11 +34,29 @@ class HoldoffCap(unittest.TestCase):
         p = [(620e-9, .10, "x")]
         self.assertFalse(hc.fits(p))
 
-    def test_netlist_value_if_present(self):
+    def test_selected_set_window(self):
+        p = hc.SETS["220+220+100+68 (4 parts)"]
+        self.assertAlmostEqual(hc.c_window(p)[2], 608e-9, delta=1e-12)
+        a, b = hc.td_window(p)
+        self.assertAlmostEqual(a * 1e3, 205.9, delta=0.3)
+        self.assertAlmostEqual(b * 1e3, 560.6, delta=0.3)
+        self.assertTrue(hc.fits(p))
+
+    def test_netlist_set_is_the_selected_set(self):
+        """The hold-off capacitors in the netlist (C1, C1B, C1C, C1D) are the set the window was computed for."""
         net = Path(os.environ.get("GATE_NET", HERE / "data" / "gate.net"))
-        self.assertTrue(net.exists())
         txt = net.read_text()
-        self.assertIn("C1", txt)   # C1 is currently a placeholder; the generator change is a separate task
+        vals = {}
+        for ref in ("C1", "C1B", "C1C", "C1D"):
+            blk = txt[txt.index('(ref "%s")' % ref):][:400]
+            m = re.search(r'\(value "(\d+)n C0G 5% (\d+)V"\)', blk)
+            self.assertIsNotNone(m, ref)
+            vals[ref] = int(m.group(1)) * 1e-9
+            self.assertIn("C_1206", blk)
+        self.assertEqual(sorted(round(v * 1e9) for v in vals.values()), [68, 100, 220, 220])
+        parts = [(c, .05, ref) for ref, c in vals.items()]
+        self.assertTrue(hc.fits(parts))
+        self.assertNotIn('(ref "C1B")\n      (value "150n', txt)
 
 
 if __name__ == "__main__":

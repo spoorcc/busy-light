@@ -13,6 +13,9 @@ import random
 # Lowest overlap weight used by cost_of (plan 06 T13): with the early annealing weight (2.0) a small overlap cost less
 # than a longer wire, so the placer accepted overlaps. The schedule pen0..pen1 in run() is unchanged.
 OVERLAP_PEN_FLOOR = 2000.0
+# Cost per mm of centre distance beyond a proximity rule (ADR-0016 layout rules); the floor above leaves the annealer
+# too stiff to meet the rules by chance, so the rules are part of the cost as well as the seed accept check.
+RULE_PEN = 40.0
 
 
 def rot_xy(dx, dy, rot):
@@ -28,13 +31,15 @@ def rot_xy(dx, dy, rot):
 
 
 class Placer:
-    def __init__(self, parts, nets, fixed_pins, fixed_rects, region_ok, margin=0.3, seed=1):
+    def __init__(self, parts, nets, fixed_pins, fixed_rects, region_ok, margin=0.3, seed=1, weights=None, rules=()):
         """parts: {ref: {'w','h','pads':{num:(dx,dy) from the rect centre}, 'sides':'FB'|'F'|'B'}}.
         nets: {name: [(ref, pad)]}; fixed_pins: {(ref, pad): (x, y)}; fixed_rects: [(side, x0, y0, x1, y1)].
         region_ok(side, x0, y0, x1, y1) -> bool."""
         self.parts, self.nets, self.fixed_pins = parts, nets, fixed_pins
         self.fixed_rects, self.region_ok, self.margin = fixed_rects, region_ok, margin
         self.rng = random.Random(seed)
+        self.rules = tuple(rules)       # (ref, ref, limit mm): cost RULE_PEN per mm of centre distance beyond the limit
+        self.weights = weights or {}     # net name -> factor on the half-perimeter wire length (default 1)
         self.refs = sorted(parts)
         self.state = {}
         self.net_of = {}
@@ -102,7 +107,13 @@ class Placer:
     def cost_of(self, ref, st, pen):
         c = 0.0
         for n in self.net_of.get(ref, ()):
-            c += self.net_hpwl(n)
+            c += self.weights.get(n, 1.0) * self.net_hpwl(n)
+        for a, b, lim in self.rules:
+            if ref not in (a, b):
+                continue
+            o = self.state.get(b if ref == a else a)
+            if o is not None:
+                c += RULE_PEN * max(0.0, math.hypot(st[0] - o[0], st[1] - o[1]) - lim)
         return c + max(pen, OVERLAP_PEN_FLOOR) * self.part_overlap(ref, st)
 
     # ---- annealing
@@ -158,12 +169,13 @@ class Placer:
         return sum(self.net_hpwl(n) for n in self.nets)
 
 
-def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000, margin=0.3, accept=None):
+def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000, margin=0.3, accept=None,
+          weights=None, rules=()):
     """Run the annealer for successive seeds; return the first overlap-free result that accept(state) allows
     (else the best), with (state, seed, hpwl, overlap)."""
     best = None
     for s in seeds:
-        pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, margin=margin, seed=s)
+        pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, margin=margin, seed=s, weights=weights, rules=rules)
         pl.run(iters=iters)
         ov, wl = pl.total_overlap(), pl.total_hpwl()
         if best is None or (ov, wl) < (best[3], best[2]):
