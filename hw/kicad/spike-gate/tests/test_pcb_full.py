@@ -5,6 +5,8 @@ without it the board tests are skipped and only the pure-Python rule tests run.
 
 Run: cd hw/kicad/spike-gate && PYTHONPATH=src python3 -m unittest tests.test_pcb_full
 """
+import json
+import math
 import sys
 import tempfile
 import unittest
@@ -12,6 +14,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "src"))
+import mech_outline  # noqa: E402
 import pcb_rules  # noqa: E402
 
 try:
@@ -30,8 +33,9 @@ class Rules(unittest.TestCase):
         self.assertAlmostEqual(pcb_rules.ipc2221_width_mm(1.5), 0.525, places=2)
         self.assertAlmostEqual(pcb_rules.ipc2221_width_mm(2.0), 0.781, places=2)
 
-    def test_power_nets_are_at_least_the_2a_width(self):
-        need = pcb_rules.ipc2221_width_mm(2.0)
+    def test_power_nets_cover_the_highest_current_limit(self):
+        need = pcb_rules.ipc2221_width_mm(pcb_rules.I_TOP_STEP_MAX_A)       # about 0.56 mm
+        self.assertGreater(need, pcb_rules.ipc2221_width_mm(1.5))
         self.assertGreaterEqual(pcb_rules.NET_WIDTH["VBUS_IC"], need)
         self.assertGreaterEqual(pcb_rules.NET_WIDTH["+5V"], need)
 
@@ -44,6 +48,7 @@ class Board(unittest.TestCase):
         cls.pcb = pcb_full.build(str(NETLIST), cls.tmp.name + "/a")
         cls.board = pcbnew.LoadBoard(cls.pcb)
         cls.fps = {f.GetReference(): f for f in cls.board.GetFootprints()}
+        cls.info = json.loads(Path(cls.pcb).with_suffix(".placement.json").read_text())
         cls.comps, cls.nets = pcb_full.read_netlist(str(NETLIST))
 
     @classmethod
@@ -76,30 +81,59 @@ class Board(unittest.TestCase):
         for ref in pcb_full.FOOTPRINT_OVERRIDE:
             self.assertIn(ref, self.comps)
 
-    def test_every_part_is_inside_the_outline(self):
+    def test_every_pad_is_inside_the_mech_outline(self):
+        """Pads inside the V1 envelope (circle D46 plus tab); the USB-C shell front may leave the tab."""
+        info = self.info
         for ref, f in self.fps.items():
-            x0, y0, x1, y1 = pcb_full.pad_bbox_mm(f)     # pads only: the module's antenna keep-out may leave the board
-            self.assertGreaterEqual(y0, -0.5, ref)
-            self.assertLessEqual(y1, pcb_full.BOARD_H + 0.5, ref)
-            self.assertLessEqual(x1, pcb_full.BOARD_W + 0.5, ref)
-            if ref != "J1":
-                self.assertGreaterEqual(x0, -0.5, ref)
+            for p in f.Pads():
+                if ref == "J1" and p.GetNumber() == "SH":
+                    continue
+                mx, my = pcb_full.mech_of(pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y))
+                self.assertTrue(mech_outline.inside_pcb(mx, my, 0.0, info["tab_r"]), "%s pad %s" % (ref, p.GetNumber()))
 
-    def test_usb_c_on_the_left_edge(self):
+    def test_led_ring_follows_the_mech_numbers(self):
+        for i in range(16):
+            f = self.fps["D%d" % (i + 1)]
+            mx, my = pcb_full.mech_of(pcbnew.ToMM(f.GetPosition().x), pcbnew.ToMM(f.GetPosition().y))
+            self.assertAlmostEqual(math.hypot(mx, my), mech_outline.R_RING, places=1)
+            az = math.degrees(math.atan2(my, mx)) % 360.0
+            self.assertAlmostEqual(az, mech_outline.led_azimuths()[i], places=1)
+            self.assertEqual(f.GetLayer(), pcbnew.F_Cu)
+            self.assertEqual(self.fps["C%d" % (i + 8)].GetLayer(), pcbnew.B_Cu)
+
+    def test_usb_c_on_the_tab_facing_plus_x(self):
         b = self.fps["J1"].GetBoundingBox(False)
-        self.assertLess(pcbnew.ToMM(b.GetX()), 1.0)
+        mouth = pcbnew.ToMM(b.GetRight()) - pcb_full.CX
+        self.assertAlmostEqual(mouth, self.info["j1_mouth_r"], places=1)
+        self.assertGreaterEqual(self.info["j1_mouth_r"], pcb_full.J1_MOUTH_R)
 
-    def test_antenna_keepout_is_free(self):
-        """No part but U9 inside the module's keep-out band (board y < 5.7 mm, x within +-21.6 mm of U9)."""
-        ux, uy, _ = pcb_full.PLACE["U9"]
+    def test_mouth_conflict_with_the_mech_limit_is_recorded(self):
+        """The mech spike's 58 mm limit (MECH-001) is exceeded once the real LED and receptacle footprints are used."""
+        self.assertGreater(self.info["largest_dim_mm"], mech_outline.m("MAX_DIM_MECH001"))
+
+    def test_antenna_strip_is_free(self):
+        ax0, ay0, ax1, ay1 = mech_outline.antenna_strip()
         for ref, f in self.fps.items():
-            if ref in ("U9",) or ref.startswith("H"):
+            if ref == "U9":
                 continue
             for p in f.Pads():
                 bb = p.GetBoundingBox()
-                x0, y0, x1, y1 = (pcbnew.ToMM(v) for v in (bb.GetX(), bb.GetY(), bb.GetRight(), bb.GetBottom()))
-                inside = (x1 > ux - 21.6 and x0 < ux + 21.6 and y0 < uy - 5.6)
-                self.assertFalse(inside, "%s pad %s inside the antenna keep-out" % (ref, p.GetNumber()))
+                x0, x1 = (pcbnew.ToMM(v) - pcb_full.CX for v in (bb.GetX(), bb.GetRight()))
+                y0, y1 = (pcb_full.CY - pcbnew.ToMM(v) for v in (bb.GetBottom(), bb.GetY()))
+                self.assertFalse(x1 > ax0 and x0 < ax1 and y1 > ay0 and y0 < ay1, "%s pad %s" % (ref, p.GetNumber()))
+
+    def test_module_antenna_points_to_minus_x(self):
+        u9 = self.fps["U9"]
+        mx, _ = pcb_full.mech_of(pcbnew.ToMM(u9.GetPosition().x), pcbnew.ToMM(u9.GetPosition().y))
+        self.assertAlmostEqual(mx, 1.0, places=0)          # MOD_OFF
+        self.assertEqual(round(u9.GetOrientationDegrees()) % 360, pcb_full.MODULE_ROT)
+
+    def test_no_overlap_among_movable_parts(self):
+        self.assertEqual(self.info["overlap_mm2"], 0.0)
+
+    def test_no_mounting_holes(self):
+        # the mech spike holds the PCB with edge pegs and hooks, there are no mounting holes
+        self.assertFalse([r for r in self.fps if r.startswith("H")])
 
     def test_gate_layout_rules(self):
         """ADR-0016 layout rules: R3 and the readback R15 at the Q3 gate; the ILIM parts next to U7."""
@@ -125,6 +159,24 @@ class Board(unittest.TestCase):
         self.assertEqual(pcb_full.STAR["/ILIM_STEP3_EN"], ("Q3", "1"))
         for ref in ("U13", "R3", "R15", "U4"):
             self.assertIn(ref, [r for r, _ in net])
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class Stitch(unittest.TestCase):
+    def test_segment_distance(self):
+        import pcb_stitch
+        self.assertAlmostEqual(pcb_stitch.seg_dist(1, 1, 0, 0, 2, 0), 1.0)
+        self.assertAlmostEqual(pcb_stitch.seg_dist(-3, 0, 0, 0, 2, 0), 3.0)
+
+    def test_unconnected_pad_parser(self):
+        import pcb_stitch
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "drc.json"
+            f.write_text(json.dumps({"unconnected_items": [{"items": [
+                {"description": "Pad 3 [GND] of U11 on F.Cu"}, {"description": "Zone [GND] on B.Cu, priority 1"}]},
+                {"items": [{"description": "PTH pad A5 [/CC1] of J1"}, {"description": "Pad 1 [+5V] of C8 on B.Cu"}]}]}))
+            got = pcb_stitch.unconnected_pads(str(f), ("GND", "+5V"))
+        self.assertEqual(got, {("U11", "3"): ("GND", "F.Cu"), ("C8", "1"): ("+5V", "B.Cu")})
 
 
 if __name__ == "__main__":
