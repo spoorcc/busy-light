@@ -77,6 +77,20 @@ class FullBoard(unittest.TestCase):
         for r in ("R_ILIM1", "R_ILIM2", "R_ILIM3"):
             self.assertIn(self.pin_net[(r, "1")] if r == "R_ILIM1" else self.pin_net[(r, "2")], ("ILIM",))
 
+    def test_switch_and_buffer_pins_follow_the_datasheets(self):
+        """TPS2553 DBV (SLVS841G tab. 5-1): 1 IN, 2 GND, 3 EN, 4 FAULT, 5 ILIM, 6 OUT.
+        SN74LVC1G125 / SN74AHCT1G125 DBV (SCES223U / SCLS378P): 1 OE, 2 A, 3 GND, 4 Y, 5 VCC."""
+        pn = self.pin_net
+        self.assertEqual([pn[("U7", str(i))] for i in (1, 2, 3, 4, 5, 6)],
+                         ["VBUS_IC", "GND", "VBUS_IC", "FAULT_N", "ILIM", "+5V"])
+        self.assertEqual([pn[("U10", str(i))] for i in (1, 2, 3, 4, 5)],
+                         ["GND", "HOLD_OK", "GND", "HOLD_OK_RB", "+3V3"])
+        self.assertEqual([pn[("U11", str(i))] for i in (1, 2, 3, 4, 5)],
+                         ["GND", "LED_DATA", "GND", "LED_BUF", "+5V"])
+        for ref in ("U10", "U11"):
+            self.assertEqual(layout_full.PARTS[ref][2], "Package_TO_SOT_SMD:SOT-23-5")
+        self.assertEqual(layout_full.PARTS["U7"][2], "Package_TO_SOT_SMD:SOT-23-6")
+
     def test_gate_inputs_and_readbacks(self):
         for g in ("U3", "U4"):
             self.assertEqual(self.pin_net[(g, "1")], "CC_OK_1A5")

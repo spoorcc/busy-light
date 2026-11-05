@@ -295,7 +295,7 @@ def _build():
     s.caption("CC detection and gate (ADR-0016): OUT1_N low = 1.5 A or more advertised", gx(38.1), 31.0)
     s.caption("Gate: step enable = select AND CC OK AND hold-off done", gx(128.27), 25.4)
     s.caption("Hold-off after VBUS returns (HW-010: 200 to 600 ms)", gx(38.1), 111.76)
-    s.caption("Current limit: TPS2553 (ADR-0010 option A); pin order not read", 262, 8)
+    s.caption("Current limit: TPS2553 (ADR-0010 option A); pins per SLVS841G", 262, 8)
     s.caption("3.3 V regulator (part not chosen)", 305, 78)
     s.caption("TUSB321: only pins 7, 8 numbered", gx(38.1), 99.0, 1.27)
     s.caption("TPS3840DL40 is a candidate, not chosen", gx(38.1), 164.0, 1.27)
