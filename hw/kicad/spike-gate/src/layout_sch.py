@@ -74,7 +74,7 @@ PLACE = {
     "Q2": (210.82, 50.8, 0), "R_ILIM2": (213.36, 41.91, 180),
     "U4": (162.56, 91.44, 0), "R5": (137.16, 100.33, 0), "R3": (198.12, 95.25, 0),
     "Q3": (210.82, 91.44, 0), "R_ILIM3": (213.36, 82.55, 180),
-    "U5": (50.8, 137.16, 0), "R6": (76.2, 130.81, 0), "C1": (78.74, 146.05, 0),
+    "U5": (50.8, 137.16, 0), "R6": (76.2, 130.81, 0), "C1": (78.74, 146.05, 0), "C1B": (86.36, 146.05, 0),
 }
 # where the reference and value text goes: (dx, dy, justify) relative to the part
 TEXT = {"U1": (-2.54, -13.97, "right"), "U5": (-2.54, -13.97, "right"),
@@ -285,8 +285,11 @@ def build(netlist_text):
     s.label("HOLD_OK", 101.6, rs[1])
     ct = P("U5", 5)
     s.wire(ct, P("C1", 1))
+    s.wire(P("C1", 1), P("C1B", 1))
+    s.junction(*P("C1", 1))
     s.label("SUP_CT", 68.58, ct[1])
     s.power("GND", *P("C1", 2))
+    s.power("GND", *P("C1B", 2))
 
     # rails (power flags, as in the SKiDL fragment)
     for k, (net, x, y) in enumerate((("VBUS_IC", 180.34, 127.0), ("+3V3", 180.34, 139.7),

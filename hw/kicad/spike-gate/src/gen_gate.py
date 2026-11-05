@@ -66,7 +66,10 @@ sup[2] += VBUS         # VDD / sense
 sup[3] += GND
 sup[4] += Net("SUP_MR_NC")
 sup[5] += ct           # delay capacitor
-c_ct = Part("Device", "C", ref="C1", value="620n C0G 5%", footprint="Capacitor_SMD:C_0603_1608Metric")
+c_ct = Part("Device", "C", ref="C1", value="470n C0G 5% 25V", footprint="Capacitor_SMD:C_1206_3216Metric")
+c_ctb = Part("Device", "C", ref="C1B", value="150n C0G 5% 50V", footprint="Capacitor_SMD:C_1206_3216Metric")
+c_ctb[1] += ct
+c_ctb[2] += GND
 c_ct[1] += ct
 c_ct[2] += GND
 r_hp = Part("Device", "R", ref="R6", value="150k", footprint="Resistor_SMD:R_0603_1608Metric")

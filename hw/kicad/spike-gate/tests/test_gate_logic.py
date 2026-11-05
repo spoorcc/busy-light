@@ -129,6 +129,8 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(self.nets, "U5", "1"), "HOLD_OK")                   # RESET
         self.assertEqual(net_of(self.nets, "U5", "3"), "GND")
         self.assertEqual(net_of(self.nets, "C1", "2"), "GND")
+        self.assertEqual(net_of(self.nets, "C1B", "1"), net_of(self.nets, "U5", "5"))   # parallel C0G part
+        self.assertEqual(net_of(self.nets, "C1B", "2"), "GND")
 
     def test_no_single_pin_named_nets_except_placeholders(self):
         # Review finding: Net("ILIM") created twice gave two one-pin nets that parity ignored.
