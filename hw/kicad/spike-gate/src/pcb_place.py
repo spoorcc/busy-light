@@ -10,6 +10,10 @@ by the board tests afterwards.
 import math
 import random
 
+# Lowest overlap weight used by cost_of (plan 06 T13): with the early annealing weight (2.0) a small overlap cost less
+# than a longer wire, so the placer accepted overlaps. The schedule pen0..pen1 in run() is unchanged.
+OVERLAP_PEN_FLOOR = 2000.0
+
 
 def rot_xy(dx, dy, rot):
     """KiCad rotation by `rot` degrees (multiples of 90), counter-clockwise on screen with y down."""
@@ -99,7 +103,7 @@ class Placer:
         c = 0.0
         for n in self.net_of.get(ref, ()):
             c += self.net_hpwl(n)
-        return c + pen * self.part_overlap(ref, st)
+        return c + max(pen, OVERLAP_PEN_FLOOR) * self.part_overlap(ref, st)
 
     # ---- annealing
     def init_state(self):

@@ -205,7 +205,7 @@ LAYOUT_RULES = (("R3", "Q3", 6.0), ("R2", "Q2", 6.0), ("R_ILIM1", "U7", 15.0), (
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 16.6                 # movable parts stay inside this radius (the LED ring pads start at about 17.8)
 SA_ITERS = 160000
-SA_SEEDS = tuple(range(1, 7))
+SA_SEEDS = tuple(range(1, 17))      # seed 12 is the first that is overlap-free and meets LAYOUT_RULES with OVERLAP_PEN_FLOOR
 
 
 def K(mx, my):

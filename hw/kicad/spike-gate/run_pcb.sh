@@ -31,6 +31,7 @@ rm -rf "$OUT/b"
 cp -f "$IN/full.kicad_sch" "$OUT/a/busy_light_spike.kicad_sch"
 
 # Strict DRC (no `| tail`): a finding that is not in known-open-violations.json fails the script.
+# SPIKE_ALLOW_KNOWN_OPEN=0 (plan 06 T8): the waiver list is ignored except the `strict_allow` key of the profile.
 export SPIKE_ALLOW_KNOWN_OPEN=${SPIKE_ALLOW_KNOWN_OPEN:-1}
 "$PY" "$HERE/src/kicad_strict.py" drc "$OUT/a/busy_light_spike.kicad_pcb" "placed-${LAYERS}l" --out "$OUT/a/drc_placed.json"
 
@@ -42,6 +43,7 @@ if [ -n "$FREEROUTING_JAR" ]; then
   cp -f "$OUT/a/busy_light_spike.kicad_pro" "$OUT/a/routed.kicad_pro"
   cp -f "$IN/full.kicad_sch" "$OUT/a/routed.kicad_sch"
   "$PY" "$HERE/src/kicad_strict.py" drc "$OUT/a/routed.kicad_pcb" "routed-${LAYERS}l" --out "$OUT/a/drc_routed.json"
-  "$PY" "$HERE/src/pcb_check.py" "$NET" "$OUT/a/routed.kicad_pcb" "$OUT/a/drc_routed.json" > "$OUT/a/check_routed.json" 2>/dev/null || true
+  "$PY" "$HERE/src/pcb_check.py" "$NET" "$OUT/a/routed.kicad_pcb" "$OUT/a/drc_routed.json" > "$OUT/a/check_routed.json" 2>/dev/null \
+    || { echo "pad-net comparison (M3) FAILED: see $OUT/a/check_routed.json"; exit 1; }
   echo "wrote $OUT/a/check_routed.json"
 fi

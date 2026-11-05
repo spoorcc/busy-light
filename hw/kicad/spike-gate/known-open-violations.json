@@ -57,8 +57,36 @@
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       },
       "footprint_symbol_mismatch": {
-        "max": 13,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "max": 29,
+        "reason": "stand-in footprints that differ from the schematic footprint field: U1, U8, U9, C1, C1B, C3, C4, test points, mounting holes and the 16 ring LEDs D1 to D16 (2020 LED stand-in, plan 06 section 5); only these refs are tolerated; spike only, not an acceptance of the parts",
+        "dev": "DEV-001",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ]
       },
       "isolated_copper": {
         "max": 1,
@@ -70,7 +98,35 @@
       },
       "net_conflict": {
         "max": 84,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ],
+        "dev": "DEV-001"
       },
       "silk_edge_clearance": {
         "max": 46,
@@ -115,8 +171,36 @@
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       },
       "footprint_symbol_mismatch": {
-        "max": 13,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "max": 29,
+        "reason": "stand-in footprints that differ from the schematic footprint field: U1, U8, U9, C1, C1B, C3, C4, test points, mounting holes and the 16 ring LEDs D1 to D16 (2020 LED stand-in, plan 06 section 5); only these refs are tolerated; spike only, not an acceptance of the parts",
+        "dev": "DEV-001",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ]
       },
       "lib_footprint_issues": {
         "max": 86,
@@ -124,7 +208,35 @@
       },
       "net_conflict": {
         "max": 84,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
+        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine",
+        "refs": [
+          "U1",
+          "U8",
+          "U9",
+          "C1",
+          "C1B",
+          "C3",
+          "C4",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "D10",
+          "D11",
+          "D12",
+          "D13",
+          "D14",
+          "D15",
+          "D16",
+          "TP*",
+          "H*"
+        ],
+        "dev": "DEV-001"
       },
       "silk_edge_clearance": {
         "max": 46,
