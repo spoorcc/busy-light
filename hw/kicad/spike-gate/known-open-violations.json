@@ -5,27 +5,11 @@
       "ignored_checks": {
         "max": 4,
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
-      },
-      "footprint_link_issues": {
-        "max": 89,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
-      },
-      "lib_symbol_issues": {
-        "max": 226,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       }
     },
     "gate-layout": {
       "ignored_checks": {
         "max": 4,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
-      },
-      "footprint_link_issues": {
-        "max": 21,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
-      },
-      "lib_symbol_issues": {
-        "max": 46,
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       }
     }
@@ -57,11 +41,10 @@
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       },
       "footprint_symbol_mismatch": {
-        "max": 29,
-        "reason": "stand-in footprints that differ from the schematic footprint field: U1, U8, U9, C1, C1B, C3, C4, test points, mounting holes and the 16 ring LEDs D1 to D16 (2020 LED stand-in, plan 06 section 5); only these refs are tolerated; spike only, not an acceptance of the parts",
+        "max": 26,
+        "reason": "stand-in footprints that differ from the schematic footprint field: U8, U9, C1, C1B, C3, C4, test points, mounting holes and the 16 ring LEDs D1 to D16 (2020 LED stand-in, plan 06 section 5); only these refs are tolerated; spike only, not an acceptance of the parts",
         "dev": "DEV-002",
         "refs": [
-          "U1",
           "U8",
           "U9",
           "C1",
@@ -90,10 +73,6 @@
       },
       "isolated_copper": {
         "max": 1,
-        "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
-      },
-      "lib_footprint_issues": {
-        "max": 86,
         "reason": "recorded at consolidation 2026-11-05 from the spike output; cause not analysed; open item, not accepted as fine"
       },
       "net_conflict": {

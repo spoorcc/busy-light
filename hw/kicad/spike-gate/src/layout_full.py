@@ -16,6 +16,7 @@ from kiutils.items.common import Position, TitleBlock
 from kiutils.items.schitems import SchematicSymbol, SymbolProjectInstance, SymbolProjectPath
 
 import layout_sch as L
+import lib_tables
 import write_sch as w
 
 GRID = 1.27
@@ -52,7 +53,7 @@ LED = ("LED", "WS2812B", "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
 PARTS = {  # ref: (lib, part, footprint, value)
     "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "Connector_USB:USB_C_Receptacle_GCT_USB4085", "USB-C receptacle"),
     "TVS1": (*TVS, "TVS"), "U6": ("Power_Protection", "USBLC6-2P6", "Package_TO_SOT_SMD:SOT-666", "USBLC6-2P6"),
-    "U1": (None, None, "Package_X2QFN:X2QFN-12", "TUSB321"),
+    "U1": (None, None, "CUSTOM:X2QFN-12_RWB", "TUSB321"),   # generated footprint, no X2QFN footprint in the KiCad libraries
     "R_VD": (*R, "887k"), "R1": (*R, "100k"), "R7": (*R, "100k"),
     "U2": (*G04, "74LVC1G04"), "U12": (*G04, "74LVC1G04"),
     "U13": (*G02, "74LVC1G02"),
@@ -71,7 +72,7 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "C2": (*C, "1u tbd"), "C3": (*C, "10u tbd"), "R8": (*R, "100k"),
     "U8": (None, None, "", "REG_3V3"),
     "C5": (*C, "tbd"), "C6": (*C, "tbd"),
-    "U9": (None, None, "RF_Module:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),
+    "U9": (None, None, "", "ESP32-C3-MINI-1"),    # no ESP32-C3-MINI-1 footprint in the KiCad libraries; pcb_full places a stand-in
     "R9": (*R, "10k"), "C7": (*C, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
@@ -720,6 +721,7 @@ def _build():
 def write(out_path, intent_path=None):
     sch, intent = build()
     sch.to_file(out_path)
+    lib_tables.write_schematic_project(out_path)
     if intent_path:
         with open(intent_path, "w", encoding="utf-8") as f:
             json.dump({k: sorted(v) for k, v in sorted(intent.items())}, f, indent=0)

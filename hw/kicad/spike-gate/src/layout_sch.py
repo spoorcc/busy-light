@@ -18,6 +18,7 @@ from kiutils.schematic import Schematic
 from kiutils.symbol import Symbol
 from kiutils.utils import sexpr
 
+import lib_tables
 import write_sch as w
 
 NS_LIB = "busylight_gate"
@@ -184,7 +185,7 @@ class Sheet:
             inBom=False, onBoard=False, uuid=self.uid("flag", k), mirror=None,
             properties=[w.prop("Reference", ref, x, y - 2.54, 0, hide=True),
                         w.prop("Value", "PWR_FLAG", x, y - 5.08, 1, hide=True),
-                        w.prop("Footprint", "Virtual:PWR_FLAG", x, y, 2, True)],
+                        w.prop("Footprint", "", x, y, 2, True)],
             pins={"1": self.uid("flagpin")},
             instances=[SymbolProjectInstance(w.PROJECT, [SymbolProjectPath(self.root, ref, 1)])]))
 
@@ -327,6 +328,7 @@ def build(netlist_text):
 def write(netlist_path, out_path):
     with open(netlist_path, encoding="utf-8") as f:
         build(f.read()).to_file(out_path)
+    lib_tables.write_schematic_project(out_path)
 
 
 if __name__ == "__main__":
