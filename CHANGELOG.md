@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- HW-006 (Draft) no longer lists UART test points; HW-010 proposed amendment names GPIO20 and GPIO21 for the two gate-enable readbacks (owner choice "test point route", 2026-11-04; module datasheet read: pins 30 and 31 are not strapping pins; GPIO21 outputs ROM messages at start-up) (HW-006, HW-010, SW-009).
 - Reports of the gate spike moved from branch `spike/hw-gate` into `docs/verification/reports/`: gate fragment, own schematic writer, goldfish reviews of versions 2 and 3a, datasheet evidence for the gate logic, the supervisor and the inverter (HW-010, ADR-0016). The spike code stays on the branch and is not merged (ADR-0012 is Proposed).
 - Proposed amendment to HW-010 (readback inputs of the hold-off and gate enable states for SW-009); the Approved text is unchanged until the owner confirms.
 - SW-009 (follow the hardware gate state and shed load when the gate closes, Draft, needs a readback line that HW-010 does not have yet) and TC-109 stub; RISK-044 extended with the findings of the second goldfish review of the gate (SW-005, HW-010).
