@@ -274,6 +274,11 @@
           "description": "Type as the document gives it, mapped to: input, output, io, power, ground, open_drain, nc, passive, other.",
           "enum": ["input", "output", "io", "power", "ground", "open_drain", "nc", "passive", "other"]
         },
+        "aliases": {
+          "description": "Other names the schematic symbol may use for this pin (for example GPIO0 for IO0). Used only by the netlist comparison.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "function": { "description": "Short function text in own words (not a quote).", "type": "string", "maxLength": 200 },
         "source": { "$ref": "#/$defs/sourcePartial" }
       }

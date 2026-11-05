@@ -251,17 +251,25 @@ def pin_report(
     if not table:
         return 0
     mismatches = 0
+    by_number: set[str] = {p["pin"] for p in table}
+    by_name: set[str] = {p["name"] for p in table} | {a for p in table for a in p.get("aliases", [])}
     for ref in part["used_in"]:
         net_pins = pins_by_ref.get(ref)
         if net_pins is None:
             continue
-        known = {p["pin"] for p in table} | {p["name"] for p in table}
         in_net = {pin for pin, _fn in net_pins}
+        name_only = sorted(pin for pin in in_net if pin not in by_number and pin in by_name)
+        if name_only:
+            lines.append(
+                f"  {ref}: {len(name_only)} pin(s) identified by name, not by number "
+                f"(pad numbers are not checked): {', '.join(name_only)}"
+            )
         for pin, fn in sorted(net_pins):
-            if pin not in known:
+            if pin not in by_number and pin not in by_name:
                 mismatches += 1
                 lines.append(f"  {ref}: netlist pin '{pin}' ({fn}) is not in the {part['mpn']} table")
-        missing = [p["pin"] for p in table if p["pin"] not in in_net and p["name"] not in in_net]
+        covered = {p["pin"] for p in table if p["pin"] in in_net or {p["name"], *p.get("aliases", [])} & in_net}
+        missing = [p["pin"] for p in table if p["pin"] not in covered]
         if missing:
             lines.append(f"  {ref}: table pins not in the netlist: {', '.join(sorted(missing))}")
     return mismatches
