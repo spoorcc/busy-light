@@ -167,6 +167,24 @@ A leads B by 6 points, which is within my scoring error. Sensitivity: if the wei
 - Option C: `hw/sim/analysis-ilim-switch-leakage.md` bounds the BSS138 and AO3400A leakage from their datasheets (BSS138: 100 nA at 30 V, 0.5 uA at 50 V; AO3400A: 1 uA at 30 V). The BSS138 fits the 118 nA budget only if the ILIM node is about 0.85 V or more and the part stays near 25 degC; no datasheet states the leakage at the ILIM voltage.
 - Evidence: `docs/journal/2026-11-06-decisions-and-live-stock.md`. Not run: no bench, no SPICE.
 
+### Update 2026-11-06 (RV-010 finding 1): truth table over the supply states, status Proposed
+The text above says an unpowered or failed IC "reads default", so the gate stays off. That overstates the fail-safe. With VBUS gone and 3V3 present the open-drain IC outputs are low and the 3V3 inverter turns that into "1.5 A seen". The table below states what holds each enable low. It follows the spike netlist (`hw/kicad/spike-gate/src/gen_gate.py`: a 3-input AND per step of select line, CC OK and hold-off done; step 2 also forced off by step 3). It is a desk statement and is verified against the schematic and the bench (TC-210) before approval.
+
+| State | CC OK signal | Hold-off (HOLD_OK) | Select GPIO | Enable | What holds it off |
+|---|---|---|---|---|---|
+| VBUS 0 V, 3V3 present | reads high (IC unpowered, outputs low, inverted) | low (supervisor off) | any | off | hold-off only |
+| VBUS_IC below the supervisor release (4.0 V part, release 4.115 to 4.285 V) | undefined | low | any | off | hold-off only |
+| VBUS_IC between release and 4.5 V (IC below its minimum supply) | undefined, not stated by the datasheet | runs, then releases after 203 to 553 ms | high | **not guaranteed off** | nothing; open point M4, bench sag test |
+| VBUS_IC 4.5 V or more, inside the hold-off | undefined until the first debounce (133 ms typical) | low | any | off | hold-off only |
+| VBUS_IC 4.5 V or more, after the hold-off, default-current source | "not 1.5 A" | high | high | off | the IC reading |
+| same, source advertises 1.5 A | "1.5 A" | high | low | off | the firmware |
+| same, source advertises 1.5 A | "1.5 A" | high | high | on | (intended) |
+| 3V3 absent, VBUS present | any | any | undefined | off | pull-down on the gate input; not yet verified for the unpowered AND gate |
+| IC output stuck or misclassifying | wrong | high | high | on | not covered (RISK-042) |
+| AND output stuck high, or select switch shorted | any | any | any | on | not covered (RISK-029) |
+
+Consequences for the text above: item 4 ("the pull-ups read default") holds only while the IC is powered. For the first four rows the hold-off is the single element that keeps the step off, so its failure modes (supervisor output stuck high, delay capacitor short) are fault-injection rows in TC-210, and the firmware treats the CC OK inputs as valid only while HOLD_OK_RB is high (SW-009 Proposed). The row between release and 4.5 V is the weakest and has no design answer yet.
+
 ### Consequences
 - Positive: the leakage of the select switch leaves the margins unchanged (0.2 nA against 118 nA); the 2N7002 problem of HW-010 is removed on paper; the fallback is a drop-in on one package change.
 - **Negative / trade-offs accepted:** a rated maximum is exceeded at every power-up on a safety-relevant limit with no datasheet support, accepted for the prototype only (DEV-001); two Extended parts or more, per-type fee not checked, stock not verified (earlier undated snippets showed TMUX1101DCKR out of stock and TS5A3166 at 0 stock); small step margins (6.4 to 15.2 mA) that rest on 0.1 % resistors and unmodelled temperature effects; more parts in the hold-off (six capacitors) and a minimum hold-off margin of 3.2 ms.
