@@ -3,7 +3,7 @@
 - **Status:** Accepted (by the owner, Ben Spoor, 2026-11-04, on explicit instruction in the session; option B). Replaces the sensing decision of ADR-0009 (option A) and the hardware-backstop wording of ADR-0010. Accepted before its own goldfish review; the review RV-008 followed and its amendments are listed below.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); based on review RV-006 findings S1, S2 and S7; this ADR itself was accepted before its own review; a goldfish review of ADR-0015 and ADR-0016 is recorded as RV-008
-- **Related:** SYS-020, HW-003, HW-010, RISK-003, RISK-024, RISK-025, RISK-029, ADR-0004, ADR-0009, ADR-0010; RV-006; `docs/verification/reports/spike-7-5-power-budget-paper.md`
+- **Related:** SYS-020, HW-003, HW-010, RISK-003, RISK-024, RISK-025, RISK-029, RISK-042, RISK-044, RISK-045, DEV-001, ADR-0004, ADR-0009, ADR-0010, ADR-0015; RV-006, RV-008, RV-010; `docs/verification/reports/spike-7-5-power-budget-paper.md`
 
 ## Context and problem
 ADR-0010 puts a current-limited load switch in the VBUS path: 500 mA at power-up, raised in steps by a firmware GPIO. Review RV-006 (finding S1) found that this does **not** protect a source that advertises only 500 mA if the firmware misreads the CC voltage and then raises the limit itself, because the same firmware decides both. It protects against a stopped, reset or never-started firmware and against a short circuit. The owner asked for a hardware limit because of this concern (SYS-020, owner decision 2026-11-04), so the gap is exactly the case the owner cares about. Finding S2 adds that a hung firmware with the GPIO high keeps the high step.
@@ -147,7 +147,7 @@ Scores 0 to 5, my judgement. Evidence: analysis report sections 3 to 5 and adden
 | Drive from 2.9 V / 2.5 V gate (3) | 5 | 3 | 2 | 3 (not re-assessed) |
 | Availability, class, fee (3) | 2 | 2 | 2 | 3 (not checked) |
 | Package and assembly (2) | 3 | 4 | 5 | 5 |
-| **Weighted sum (max 110)** | **81** | 75 | 60 | 53 |
+| **Weighted sum (max 110)** | **81** | 75 | 57 | 53 |
 
 A leads B by 6 points, which is within my scoring error. Sensitivity: if the weight of "behaviour with 3V3 off" rises from 4 to 7 the two tie, and above that B leads. The table therefore depends on how the 3V3-off condition is judged. The recommendation is conditional (see Decision).
 
