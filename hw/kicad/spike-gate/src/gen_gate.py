@@ -66,12 +66,13 @@ sup[2] += VBUS         # VDD / sense
 sup[3] += GND
 sup[4] += Net("SUP_MR_NC")
 sup[5] += ct           # delay capacitor
-c_ct = Part("Device", "C", ref="C1", value="470n C0G 5% 25V", footprint="Capacitor_SMD:C_1206_3216Metric")
-c_ctb = Part("Device", "C", ref="C1B", value="150n C0G 5% 50V", footprint="Capacitor_SMD:C_1206_3216Metric")
-c_ctb[1] += ct
-c_ctb[2] += GND
-c_ct[1] += ct
-c_ct[2] += GND
+# Hold-off capacitor set (owner decision 2026-11-05 (c)): 220 + 220 + 100 + 68 nF C0G 5 % 1206 in parallel
+# (window 205.9 to 560.6 ms, sim/holdoff_cap.py).
+for _ref, _val in (("C1", "220n C0G 5% 50V"), ("C1B", "220n C0G 5% 50V"),
+                   ("C1C", "100n C0G 5% 50V"), ("C1D", "68n C0G 5% 50V")):
+    _c = Part("Device", "C", ref=_ref, value=_val, footprint="Capacitor_SMD:C_1206_3216Metric")
+    _c[1] += ct
+    _c[2] += GND
 r_hp = Part("Device", "R", ref="R6", value="150k", footprint="Resistor_SMD:R_0603_1608Metric")
 r_hp[1] += VBUS
 r_hp[2] += hold_ok
@@ -105,16 +106,29 @@ for ref, net in (("R2", en2), ("R3", en3), ("R4", sel2), ("R5", sel3)):
     r[1] += net
     r[2] += GND
 
-# Limit-resistor switches (ILIM network of ADR-0010 option A; values are placeholders).
+# Limit-resistor switches (ILIM network of ADR-0010 option A). Owner decision 2026-11-05 (a): TMUX1101DCKR
+# (LCSC C2673506, SC70-5) instead of the 2N7002. Pins (SCDS410D tab. 5-1, DCK): 1 D, 2 S, 3 GND, 4 SEL, 5 VDD;
+# SEL high = switch on. The gate output drives SEL; a 100 kohm pull-down on SEL makes an open gate output mean "off".
+# Decision (b): R_ILIM 0.1 % 0603: step 1 47.0 k (full board only), step 2 56.9 k, step 3 27.7 k, single parts
+# (owner decision 2026-11-06; 56.9 k and 27.7 k at 0.1 % 0603 have no confirmed LCSC/JLCPCB source).
 ilim = Net("ILIM")  # one net for both switched resistors (review finding: it was created twice)
-for tag, en in (("2", en2), ("3", en3)):
-    q = Part("Transistor_FET", "2N7002", ref=f"Q{tag}", footprint="Package_TO_SOT_SMD:SOT-23")
-    rl = Part("Device", "R", ref=f"R_ILIM{tag}", value="PLACEHOLDER",
-              footprint="Resistor_SMD:R_0603_1608Metric")
-    q["G"] += en
-    q["S"] += GND
-    q["D"] += rl[1]
-    rl[2] += ilim
+for sw, en, rl, rl_val, cap, rpd in (("U14", en2, "R_ILIM2", "56.9k 0.1%", "C24", "R18"),
+                                     ("U15", en3, "R_ILIM3", "27.7k 0.1%", "C25", "R19")):
+    q = Part("Connector_Generic", "Conn_01x05", ref=sw, value="TMUX1101DCKR",
+             footprint="Package_TO_SOT_SMD:SOT-353_SC-70-5")
+    r = Part("Device", "R", ref=rl, value=rl_val, footprint="Resistor_SMD:R_0603_1608Metric")
+    q[4] += en         # SEL
+    q[2] += GND        # S: the low side of the switched resistor
+    q[3] += GND
+    q[5] += V3         # VDD
+    q[1] += r[1]       # D: switch - resistor - ILIM
+    r[2] += ilim
+    c = Part("Device", "C", ref=cap, value="100n", footprint="Capacitor_SMD:C_0603_1608Metric")
+    c[1] += V3
+    c[2] += GND
+    rd = Part("Device", "R", ref=rpd, value="100k", footprint="Resistor_SMD:R_0603_1608Metric")
+    rd[1] += en
+    rd[2] += GND
 
 if __name__ == "__main__":
     out = sys.argv[1]

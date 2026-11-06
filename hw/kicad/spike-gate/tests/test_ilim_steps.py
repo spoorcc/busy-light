@@ -71,16 +71,58 @@ class Search(unittest.TestCase):
         self.assertEqual(il.candidate_b(), il.candidate_b())
 
 
+class TmuxCandidate(unittest.TestCase):
+    """Owner decisions 2026-11-05: R_ILIM 47.0 k, 56.9 k, 27.7 k (0.1 %, 0603; 56.9 k and 27.7 k unsourced) and TMUX1101 select switches."""
+
+    def test_candidate_values(self):
+        r1, r2, r3 = il.candidate_c()
+        self.assertEqual((r1, r2), (47.0, 56.9))
+        self.assertAlmostEqual(r3, 27.7, places=6)
+
+    def test_switch_numbers_are_the_datasheet_limits(self):
+        # TMUX1101 SCDS410D tab. 6.6: off leakage 0.2 nA to 85 degC; ron 9.5 ohm to 85 degC
+        self.assertEqual(il.TMUX_LEAK_A, 0.2e-9)
+        self.assertEqual(il.TMUX_RDS_ON_MAX_OHM, 9.5)
+
+    def test_windows_of_the_three_steps(self):
+        w = il.step_windows(*il.candidate_c(), il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        self.assertAlmostEqual(w["1"][0], 504.2, delta=0.6)
+        self.assertAlmostEqual(w["1"][1], 616.6, delta=0.6)
+        self.assertAlmostEqual(w["2"][0], 929.6, delta=0.6)
+        self.assertAlmostEqual(w["2"][1], 1085.9, delta=0.6)
+        self.assertAlmostEqual(w["3"][0], 1381.2, delta=0.6)
+        self.assertAlmostEqual(w["3"][1], 1566.7, delta=0.6)
+
+    def test_hw010_numbers_met(self):
+        mg = il.margins(*il.candidate_c(), il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        self.assertTrue(all(v > 0 for v in mg.values()), mg)
+        self.assertLess(min(mg.values()), 10.0)   # still thin
+
+    def test_step_2_inside_the_proposed_window(self):
+        w = il.step_windows(*il.candidate_c(), il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        self.assertGreaterEqual(w["2"][0], il.STEP2_BAND_MA[0])
+        self.assertLessEqual(w["2"][1], il.STEP2_BAND_MA[1])
+        self.assertEqual(il.STEP2_BAND_MA, (850.0, 1150.0))
+
+    def test_both_on_is_still_above_the_top_limit(self):
+        # the extra state must be excluded by the gate logic (U13), the resistors alone do not exclude it
+        r1, r2, r3 = il.candidate_c()
+        both = il.three_steps(r1, r2, r3, il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)["both"]
+        self.assertGreater(both[2], il.STEP3_MAX_MA)
+
+
 class Generator(unittest.TestCase):
-    def test_generator_values_are_tbd_or_a_checked_set(self):
+    def test_generator_values_are_the_checked_set(self):
         P = layout_full.PARTS
-        vals = [P[k][-1] for k in ("R_ILIM1", "R_ILIM2", "R_ILIM3")]
-        if all(v == "tbd" for v in vals):
-            return
-        r1, r2, r3 = (ohms(v) / 1e3 for v in vals)
-        for tol in (il.TOL_01PCT,):
-            mg = il.margins(r1, r2, r3, tol, leak_a=0.0)
-            self.assertTrue(all(v >= 0 for v in mg.values()), (vals, mg))
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
+                         ("47.0k 0.1%", "56.9k 0.1%", "27.7k 0.1%"))
+        self.assertNotIn("R_ILIM3B", P)
+        r1, r2 = ohms(P["R_ILIM1"][-1]) / 1e3, ohms(P["R_ILIM2"][-1]) / 1e3
+        r3 = ohms(P["R_ILIM3"][-1]) / 1e3
+        self.assertEqual((r1, r2), il.candidate_c()[:2])
+        self.assertAlmostEqual(r3, il.candidate_c()[2], places=6)
+        mg = il.margins(r1, r2, r3, il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        self.assertTrue(all(v >= 0 for v in mg.values()), mg)
 
 
 if __name__ == "__main__":

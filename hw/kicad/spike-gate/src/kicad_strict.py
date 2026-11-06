@@ -8,9 +8,11 @@ kicad-cli runs with `--format json --severity-all --exit-code-violations` (ERC) 
 `--schematic-parity --refill-zones` (DRC). Every violation, warning and unconnected item counts.
 
 Two modes, chosen by the environment variable SPIKE_ALLOW_KNOWN_OPEN:
-  0 (default of this program)  strict: any violation fails.
+  0 (default of this program)  strict: any violation fails, except the classes of the profile's `strict_allow` key
+     (maximum, reason and, where given, an allow-list of refs; plan 06).
   1 (default of the run_*.sh scripts while the spike is open)  a violation type is tolerated only
-     when `known-open-violations.json` lists it for the profile with a reason and a maximum count;
+     when `known-open-violations.json` lists it for the profile with a reason and a maximum count (and, when the
+     entry has `refs`, only for items on those refs; `*` suffix patterns allowed);
      a type that is not listed, or a count above the maximum, fails. Tolerated items are printed.
 Exit codes: 0 pass, 1 violations not tolerated, 2 kicad-cli did not run or the report is unusable.
 The allow-list is a waiver list: changing it needs the owner (see docs/process/hw-generated-design-guardrails.md).
@@ -19,8 +21,10 @@ The allow-list is a waiver list: changing it needs the owner (see docs/process/h
 from __future__ import annotations
 
 import collections
+import fnmatch
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -61,6 +65,53 @@ def tally(report: dict, kind: str) -> collections.Counter:
     return c
 
 
+def ref_ok(ref: str, patterns: list[str]) -> bool:
+    """A ref is allowed when it equals a listed ref or matches a listed `*`-suffix pattern (for example `TP*`)."""
+    return any(ref == p or (p.endswith("*") and fnmatch.fnmatchcase(ref, p)) for p in patterns)
+
+
+def item_refs(violation: dict) -> set[str]:
+    """Reference designators named by the items of one DRC finding (`Footprint U1`, `Pad 1 [/NET] of U1 on F.Cu`)."""
+    refs: set[str] = set()
+    for it in violation.get("items", []):
+        desc = it.get("description", "")
+        m = re.match(r"Footprint (\S+)", desc) or re.search(r" of (\S+)", desc)
+        if m:
+            refs.add(m.group(1))
+    return refs
+
+
+def foreign_refs(report: dict, kind: str, allowed: dict[str, dict]) -> dict[str, set[str]]:
+    """For classes whose entry has `refs` (all refs of a finding must be listed) or `refs_any` (one listed ref is enough):
+    the refs of findings that fail, per class."""
+    bad: dict[str, set[str]] = {}
+    if kind != "drc":
+        return bad
+    for key in ("violations", "unconnected_items", "schematic_parity"):
+        items = report.get(key, [])
+        if not isinstance(items, list):
+            continue
+        for v in items:
+            entry = allowed.get(v.get("type", ""))
+            if entry is None or not ("refs" in entry or "refs_any" in entry):
+                continue
+            found = item_refs(v)
+            if "refs_any" in entry:      # pair findings: tolerated when at least one ref is listed (for example U9)
+                extra = set() if any(ref_ok(r, entry["refs_any"]) for r in found) else found
+            else:
+                extra = {r for r in found if not ref_ok(r, entry["refs"])}
+            if extra:
+                bad.setdefault(v["type"], set()).update(extra)
+    return bad
+
+
+def allowed_for(profile_entry: dict, strict: bool) -> dict[str, dict]:
+    """Strict mode reads only the `strict_allow` key of the profile; the known-open mode reads the whole profile."""
+    if strict:
+        return dict(profile_entry.get("strict_allow", {}))
+    return {k: v for k, v in profile_entry.items() if k != "strict_allow"}
+
+
 def judge(counts: collections.Counter, allowed: dict[str, dict], strict: bool) -> tuple[int, list[str]]:
     lines: list[str] = []
     bad = 0
@@ -96,10 +147,11 @@ def main(argv: list[str]) -> int:
         except (ValueError, KeyError) as exc:
             print(f"{kind.upper()} NOT RUN: report unusable ({exc})")
             return 2
-    allowed = {}
-    if not strict:
-        allowed = json.loads(ALLOW_FILE.read_text())[kind].get(profile, {})
-    bad, lines = judge(counts, allowed, strict)
+    allowed = allowed_for(json.loads(ALLOW_FILE.read_text())[kind].get(profile, {}), strict)
+    bad, lines = judge(counts, allowed, False)
+    for typ, refs in sorted(foreign_refs(report, kind, allowed).items()):
+        lines.append(f"FAIL {typ}: refs not in the allow-list: {', '.join(sorted(refs))}")
+        bad += 1
     total = sum(counts.values())
     # kicad-cli's own exit code must agree with the tally: exit 5 with an empty tally means a parse gap.
     if rc == VIOLATION_EXIT and total == 0:

@@ -4,9 +4,23 @@ drives or pulls up the net, versus the 2N7002 Vgs(th). Analysis, not a measureme
 Sources: ESP32-C3 datasheet Table 5-4 (VIH 0.75 VDD, VIL 0.25 VDD, VOH 0.8 VDD, RPU 45 kohm typ),
 TRM Table 5.12-1 (GPIO20 reset 3 = IE+WPU, GPIO21 reset 4 = OE+WPU); 2N7002 Vgs(th) from a
 secondary copy of the Nexperia datasheet (1.0 / 2.0 / 2.5 V at 25 C, 0.6 V min at 150 C): ASSUMPTION."""
+# TMUX1101 SEL (U14, U15; owner decision 2026-11-05 (a)), SCDS410D tab. 6.6, VDD 3.3 V +-10 %, -40 to +125 degC:
+TMUX_VIL_MAX = 0.8        # V, input low max
+TMUX_VIH_MIN = 1.35       # V, input high min
+TMUX_IIH_HOT_A = 0.05e-6  # A, input leakage max -40 to +125 degC
+R_OUT_ASSUMED_OHM = 100.0  # ASSUMPTION: 74LVC1G11 output resistance at 3.0 V; not read from the datasheet here
 VTH_MIN_HOT = 0.6
 VTH_MIN = 1.0
 VTH_MAX_COLD = 2.75
+
+
+def parallel(a, b):
+    return a * b / (a + b)
+
+
+def gate_high_level(vdd, r_out, r_pd):
+    """Net voltage with the gate output high: output resistance into the pull-down (R2 or R3 in parallel with R18 or R19)."""
+    return vdd * r_pd / (r_pd + r_out)
 
 
 def open_gate_cases(r_series, r_pd, vdd=3.6, rpu=(30e3, 45e3, 70e3)):
@@ -24,8 +38,10 @@ def pin_level_gate_low(r_series, vdd=3.0, rpu=45e3, vnet=0.1):
 
 
 if __name__ == "__main__":
-    for rs, rpd in ((1e3, 100e3), (100e3, 10e3)):
+    for rs, rpd in ((1e3, 100e3), (100e3, 10e3), (100e3, parallel(10e3, 100e3)), (100e3, 100e3)):
         print(f"R_series {rs / 1e3:g}k, R_pulldown {rpd / 1e3:g}k")
         for k, v in open_gate_cases(rs, rpd).items():
             print(f"  {k}: {v:.2f} V")
+        print(f"  gate high: net {gate_high_level(3.0, R_OUT_ASSUMED_OHM, rpd):.3f} V (TMUX VIH min {TMUX_VIH_MIN} V; "
+              f"VIL max {TMUX_VIL_MAX} V for the open cases)")
         print(f"  gate low, pull-up on: pin {pin_level_gate_low(rs):.2f} V (VIL 0.75 V at 3.0 V, VIH 2.25 V)")

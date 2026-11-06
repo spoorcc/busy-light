@@ -21,7 +21,7 @@ SETS = {
     "220+220+150+33 (4 parts)": [(220e-9, .05, "GRM31C5C1H224JE02L")] * 2 +
                                 [(150e-9, .05, "GRM31C5C1H154JE02L"), (33e-9, .05, "33n C0G not checked")],
     "220+220+100+68 (4 parts)": [(220e-9, .05, "GRM31C5C1H224JE02L")] * 2 +
-                                [(100e-9, .05, "GRM31C5C1H104JA01K"), (68e-9, .05, "68n C0G not checked")],
+                                [(100e-9, .05, "GRM31C5C1H104JA01K"), (68e-9, .05, "C3216C0G1H683JT000N (stock-check-ilim-holdoff.md)")],
     "3x220 (3 parts)": [(220e-9, .05, "GRM31C5C1H224JE02L")] * 3,
 }
 

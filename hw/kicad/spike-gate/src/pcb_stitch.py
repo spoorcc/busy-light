@@ -18,9 +18,11 @@ import pcbnew
 import mech_outline as MO
 import pcb_full as P
 
-VIA_D, VIA_DRILL = 0.6, 0.3
-CLR = 0.15 + 0.06            # DRC clearance plus a margin
-TRACK_W = {"GND": 0.25, "+5V": 0.4}
+import pcb_rules as R       # noqa: E402  (rule values: pcb_rules.py)
+from pcb_rules import stitch_width   # noqa: E402
+
+VIA_D, VIA_DRILL = R.VIA_DIA, R.VIA_DRILL
+CLR = R.CLEARANCE + R.STITCH_MARGIN            # DRC clearance plus a margin
 DIST = (0.8, 1.0, 1.25, 1.6, 2.0, 2.5, 3.2)
 ANG = [i * 22.5 for i in range(16)]
 
@@ -59,7 +61,7 @@ class Stitcher:
     def free(self, x, y, r, net):
         """True when a disc of radius r at (x, y) clears all copper of other nets (all layers, conservative)."""
         mx, my = x - P.CX, P.CY - y
-        if not MO.inside_pcb(mx, my, 0.6, self.tab_r):
+        if not MO.inside_pcb(mx, my, R.STITCH_EDGE_MARGIN, self.tab_r):
             return False
         ax0, ay0, ax1, ay1 = MO.antenna_strip()
         if ax0 - r < mx < ax1 + r and ay0 - r < my < ay1 + r:
@@ -96,7 +98,7 @@ class Stitcher:
                    for i in range(1, n + 1))
 
     def stitch_pad(self, ref, num, net, layer, cx, cy, big=False):
-        w = TRACK_W.get(net, 0.25)
+        w = stitch_width(net)
         if big and self.free(cx, cy, VIA_D / 2, net):         # via in a large pad (module ground pad, vendor practice)
             self.put_via(ref, num, net, cx, cy)
             self.added.append((ref, num, net, 0.0))
@@ -133,7 +135,7 @@ def unconnected_pads(drc_path, nets):
     return out
 
 
-def main(src, drc, dst, nets=("GND", "+5V"), tab_r=None):
+def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None):
     board = pcbnew.LoadBoard(src)
     st = Stitcher(board, src)
     info = json.load(open(src.rsplit("/", 1)[0] + "/busy_light_spike.placement.json")) if tab_r is None else {"tab_r": tab_r}
@@ -161,4 +163,5 @@ def main(src, drc, dst, nets=("GND", "+5V"), tab_r=None):
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         sys.exit(__doc__)
-    main(sys.argv[1], sys.argv[2], sys.argv[3], tuple((sys.argv[4] if len(sys.argv) > 4 else "GND,+5V").split(",")))
+    rep = main(sys.argv[1], sys.argv[2], sys.argv[3], tuple((sys.argv[4] if len(sys.argv) > 4 else ",".join(R.PLANE_NET_ORDER)).split(",")))
+    sys.exit(1 if rep["failed"] else 0)      # a pad that could not be stitched is a failure (plan 06 G3)

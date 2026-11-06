@@ -40,6 +40,28 @@ class Rules(unittest.TestCase):
         self.assertGreaterEqual(pcb_rules.NET_WIDTH["+5V"], need)
 
 
+class PlacementWeights(unittest.TestCase):
+    """The gate and bypass rules are enforced by weights in the annealer, not left to chance."""
+
+    def test_rule_tables(self):
+        self.assertGreater(pcb_rules.NET_WEIGHT["/ILIM_STEP3_EN"], 1.0)
+        self.assertEqual(set(pcb_rules.PIN_TIES),
+                         {"tie:C24-U14", "tie:C25-U15"})
+        for a, b, w in pcb_rules.PIN_TIES.values():
+            self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
+            self.assertGreater(w, 1.0)
+
+    def test_weight_scales_the_wire_length_cost(self):
+        import pcb_place
+        parts = {"A": {"w": 1, "h": 1, "pads": {"1": (0, 0)}}, "B": {"w": 1, "h": 1, "pads": {"1": (0, 0)}}}
+        nets = {"n": [("A", "1"), ("B", "1")]}
+        plain = pcb_place.Placer(parts, nets, {}, [], lambda *a: True)
+        heavy = pcb_place.Placer(parts, nets, {}, [], lambda *a: True, weights={"n": 4.0})
+        for pl in (plain, heavy):
+            pl.state = {"A": (0, 0, 0, "F"), "B": (3, 4, 0, "F")}
+        self.assertAlmostEqual(heavy.cost_of("A", plain.state["A"], 0.0), 4 * plain.cost_of("A", plain.state["A"], 0.0))
+
+
 @unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
 class Board(unittest.TestCase):
     @classmethod
@@ -56,10 +78,12 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 86)
+        self.assertEqual(len(self.comps), 92)
         self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 53)
-        for ref in ("U13", "C1B", "Q2", "Q3", "R3", "R15"):
+        for ref in ("U13", "C1B", "C1C", "C1D", "U14", "U15", "R18", "R19", "C24", "C25", "R3", "R15"):
             self.assertIn(ref, self.comps)
+        for ref in ("Q2", "Q3", "R_ILIM3B"):
+            self.assertNotIn(ref, self.comps)
 
     def test_board_matches_netlist(self):
         res, _ = pcb_check.compare(str(NETLIST), self.pcb)
@@ -78,7 +102,7 @@ class Board(unittest.TestCase):
     def test_substitutions_are_the_documented_ones(self):
         # every substituted footprint is a provisional stand-in; the report lists the same refs
         self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE),
-                         sorted(["C1", "C1B", "C3", "C4", "U1", "U8", "U9"] + ["D%d" % i for i in range(1, 17)]))
+                         sorted(["C3", "C4", "U1", "U8", "U9"] + ["D%d" % i for i in range(1, 17)]))
         for ref in pcb_full.FOOTPRINT_OVERRIDE:
             self.assertIn(ref, self.comps)
 
@@ -210,8 +234,8 @@ class Board(unittest.TestCase):
 
     def test_star_net_is_the_q3_gate(self):
         net = self.nets["/ILIM_STEP3_EN"]
-        self.assertIn(("Q3", "1"), net)
-        self.assertEqual(pcb_full.STAR["/ILIM_STEP3_EN"], ("Q3", "1"))
+        self.assertIn(("U15", "4"), net)
+        self.assertEqual(pcb_full.STAR["/ILIM_STEP3_EN"], ("U15", "4"))
         for ref in ("U13", "R3", "R15", "U4"):
             self.assertIn(ref, [r for r, _ in net])
 
