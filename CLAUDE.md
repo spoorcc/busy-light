@@ -34,7 +34,9 @@ Run like a regulated-company project. **Read `docs/process/README.md` before doi
    `python3 -I scripts/check_traceability.py` after touching `docs/`.
 11. **Evidence over claims.** Report test/build results exactly as observed. Never claim something is verified
    without recorded evidence; say what was not run.
-12. Never hand-edit `.kicad_*` or `.FCStd` files; ask the user to make CAD changes. Do not commit build output.
+12. Never hand-edit `.kicad_*` or `.FCStd` files, and do not ask the user for GUI edits. Make CAD changes only through
+    the KiCad and FreeCAD scripting APIs (pcbnew, kicad-cli, FreeCAD Python), with the scripts kept in `scripts/` so the
+    change is reproducible. Do not commit build output.
 13. Add an entry to `CHANGELOG.md` (Keep a Changelog, section `[Unreleased]`) for every user-visible or release-relevant change.
 14. Commit only when asked. Do not rewrite history on `main`.
 
