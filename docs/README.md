@@ -16,6 +16,7 @@ gates, IDs and review rules that all other documents follow.
 | `verification/` | Test plans, test reports, traceability, release records |
 | `reviews/` | Formal review records |
 | `plans/` | Working plans and schedules (not controlled requirements) |
+| `journal/` | Dated notes on work without a controlled home (sourcing checks, tool findings); not evidence of approval |
 | `templates/` | Templates for all of the above |
 | `diagrams/` | Diagram sources (PlantUML, Mermaid, WaveDrom) and generated SVG |
 | `images/` | Photos and screenshots only |
