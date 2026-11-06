@@ -1,5 +1,9 @@
 # ILIM select MOSFET: off-state leakage bound (HW-010, ADR-0010, ADR-0016)
 
+Status update 2026-11-06: the owner kept the TMUX1101DCKR analog switch (decision 5 of the journal entry
+`docs/journal/2026-11-06-decisions-and-live-stock.md`). This analysis stays as the conditional BSS138 fallback
+(fits the 118 nA budget of the second owner record only if V_ILIM is about 0.85 V or more and the part stays near 25 degC).
+
 Status: analysis, draft. Not reviewed. Supports the open item "replace the 2N7002 by a part with stated low-voltage
 leakage" of the owner-confirmed proposals of 2026-11-05. Code: `scripts/ilim_switch_leakage.py`, test:
 `scripts/test_ilim_switch_leakage.py` (5 tests, pass).

@@ -1,5 +1,11 @@
 # JLCPCB stock check for the HW-010 gate parts (2026-11-06)
 
+> **Correction (2026-11-06, later the same day).** This entry was written from a branch that lacked the second owner
+> record of 2026-11-05 (`owner-decisions-2026-11-05-b.md`) and the earlier `stock-check-ilim-holdoff.md`. It checked
+> superseded values (56.9 kohm, 27.7 kohm, a MOSFET switch). The capacitor "not found" results are wrong for 1206:
+> my filter covered only the label "C0G、NP0", and the 1206 parts are listed under other C0G and NP0 labels. See
+> `2026-11-06-decisions-and-live-stock.md` for the live results and the decisions. The text below is kept unchanged.
+
 Scope: open items of the owner-confirmed proposals of 2026-11-05 (resistors, hold-off capacitors, MOSFET).
 Method: read-only searches on the JLCPCB parts library in a browser session. Nothing was added to a cart or an
 account. Stock numbers change daily; treat them as a snapshot of 2026-11-06. Prices were not recorded.
