@@ -25,8 +25,12 @@ class LeakageModelTest(unittest.TestCase):
         self.assertTrue(math.isclose(m.relative_error(47_000.0, 2, limit, 1.0), 0.001))
 
     def test_error_grows_with_leakage_and_falls_with_voltage(self) -> None:
-        self.assertGreater(m.relative_error(47e3, 2, 1e-6, 1.0), m.relative_error(47e3, 2, 1e-7, 1.0))
-        self.assertGreater(m.relative_error(47e3, 2, 1e-7, 0.5), m.relative_error(47e3, 2, 1e-7, 2.0))
+        self.assertGreater(
+            m.relative_error(47e3, 2, 1e-6, 1.0), m.relative_error(47e3, 2, 1e-7, 1.0)
+        )
+        self.assertGreater(
+            m.relative_error(47e3, 2, 1e-7, 0.5), m.relative_error(47e3, 2, 1e-7, 2.0)
+        )
 
 
 if __name__ == "__main__":

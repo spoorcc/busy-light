@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Worst-case error of the TPS2553 current limit caused by off-state leakage of the ILIM select MOSFETs.
+"""Worst-case error of the TPS2553 current limit from off-state leakage of the ILIM select MOSFETs.
 
 Model (HW-010, ADR-0010 E4, ADR-0016): the limit is set by the total resistance from ILIM to GND.
 The TPS2553 holds a regulated voltage V_ILIM on the pin and the limit is proportional to the current
-sourced out of ILIM. A select MOSFET that is off adds a leakage current I_L from the ILIM node to GND
-in parallel with the resistor network. With n off switches:
+sourced out of ILIM. A select MOSFET that is off adds a leakage current I_L from the ILIM node to
+GND in parallel with the resistor network. With n off switches:
 
     I_pin = V_ILIM / R_total + n * I_L
     relative increase of the sourced current = n * I_L * R_total / V_ILIM
@@ -17,9 +17,9 @@ Assumptions (stated, not verified):
       prediction.
   A2. V_ILIM is NOT stated numerically in the TPS2553 datasheet (SLVS841G, text: "a regulated
       voltage on the ILIM pin"). The result is therefore given for a range of V_ILIM.
-  A3. The ILIM resistors are R1 = 47.0 kohm, R2 = 56.9 kohm, R3 = 27.7 kohm (owner-confirmed proposal
-      of 2026-11-05, not Approved). Steps are exclusive: step 2 = R1||R2 with Q2 on, step 3 = R1||R3
-      with Q3 on and Q2 off.
+  A3. The ILIM resistors are R1 = 47.0 kohm, R2 = 56.9 kohm, R3 = 27.7 kohm (owner-confirmed
+      proposal of 2026-11-05, not Approved). Steps are exclusive: step 2 = R1||R2 with Q2 on,
+      step 3 = R1||R3 with Q3 on and Q2 off.
 """
 
 from __future__ import annotations

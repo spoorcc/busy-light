@@ -1,4 +1,7 @@
-"""Tests for amendment2_numbers.py (HW-010, ADR-0016 Amendment 2). Run: cd hw/sim/scripts && python3 -m unittest."""
+"""Tests for amendment2_numbers.py (HW-010, ADR-0016 Amendment 2).
+
+Run: cd hw/sim/scripts && python3 -m unittest.
+"""
 
 import unittest
 
