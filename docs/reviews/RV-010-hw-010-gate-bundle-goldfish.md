@@ -63,3 +63,22 @@ The goldfish asked 20 questions. Triage: questions 1, 13, 18, 19 and 20 ask whet
 
 ## Outcome
 Rejected for approval as written, and the readiness check is NO-GO. Most of the Action items are drafted; what remains is listed in the readiness table above. A fresh readiness goldfish must answer GO before the owner approves. This record states no approval.
+
+## Implementation readiness rerun (2026-11-07, after the approvals): NO-GO for the whole scope, GO for a firmware-logic slice after items 1 to 4
+A fresh goldfish read SYS-020, HW-010, HW-013, SW-005 to SW-010, ADR-0010, ADR-0016 and the five test cases. It edited nothing. Recorded by the assistant; the owner has not yet seen or accepted this verdict.
+
+| # | Reason (goldfish) | Assistant check | Closes it | Owner of the action |
+|---|---|---|---|---|
+| 1 | TC-210, TC-213, TC-105, TC-109, TC-110 are unreviewed drafts, not approved | Correct. The goldfish also saw them uncommitted; they are now committed in PR #11 | Goldfish review of the five procedures, then owner approval | Assistant, owner |
+| 2 | No firmware implementation plan (EGM rule 0) | Correct, no plan under `docs/plans/` | Plan: module split, GPIO fakes, board target, retained flag, watchdog | Assistant drafts, owner approves |
+| 3 | Pin map not recorded; select lines and CC_OK_1A5 and FAULT_N pins not found | Not verified by me; the goldfish marked its GPIO2/GPIO3 as a guess | Write the pin map from `hw/kicad/spike-gate/src/gen_gate.py` (RV-010 21) | Assistant |
+| 4 | No board overlay or Kconfig under `sw/app/`; usb_serial console symbols not built | Not verified by me | Overlay and Kconfig, then a `west build` | Assistant |
+| 5 | Hardware deliverable is a spike, not a product board; no SPICE | Matches the repo state and ADR-0012 gate G1 | Owner says spike regeneration or product board | Owner |
+| 6 | TVS1, 3V3 regulator open; TS5A3166 and TUSB321 stock not checked | Shortlist drafted in `docs/verification/reports/shortlist-tvs1-3v3-regulator.md` with the finding that a plain 5 V TVS cannot clamp below 6 V | Owner picks | Owner |
+| 7 | SW-009 [X] ms needs the hold-up measurement; SW-005 value table still "to be agreed" (ADR-0010 open point 3 reads OPEN) | Plausible, not re-checked | Owner confirms the mapping and ADR-0010 points 3 and 4 are updated | Owner |
+| 8 | The remaining bracketed values can be set by measurement | Agreed | Bench (TC-109, TC-210, TC-213) | Bench |
+| 9 | No board and no closed housing, so no bench test can run | Correct | Owner provides the bench and boards | Owner |
+| 10 | No test case for SW-007 among the five | TC-107 exists in `test-cases-sw.md` with procedure TBD; it was outside the reviewed set | Write the TC-107 procedure; add TC-020 and TC-106 to the review set | Assistant |
+| 11 | Regulatory fields TBD or "verify"; CHANGELOG and checks | Checks pass; regulatory-check not run | Run `regulatory-check` | Assistant |
+
+Not run: no firmware, bench, SPICE or build.

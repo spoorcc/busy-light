@@ -1,6 +1,6 @@
 # ADR-0011: Housing concept and manufacturing process
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted for the prototype only (by the owner, Ben Spoor, 2026-11-07, in the working session; concept B with FDM in PETG; recorded by the assistant). All dimensions stay working values. The thermal case is not shown: TC-305 (measured temperature) gates any thermal claim, and the dimensions, label place and thermal case are redone for horizontal and vertical mounting (RV-004 A1) with ADR-0014. The coupon and mock-up step (TC-302) and the antenna test of ADR-0003 are open. The process scores were made for ASA, which is not available; the PETG-only decision is the owner's, and the production material is not decided.
 - **Date:** 2026-11-04 (revised the same day: dimensions, label position and height resolved by author decisions that the owner must confirm; see Decision and the analysis report section 8)
 - **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-004 (2026-11-04): not ready for approval, actions open
 - **Related:** NEED-014, SYS-001, SYS-013, SYS-017, SYS-020, SYS-028, SYS-038, MECH-001, MECH-002, MECH-003, MECH-004, MECH-005, MECH-006, HW-001, HW-005, ADR-0003, ADR-0009, RISK-005, RISK-011; plan `docs/plans/05-mechanical-design.md`; analysis `docs/verification/reports/mech-concept-analysis.md`
