@@ -53,7 +53,7 @@ select = ["E", "F", "I", "B", "UP", "SIM", "PL"]
 "scripts/check_traceability.py" = ["PLR0912"]
 
 [tool.pytest.ini_options]
-testpaths = ["scripts", "hw/kicad/src"]
+testpaths = ["scripts", "hw/kicad/src", "mech/analysis"]
 pythonpath = ["scripts"]
 
 [tool.mypy]
