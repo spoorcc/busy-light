@@ -1,6 +1,6 @@
 # Mechanical Requirements
 
-- **Status:** Partly approved (MECH-001 to MECH-005 and MECH-009 Approved 2026-11-07; MECH-006 to MECH-008 Draft, waiting for ADR-0014)
+- **Status:** Approved (MECH-001 to MECH-009, owner, 2026-11-07, in two steps; bracketed values stay open)
 - **Version:** 0.2 (2026-11-07, assistant redraft after ADR-0003 and ADR-0011 Accepted, ADR-0014 Proposed, RV-004, RV-007; all entries stay Draft; only the owner approves)
 - **Owner:**
 
@@ -83,12 +83,12 @@ Process rules: `docs/process/README.md`.
 - **Category:** Usability
 - **Regulatory:** none
 - **Priority:** Should
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session, after ADR-0014 was accepted; recorded by the assistant; values in square brackets stay open until the coupon test; [X] N is derived from the heaviest accessory)
 
 ### MECH-007 Back mounting interface
 
 - **Statement:** The back of the housing shall have an annular bayonet (ring from radius [16.3] to [21.0] mm, depth [1.2] mm in the 2.0 mm floor, [3] lugs of [1.2] mm, [3] lock positions) that takes a ring-shaped accessory (stand, clip, rack-mount adapter or blank plate) by a turn of about [30] degrees, with a detent and a release tab, without tools, leaving the centre open, and shall have no metal, magnet or insert in or on the back.
-- **Rationale:** NEED-022 and ADR-0014 (Proposed, so this requirement is conditional on its acceptance): a printed bayonet is plastic only, so it respects the antenna box of MECH-003. The annular variant keeps the 21 mm label readable in the open centre (`spike-mech-back-layout.md`, V2); widths are multiples of 0.4 mm (4.4 or 4.8 mm for the ring). The floor skin, print orientation (the recess on the bed side is a bridge), release against a knock and the loads are not shown (RV-007). A printed thread and a tripod socket were rejected.
+- **Rationale:** NEED-022 and ADR-0014 (Accepted 2026-11-07): a printed bayonet is plastic only, so it respects the antenna box of MECH-003. The annular variant keeps the 21 mm label readable in the open centre (`spike-mech-back-layout.md`, V2); widths are multiples of 0.4 mm (4.4 or 4.8 mm for the ring). The floor skin, print orientation (the recess on the bed side is a bridge), release against a knock and the loads are not shown (RV-007). A printed thread and a tripod socket were rejected.
 - **Parent:** NEED-022
 - **Acceptance criteria:** The drawing shows the ring, the lugs, the detent and the release tab with tolerances and the print orientation. A test accessory fits and locks on [3] printed housings by one hand in under [10] s, and detaches again; a knock test does not release it. No metal part is in the back (inspection).
 - **Verification method:** Inspection and Test
@@ -96,7 +96,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Functional
 - **Regulatory:** none
 - **Priority:** Should
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session, after ADR-0014 was accepted; recorded by the assistant; values in square brackets stay open until the coupon test; [X] N is derived from the heaviest accessory)
 
 ### MECH-008 Accessory retention
 
@@ -109,7 +109,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Safety
 - **Regulatory:** none
 - **Priority:** Should
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session, after ADR-0014 was accepted; recorded by the assistant; values in square brackets stay open until the coupon test; [X] N is derived from the heaviest accessory)
 
 ### MECH-009 PCB retention and reopening
 

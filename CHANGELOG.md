@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Owner accepted ADR-0014 (annular bayonet, coupon test as the gate, dovetail fallback) and approved MECH-006, MECH-007 and MECH-008 on 2026-11-07 (ADR-0014, MECH-006, MECH-007, MECH-008).
 - Owner approved MECH-001, MECH-002, MECH-003, MECH-004, MECH-005 and MECH-009 on 2026-11-07; MECH-006 to MECH-008 wait for ADR-0014 (MECH-001 to MECH-009).
 - Mechanical requirements MECH-001 to MECH-008 redrafted (version 0.2, all Draft) to match ADR-0003, ADR-0011 and ADR-0014 (PETG, off-centre module, annular bayonet, thermal limit, window and label), new MECH-009 (PCB snap hooks and reopening) with stub TC-309; open items are listed in the journal (MECH-001 to MECH-009, ADR-0011, ADR-0014).
 - TC-210 step 4 extended: peak of VBUS_IC and +5V at hot-plug against the part ratings, with a trigger for the fallback options; owner chose to measure first (HW-010, TC-210, ADR-0010).

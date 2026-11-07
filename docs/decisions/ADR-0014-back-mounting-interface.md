@@ -1,6 +1,6 @@
 # ADR-0014: Mounting interface on the back of the housing
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session; the annular bayonet of the update of 2026-11-07 with the coupon test as the gate, dovetail C as the fallback; recorded by the assistant). Not shown yet: creep of the lugs in warm PETG, release against a knock, the load of the heaviest accessory, the floor skin and the print orientation (RV-007). The centred 30 mm recess of the earlier decision text is superseded by the annular layout.
 - **Date:** 2026-11-04
 - **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-007 (2026-11-04): not ready for approval, actions open
 - **Related:** NEED-014, NEED-020, NEED-022, SYS-047, HW-011, MECH-007, MECH-008, SYS-013, SYS-028, MECH-001, MECH-003, MECH-006, ADR-0003, ADR-0011, RISK-011, RISK-005, RV-004 (finding A1)
