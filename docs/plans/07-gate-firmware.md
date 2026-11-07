@@ -34,6 +34,8 @@ Module `gate` (no Zephyr includes in the logic file):
 Failure behaviour: any unknown input pattern gives the lowest step. Safety: this is the first of two checks; the hardware gate stays the independent one.
 
 ## 5. Detailed implementation plan
+**Decisions of 2026-11-07 (owner):** FAULT_N removed (ADR-0018, Proposed); regulator in the standard package with a firmware limit (ADR-0019, Proposed); retained flag cleared when the gate reopens, elapsed-time clock, watchdog resets count toward the back-off, watchdog timeout 8 s (Proposed amendments of SW-007 and SW-010).
+
 **Gate on approval (rule 1):** the SW-005 step table, the removal of FAULT_N from SW-009 and the pin map are Proposed amendments or spike data. No `sw/` file is created until the owner has approved them and this plan.
 
 **Hardware abstraction `gate_hal.h` (interface list, to be fixed in the review):** `gate_hal_read_inputs(snapshot *)`, `gate_hal_write_selects(step2, step3)`, `gate_hal_now_ms()`, `gate_hal_request_budget(level)` (the LED-layer call; level lowest or normal; the layer must reach the budget within [X] ms), `gate_hal_store_read(*)` and `gate_hal_store_write(*)` (retained store), `gate_hal_reset_cause()`, `gate_hal_wdt_service()`. Edge events: `gate_hal` calls `gate_on_edge(which)` from the GPIO interrupt; on native_sim a test injects the edge.
@@ -63,7 +65,7 @@ Failure behaviour: any unknown input pattern gives the lowest step. Safety: this
 Note: the first goldfish read guessed GPIO2 and GPIO3 for the selects; the map shows GPIO3 and GPIO10. The owner decided on 2026-11-07 to give up FAULT_N so that GPIO1 and GPIO4 can carry the orientation sensor; the spike schematic still shows FAULT_N on GPIO4 until HW-010 is amended.
 
 - **Files to create (this change set, after approval):** `sw/app/src/gate.c`, `sw/app/src/gate.h`, `sw/app/src/gate_hal.h` (interface only), `sw/app/tests/gate/` (ztest sources, `CMakeLists.txt`, `prj.conf`, `testcase.yaml`), `sw/app/Kconfig` (constants), `sw/app/boards/esp32c3_devkitm.overlay` is **not** created in this slice.
-- **Kconfig symbols:** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_ADVERT_FALL_MS` (50, SW-006), `BL_WDT_S` (10).
+- **Kconfig symbols:** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_ADVERT_FALL_MS` (50, SW-006), `BL_WDT_S` (8, Proposed amendment of SW-010).
 - **Order of work:** (1) value table and interlock; (2) SW-005 counter; (3) SW-009 edge latch and shed; (4) SW-007 counter and store; (5) SW-006 time base; (6) SW-010 watchdog.
 
 ## 6. Test and verification plan
