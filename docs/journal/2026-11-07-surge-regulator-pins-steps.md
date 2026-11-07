@@ -14,3 +14,5 @@ Not run: no calculation of the resistor and zener values, no bench, no build.
 Follow-up (same day): values derived in `docs/verification/reports/analysis-supply-pin-surge.md`: 1 kohm for the TMUX1101 and 470 ohm for the TUSB321, each with 100 nF and a 5.1 V zener. Assumptions: zener model, surge shapes. Not run: no bench, no zener datasheet.
 
 Owner answers (same day, later): the surge values (1 kohm, 470 ohm, 100 nF, 5.1 V zener) are approved; the CC-pin options were asked for and are in `analysis-cc-pin-protection.md`; the regulator heat estimate was asked for and is in `analysis-regulator-heat.md`. Not run: no bench, no zener datasheet.
+
+Owner choices (same day, later): regulator in the standard DBV package with a firmware limit only (the limit is about 70 mA average at the worst board and case; see `analysis-regulator-heat.md`); CC pins: ESD part plus series resistors (P3), with the caution recorded in `analysis-cc-pin-protection.md` that a series resistor alone does not keep the pin under 6 V. Not run: no bench, no ESD test, no requirement for the transmit-duty limit yet.

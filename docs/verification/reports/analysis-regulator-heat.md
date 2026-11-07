@@ -40,3 +40,13 @@ Keep the linear **TLV75733P in the DYD package (exposed thermal pad)**, with a c
 
 ## Not done
 No measurement; duty cycles assumed; the housing rise is a parameter, not a result; LED heat and the regulator heat are not coupled in this model; stock of the DYD variant not read.
+
+## Owner choice of 2026-11-07 and what it implies
+The owner chose the **standard package (DBV), firmware limit only**, not the DYD pad package. The highest average 3V3 current that keeps the junction at or below 110 degC (script output):
+
+| Board / housing rise | +0 K | +20 K | +40 K |
+|---|---|---|---|
+| DBV, EVM-class board (100.8 degC/W) | 338 mA | 248 mA | 158 mA |
+| DBV, JEDEC-class board (231.1 degC/W) | 147 mA | 108 mA | 69 mA |
+
+So the firmware rule has to be written for the weakest case: **an average 3V3 current of at most [70] mA** if the board is poor and the case is 40 K warm, or about [150] mA if the board spreads heat well and the case rise is small. A firmware download at 30 % transmit and 50 % receive averages 157 mA, so it needs a lower transmit duty (about 8 % transmit with 20 % receive averages 70 mA) or a slower download. The numbers become real only when HW-013 measures the housing rise and the regulator temperature. A new requirement for the transmit-duty limit is not written yet (skill `write-requirements`); until it exists, no firmware work depends on it.

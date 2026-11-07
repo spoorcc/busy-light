@@ -33,3 +33,8 @@ def test_push_model_is_cool_on_the_worst_package():
 def test_tx_bound_exceeds_limit_on_the_worst_package():
     i = h.avg_current(1.0, 0.0)
     assert h.tj(h.power(i), 231.1, 0.0) > h.TJ_MAX
+
+
+def test_max_average_current_gives_exactly_the_limit():
+    i = h.max_avg_current(231.1, 40.0)
+    assert h.tj(h.power(i), 231.1, 40.0) == pytest.approx(h.TJ_MAX - h.TJ_MARGIN)
