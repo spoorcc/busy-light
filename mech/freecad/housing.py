@@ -4,9 +4,10 @@
 Run headless: scripts/ci_mech.sh (it pipes exec(open(this file).read()) into freecad -c).
 Traces to MECH-001, MECH-004, MECH-006, MECH-007, MECH-009 (ADR-0011, ADR-0014).
 Dimensions come from mech/analysis/housing_params.py (one source, also used by the checks).
-Scope of this first version: base with USB-C window, annular bayonet recess with lugs,
-three PCB snap hooks, and the lid. NOT modelled yet: lid spigot, release tab and detent of the
-bayonet, button access, posts under the board. Output goes to the build folder (not committed).
+Scope: base with USB-C window, button hole, annular bayonet groove (lips, stop, detent), PCB
+posts and snap hooks, lid spigot with grooves; lid with skirt and snap bumps. NOT modelled: the
+release tab of the bayonet, the switch and the PCB itself (a board cylinder is used for the
+interference check). Output goes to the build folder (not committed).
 """
 
 import math
@@ -41,36 +42,88 @@ def rot_z(shape, deg):
     return s
 
 
+def box_at(size, corner, az):
+    """Box of size (dx, dy, dz) with its corner at (x, y, z), turned by az degrees about Z."""
+    return rot_z(Part.makeBox(*size, V(*corner)), az)
+
+
 def build_base():
-    base = cyl(R_OUT, p.H_JOINT).cut(cyl(R_IN, p.H_JOINT - p.FLOOR, p.FLOOR))
-    # USB-C window through the wall at azimuth 0 (+X)
-    win = Part.makeBox(
-        p.WALL * 3, p.WIN_W, p.WIN_H, V(R_IN - p.WALL, -p.WIN_W / 2, p.WIN_ZC - p.WIN_H / 2)
+    # wall with a chamfered inner ledge from LEDGE_Z to H_JOINT so that the spigot has support
+    r_spig_out = R_OUT - p.SKIRT_T - p.SPIGOT_CLEAR
+    r_spig_in = r_spig_out - p.SPIGOT_T
+    base = cyl(R_OUT, p.H_JOINT)
+    cavity = cyl(R_IN, p.LEDGE_Z - p.FLOOR, p.FLOOR).fuse(
+        Part.makeCone(R_IN, r_spig_in, p.H_JOINT - p.LEDGE_Z, V(0, 0, p.LEDGE_Z))
     )
-    base = base.cut(win)
-    # annular bayonet groove with lock lips in the back (z = 0 side)
+    base = base.cut(cavity)
+    # lid spigot above the joint plane, with grooves for the lid snap bumps on its outer face
+    spigot = cyl(r_spig_out, p.Z_SPIGOT_TOP - p.H_JOINT, p.H_JOINT).cut(
+        cyl(r_spig_in, p.Z_SPIGOT_TOP - p.H_JOINT, p.H_JOINT)
+    )
+    base = base.fuse(spigot)
+    z0, z1 = p.H_JOINT + 0.4, p.Z_SPIGOT_TOP - 0.25
+    for az in p.LID_HOOK_DEG:
+        groove = box_at(
+            (p.LID_BUMP + 0.1, p.LID_HOOK_W, z1 - z0),
+            (r_spig_out - p.LID_BUMP, -p.LID_HOOK_W / 2, z0),
+            az,
+        )
+        base = base.cut(groove)
+    # USB-C window through the wall at azimuth 0 (+X)
+    base = base.cut(
+        Part.makeBox(
+            p.WALL * 3, p.WIN_W, p.WIN_H, V(R_IN - p.WALL, -p.WIN_W / 2, p.WIN_ZC - p.WIN_H / 2)
+        )
+    )
+    # button hole through the wall (working values: the switch is not chosen, plan 05)
+    z_btn = p.Z_PCB_BOT + p.T_PCB + p.BTN_Z_ABOVE_PCB
+    btn = Part.makeCylinder(p.BTN_D / 2.0, p.WALL * 3, V(R_IN - p.WALL, 0, z_btn), V(1, 0, 0))
+    base = base.cut(rot_z(btn, p.BTN_DEG))
+    # annular bayonet groove with lock lips, stop and detent in the back (z = 0 side)
     base = base.cut(bg.groove_cut())
+    # PCB posts under the board, none at the USB-C azimuth
+    for az in p.POST_DEG:
+        post = box_at(
+            (p.POST_PAD_R, p.POST_PAD_W, p.POST_H + 0.2),
+            (p.POST_R - p.POST_PAD_R / 2, -p.POST_PAD_W / 2, p.FLOOR - 0.2),
+            az,
+        )
+        base = base.fuse(post)
     # PCB snap hooks: arm on the wall, lip over the board edge. Azimuth 0 is the USB-C window.
     z_top = p.Z_PCB_BOT + p.T_PCB
     for k in range(p.HOOK_COUNT):
         az = 120.0 * k + 60.0
-        arm = Part.makeBox(
-            R_IN - p.HOOK_R - 0.2 + 0.4,
-            p.HOOK_W,
-            z_top + 0.4 - p.FLOOR,
-            V(p.HOOK_R + 0.2, -p.HOOK_W / 2, p.FLOOR),
+        arm = box_at(
+            (R_IN - p.HOOK_R - 0.2 + 0.4, p.HOOK_W, z_top + 0.4 - p.FLOOR),
+            (p.HOOK_R + 0.2, -p.HOOK_W / 2, p.FLOOR),
+            az,
         )
-        lip = Part.makeBox(
-            p.HOOK_LIP + 0.5, p.HOOK_W, 0.8, V(p.HOOK_R - p.HOOK_LIP, -p.HOOK_W / 2, z_top + 0.4)
+        lip = box_at(
+            (p.HOOK_LIP + 0.5, p.HOOK_W, 0.8),
+            (p.HOOK_R - p.HOOK_LIP, -p.HOOK_W / 2, z_top + 0.4),
+            az,
         )
-        base = base.fuse(rot_z(arm, az)).fuse(rot_z(lip, az))
+        base = base.fuse(arm).fuse(lip)
     return base.removeSplitter()
 
 
 def build_lid():
-    lid = cyl(R_OUT, H_TOTAL - p.H_JOINT, p.H_JOINT).cut(
-        cyl(R_IN, H_TOTAL - p.H_JOINT - p.LID_T, p.H_JOINT)
+    """Plate on the spigot top, skirt around the spigot with the clearance, three snap bumps."""
+    r_skirt_in = R_OUT - p.SKIRT_T
+    lid = cyl(R_OUT, H_TOTAL - p.Z_SPIGOT_TOP, p.Z_SPIGOT_TOP)
+    skirt = cyl(R_OUT, p.Z_SPIGOT_TOP - p.H_JOINT, p.H_JOINT).cut(
+        cyl(r_skirt_in, p.Z_SPIGOT_TOP - p.H_JOINT, p.H_JOINT)
     )
+    lid = lid.fuse(skirt)
+    z0, z1 = p.H_JOINT + 0.4, p.Z_SPIGOT_TOP - 0.25
+    r_tip = R_OUT - p.SKIRT_T - p.SPIGOT_CLEAR - p.LID_BUMP + 0.05
+    for az in p.LID_HOOK_DEG:
+        bump = box_at(
+            (r_skirt_in + 0.1 - r_tip, p.LID_HOOK_W, z1 - z0),
+            (r_tip, -p.LID_HOOK_W / 2, z0),
+            az,
+        )
+        lid = lid.fuse(bump)
     return lid.removeSplitter()
 
 

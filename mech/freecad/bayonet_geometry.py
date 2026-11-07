@@ -58,6 +58,15 @@ def groove_cut():
                 120.0 - p.BAY_ENTRY_DEG - LOCK_DEG,
             )
         )
+        # detent ridge: material left in the groove below the ceiling, the lug head has to pass it
+        ridge = sector(
+            p.BAY_R_OUT,
+            p.BAY_R_IN,
+            (p.DETENT_H, p.BAY_DEPTH - p.DETENT_H),
+            start_of(k) + p.DETENT_START_DEG,
+            p.DETENT_SPAN_DEG,
+        )
+        groove = groove.cut(ridge)
     return groove
 
 

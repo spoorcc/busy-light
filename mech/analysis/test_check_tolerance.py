@@ -49,3 +49,21 @@ def test_big_board_binds(monkeypatch) -> None:
 def test_window_has_reserve_at_worst_case() -> None:
     u = ct.usb_window()
     assert u["slack"] - u["need_wc"] >= 0.1 - 1e-9
+
+
+def test_spigot_binds_when_clearance_small(monkeypatch) -> None:
+    monkeypatch.setattr(p, "SPIGOT_CLEAR", 0.25)
+    _, fail = ct.run()
+    assert any("spigot" in f for f in fail)
+
+
+def test_thin_skirt_fails(monkeypatch) -> None:
+    monkeypatch.setattr(p, "SKIRT_T", 0.6)
+    _, fail = ct.run()
+    assert any("skirt" in f for f in fail)
+
+
+def test_steep_ledge_fails(monkeypatch) -> None:
+    monkeypatch.setattr(p, "LEDGE_Z", 13.6)
+    _, fail = ct.run()
+    assert any("ledge" in f for f in fail)

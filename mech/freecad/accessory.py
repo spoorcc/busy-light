@@ -63,6 +63,9 @@ def main():
     over = bg.turned(acc, p.BAY_ENTRY_DEG + bg.LOCK_DEG - lug_end + 5.0)
     assert overlap(base, over) > EPS_MM3, "no stop: the ring turns past the lock sector"
     print("accessory: the stop ends the turn")
+    mid = bg.turned(acc, p.DETENT_START_DEG + 0.5 * p.DETENT_SPAN_DEG - 15.0)  # lug over the ridge
+    det = overlap(base, mid)
+    print(f"accessory: detent interference {det:.2f} mm3 while the lug head passes the ridge")
     print(f"accessory: at half the turn pull-off is {'blocked' if held_half else 'free'}")
     doc = App.newDocument("busy_light_accessory")
     obj = doc.addObject("Part::Feature", "accessory_ring")

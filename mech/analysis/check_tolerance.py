@@ -17,6 +17,9 @@ import housing_params as p  # noqa: E402
 RING_W_TOL = 0.45  # ring width may differ from 4.4 or 4.8 mm by this much (MECH-007)
 MIN_MARGIN = 1.0  # window to floor and to joint
 MIN_SKIN_LINES = 2.0
+MIN_WC_CLEARANCE = 0.04  # spigot clearance minus the FDM tolerance, plan 05 stack 5
+MAX_OVERHANG_DEG = 45.0  # printable overhang from the vertical
+BUMP_TIP_GAP = 0.05  # bump tip to the groove bottom
 
 
 def rss(vals: list[float]) -> float:
@@ -44,6 +47,22 @@ def window_z() -> dict[str, float]:
     bottom = p.WIN_ZC - p.WIN_H / 2
     top = p.WIN_ZC + p.WIN_H / 2
     return {"to_floor": bottom - p.FLOOR, "to_joint": p.H_JOINT - top}
+
+
+def spigot() -> dict[str, float]:
+    """Lid spigot: clearance at worst case, snap bump interference, ledge support."""
+    r_skirt_in = p.D_OUT / 2.0 - p.SKIRT_T
+    r_out = r_skirt_in - p.SPIGOT_CLEAR
+    r_in = r_out - p.SPIGOT_T
+    wall_in = p.D_OUT / 2.0 - p.WALL
+    return {
+        "wc_min": round(p.SPIGOT_CLEAR - p.TOL_FDM, 3),
+        "play_max": p.SPIGOT_CLEAR + p.TOL_FDM,
+        "bump_interference": p.LID_BUMP - BUMP_TIP_GAP,
+        "skirt_lines": p.SKIRT_T / p.NOZZLE,
+        "ledge_radial": wall_in - r_in,
+        "ledge_angle_deg": math.degrees(math.atan2(wall_in - r_in, p.H_JOINT - p.LEDGE_Z)),
+    }
 
 
 def led_distance() -> dict[str, float]:
@@ -102,6 +121,22 @@ def run() -> tuple[list[str], list[str]]:
     out.append(f"Window margin to floor {z['to_floor']:.2f}, to joint {z['to_joint']:.2f} mm")
     if min(z.values()) < MIN_MARGIN:
         fail.append("window too close to the floor or the joint")
+    sp = spigot()
+    out.append(
+        f"Lid spigot clearance {p.SPIGOT_CLEAR:.2f}: WC min {sp['wc_min']:+.2f}, "
+        f"max play {sp['play_max']:.2f}; skirt {sp['skirt_lines']:.1f} lines"
+    )
+    out.append(
+        f"Lid snap bump interference {sp['bump_interference']:.2f} mm (the skirt flexes by that); "
+        f"wall ledge {sp['ledge_radial']:.2f} mm at "
+        f"{sp['ledge_angle_deg']:.0f} deg from the vertical"
+    )
+    if sp["wc_min"] < MIN_WC_CLEARANCE:
+        fail.append("lid spigot binds at worst case")
+    if sp["skirt_lines"] < MIN_SKIN_LINES:
+        fail.append("lid skirt thinner than two print lines")
+    if sp["ledge_angle_deg"] > MAX_OVERHANG_DEG:
+        fail.append("wall ledge is a steeper overhang than 45 degrees")
     d = led_distance()
     out.append(f"LED to diffuser {p.D_LED}: WC +-{d['wc']:.2f}, RSS +-{d['rss']:.2f} mm")
     b = bayonet()

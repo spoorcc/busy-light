@@ -48,6 +48,33 @@ BAY_ENTRY_DEG = 30.0  # entry sector: groove fully open
 BAY_CLEAR = 0.3  # radial clearance lug to groove (FDM)
 BAY_CLEAR_Z = 0.2  # axial clearance of the head behind the lip
 
+# Lid joint (plan 05 section 4.3; the spigot sits on a chamfered inner ledge of the wall)
+SPIGOT_T = 1.15
+SKIRT_T = 0.8  # two print lines (plan 05 had 0.9)
+SPIGOT_CLEAR = 0.35
+Z_SPIGOT_TOP = Z_PCB_BOT + T_PCB + H_LED + D_LED  # lid underside, 15.25
+LEDGE_Z = 12.8  # the wall steps in from here up to H_JOINT
+LID_HOOK_DEG = (60.0, 180.0, 300.0)  # lid snap bumps and grooves
+LID_BUMP = 0.3  # bump depth into the groove
+LID_HOOK_W = 4.0
+
+# PCB posts (plan 05 section 4.3)
+POST_H = 3.0
+POST_R = 21.0
+POST_PAD_W = 4.0  # tangential
+POST_PAD_R = 1.0  # radial, working value of the plan
+POST_DEG = (60.0, 180.0, 300.0)  # none at the USB-C azimuth 0
+
+# Button (plan 05: the switch is not chosen, so these are working values)
+BTN_D = 7.0
+BTN_DEG = 240.0
+BTN_Z_ABOVE_PCB = 1.0
+
+# Bayonet detent (a ridge in the groove ceiling that the lug head has to pass)
+DETENT_START_DEG = 31.0  # from the start of the entry sector
+DETENT_SPAN_DEG = 2.5
+DETENT_H = 0.4  # ridge height from the ceiling; head top is 0.2 below the ceiling
+
 # Label area (MECH-006)
 LABEL_CIRCLE_D = 21.0
 

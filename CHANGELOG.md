@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - CI: the licence-map check lists the TLV75733P and TMUX1101 evidence files as data (HW-012, ADR-0015).
 
 ### Added
+- Mechanics: housing model completed with lid spigot and snap bumps, PCB posts, button hole and a bayonet detent; tolerance check for the spigot, skirt and ledge (MECH-001, MECH-004, MECH-005, MECH-007, MECH-009).
 - Mechanics: FreeCAD coupon generator for the diffuser (3 plates, 3 spacer rings) and the bayonet floor; bayonet lock concept (entry sector, lips, stop) with a mating accessory ring and a model check of the lock action (MECH-002, MECH-007, ADR-0014).
 - Mechanics: first FreeCAD housing generator (base with USB-C window, annular bayonet recess, three PCB snap hooks, lid), shared dimension file and a tolerance check with tests; evidence report `mech-housing-first-model.md` (MECH-001, MECH-004, MECH-006, MECH-007, MECH-009).
 - HW-012 evidence files for the TLV75733P (supply, current and thermal-resistance ratings) and the TMUX1101 (supply ratings): 9 claims, all `unverified` (AI-extracted, quotes checked against the PDF pages by `scripts/check_part_evidence.py`, 0 errors); the PDFs are in the local datasheets folder, not in the repository (HW-012, ADR-0017, ADR-0019, ADR-0016).
