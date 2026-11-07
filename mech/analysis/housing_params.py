@@ -20,8 +20,8 @@ H_LED = 0.65
 D_LED = 8.0  # LED top to lid underside (MECH-002)
 
 # USB-C window (MECH-004)
-WIN_W = 14.0
-WIN_H = 8.0
+WIN_W = 14.2
+WIN_H = 8.2
 WIN_ZC = 8.25
 PLUG_W = 12.35
 PLUG_H = 6.5

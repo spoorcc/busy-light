@@ -48,8 +48,8 @@ Process rules: `docs/process/README.md`.
 
 ### MECH-004 Access to USB-C and button
 
-- **Statement:** The housing shall give access to the USB-C connector with a standard cable whose plug overmold fits the Type-C envelope of 12.35 x 6.5 mm, through a window of [14.0] x [8.0] mm, and to the button with a finger, without tools.
-- **Rationale:** SYS-017 and SYS-020: the user needs both.
+- **Statement:** The housing shall give access to the USB-C connector with a standard cable whose plug overmold fits the Type-C envelope of 12.35 x 6.5 mm, through a window of [14.2] x [8.2] mm, and to the button with a finger, without tools.
+- **Rationale:** SYS-017 and SYS-020: the user needs both. Window raised from [14.0] x [8.0] to [14.2] x [8.2] mm by the owner on 2026-11-07: the tolerance check (`mech-housing-first-model.md`) showed zero reserve at worst case with 14.0 x 8.0.
 - **Parent:** SYS-017, SYS-020
 - **Acceptance criteria:** Fit check with [3] common USB-C cables (including one with an overmolded plug at the envelope limit) and with a finger on the button in the fitted housing, on [3] printed housings; the window is checked at the worst-case tolerance stack (`mech-concept-analysis.md`).
 - **Verification method:** Demonstration

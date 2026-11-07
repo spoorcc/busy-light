@@ -44,3 +44,8 @@ def test_big_board_binds(monkeypatch) -> None:
     monkeypatch.setattr(p, "D_PCB", 49.0)
     _, fail = ct.run()
     assert any("PCB binds" in f for f in fail)
+
+
+def test_window_has_reserve_at_worst_case() -> None:
+    u = ct.usb_window()
+    assert u["slack"] - u["need_wc"] >= 0.1 - 1e-9
