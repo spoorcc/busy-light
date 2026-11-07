@@ -34,6 +34,8 @@ ALLOW: set[str] = {
     "hw/evidence/parts/sn74lvc1g125.yaml",
     "hw/evidence/parts/sw-tl3342.yaml",
     "hw/evidence/parts/test-point.yaml",
+    "hw/evidence/parts/tlv75733p.yaml",
+    "hw/evidence/parts/tmux1101.yaml",
     "hw/evidence/parts/tps2553.yaml",
     "hw/evidence/parts/tps3840dl40.yaml",
     "hw/evidence/parts/tusb321.yaml",

@@ -22,3 +22,9 @@ P1 now (one part, standard practice), with the ESD test as an explicit TC. Decid
 
 ## Not done
 USB Type-C specification not read; TUSB321 application section not read; no simulation; no ESD test; schematic CC wiring not fully checked.
+
+## Owner choice of 2026-11-07 and a caution
+The owner chose **P3, an ESD part plus series resistors**, before the open reading was done. Notes on what I could and could not check:
+- TUSB321 datasheet (read): it gives no guidance for series resistors on CC1 and CC2 or for external ESD parts. The pin has an internal pull-down Rd of 4.6 to 5.6 kohm. A 100 ohm series resistor adds 2 % to the Rd seen by the source, which is small against the Type-C Rd tolerance as I know it (the Type-C document was not read, so the exact limit is not checked).
+- **A series resistor does not by itself keep the pin under 6 V.** With the Rd of about 5.1 kohm to ground, 100 ohm in series passes almost all of a pulse to the pin (98 %). The resistor helps only by limiting the current into the chip's own ESD structures (7 kV HBM), and the external ESD part takes the energy. Whether this holds for an IEC 61000-4-2 pulse is shown only by the ESD test. This is a correction of the optimistic wording in option P3 above.
+- Recommendation kept: place the ESD part at the connector, the 100 ohm resistors between it and the chip, and add an ESD test case (IEC 61000-4-2, to be written) before the layout is frozen.

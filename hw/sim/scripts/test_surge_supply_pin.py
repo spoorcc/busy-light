@@ -26,6 +26,13 @@ def test_220_ohm_fails_s1_at_worst_case_capacitor():
     assert s.run_case(220.0, WORST_C, s.LOADS["TUSB321"], s.SURGES["S1 8/20us 15V"]) > LIMIT
 
 
+@pytest.mark.parametrize("part,r", [("TMUX1101", 1000.0), ("TUSB321", 470.0)])
+@pytest.mark.parametrize("bv", s.VZ_CORNERS)
+def test_chosen_values_hold_at_every_zener_voltage_corner(part, r, bv):
+    for shape in s.SURGES.values():
+        assert s.run_case(r, WORST_C, s.LOADS[part], shape, bv=bv) <= LIMIT
+
+
 def test_dc_drop_of_chosen_values():
     assert s.dc_drop(470.0, s.LOADS["TUSB321"]) == pytest.approx(0.047)
     assert s.dc_drop(1000.0, s.LOADS["TMUX1101"]) == pytest.approx(0.001)
