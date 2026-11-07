@@ -41,6 +41,9 @@ Circuit per pin: VBUS_IC, series R, pin with C_pin to GND, 5.1 V zener, load cur
 - The TMUX1101 draws at most 1 uA, so 1 kohm costs 1 mV: **1 kohm for the TMUX1101.**
 - The TUSB321 draws up to 100 uA, so 470 ohm costs up to 47 mV: **470 ohm for the TUSB321.** The recommended minimum for its VDD is 4.5 V. With VBUS_IC at the assumed 4.5 V sag floor the pin sits at 4.453 V, which is 47 mV under the recommended minimum. This adds to the open M4 question (HW-010 criterion 5) and has to be measured in TC-210 case 5 with the real part. It is not a new failure of the gate (a low supply fails safe: no enable output), but it moves the point at which the CC IC starts to work.
 
+## Zener voltage corners (added after goldfish review RV-011)
+The script now runs the assumed zener corners 4.85, 5.1 and 5.35 V (worst-case capacitor 50 nF, surge S1). 470 ohm / TUSB321: 5.23, 5.40 and 5.56 V, so the margin to the 5.7 V pass limit is **0.14 V at the highest zener voltage** (not 0.3 V). 1 kohm / TMUX1101: 4.00 V at all three. The 5.7 V limit is a project choice (0.3 V under the 6 V absolute maximum), not a datasheet value. The sustained 9 V case S3 assumes a source that negotiated 9 V; the CC analysis says a sink that does not negotiate stays at 5 V, so S3 is a bound for a failed TVS1, not a normal event. Tests: 27 in `hw/sim/scripts` pass.
+
 ## Recommended values for the owner's approval
 | Pin | R | C at the pin | Zener |
 |---|---|---|---|
