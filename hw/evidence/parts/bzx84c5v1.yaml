@@ -1,0 +1,68 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the 5.1 V zener diodes at the supply pins of the TMUX1101 and the TUSB321 (D_Z1..D_Z3; HW-010 amendment, ADR-0016). See hw/evidence/README.md.
+# Source: Vishay Telefunken BZX84C2V7-BZX84C51, Rev. 1, 01-Apr-99, supplied by the owner (copy from a datasheet archive, 5 pages). Old revision: confirm against the current maker datasheet before the BOM is frozen.
+# The leakage column shows the unit "mA" in the text where the part is a microampere part; no value is entered for it.
+schema_version: 1
+part:
+  key: BZX84C5V1
+  mpn: BZX84C5V1
+  manufacturer: Vishay
+  description: 350 mW surface mount zener diode 5.1 V, SOT-23
+  selection: candidate
+  package:
+    code: SOT-23
+    name: SOT-23
+    pin_count: 3
+  used_in:
+  - D_Z1
+  - D_Z2
+  - D_Z3
+documents:
+- id: bzx84c-ds
+  title: BZX84C2V7-BZX84C51 350 mW Surface Mount Zener Diodes
+  doc_number: Rev. 1, 01-Apr-99
+  revision_date: April 1999
+  origin: manufacturer
+  url: owner-supplied copy of the maker datasheet from an archive site
+  file: bzx84c-series.pdf
+  sha256: 6a50857005d9bfb3a8808dd44e76075fd7bb76ceb69bd44f9ce58f4ea9260caa
+  pages: 5
+  retrieved_on: '2026-11-07'
+defaults:
+  source_document: bzx84c-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-07'
+  status: unverified
+claims:
+- id: BZX84C5V1.vz
+  parameter: Zener voltage at the test current (5V1 type)
+  category: electrical
+  min: 4.8
+  max: 5.4
+  unit: V
+  source: {page: 2, locator: Electrical characteristics table, quote: 5V1 KZ2 4.8 to 5.4 60 5.0 480 1.0 +0.005 2.0 2.0}
+- id: BZX84C5V1.zzt
+  parameter: Dynamic resistance ZZT at the test current IZT of 5 mA
+  category: electrical
+  max: 60
+  unit: ohm
+  source: {page: 2, locator: Electrical characteristics table, quote: 5V1 KZ2 4.8 to 5.4 60 5.0 480 1.0 +0.005 2.0 2.0}
+- id: BZX84C5V1.zzk
+  parameter: Dynamic resistance ZZK at the knee current IZK of 1 mA
+  category: electrical
+  max: 480
+  unit: ohm
+  source: {page: 2, locator: Electrical characteristics table, quote: 5V1 KZ2 4.8 to 5.4 60 5.0 480 1.0 +0.005 2.0 2.0}
+- id: BZX84C5V1.pd
+  parameter: Power dissipation on ceramic substrate 10 mm x 8 mm x 0.7 mm
+  category: abs_max
+  max: 350
+  unit: mW
+  source: {page: 1, locator: Absolute maximum ratings, quote: Power dissipation on ceramic substrate Pd 350 mW}
+- id: BZX84C5V1.rthja
+  parameter: Thermal resistance junction to ambient on ceramic substrate
+  category: thermal
+  max: 420
+  unit: K/W
+  source: {page: 1, locator: Maximum thermal resistance, quote: Junction ambient on ceramic substrate 10mm x 8mm x 0.7mm RthJA 420 K/W}

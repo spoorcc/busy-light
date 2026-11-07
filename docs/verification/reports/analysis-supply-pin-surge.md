@@ -58,3 +58,9 @@ The script now runs the assumed zener corners 4.85, 5.1 and 5.35 V (worst-case c
 
 ## Not done
 No bench, no zener datasheet, no DC simulation, no Monte Carlo of the resistor tolerance. No `hw/` file changed.
+
+## Zener datasheet read (2026-11-07)
+- Part: BZX84C5V1 (Vishay, SOT-23, 350 mW), datasheet Rev. 1, 01-Apr-99, supplied by the owner (`hw/evidence/parts/bzx84c5v1.yaml`, quotes checked against the PDF). It is an old revision: confirm against the current maker datasheet before the BOM is frozen.
+- Datasheet values: VZ 4.8 to 5.4 V at 5 mA, ZZT 60 ohm at 5 mA, ZZK 480 ohm at 1 mA. The assumed corners (4.85 to 5.35 V) were slightly narrow; the model dynamic resistance of 60 ohm equals the datasheet value.
+- Rerun of the ngspice cases with the datasheet corners 4.8, 5.1 and 5.4 V and capacitor 50, 100 and 150 nF (worst case taken): TUSB321 pin 470 ohm, surge S1: 5.20, 5.40 and 5.59 V (limit 5.7 V for the 6 V maximum with 0.3 V margin, so margin 0.11 V at the highest zener voltage); S2: 1.81 V. TMUX1101 pin 1 kohm: S1 4.00 V, S2 0.99 V. All pass; the TUSB321 case at the top zener voltage has little margin.
+- Not covered: leakage near 4.5 V (the leakage column shows a wrong unit in the text, no value entered), the zener power in a sustained overvoltage with these values (350 mW rating, earlier result 42 mW), the effect of the 47 mV drop on the TUSB321 supply.
