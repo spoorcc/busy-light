@@ -30,11 +30,11 @@ Module `gate` (no Zephyr includes in the logic file):
 - Interlock: one function `gate_set_selects()` is the only writer of the select pins and refuses both-high (SW-009 "never both").
 - Brown-out back-off (SW-007): counter and back-off deadline in a store behind `gate_store_*` (retained RAM); a reset counts unless `hold_ok_rb` was low at the first read or the retained flag is set.
 - Watchdog (SW-010): serviced only from the loop that calls `gate_step()`; no service from a timer or interrupt.
-- Inputs valid only while `hold_ok_rb` is high. `fault_n` is dropped from the snapshot (owner decision 2026-11-07); SW-009 text to be amended.
+- Inputs valid only while `hold_ok_rb` is high. there is no separate `fault_n`; a limiter fault arrives as a fall of `hold_ok_rb` (GATE_OK_RB, ADR-0018 option E); SW-009 text amendment is Proposed.
 Failure behaviour: any unknown input pattern gives the lowest step. Safety: this is the first of two checks; the hardware gate stays the independent one.
 
 ## 5. Detailed implementation plan
-**Decisions of 2026-11-07 (owner):** FAULT_N removed (ADR-0018, Proposed); regulator in the standard package with a firmware limit (ADR-0019, Proposed); retained flag cleared when the gate reopens, elapsed-time clock, watchdog resets count toward the back-off, watchdog timeout 8 s (Proposed amendments of SW-007 and SW-010).
+**Decisions of 2026-11-07 (owner):** FAULT_N combined into GATE_OK_RB (ADR-0018, Accepted); regulator in the standard package with a firmware limit (ADR-0019, Proposed); retained flag cleared when the gate reopens, elapsed-time clock, watchdog resets count toward the back-off, watchdog timeout 8 s (Proposed amendments of SW-007 and SW-010).
 
 **Gate on approval (rule 1):** the SW-005 step table, the removal of FAULT_N from SW-009 and the pin map are Proposed amendments or spike data. No `sw/` file is created until the owner has approved them and this plan.
 
@@ -51,9 +51,9 @@ Failure behaviour: any unknown input pattern gives the lowest step. Safety: this
 | GPIO1 | reserved: I2C line for the orientation sensor (owner decision 2026-11-07; was CC_OK_3A, deleted) | not used by the gate | HW-011 |
 | GPIO2 | pulled up (R16), strapping pin | not used | HW-010 |
 | GPIO3 | SEL_STEP2_GPIO | output | SW-005, SW-009 |
-| GPIO4 | reserved: I2C line for the orientation sensor; FAULT_N is no longer read (owner decision 2026-11-07, not yet in the schematic) | not used by the gate | HW-011, SW-009 |
+| GPIO4 | reserved: I2C line for the orientation sensor (FAULT_N is combined into GATE_OK_RB, ADR-0018 option E, not yet in the schematic) | not used by the gate | HW-011, SW-009 |
 | GPIO5 | BUTTON | input | HW-007 |
-| GPIO6 | HOLD_OK_RB (through a buffer) | input | SW-009 |
+| GPIO6 | GATE_OK_RB = hold-off ok AND no limiter fault (AND gate, replaces the buffer; ADR-0018 option E) | input | SW-009 |
 | GPIO7 | LED_DATA | output | LED driver |
 | GPIO8 | pulled up (R17), strapping pin | not used | HW-010 |
 | GPIO9 | BOOT test point | not used | HW-006 |
@@ -62,7 +62,7 @@ Failure behaviour: any unknown input pattern gives the lowest step. Safety: this
 | GPIO20 | STEP2_EN_RB (R14, 100 k) | input, no pull | SW-009 |
 | GPIO21 | STEP3_EN_RB (R15, 100 k) | input, no pull | SW-009 |
 
-Note: the first goldfish read guessed GPIO2 and GPIO3 for the selects; the map shows GPIO3 and GPIO10. The owner decided on 2026-11-07 to give up FAULT_N so that GPIO1 and GPIO4 can carry the orientation sensor; the spike schematic still shows FAULT_N on GPIO4 until HW-010 is amended.
+Note: the first goldfish read guessed GPIO2 and GPIO3 for the selects; the map shows GPIO3 and GPIO10. The owner decided on 2026-11-07 (ADR-0018 option E) to combine FAULT_N into the GATE_OK_RB signal so that GPIO1 and GPIO4 can carry the orientation sensor; the spike schematic still shows FAULT_N on GPIO4 and a buffer on GPIO6 until HW-010 is amended.
 
 - **Files to create (this change set, after approval):** `sw/app/src/gate.c`, `sw/app/src/gate.h`, `sw/app/src/gate_hal.h` (interface only), `sw/app/tests/gate/` (ztest sources, `CMakeLists.txt`, `prj.conf`, `testcase.yaml`), `sw/app/Kconfig` (constants), `sw/app/boards/esp32c3_devkitm.overlay` is **not** created in this slice.
 - **Kconfig symbols (the advertised-current step is `BL_ADVERT_STEP`, default 2):** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_ADVERT_FALL_MS` (50, SW-006), `BL_WDT_S` (8, Proposed amendment of SW-010).
