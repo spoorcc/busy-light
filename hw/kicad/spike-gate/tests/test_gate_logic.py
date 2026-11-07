@@ -116,10 +116,10 @@ class GateNetlist(unittest.TestCase):
 
     def test_switch_power_and_ground(self):
         for sw, cap in (("U14", "C24"), ("U15", "C25")):
-            self.assertEqual(net_of(self.nets, sw, "5"), "+3V3")
+            self.assertEqual(net_of(self.nets, sw, "5"), "VBUS_IC")   # owner decision 2026-11-07: switch VDD from VBUS_IC
             self.assertEqual(net_of(self.nets, sw, "3"), "GND")
             self.assertEqual(net_of(self.nets, sw, "2"), "GND")      # source side to ground, drain side to the resistor
-            self.assertEqual(net_of(self.nets, cap, "1"), "+3V3")
+            self.assertEqual(net_of(self.nets, cap, "1"), "VBUS_IC")
             self.assertEqual(net_of(self.nets, cap, "2"), "GND")
 
     def test_control_pin_pulldowns_100k(self):
@@ -128,12 +128,12 @@ class GateNetlist(unittest.TestCase):
             self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, gate, "4"))
             self.assertEqual(net_of(self.nets, ref, "2"), "GND")
 
-    def test_step_3_resistor_is_a_single_part(self):
+    def test_step_3_resistor_is_a_series_pair(self):
         n = self.nets
-        self.assertEqual(net_of(n, "U15", "1"), net_of(n, "R_ILIM3", "1"))
+        self.assertEqual(net_of(n, "U15", "1"), net_of(n, "R_ILIM3B", "1"))
+        self.assertEqual(net_of(n, "R_ILIM3B", "2"), net_of(n, "R_ILIM3", "1"))
         self.assertEqual(net_of(n, "R_ILIM3", "2"), "ILIM")
-        self.assertNotEqual(net_of(n, "U15", "1"), "ILIM")
-        self.assertFalse([p for pins in n.values() for p in pins if p[0] == "R_ILIM3B"])
+        self.assertNotEqual(net_of(n, "R_ILIM3B", "2"), "ILIM")
         self.assertEqual(net_of(n, "U14", "1"), net_of(n, "R_ILIM2", "1"))
 
     def test_ic_is_supplied_from_vbus_not_3v3(self):
@@ -156,7 +156,7 @@ class GateNetlist(unittest.TestCase):
         self.assertEqual(net_of(self.nets, "C1", "2"), "GND")
         self.assertEqual(net_of(self.nets, "C1B", "1"), net_of(self.nets, "U5", "5"))   # parallel C0G part
         self.assertEqual(net_of(self.nets, "C1B", "2"), "GND")
-        for ref in ("C1C", "C1D"):     # decision (c): 220 + 220 + 100 + 68 nF
+        for ref in ("C1C", "C1D", "C1E", "C1F"):     # owner decision 2026-11-06: six 100 nF C0G in parallel
             self.assertEqual(net_of(self.nets, ref, "1"), net_of(self.nets, "U5", "5"))
             self.assertEqual(net_of(self.nets, ref, "2"), "GND")
 

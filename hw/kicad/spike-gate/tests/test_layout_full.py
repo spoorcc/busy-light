@@ -58,7 +58,9 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(self.pin_net[("U1", "PORT")], "GND")
         self.assertEqual(self.pin_net[("U1", "VDD")], "VBUS_IC")
         self.assertEqual(self.pin_net[("R1", "1")], "VBUS_IC")     # pull-up on the IC supply, not 3V3
-        self.assertEqual(self.pin_net[("R7", "1")], "VBUS_IC")
+        self.assertNotIn("R7", layout_full.PARTS)                  # OUT2 reading deleted (owner decision 2026-11-07)
+        self.assertNotIn("U12", layout_full.PARTS)
+        self.assertNotIn("CC_OK_3A", self.pin_net.values())
         self.assertEqual(self.pin_net[("R_VD", "2")], self.pin_net[("U1", "VBUS_DET")])
 
     def test_cc_ic_symbol_has_the_datasheet_pins(self):
@@ -97,7 +99,6 @@ class FullBoard(unittest.TestCase):
         for g in ("U3", "U4"):
             self.assertEqual(self.pin_net[(g, "6")], "HOLD_OK")
         self.assertEqual(self.pin_net[("U9", "GPIO0")], "CC_OK_1A5")
-        self.assertEqual(self.pin_net[("U9", "GPIO1")], "CC_OK_3A")
         self.assertEqual(self.pin_net[("U10", "4")], "HOLD_OK_RB")
         self.assertEqual(self.pin_net[("U9", "GPIO6")], "HOLD_OK_RB")
 
@@ -149,18 +150,17 @@ class FullBoard(unittest.TestCase):
 
     def test_ilim_resistor_values(self):
         P = layout_full.PARTS
-        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
-                         ("47.0k 0.1%", "56.9k 0.1%", "27.7k 0.1%"))
-        self.assertNotIn("R_ILIM3B", P)
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R_ILIM3B"][-1]),
+                         ("47.0k 0.1%", "56.2k 0.1%", "27.4k 0.1%", "301 0.1%"))   # E96, HW-010 revision
 
     def test_tmux1101_ilim_switches(self):
         """Owner decision 2026-11-05 (a). TMUX1101DCK (SCDS410D tab. 5-1): 1 D, 2 S, 3 GND, 4 SEL, 5 VDD."""
         pn, P = self.pin_net, layout_full.PARTS
         for sw, en, r_ilim, cap, rpd in (("U14", "ILIM_STEP2_EN", "R_ILIM2", "C24", "R18"),
-                                         ("U15", "ILIM_STEP3_EN", "R_ILIM3", "C25", "R19")):
-            self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, "+3V3"])
+                                         ("U15", "ILIM_STEP3_EN", "R_ILIM3B", "C25", "R19")):
+            self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, "VBUS_IC"])   # VDD from VBUS_IC (2026-11-07)
             self.assertEqual(pn[(sw, "1")], pn[(r_ilim, "1")])
-            self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), ("+3V3", "GND"))
+            self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), ("VBUS_IC", "GND"))
             self.assertEqual({pn[(rpd, "1")], pn[(rpd, "2")]}, {en, "GND"})
             self.assertEqual(P[rpd][-1], "100k")
             self.assertEqual(P[cap][-1], "100n")
@@ -168,13 +168,14 @@ class FullBoard(unittest.TestCase):
             self.assertEqual(P[sw][2], "Package_TO_SOT_SMD:SOT-353_SC-70-5")
         self.assertNotIn("Q2", P)
         self.assertNotIn("Q3", P)
+        self.assertEqual(pn[("R_ILIM3B", "2")], pn[("R_ILIM3", "1")])
         self.assertEqual(pn[("R_ILIM3", "2")], "ILIM")
 
     def test_holdoff_capacitor_set(self):
-        """Owner decision 2026-11-05 (c): 220 + 220 + 100 + 68 nF C0G 5 % 1206 on SUP_CT."""
+        """Owner decision 2026-11-06: six 100 nF C0G 5 % 1206 on SUP_CT (HW-010 revision)."""
         P = layout_full.PARTS
-        vals = {r: P[r][-1] for r in ("C1", "C1B", "C1C", "C1D")}
-        self.assertEqual(sorted(v.split()[0] for v in vals.values()), ["100n", "220n", "220n", "68n"])
+        vals = {r: P[r][-1] for r in ("C1", "C1B", "C1C", "C1D", "C1E", "C1F")}
+        self.assertEqual(sorted(v.split()[0] for v in vals.values()), ["100n"] * 6)
         for r, v in vals.items():
             self.assertIn("C0G 5%", v)
             self.assertEqual(self.pin_net[(r, "1")], "SUP_CT")
@@ -186,7 +187,7 @@ class FullBoard(unittest.TestCase):
 
     def test_every_gpio_in_use_is_listed(self):
         used = {p[1] for p in self.pin_net if p[0] == "U9"} - {"3V3", "GND"}
-        self.assertEqual(used, {"GPIO0", "GPIO1", "GPIO3", "GPIO10", "GPIO4", "GPIO5", "GPIO6", "GPIO7",
+        self.assertEqual(used, {"GPIO0", "GPIO3", "GPIO10", "GPIO4", "GPIO5", "GPIO6", "GPIO7",
                                 "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "GPIO2", "GPIO8", "EN"})
 
     def test_test_points(self):

@@ -35,11 +35,11 @@ class HoldoffCap(unittest.TestCase):
         self.assertFalse(hc.fits(p))
 
     def test_selected_set_window(self):
-        p = hc.SETS["220+220+100+68 (4 parts)"]
-        self.assertAlmostEqual(hc.c_window(p)[2], 608e-9, delta=1e-12)
+        p = hc.SETS["6x100 (6 parts)"]       # owner decision 2026-11-06; HW-010 revision approved 2026-11-07
+        self.assertAlmostEqual(hc.c_window(p)[2], 600e-9, delta=1e-12)
         a, b = hc.td_window(p)
-        self.assertAlmostEqual(a * 1e3, 205.9, delta=0.3)
-        self.assertAlmostEqual(b * 1e3, 560.6, delta=0.3)
+        self.assertAlmostEqual(a * 1e3, 203.2, delta=0.3)
+        self.assertAlmostEqual(b * 1e3, 553.2, delta=0.3)
         self.assertTrue(hc.fits(p))
 
     def test_netlist_set_is_the_selected_set(self):
@@ -47,13 +47,13 @@ class HoldoffCap(unittest.TestCase):
         net = Path(os.environ.get("GATE_NET", HERE / "data" / "gate.net"))
         txt = net.read_text()
         vals = {}
-        for ref in ("C1", "C1B", "C1C", "C1D"):
+        for ref in ("C1", "C1B", "C1C", "C1D", "C1E", "C1F"):
             blk = txt[txt.index('(ref "%s")' % ref):][:400]
             m = re.search(r'\(value "(\d+)n C0G 5% (\d+)V"\)', blk)
             self.assertIsNotNone(m, ref)
             vals[ref] = int(m.group(1)) * 1e-9
             self.assertIn("C_1206", blk)
-        self.assertEqual(sorted(round(v * 1e9) for v in vals.values()), [68, 100, 220, 220])
+        self.assertEqual(sorted(round(v * 1e9) for v in vals.values()), [100] * 6)
         parts = [(c, .05, ref) for ref, c in vals.items()]
         self.assertTrue(hc.fits(parts))
         self.assertNotIn('(ref "C1B")\n      (value "150n', txt)
