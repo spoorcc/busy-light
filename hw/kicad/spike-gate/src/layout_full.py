@@ -54,20 +54,21 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "Connector_USB:USB_C_Receptacle_GCT_USB4085", "USB-C receptacle"),
     "TVS1": (*TVS, "TVS"), "U6": ("Power_Protection", "USBLC6-2P6", "Package_TO_SOT_SMD:SOT-666", "USBLC6-2P6"),
     "U1": (None, None, "CUSTOM:X2QFN-12_RWB", "TUSB321"),   # generated footprint, no X2QFN footprint in the KiCad libraries
-    "R_VD": (*R, "887k"), "R1": (*R, "100k"), "R7": (*R, "100k"),
-    "U2": (*G04, "74LVC1G04"), "U12": (*G04, "74LVC1G04"),
+    "R_VD": (*R, "887k"), "R1": (*R, "100k"),
+    "U2": (*G04, "74LVC1G04"),
     "U13": (*G02, "74LVC1G02"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
     "R4": (*R, "100k"), "R5": (*R, "100k"), "R2": (*R, "10k"), "R3": (*R, "10k"),
     "U14": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
-    # owner decision 2026-11-05 (b): 0.1 % 0603; owner decision 2026-11-06: 56.9 k and 27.7 k single parts (unsourced at 0.1 % 0603)
-    "R_ILIM2": (*R, "56.9k 0.1%"), "R_ILIM3": (*R, "27.7k 0.1%"),
+    # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
+    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R_ILIM3B": (*R, "301 0.1%"),
     "R_ILIM1": (*R, "47.0k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
-    "R6": (*R, "150k"), "C1": (*C1206, "220n C0G 5% 50V"), "C1B": (*C1206, "220n C0G 5% 50V"),
-    "C1C": (*C1206, "100n C0G 5% 50V"), "C1D": (*C1206, "68n C0G 5% 50V"),
+    "R6": (*R, "150k"), "C1": (*C1206, "100n C0G 5% 50V"), "C1B": (*C1206, "100n C0G 5% 50V"),
+    "C1C": (*C1206, "100n C0G 5% 50V"), "C1D": (*C1206, "100n C0G 5% 50V"),
+    "C1E": (*C1206, "100n C0G 5% 50V"), "C1F": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
     "C2": (*C, "1u tbd"), "C3": (*C, "10u tbd"), "R8": (*R, "100k"),
     "U8": (None, None, "", "REG_3V3"),
@@ -129,15 +130,16 @@ LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
 PLACE = {
     "J1": (30, 78.74, 0), "TVS1": (57.15, 63.5, 0), "U6": (68, 118, 0),
     "U1": (gx(50.8), 71.12, 0), "R_VD": (gx(50.8) + 2.54, 49.53, 0), "R1": (gx(76.2), 62.23, 0),
-    "R7": (125.0, 87.63, 0), "U2": (gx(104.14), 66.04, 0), "U13": (gx(121.92), 40.64, 0), "U12": (143.0, 91.44, 0),
+    "U2": (gx(104.14), 66.04, 0), "U13": (gx(121.92), 40.64, 0),
     "U3": (gx(162.56), 50.8, 0), "R4": (gx(137.16), 59.69, 0), "R2": (gx(198.12), 54.61, 0),
     "U14": (gx(223.52), 50.8, 0), "R18": (gx(208.28), 54.61, 0), "C24": (gx(228.6), 38.1, 0),
     "R_ILIM2": (gx(250.19), 50.8, 90),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
     "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
-    "R_ILIM3": (gx(250.19), 91.44, 90),
+    "R_ILIM3B": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
     "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C1B": (gx(86.36), 146.05, 0),
-    "C1C": (gx(93.98), 146.05, 0), "C1D": (gx(101.6), 146.05, 0),
+    "C1C": (gx(93.98), 146.05, 0), "C1D": (gx(101.6), 146.05, 0), "C1E": (gx(109.22), 146.05, 0),
+    "C1F": (gx(116.84), 146.05, 0),
     "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
     "C3": (350.5, 24.0, 0), "R8": (364.0, 36.83, 0),
     "U8": (335.0, 100.0, 0), "C5": (317.0, 103.81, 0), "C6": (353.0, 103.81, 0),
@@ -151,10 +153,10 @@ TEXT = {
     "J1": (-7.62, 26.0, "left"), "TVS1": (-3.81, -5.5, "left"), "U6": (6.0, 8.0, "left"),
     "U1": (-7.62, 20.5, "left"), "U5": (-5.08, 19.5, "left"), "U7": (-7.62, 17.0, "left"),
     "U8": (-7.62, 15.0, "left"), "U9": (-22.86, -40.0, "left"),
-    "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U12": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"),
+    "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
     "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
-    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"),
+    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R_ILIM3B": (-2.54, 2.54, "left"),
     "R_ILIM1": (-2.54, -1.27, "right"),
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
     "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
@@ -391,21 +393,8 @@ def _build():
     s.ends("CC_OK_1A5", ("U2", "4"), (y2[0] + 5.08, y2[1]))
     s.bind("CC_OK_1A5", "U2", 4)
     s.label("CC_OK_1A5", y2[0] + 5.08, y2[1])
-    # OUT2: second reading for the MCU (inverter on 3.3 V)
-    o2 = P("U1", "8")
-    s.bind("CC_OUT2_N", "U1", 8)
-    s.wire(o2, (122.5, o2[1]), (122.5, P("U12", "2")[1]), P("U12", "2"))
-    s.bind("CC_OUT2_N", "U12", 2)
-    s.pw("VBUS_IC", ("R7", "1"))
-    s.bind("CC_OUT2_N", "R7", 2)
-    s.junction(*P("R7", "2"))
-    s.pw("+3V3", ("U12", "5"))
-    s.pw("GND", ("U12", "3"))
-    s.nc(P("U12", "1"))
-    y12 = P("U12", "4")
-    s.bind("CC_OK_3A", "U12", 4)
-    s.wire(y12, (y12[0] + 5.08, y12[1]))
-    s.label("CC_OK_3A", y12[0] + 5.08, y12[1])
+    # OUT2 is not used: no 3 A reading (owner decision 2026-11-07, OUT2 is not a clean 3 A signal); the pin is left open
+    s.nc(P("U1", "8"))
 
     # ------------------------------------------------------------ gates and ILIM switches
     for g, rsel, ren, sw, rpd, cap, sel, en in (("U3", "R4", "R2", "U14", "R18", "C24", "SEL_STEP2_GPIO", "ILIM_STEP2_EN"),
@@ -439,18 +428,18 @@ def _build():
         # switch supply with 0.1 uF; S and GND pins to ground
         vdd = P(sw, 5)
         ty = P(cap, 1)[1]
-        s.bind("+3V3", sw, 5)
-        s.bind("+3V3", cap, 1)
+        s.bind("VBUS_IC", sw, 5)
+        s.bind("VBUS_IC", cap, 1)
         s.wire(vdd, (vdd[0], ty), P(cap, 1))
         s.junction(vdd[0], ty)
-        s.pw("+3V3", (vdd[0], ty), True)
+        s.pw("VBUS_IC", (vdd[0], ty), True)
         s.pw("GND", (cap, "2"), True)
         s.bind("GND", sw, 3)
         s.bind("GND", sw, 2)
         s.pw("GND", (sw, "3"), True)
         s.wire(P(sw, 2), P(sw, 3))
-    # step 2: switch - 56.9 k - ILIM; step 3: switch - 27.7 k - ILIM (decision (b))
-    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3",), "ILIM_D_U15")):
+    # step 2: switch - 56.2 k - ILIM; step 3: switch - 301 ohm - 27.4 k - ILIM (decision (b))
+    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3B", "R_ILIM3"), "ILIM_D_U15")):
         prev, prev_pin = P(sw, 1), (sw, 1)
         for k, rl in enumerate(chain):
             (lo_pin, lo), (hi_pin, hi) = sorted((("1", P(rl, 1)), ("2", P(rl, 2))), key=lambda e: e[1][0])
@@ -497,13 +486,13 @@ def _build():
     s.bind("SUP_CT", "C1", 1)
     s.wire(ct, P("C1", 1))
     s.bind("SUP_CT", "C1B", 1)
-    for a_, b_ in (("C1", "C1B"), ("C1B", "C1C"), ("C1C", "C1D")):   # parallel C0G set, one rail wire
+    for a_, b_ in (("C1", "C1B"), ("C1B", "C1C"), ("C1C", "C1D"), ("C1D", "C1E"), ("C1E", "C1F")):   # parallel C0G set, one rail wire
         s.bind("SUP_CT", b_, 1)
         s.wire(P(a_, 1), P(b_, 1))
-    for r_ in ("C1", "C1B", "C1C"):
+    for r_ in ("C1", "C1B", "C1C", "C1D", "C1E"):
         s.junction(*P(r_, 1))
     s.label("SUP_CT", gx(68.58), ct[1])
-    for r_ in ("C1", "C1B", "C1C", "C1D"):
+    for r_ in ("C1", "C1B", "C1C", "C1D", "C1E", "C1F"):
         s.pw("GND", (r_, "2"), True)
 
     # ------------------------------------------------------------ TPS2553 and 5 V output
@@ -559,10 +548,11 @@ def _build():
     # ------------------------------------------------------------ MCU
     s.pw("+3V3", ("U9", "3V3"))
     s.pw("GND", ("U9", "GND"))
-    for pin, net in (("GPIO0", "CC_OK_1A5"), ("GPIO1", "CC_OK_3A"), ("GPIO3", "SEL_STEP2_GPIO"),
+    for pin, net in (("GPIO0", "CC_OK_1A5"), ("GPIO3", "SEL_STEP2_GPIO"),
                      ("GPIO10", "SEL_STEP3_GPIO"), ("GPIO4", "FAULT_N"), ("GPIO5", "BUTTON"),
                      ("GPIO6", "HOLD_OK_RB"), ("GPIO7", "LED_DATA")):
         s.stub(net, ("U9", pin), 5.08, 0, 0)
+    s.nc(P("U9", "GPIO1"))   # was CC_OK_3A: OUT2 reading deleted (owner decision 2026-11-07)
     s.stub("USB_DN", ("U9", "GPIO18"), -5.08, 0, 180)
     s.stub("USB_DP", ("U9", "GPIO19"), -5.08, 0, 180)
     # test points on the left side

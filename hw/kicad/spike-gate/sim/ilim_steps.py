@@ -158,12 +158,12 @@ def candidate_a():
 
 
 # Candidate B: E96 1 %. R1 is the smallest value whose step 1 maximum meets 623 mA; R3 the largest value whose step 3 minimum reaches the floor
-# Candidate C: the owner decision of 2026-11-05 (b): R1 47.0 k, R2 56.9 k, R3 27.7 k (all 0.1 %, 0603; owner decision 2026-11-06; 56.9 k and 27.7 k unsourced)
-R3_PARTS_K = (27.7,)
+# Candidate C: the owner decision of 2026-11-05 (b): R1 47.0 k, R2 56.2 k, R3 = 27.4 k + 301 ohm in series (all 0.1 %)
+R3_PARTS_K = (27.4, 0.301)
 
 
 def candidate_c():
-    return 47.0, 56.9, round(sum(R3_PARTS_K), 6)
+    return 47.0, 56.2, round(sum(R3_PARTS_K), 6)
 
 
 def candidate_b():
@@ -212,7 +212,7 @@ def main():
     ok = all(v >= 0 for v in margins(*ca, TOL_01PCT, leak_a=0.0).values())
     print("\ncandidate A meets all four HW-010 numbers with no leakage:", ok)
 
-    print("\n-- candidate C (owner decision 2026-11-06): R1 47.0k, R2 56.9k, R3 27.7k, 0.1 %, TMUX1101 switches")
+    print("\n-- candidate C (owner decision 2026-11-05): R1 47.0k, R2 56.2k, R3 27.4k + 301 ohm, 0.1 %, TMUX1101 switches")
     cc = candidate_c()
     kw = dict(leak_a=TMUX_LEAK_A, rds_max=TMUX_RDS_ON_MAX_OHM)
     print(f"  switch: leakage {TMUX_LEAK_A*1e9:g} nA per off switch at V_ILIM {V_ILIM_V:g} V, Rds(on) max {TMUX_RDS_ON_MAX_OHM:g} ohm [DS SCDS410D]")

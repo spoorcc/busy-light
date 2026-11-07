@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
-		(date "2026-11-06T00:31:19")
+		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/b69520cb-3f58-4588-89c0-3c47f4c9a35d/scratchpad/f/full.kicad_sch")
+		(date "2026-11-07T11:07:31")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -56,7 +56,7 @@
 	(components
 		(comp
 			(ref "C1")
-			(value "220n C0G 5% 50V")
+			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
 				(field
@@ -75,11 +75,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -110,7 +110,7 @@
 		)
 		(comp
 			(ref "C1B")
-			(value "220n C0G 5% 50V")
+			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
 				(field
@@ -129,11 +129,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -183,11 +183,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -218,7 +218,7 @@
 		)
 		(comp
 			(ref "C1D")
-			(value "68n C0G 5% 50V")
+			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
 				(field
@@ -237,11 +237,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -256,6 +256,114 @@
 				(tstamps "/")
 			)
 			(tstamps "5dfa0c94-3e5c-5219-ae26-62bc0a35e00e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C1E")
+			(value "100n C0G 5% 50V")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7d7d0fe2-6ef0-547d-bced-33bf76599582")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C1F")
+			(value "100n C0G 5% 50V")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ea1a6644-6aed-5d8d-b7c8-5a439dcff6eb")
 			(units
 				(unit
 					(name "A")
@@ -291,11 +399,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -345,11 +453,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -399,11 +507,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -453,11 +561,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -507,11 +615,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -561,11 +669,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -615,11 +723,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -669,11 +777,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -723,11 +831,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -777,11 +885,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -831,11 +939,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -885,11 +993,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -939,11 +1047,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -993,11 +1101,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1047,11 +1155,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1101,11 +1209,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1155,11 +1263,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1209,11 +1317,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1263,11 +1371,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1317,11 +1425,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1371,11 +1479,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1425,11 +1533,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1479,11 +1587,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1533,11 +1641,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1587,11 +1695,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1647,11 +1755,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1707,11 +1815,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1767,11 +1875,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1827,11 +1935,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1887,11 +1995,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1947,11 +2055,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2007,11 +2115,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2067,11 +2175,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2127,11 +2235,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2187,11 +2295,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2247,11 +2355,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2307,11 +2415,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2367,11 +2475,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2427,11 +2535,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2487,11 +2595,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2547,11 +2655,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2646,11 +2754,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2700,11 +2808,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2754,11 +2862,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2808,11 +2916,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2862,11 +2970,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2916,11 +3024,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2935,60 +3043,6 @@
 				(tstamps "/")
 			)
 			(tstamps "95855855-4d65-5102-b9ce-1cde39817501")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R7")
-			(value "100k")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(fields
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "Sheetname")
-				(value "Root")
-			)
-			(property
-				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "62bc49b5-a015-5e75-a6f1-a90dfc5640dc")
 			(units
 				(unit
 					(name "A")
@@ -3024,11 +3078,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3078,11 +3132,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3132,11 +3186,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3186,11 +3240,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3240,11 +3294,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3294,11 +3348,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3348,11 +3402,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3402,11 +3456,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3456,11 +3510,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3510,11 +3564,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3564,11 +3618,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3618,11 +3672,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3672,11 +3726,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3707,7 +3761,7 @@
 		)
 		(comp
 			(ref "R_ILIM2")
-			(value "56.9k 0.1%")
+			(value "56.2k 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
 				(field
@@ -3726,11 +3780,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3761,7 +3815,7 @@
 		)
 		(comp
 			(ref "R_ILIM3")
-			(value "27.7k 0.1%")
+			(value "27.4k 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
 				(field
@@ -3780,11 +3834,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3799,6 +3853,60 @@
 				(tstamps "/")
 			)
 			(tstamps "fb847c3b-b019-5da0-90df-a5e3542d41d0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R_ILIM3B")
+			(value "301 0.1%")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "97f7fdf6-781c-5f5b-b35a-168234c83062")
 			(units
 				(unit
 					(name "A")
@@ -3834,11 +3942,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3888,11 +3996,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3938,11 +4046,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3989,11 +4097,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4040,11 +4148,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4091,11 +4199,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4142,11 +4250,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4193,11 +4301,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4244,11 +4352,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4298,11 +4406,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4334,10 +4442,10 @@
 		(comp
 			(ref "U1")
 			(value "TUSB321")
-			(footprint "Package_X2QFN:X2QFN-12")
+			(footprint "CUSTOM:X2QFN-12_RWB")
 			(fields
 				(field
-					(name "Footprint") "Package_X2QFN:X2QFN-12")
+					(name "Footprint") "CUSTOM:X2QFN-12_RWB")
 				(field
 					(name "Datasheet")
 				)
@@ -4352,11 +4460,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -4428,11 +4536,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4491,11 +4599,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4557,11 +4665,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4623,11 +4731,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -4678,11 +4786,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4744,11 +4852,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -4802,11 +4910,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -4833,10 +4941,10 @@
 		(comp
 			(ref "U9")
 			(value "ESP32-C3-MINI-1")
-			(footprint "RF_Module:ESP32-C3-MINI-1")
 			(fields
 				(field
-					(name "Footprint") "RF_Module:ESP32-C3-MINI-1")
+					(name "Footprint")
+				)
 				(field
 					(name "Datasheet")
 				)
@@ -4851,11 +4959,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -4945,11 +5053,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5008,11 +5116,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5051,69 +5159,6 @@
 			)
 		)
 		(comp
-			(ref "U12")
-			(value "74LVC1G04")
-			(footprint "Package_TO_SOT_SMD:SOT-23-5")
-			(fields
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "74xGxx")
-				(part "74LVC1G04")
-				(description "Single NOT Gate, Low-Voltage CMOS")
-			)
-			(property
-				(name "Sheetname")
-				(value "Root")
-			)
-			(property
-				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "Single Gate NOT LVC CMOS")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "SOT?23* Texas?R-PDSO-G5?DCK* Texas?R-PDSO-N5?DRL* Texas?X2SON*0.8x0.8mm*P0.48mm*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "de7932c9-bd4a-5b3e-9725-adc4f590e7ad")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "5")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "4")
-						)
-					)
-				)
-			)
-		)
-		(comp
 			(ref "U13")
 			(value "74LVC1G02")
 			(footprint "Package_TO_SOT_SMD:SOT-23-5")
@@ -5134,11 +5179,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5197,11 +5242,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -5252,11 +5297,11 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Root")
+				(value "full")
 			)
 			(property
 				(name "Sheetfile")
-				(value "../../../../../../../tmp/claude-1000/-home-ben-Programming-busy-light/36c2f04b-710a-4975-8a8f-4166cf7aa814/scratchpad/full/full.kicad_sch")
+				(value "full.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
@@ -6294,22 +6339,41 @@
 			)
 		)
 	)
-	(libraries)
+	(libraries
+		(library
+			(logical "74xGxx")
+			(uri "${KICAD10_SYMBOL_DIR}/74xGxx.kicad_sym")
+		)
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "LED")
+			(uri "${KICAD10_SYMBOL_DIR}/LED.kicad_sym")
+		)
+		(library
+			(logical "Power_Protection")
+			(uri "${KICAD10_SYMBOL_DIR}/Power_Protection.kicad_sym")
+		)
+		(library
+			(logical "Switch")
+			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
+		)
+		(library
+			(logical "busylight_gate")
+			(uri "${KIPRJMOD}/busylight_gate.kicad_sym")
+		)
+	)
 	(nets
 		(net
 			(code "1")
 			(name "+3V3")
 			(class "Default")
-			(node
-				(ref "C24")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C25")
-				(pin "1")
-				(pintype "passive")
-			)
 			(node
 				(ref "C6")
 				(pin "1")
@@ -6353,27 +6417,9 @@
 				(pintype "power_in")
 			)
 			(node
-				(ref "U12")
-				(pin "5")
-				(pinfunction "VCC_5")
-				(pintype "power_in")
-			)
-			(node
 				(ref "U13")
 				(pin "5")
 				(pinfunction "VCC_5")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U14")
-				(pin "5")
-				(pinfunction "VDD_5")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U15")
-				(pin "5")
-				(pinfunction "VDD_5")
 				(pintype "power_in")
 			)
 			(node
@@ -6711,22 +6757,6 @@
 		)
 		(net
 			(code "7")
-			(name "/CC_OK_3A")
-			(class "Default")
-			(node
-				(ref "U12")
-				(pin "4")
-				(pintype "output")
-			)
-			(node
-				(ref "U9")
-				(pin "GPIO1")
-				(pinfunction "GPIO1_GPIO1")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "8")
 			(name "/CC_OK_NOT_S3")
 			(class "Default")
 			(node
@@ -6741,7 +6771,7 @@
 			)
 		)
 		(net
-			(code "9")
+			(code "8")
 			(name "/CC_OUT1_N")
 			(class "Default")
 			(node
@@ -6767,7 +6797,7 @@
 			)
 		)
 		(net
-			(code "10")
+			(code "9")
 			(name "/FAULT_N")
 			(class "Default")
 			(node
@@ -6789,7 +6819,7 @@
 			)
 		)
 		(net
-			(code "11")
+			(code "10")
 			(name "/HOLD_OK")
 			(class "Default")
 			(node
@@ -6820,7 +6850,7 @@
 			)
 		)
 		(net
-			(code "12")
+			(code "11")
 			(name "/HOLD_OK_RB")
 			(class "Default")
 			(node
@@ -6836,7 +6866,7 @@
 			)
 		)
 		(net
-			(code "13")
+			(code "12")
 			(name "/ILIM")
 			(class "Default")
 			(node
@@ -6862,7 +6892,7 @@
 			)
 		)
 		(net
-			(code "14")
+			(code "13")
 			(name "/ILIM_STEP2_EN")
 			(class "Default")
 			(node
@@ -6893,7 +6923,7 @@
 			)
 		)
 		(net
-			(code "15")
+			(code "14")
 			(name "/ILIM_STEP3_EN")
 			(class "Default")
 			(node
@@ -6929,7 +6959,7 @@
 			)
 		)
 		(net
-			(code "16")
+			(code "15")
 			(name "/LED_BUF")
 			(class "Default")
 			(node
@@ -6944,7 +6974,7 @@
 			)
 		)
 		(net
-			(code "17")
+			(code "16")
 			(name "/LED_DATA")
 			(class "Default")
 			(node
@@ -6971,7 +7001,7 @@
 			)
 		)
 		(net
-			(code "18")
+			(code "17")
 			(name "/LED_ROW2")
 			(class "Default")
 			(node
@@ -6988,7 +7018,7 @@
 			)
 		)
 		(net
-			(code "19")
+			(code "18")
 			(name "/SEL_STEP2_GPIO")
 			(class "Default")
 			(node
@@ -7009,7 +7039,7 @@
 			)
 		)
 		(net
-			(code "20")
+			(code "19")
 			(name "/SEL_STEP3_GPIO")
 			(class "Default")
 			(node
@@ -7030,7 +7060,7 @@
 			)
 		)
 		(net
-			(code "21")
+			(code "20")
 			(name "/SUP_CT")
 			(class "Default")
 			(node
@@ -7054,6 +7084,16 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "C1E")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C1F")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "U5")
 				(pin "5")
 				(pinfunction "CT_5")
@@ -7061,7 +7101,7 @@
 			)
 		)
 		(net
-			(code "22")
+			(code "21")
 			(name "/USB_DN")
 			(class "Default")
 			(node
@@ -7078,7 +7118,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "22")
 			(name "/USB_DP")
 			(class "Default")
 			(node
@@ -7095,7 +7135,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "23")
 			(name "GND")
 			(class "Default")
 			(node
@@ -7165,6 +7205,16 @@
 			)
 			(node
 				(ref "C1D")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C1E")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C1F")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -7463,12 +7513,6 @@
 				(pintype "power_in")
 			)
 			(node
-				(ref "U12")
-				(pin "3")
-				(pinfunction "GND_3")
-				(pintype "power_in")
-			)
-			(node
 				(ref "U13")
 				(pin "3")
 				(pinfunction "GND_3")
@@ -7548,7 +7592,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "24")
 			(name "Net-(C7-Pad1)")
 			(class "Default")
 			(node
@@ -7575,7 +7619,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "25")
 			(name "Net-(D1-DIN)")
 			(class "Default")
 			(node
@@ -7591,7 +7635,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "26")
 			(name "Net-(D1-DOUT)")
 			(class "Default")
 			(node
@@ -7608,7 +7652,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "27")
 			(name "Net-(D2-DOUT)")
 			(class "Default")
 			(node
@@ -7625,7 +7669,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "28")
 			(name "Net-(D3-DOUT)")
 			(class "Default")
 			(node
@@ -7642,7 +7686,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "29")
 			(name "Net-(D4-DOUT)")
 			(class "Default")
 			(node
@@ -7659,7 +7703,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "30")
 			(name "Net-(D5-DOUT)")
 			(class "Default")
 			(node
@@ -7676,7 +7720,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "31")
 			(name "Net-(D6-DOUT)")
 			(class "Default")
 			(node
@@ -7693,7 +7737,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "32")
 			(name "Net-(D7-DOUT)")
 			(class "Default")
 			(node
@@ -7710,7 +7754,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "33")
 			(name "Net-(D10-DIN)")
 			(class "Default")
 			(node
@@ -7727,7 +7771,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "34")
 			(name "Net-(D10-DOUT)")
 			(class "Default")
 			(node
@@ -7744,7 +7788,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "35")
 			(name "Net-(D11-DOUT)")
 			(class "Default")
 			(node
@@ -7761,7 +7805,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "36")
 			(name "Net-(D12-DOUT)")
 			(class "Default")
 			(node
@@ -7778,7 +7822,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "37")
 			(name "Net-(D13-DOUT)")
 			(class "Default")
 			(node
@@ -7795,7 +7839,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "38")
 			(name "Net-(D14-DOUT)")
 			(class "Default")
 			(node
@@ -7812,7 +7856,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "39")
 			(name "Net-(D15-DOUT)")
 			(class "Default")
 			(node
@@ -7829,7 +7873,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "40")
 			(name "Net-(J1-D+-PadA6)")
 			(class "Default")
 			(node
@@ -7852,7 +7896,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "41")
 			(name "Net-(J1-D--PadA7)")
 			(class "Default")
 			(node
@@ -7875,7 +7919,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "42")
 			(name "Net-(R12-Pad2)")
 			(class "Default")
 			(node
@@ -7887,6 +7931,21 @@
 				(ref "SW1")
 				(pin "1")
 				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "43")
+			(name "Net-(R_ILIM3-Pad1)")
+			(class "Default")
+			(node
+				(ref "R_ILIM3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R_ILIM3B")
+				(pin "2")
 				(pintype "passive")
 			)
 		)
@@ -7908,27 +7967,6 @@
 		)
 		(net
 			(code "45")
-			(name "Net-(U1-OUT2_N)")
-			(class "Default")
-			(node
-				(ref "R7")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "8")
-				(pinfunction "OUT2_N_8")
-				(pintype "open_collector")
-			)
-			(node
-				(ref "U12")
-				(pin "2")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "46")
 			(name "Net-(U9-GPIO2_(strap))")
 			(class "Default")
 			(node
@@ -7944,7 +7982,7 @@
 			)
 		)
 		(net
-			(code "47")
+			(code "46")
 			(name "Net-(U9-GPIO8_(strap))")
 			(class "Default")
 			(node
@@ -7960,7 +7998,7 @@
 			)
 		)
 		(net
-			(code "48")
+			(code "47")
 			(name "Net-(U9-GPIO9_(boot))")
 			(class "Default")
 			(node
@@ -7977,7 +8015,7 @@
 			)
 		)
 		(net
-			(code "49")
+			(code "48")
 			(name "Net-(U9-GPIO20_U0RXD)")
 			(class "Default")
 			(node
@@ -7993,7 +8031,7 @@
 			)
 		)
 		(net
-			(code "50")
+			(code "49")
 			(name "Net-(U9-GPIO21_U0TXD)")
 			(class "Default")
 			(node
@@ -8009,7 +8047,7 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "50")
 			(name "Net-(U14-D)")
 			(class "Default")
 			(node
@@ -8025,11 +8063,11 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "51")
 			(name "Net-(U15-D)")
 			(class "Default")
 			(node
-				(ref "R_ILIM3")
+				(ref "R_ILIM3B")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8041,11 +8079,21 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "52")
 			(name "VBUS_IC")
 			(class "Default")
 			(node
 				(ref "C2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8084,11 +8132,6 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R7")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
 				(ref "R_VD")
 				(pin "1")
 				(pintype "passive")
@@ -8103,6 +8146,18 @@
 				(ref "U1")
 				(pin "VDD")
 				(pinfunction "VDD_VDD")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U14")
+				(pin "5")
+				(pinfunction "VDD_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U15")
+				(pin "5")
+				(pinfunction "VDD_5")
 				(pintype "power_in")
 			)
 			(node
@@ -8131,7 +8186,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "53")
 			(name "unconnected-(D16-DOUT-Pad2)")
 			(class "Default")
 			(node
@@ -8142,7 +8197,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "54")
 			(name "unconnected-(J1-SBU1-PadA8)")
 			(class "Default")
 			(node
@@ -8153,7 +8208,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "55")
 			(name "unconnected-(J1-SBU2-PadB8)")
 			(class "Default")
 			(node
@@ -8164,7 +8219,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "56")
 			(name "unconnected-(U1-CURRENT_MODE-Pad3)")
 			(class "Default")
 			(node
@@ -8175,7 +8230,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "57")
 			(name "unconnected-(U1-DIR-Pad11)")
 			(class "Default")
 			(node
@@ -8186,13 +8241,24 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "58")
 			(name "unconnected-(U1-ID-Pad9)")
 			(class "Default")
 			(node
 				(ref "U1")
 				(pin "9")
 				(pinfunction "ID_9")
+				(pintype "open_collector+no_connect")
+			)
+		)
+		(net
+			(code "59")
+			(name "unconnected-(U1-OUT2_N-Pad8)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "8")
+				(pinfunction "OUT2_N_8")
 				(pintype "open_collector+no_connect")
 			)
 		)
@@ -8231,13 +8297,13 @@
 		)
 		(net
 			(code "63")
-			(name "unconnected-(U12-NC-Pad1)")
+			(name "unconnected-(U9-PadGPIO1)")
 			(class "Default")
 			(node
-				(ref "U12")
-				(pin "1")
-				(pinfunction "NC_1")
-				(pintype "no_connect")
+				(ref "U9")
+				(pin "GPIO1")
+				(pinfunction "GPIO1_GPIO1")
+				(pintype "bidirectional+no_connect")
 			)
 		)
 	)
