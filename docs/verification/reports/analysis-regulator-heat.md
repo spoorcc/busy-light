@@ -1,7 +1,7 @@
 # Analysis: heat of the 3V3 linear regulator with realistic Wi-Fi use (HW-010 proposal, HW-013)
 
 - **Date:** 2026-11-07. **Author:** assistant. **Status:** Draft analysis. Nothing Approved, nothing measured.
-- **Script and tests:** `hw/sim/scripts/regulator_heat.py`, `hw/sim/scripts/test_regulator_heat.py` (6 tests pass; ruff clean).
+- **Script and tests:** `hw/sim/scripts/regulator_heat.py`, `hw/sim/scripts/test_regulator_heat.py` (7 tests pass; ruff clean).
 
 ## Question
 The owner chose the TLV75733P linear regulator on 2026-11-07, on condition that a Wi-Fi duty-cycle heat estimate shows the heat is acceptable in the closed PETG housing.
@@ -35,11 +35,11 @@ Loss = (5.5 V - 3.3 V) x average 3V3 current + the ground-current term. Input 5.
 - **Continuous transmit** (0.78 W, a bound, not a real use) fails in most cases, including the DYD package with a hot housing. It can be excluded only by firmware: the transmit duty is a design property, not a measurement.
 - My earlier statement in the shortlist, "up to about 1 W, junction rise 89 to 97 K", used the 567 mA worst case with the better board figures. With the standard DBV package on the JEDEC board the worst case is higher. The shortlist is corrected.
 
-## Recommendation
-Keep the linear **TLV75733P in the DYD package (exposed thermal pad)**, with a copper pour under it, and put two limits in the requirements: (1) the firmware limits transmit duty during updates so that the 3V3 average stays at or below [150] mA, and (2) HW-013 measures the junction (case) temperature of the regulator at the update load. The buck converter stays the fallback if the measurement fails. Whether the DYD variant has the stock and the price needed is not checked.
+## Recommendation (superseded by the owner choice at the end of this report: DBV package, firmware limit only)
+Keep the linear **TLV75733P in the DYD package (exposed thermal pad)**, with a copper pour under it, and put two limits in the requirements: (1) the firmware limits transmit duty during updates so that the 3V3 average stays at or below [150] mA, and (2) HW-013 measures the junction (case) temperature of the regulator at the update load. The buck converter stays the fallback if the measurement fails. 
 
 ## Not done
-No measurement; duty cycles assumed; the housing rise is a parameter, not a result; LED heat and the regulator heat are not coupled in this model; stock of the DYD variant not read.
+No measurement; duty cycles assumed; the housing rise is a parameter, not a result; LED heat and the regulator heat are not coupled in this model; stock of the TLV75733P variants not read.
 
 ## Owner choice of 2026-11-07 and what it implies
 The owner chose the **standard package (DBV), firmware limit only**, not the DYD pad package. The highest average 3V3 current that keeps the junction at or below 110 degC (script output):

@@ -4,7 +4,7 @@
 - **Date:** 2026-11-07  **Owner:** Ben Spoor (author: assistant)
 - **Area:** sw
 - **Requirements addressed:** SW-005, SW-006, SW-007, SW-009, SW-010 (all Approved 2026-11-07); SYS-020; HW-010 (readback inputs)
-- **EGM review record:** none yet. The readiness rerun of 2026-11-07 is in RV-010 and asked for this plan.
+- **EGM review record:** RV-011 (goldfish review of 2026-11-07, in progress). The readiness rerun of 2026-11-07 is in RV-010 and asked for this plan.
 
 ## 1. Problem definition
 The USB input current limit has a hardware gate (ADR-0016) and needs the firmware that raises the step only after a stable reading, sheds load when the gate closes, backs off after brown-outs and restarts when hung. Out of scope: the LED, Wi-Fi and mapping firmware, HW-011 sensor, bench measurements, any hardware change.
@@ -34,6 +34,13 @@ Module `gate` (no Zephyr includes in the logic file):
 Failure behaviour: any unknown input pattern gives the lowest step. Safety: this is the first of two checks; the hardware gate stays the independent one.
 
 ## 5. Detailed implementation plan
+**Gate on approval (rule 1):** the SW-005 step table, the removal of FAULT_N from SW-009 and the pin map are Proposed amendments or spike data. No `sw/` file is created until the owner has approved them and this plan.
+
+**Hardware abstraction `gate_hal.h` (interface list, to be fixed in the review):** `gate_hal_read_inputs(snapshot *)`, `gate_hal_write_selects(step2, step3)`, `gate_hal_now_ms()`, `gate_hal_request_budget(level)` (the LED-layer call; level lowest or normal; the layer must reach the budget within [X] ms), `gate_hal_store_read(*)` and `gate_hal_store_write(*)` (retained store), `gate_hal_reset_cause()`, `gate_hal_wdt_service()`. Edge events: `gate_hal` calls `gate_on_edge(which)` from the GPIO interrupt; on native_sim a test injects the edge.
+
+**Mapping of requirements to functions:** SW-005 `gate_step()`; SW-006 `gate_on_advert_fall()` (budget before select, [50] ms from the read that shows the fall); SW-007 `gate_boot()` (reads cause, retained flag and counter at start, before the readback pins are configured, clears the flag after use); SW-009 `gate_on_edge()` and `gate_readbacks_valid()` (false until GPIO20 and GPIO21 are configured as inputs without pull); SW-010 `gate_loop()` (the only caller of `gate_hal_wdt_service()`).
+
+**Pin map validity:** the pin map below comes from the spike generator, which uses the ESP32-C6-MINI-1 footprint as a stand-in (DEV-004). It is not valid for layout or any product file until the ESP32-C3-MINI-1 footprint exists and the map is rechecked.
 **Pin map (spike, from `layout_full.py`; to be confirmed in HW-010 and the product schematic):**
 
 | ESP32-C3 GPIO | Net | Direction | Requirement |
@@ -56,11 +63,11 @@ Failure behaviour: any unknown input pattern gives the lowest step. Safety: this
 Note: the first goldfish read guessed GPIO2 and GPIO3 for the selects; the map shows GPIO3 and GPIO10. The owner decided on 2026-11-07 to give up FAULT_N so that GPIO1 and GPIO4 can carry the orientation sensor; the spike schematic still shows FAULT_N on GPIO4 until HW-010 is amended.
 
 - **Files to create (this change set, after approval):** `sw/app/src/gate.c`, `sw/app/src/gate.h`, `sw/app/src/gate_hal.h` (interface only), `sw/app/tests/gate/` (ztest sources, `CMakeLists.txt`, `prj.conf`, `testcase.yaml`), `sw/app/Kconfig` (constants), `sw/app/boards/esp32c3_devkitm.overlay` is **not** created in this slice.
-- **Kconfig symbols:** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_WDT_S` (10).
+- **Kconfig symbols:** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_ADVERT_FALL_MS` (50, SW-006), `BL_WDT_S` (10).
 - **Order of work:** (1) value table and interlock; (2) SW-005 counter; (3) SW-009 edge latch and shed; (4) SW-007 counter and store; (5) SW-006 time base; (6) SW-010 watchdog.
 
 ## 6. Test and verification plan
-TC-105, TC-106, TC-107, TC-109, TC-110 at unit level in ztest on native_sim, run by CI; every case has a table of inputs and expected outputs. Static analysis per `docs/standards/coding-sw.md` (clang-tidy, no MISRA claim without a report). Bench parts of the test cases stay not run.
+TC-105, TC-106, TC-107, TC-109, TC-110 at unit level in ztest on native_sim, run by CI; every case has a table of inputs and expected outputs. Cases beyond TC-105 to TC-110: the SW-009 build-configuration checks (a) to (c) and the GPIO_INPUT-only check are part of TC-109. Resource budget (proposed, to be measured): `gate_step()` under [1] ms of CPU and under [2] KiB of RAM including the store; not measured. The native_sim build is not proven: a smoke test that builds and runs an empty ztest is the first increment. Static analysis per `docs/standards/coding-sw.md` (clang-tidy, no MISRA claim without a report). Bench parts of the test cases stay not run.
 
 ## 7. Risks and open questions
 - SW-005 value table: owner decision 2026-11-07, 1.5 A and 3 A both give the middle step until TC-213; the Proposed amendment must be approved and ADR-0010 open point 3 updated.
