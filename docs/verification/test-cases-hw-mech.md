@@ -182,3 +182,12 @@
 - **Expected result / pass criteria:** see acceptance criteria of MECH-008
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-213 Thermal limit in the closed housing at the top current step
+
+- **Verifies:** HW-013
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of HW-013
+- **Automated:** TBD
+- **Evidence:** TBD

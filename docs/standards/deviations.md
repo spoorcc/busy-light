@@ -39,3 +39,13 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Risk assessment:** the antenna environment is not acceptable as it stands; no statement on antenna performance is made. Open items for the owner: board cutout, separate antenna board, U.FL variant or module at the edge (mech or HW-005 decision).
 - **Scope & duration:** spike only, until the owner decides the antenna arrangement
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
+
+### DEV-005 ADR-0016 accepted before its own goldfish review
+
+- **Status:** Proposed (owner decision of 2026-11-07 to record it; not Approved; the owner approves)
+- **Rule / requirement deviated from:** the review step of `docs/process/README.md` (an ADR is reviewed before it is accepted; CLAUDE.md rule 2 and the skills `egm-plan`, `egm-review`).
+- **Location:** `docs/decisions/ADR-0016-independent-hardware-gate-for-high-current-step.md`, status line ("Accepted before its own goldfish review").
+- **Justification:** the owner accepted option B on explicit instruction in the session of 2026-11-04 to let the gate work proceed.
+- **Risk assessment:** an unreviewed decision could carry errors into HW-010. The goldfish reviews RV-008 (after acceptance) and RV-010 (2026-11-06) found material points (truth table, hold-off margin, abs-max exceedance) that were then added as amendments and open actions, so the risk was real and is being closed by those records. Compensating measures: Amendments 1 and 2 stay Proposed until the owner approves them after the reviews; HW-010 stays Approved only for its original text.
+- **Scope & duration:** one-off, closed when the open actions of RV-010 are closed and the owner approves the amendments.
+- **Approved by / date:** not approved (Proposed 2026-11-07)
