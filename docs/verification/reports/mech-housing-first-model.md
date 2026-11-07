@@ -16,7 +16,8 @@
 ## Not run
 No print, no fit test with cables, no FEM, no heat run. FDM tolerances (+-0.3 mm, +-0.2 mm fine) are assumptions from the concept report, not measured on the printer.
 
-## Coupon generator (MECH-002, MECH-007)
-- `mech/freecad/coupons.py` builds 7 print pieces: 3 diffuser plates (0.8, 1.2, 1.6 mm), 3 spacer rings (4, 6, 8 mm) that give the 9 combinations of MECH-002 on the real LED board, and a bayonet floor disc with the recess, the lugs and the 0.8 mm floor skin.
-- Observed: every piece is one valid solid; the floor skin measured in the model is 0.80 mm. Run through `scripts/ci_mech.sh` together with the housing.
-- Not done: the mating accessory ring is not designed, so the bayonet coupon tests print quality of recess, lugs and skin, not the lock action. The procedures of TC-302 and TC-307 are still "TBD" and need the owner's approval once written. Nothing is printed.
+## Coupon generator and bayonet lock model (MECH-002, MECH-007)
+- `mech/freecad/coupons.py` builds 8 print pieces: 3 diffuser plates (0.8, 1.2, 1.6 mm), 3 spacer rings (4, 6, 8 mm) that give the 9 combinations of MECH-002 on the real LED board, the bayonet floor disc, and (from `accessory.py`) the mating accessory ring. Every piece is one valid solid; the floor skin measured in the model is 0.80 mm.
+- Lock concept (my assumption, not in a requirement yet; `housing_params.py`, `bayonet_geometry.py`): per 120 degrees the groove has an entry sector of 30 degrees (fully open), a lock sector of 50 degrees (a 0.4 mm lip narrows the opening by 0.7 mm per side) and a solid stop. The accessory has three T-lugs of 20 degrees. "Lugs of 1.2 mm" is read as the engagement height (lip 0.4 + head 0.8); the owner should confirm.
+- `accessory.py` checks the lock action in the model. Observed: at the entry position the ring touches nothing and moves in and out; after the turn of 30 degrees it touches nothing and a 0.5 mm pull-off hits the lips (overlap 4.69 mm3, so it is held); turning on to 60 degrees hits the stop; at half the turn it is already held. All asserted except the half-turn, which is only reported.
+- Not done: detent, release tab, retention force (MECH-008 value [X] N is open), clearances (0.3 mm radial, 0.2 mm axial) are FDM assumptions and the head overlap behind the lip is only 0.4 mm per side. The procedures of TC-302 and TC-307 are still "TBD" and need the owner's approval once written. Nothing is printed.

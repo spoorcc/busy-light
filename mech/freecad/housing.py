@@ -17,6 +17,8 @@ import FreeCAD as App
 import Part
 
 sys.path.insert(0, "mech/analysis")
+sys.path.insert(0, "mech/freecad")
+import bayonet_geometry as bg  # noqa: E402
 import housing_params as p  # noqa: E402
 
 BUILD = os.environ.get("MECH_BUILD_DIR", "build/mech")
@@ -46,14 +48,8 @@ def build_base():
         p.WALL * 3, p.WIN_W, p.WIN_H, V(R_IN - p.WALL, -p.WIN_W / 2, p.WIN_ZC - p.WIN_H / 2)
     )
     base = base.cut(win)
-    # annular bayonet recess in the back (z = 0 side), lugs stay as ribs
-    ring = cyl(p.BAY_R_OUT, p.BAY_DEPTH).cut(cyl(p.BAY_R_IN, p.BAY_DEPTH))
-    for k in range(p.BAY_LUGS):
-        rib = Part.makeBox(
-            p.BAY_R_OUT - p.BAY_R_IN, p.BAY_LUG_W, p.BAY_DEPTH, V(p.BAY_R_IN, -p.BAY_LUG_W / 2, 0)
-        )
-        ring = ring.cut(rot_z(rib, 360.0 / p.BAY_LUGS * k + 90.0))
-    base = base.cut(ring)
+    # annular bayonet groove with lock lips in the back (z = 0 side)
+    base = base.cut(bg.groove_cut())
     # PCB snap hooks: arm on the wall, lip over the board edge. Azimuth 0 is the USB-C window.
     z_top = p.Z_PCB_BOT + p.T_PCB
     for k in range(p.HOOK_COUNT):

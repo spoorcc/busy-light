@@ -37,8 +37,16 @@ BAY_R_IN = 16.3
 BAY_R_OUT = 21.0
 BAY_DEPTH = 1.2
 BAY_LUGS = 3
-BAY_LUG_W = 1.2
+BAY_LUG_W = 1.2  # lug height: lip 0.4 + head 0.8 (reading of "lugs of 1.2 mm")
 BAY_TURN_DEG = 30.0
+# Concept of the lock (assumption, not yet in a requirement): a lip narrows the groove opening
+# at the back face in the lock sectors; a T-shaped lug head turns in behind the lip.
+BAY_LIP_W = 0.7  # radial overlap of the lip on each side of the groove
+BAY_LIP_T = 0.4  # lip thickness, one print layer pair at the bed
+BAY_LUG_ARC_DEG = 20.0  # angular size of one lug
+BAY_ENTRY_DEG = 30.0  # entry sector: groove fully open
+BAY_CLEAR = 0.3  # radial clearance lug to groove (FDM)
+BAY_CLEAR_Z = 0.2  # axial clearance of the head behind the lip
 
 # Label area (MECH-006)
 LABEL_CIRCLE_D = 21.0

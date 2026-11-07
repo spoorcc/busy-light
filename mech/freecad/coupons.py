@@ -7,9 +7,8 @@ mech/analysis/housing_params.py. Output goes to the build folder (not committed)
 
 Diffuser set: 3 plates (one per thickness) and 3 spacer rings (one per LED distance). A plate on a
 spacer ring on the LED board gives 9 combinations, so 6 prints cover the whole matrix.
-Bayonet set: one disc with the annular recess, the lugs and the 0.8 mm floor skin of the housing.
-NOT modelled yet: the mating accessory ring, so the coupon shows the print quality of the recess,
-the lugs and the skin, not yet the lock action.
+Bayonet set: one disc with the annular groove, the lock lips and the 0.8 mm floor skin of the
+housing, and the mating accessory ring from accessory.py (print both to test the lock action).
 """
 
 import os
@@ -19,6 +18,8 @@ import FreeCAD as App
 import Part
 
 sys.path.insert(0, "mech/analysis")
+sys.path.insert(0, "mech/freecad")
+import bayonet_geometry as bg  # noqa: E402
 import housing_params as p  # noqa: E402
 
 BUILD = os.environ.get("MECH_BUILD_DIR", "build/mech")
@@ -46,15 +47,7 @@ def spacer(h):
 
 
 def bayonet_disc():
-    disc = cyl(R_OUT, p.FLOOR)
-    ring = cyl(p.BAY_R_OUT, p.BAY_DEPTH).cut(cyl(p.BAY_R_IN, p.BAY_DEPTH))
-    for k in range(p.BAY_LUGS):
-        rib = Part.makeBox(
-            p.BAY_R_OUT - p.BAY_R_IN, p.BAY_LUG_W, p.BAY_DEPTH, V(p.BAY_R_IN, -p.BAY_LUG_W / 2, 0)
-        )
-        rib.rotate(V(0, 0, 0), V(0, 0, 1), 360.0 / p.BAY_LUGS * k + 90.0)
-        ring = ring.cut(rib)
-    return disc.cut(ring)
+    return cyl(R_OUT, p.FLOOR).cut(bg.groove_cut())
 
 
 def main():
@@ -74,7 +67,7 @@ def main():
         )
     skin = p.FLOOR - p.BAY_DEPTH
     bb = parts["bayonet_floor_disc"]
-    # probe the material left under the recess, between two lugs, at the ring mid radius
+    # probe the material left under the groove in an entry sector, at the ring mid radius
     mid = (p.BAY_R_IN + p.BAY_R_OUT) / 2.0
     probe = Part.makeBox(0.2, 0.2, p.FLOOR, V(mid, 5.0, 0.0))
     left = probe.common(bb)
