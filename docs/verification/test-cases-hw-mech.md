@@ -193,3 +193,12 @@
 - **Expected result / pass criteria:** see acceptance criteria of HW-013
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-309 PCB retention and reopening
+
+- **Verifies:** MECH-009
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of MECH-009
+- **Automated:** TBD
+- **Evidence:** TBD
