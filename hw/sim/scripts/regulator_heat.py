@@ -46,6 +46,12 @@ def tj(p_w: float, rth: float, case_rise: float) -> float:
     return T_AMB + case_rise + rth * p_w
 
 
+def max_avg_current(rth: float, case_rise: float, v_in: float = V_IN) -> float:
+    """Highest average 3V3 current that keeps Tj at or below the limit minus the margin."""
+    p_max = (TJ_MAX - TJ_MARGIN - T_AMB - case_rise) / rth
+    return (p_max - v_in * I_GND) / (v_in - V_OUT)
+
+
 def table() -> list[str]:
     rows = [
         "| Scenario | I avg (mA) | P (mW) | Package / board | Tj at +0 K | +20 K | +40 K |",
@@ -67,3 +73,7 @@ def table() -> list[str]:
 
 if __name__ == "__main__":
     print("\n".join(table()))
+    for label, rth in RTH:
+        for cr in CASE_RISE:
+            i_max = max_avg_current(rth, cr) * 1e3
+            print(f"max average 3V3 current, {label}, +{cr:.0f} K: {i_max:.0f} mA")

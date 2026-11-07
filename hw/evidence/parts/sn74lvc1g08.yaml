@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the SN74LVC1G08 2-input AND gate (U10: HOLD_OK AND FAULT_N to GATE_OK_RB; ADR-0018 option E, HW-010 amendment). See hw/evidence/README.md.
+schema_version: 1
+part:
+  key: SN74LVC1G08
+  mpn: SN74LVC1G08DBVR
+  manufacturer: Texas Instruments
+  description: Single 2-input positive-AND gate, 1.65 V to 5.5 V supply, inputs accept 5.5 V, SOT-23-5
+  selection: candidate
+  package:
+    code: DBV
+    name: SOT-23-5
+    pin_count: 5
+  used_in:
+  - U10
+  schematic_symbol: 74xGxx:74LVC1G08
+documents:
+- id: sn74lvc1g08-ds
+  title: SN74LVC1G08 Single 2-Input Positive-AND Gate
+  doc_number: SCES217AA
+  revision_date: April 1999, revised August 2026
+  origin: manufacturer
+  url: https://www.ti.com/lit/ds/symlink/sn74lvc1g08.pdf
+  file: sn74lvc1g08.pdf
+  sha256: f30261db71823981aa9057ced4846f1dee467d4ce67998e5a3366872a79f688d
+  pages: 50
+  retrieved_on: '2026-11-07'
+defaults:
+  source_document: sn74lvc1g08-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-07'
+  status: unverified
+  package: DBV
+pins:
+- id: SN74LVC1G08.pin.1
+  pin: '1'
+  name: A
+  pin_type: input
+  source: {page: 3, locator: Pin Functions, quote: A 1 1 2 Input}
+- id: SN74LVC1G08.pin.2
+  pin: '2'
+  name: B
+  pin_type: input
+  source: {page: 3, locator: Pin Functions, quote: B 2 2 1 Input}
+- id: SN74LVC1G08.pin.3
+  pin: '3'
+  name: GND
+  pin_type: ground
+  source: {page: 3, locator: Pin Functions, quote: GND 3 3 3 Ground}
+- id: SN74LVC1G08.pin.4
+  pin: '4'
+  name: Y
+  pin_type: output
+  source: {page: 3, locator: Pin Functions, quote: Y 4 4 4 Output}
+- id: SN74LVC1G08.pin.5
+  pin: '5'
+  name: VCC
+  pin_type: power
+  source: {page: 3, locator: Pin Functions, quote: VCC 5 6 5 Power pin}
+claims:
+- id: SN74LVC1G08.abs_max_vi
+  parameter: Input voltage range
+  category: abs_max
+  min: -0.5
+  max: 6.5
+  unit: V
+  source: {page: 4, locator: Section 5.1, quote: VI Input voltage range(2) –0.5 6.5 V}
+- id: SN74LVC1G08.abs_max_vcc
+  parameter: Supply voltage range
+  category: abs_max
+  min: -0.5
+  max: 6.5
+  unit: V
+  source: {page: 4, locator: Section 5.1, quote: VCC (1) Supply voltage range –0.5 6.5 V}
+- id: SN74LVC1G08.rec_vi
+  parameter: Input voltage (recommended)
+  category: recommended
+  min: 0
+  max: 5.5
+  unit: V
+  source: {page: 5, locator: Section 5.3, quote: VI Input voltage 0 5.5 V}
+- id: SN74LVC1G08.vih_3v
+  parameter: High-level input voltage at VCC = 3 V to 3.6 V
+  category: recommended
+  min: 2
+  unit: V
+  source: {page: 5, locator: Section 5.3, quote: VCC = 3V to 3.6V 2}
+- id: SN74LVC1G08.vil_3v
+  parameter: Low-level input voltage at VCC = 3 V to 3.6 V
+  category: recommended
+  max: 0.8
+  unit: V
+  source: {page: 5, locator: Section 5.3, quote: VCC = 3V to 3.6V 0.8}

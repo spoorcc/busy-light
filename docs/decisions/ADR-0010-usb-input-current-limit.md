@@ -190,3 +190,6 @@ Points 1 to 4 of the list below were settled by later work; the requirements beh
 4. **OPEN, hung firmware.** Accept that a hung firmware with the GPIO high keeps the higher step, or add a circuit that drops the step without the firmware (for example a watchdog output). I propose to accept, because the watchdog resets the processor (the reset releases the GPIO).
 5. **OPEN, TPS2553 versus TPS25200.** The TPS25200 adds a 20 V input and a 5.4 V clamp for USB-C; its 500 mA step is not specified in the table I read.
 6. **OPEN, extended-part fee.** The owner accepts the extended-part fee of the switch (amount not looked up) or asks for a search of a basic part.
+
+## Update 2026-11-07 (later; the decision A1 is unchanged)
+Owner-open points 3 and 4 are resolved by approved requirements: point 3 (steps) by SYS-020 (three steps, step 2 a thermal cap) and the SW-005 value table (a 1.5 A and a 3 A charger both give the middle step until TC-213 shows the top step is safe); point 4 (hung firmware) by SW-010 (watchdog from the select loop, timeout [8] s) and HW-013. Item 3 of the Decision (FAULT handling) is under ADR-0018 (Proposed).

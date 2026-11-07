@@ -40,10 +40,11 @@ SURGES = {
     "S1 8/20us 15V": "PWL(0 0 8u 15 20u 7.5 60u 0 200u 0)",
     "S2 ring 10V 1us": "PWL(0 0 50n 10 1u 5.5 3u 5 10u 5 11u 0 200u 0)",
 }
-ZENER_MODEL = ".model DZ D(IS=1e-14 N=1 RS=60 BV=5.1 IBV=5m CJO=100p)"
+ZENER_MODEL = ".model DZ D(IS=1e-14 N=1 RS=60 BV={bv} IBV=5m CJO=100p)"
+VZ_CORNERS = (4.85, 5.1, 5.35)  # V, assumed +-5 % around 5.1 V
 
 
-def run_case(r_ohm: float, c_f: float, i_load: float, source: str, t_end: str = "300u") -> float:
+def run_case(r_ohm: float, c_f: float, i_load: float, source: str, *, bv: float = 5.1) -> float:
     """Return the peak pin voltage in volts from one ngspice batch run."""
     net = f"""* surge at supply pin
 VS src 0 {source}
@@ -52,8 +53,8 @@ RSER vb pin {r_ohm}
 CP pin 0 {c_f}
 DZ 0 pin DZ
 IL pin 0 {i_load}
-{ZENER_MODEL}
-.tran 20n {t_end}
+{ZENER_MODEL.format(bv=bv)}
+.tran 20n 300u
 .meas tran vmax MAX v(pin)
 .end
 """

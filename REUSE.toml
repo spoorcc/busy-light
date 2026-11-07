@@ -25,6 +25,7 @@ path = [
   "mech/freecad/**/*.py",
   "mech/analysis/**/*.py",
   "mech/analysis/**/*.sh",
+  "mech/*.sh",
   "hw/sim/**/*.py",
   "hw/sim/**/*.sh",
   "hw/kicad/**/*.py",

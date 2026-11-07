@@ -41,6 +41,9 @@ Circuit per pin: VBUS_IC, series R, pin with C_pin to GND, 5.1 V zener, load cur
 - The TMUX1101 draws at most 1 uA, so 1 kohm costs 1 mV: **1 kohm for the TMUX1101.**
 - The TUSB321 draws up to 100 uA, so 470 ohm costs up to 47 mV: **470 ohm for the TUSB321.** The recommended minimum for its VDD is 4.5 V. With VBUS_IC at the assumed 4.5 V sag floor the pin sits at 4.453 V, which is 47 mV under the recommended minimum. This adds to the open M4 question (HW-010 criterion 5) and has to be measured in TC-210 case 5 with the real part. It is not a new failure of the gate (a low supply fails safe: no enable output), but it moves the point at which the CC IC starts to work.
 
+## Zener voltage corners (added after goldfish review RV-011)
+The script now runs the assumed zener corners 4.85, 5.1 and 5.35 V (worst-case capacitor 50 nF, surge S1). 470 ohm / TUSB321: 5.23, 5.40 and 5.56 V, so the margin to the 5.7 V pass limit is **0.14 V at the highest zener voltage** (not 0.3 V). 1 kohm / TMUX1101: 4.00 V at all three. The 5.7 V limit is a project choice (0.3 V under the 6 V absolute maximum), not a datasheet value. The sustained 9 V case S3 assumes a source that negotiated 9 V; the CC analysis says a sink that does not negotiate stays at 5 V, so S3 is a bound for a failed TVS1, not a normal event. Tests: 27 in `hw/sim/scripts` pass.
+
 ## Recommended values for the owner's approval
 | Pin | R | C at the pin | Zener |
 |---|---|---|---|
@@ -49,9 +52,15 @@ Circuit per pin: VBUS_IC, series R, pin with C_pin to GND, 5.1 V zener, load cur
 
 ## Open points
 1. The zener datasheet is not read; Vz tolerance, leakage near 4.5 V and dynamic resistance are assumptions. Choose the part, read it, add it to HW-012, rerun the script with its numbers.
-2. With the supply at 5.25 V or 5.5 V the 5.1 V zener (Vz down to 4.85 V) conducts a small current through the resistor and holds the pin at about the zener voltage (inside 4.5 to 5.5 V). The effect on the supervisor and on the hold-off is none (they read VBUS_IC directly); the extra continuous load on VBUS_IC is up to about 0.4 to 0.8 mA. Not simulated for the DC case.
+2. With the supply at 5.25 V or 5.5 V the 5.1 V zener (Vz down to 4.85 V) conducts a small current through the resistor and holds the pin at about the zener voltage (inside 4.5 to 5.5 V). The effect on the supervisor and on the hold-off is none (they read VBUS_IC directly); the extra continuous load on VBUS_IC is about 0.4 to 0.8 mA per branch at the nominal 5.1 V zener and up to about 1.4 mA on the 470 ohm branch at the lowest zener voltage (5.5 V - 4.85 V over 470 ohm; reviewer finding). Not simulated for the DC case.
 3. The surge shapes are assumptions. The TVS1 part is not chosen; a part with a lower clamp relaxes the result, a higher one tightens it. The result is only valid for the surge on VBUS_IC; the TUSB321 CC1 and CC2 pins also have a 6 V maximum and face the cable directly. That is a separate protection question and is not covered here (to be added to HW-010 or HW-014 after the owner decides).
 4. The shorted and the open resistor, and a failed zener, are fault cases for TC-210 (the fault table). A zener that fails short pulls the pin low and the part fails safe; a resistor that fails open removes the supply and also fails safe. Not simulated.
 
 ## Not done
 No bench, no zener datasheet, no DC simulation, no Monte Carlo of the resistor tolerance. No `hw/` file changed.
+
+## Zener datasheet read (2026-11-07)
+- Part: BZX84C5V1 (Vishay, SOT-23, 350 mW), datasheet Rev. 1, 01-Apr-99, supplied by the owner (`hw/evidence/parts/bzx84c5v1.yaml`, quotes checked against the PDF). It is an old revision: confirm against the current maker datasheet before the BOM is frozen.
+- Datasheet values: VZ 4.8 to 5.4 V at 5 mA, ZZT 60 ohm at 5 mA, ZZK 480 ohm at 1 mA. The assumed corners (4.85 to 5.35 V) were slightly narrow; the model dynamic resistance of 60 ohm equals the datasheet value.
+- Rerun of the ngspice cases with the datasheet corners 4.8, 5.1 and 5.4 V and capacitor 50, 100 and 150 nF (worst case taken): TUSB321 pin 470 ohm, surge S1: 5.20, 5.40 and 5.59 V (limit 5.7 V for the 6 V maximum with 0.3 V margin, so margin 0.11 V at the highest zener voltage); S2: 1.81 V. TMUX1101 pin 1 kohm: S1 4.00 V, S2 0.99 V. All pass; the TUSB321 case at the top zener voltage has little margin.
+- Not covered: leakage near 4.5 V (the leakage column shows a wrong unit in the text, no value entered), the zener power in a sustained overvoltage with these values (350 mW rating, earlier result 42 mW), the effect of the 47 mV drop on the TUSB321 supply.

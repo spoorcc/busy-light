@@ -84,13 +84,13 @@ The project has done a lot of thinking and some experiments, but **no product co
 
 | Area | State |
 |------|-------|
-| Requirements | Drafted (needs, system, software, hardware, mechanical). **None approved.** |
-| Architecture decisions | 16 decision records written. **Accepted:** licensing (ADR-0015, which supersedes ADR-0013) and the hardware gate for the high current step (ADR-0016, which replaces the sensing decision of ADR-0009). The other 12 are **Proposed**. They cover platform, LED drive, mapping model, provisioning, update and boot security, transport, USB-C power input and current limit, housing, the hardware design flow, licensing and the mounting interface. |
+| Requirements | Written for needs, system, software, hardware and mechanics (101 entries). **18 are approved by the owner** (all 9 mechanical, 5 software, 3 hardware including the current-limit gate HW-010, 1 system); the rest are drafts. |
+| Architecture decisions | 19 decision records. **17 are accepted** by the owner (ADR-0011, the housing, only for the prototype); 2 are superseded. Recent decisions: first antenna layout (ADR-0003), annular back bayonet (ADR-0014), AND gate for the fault readback (ADR-0018) and a standard-package regulator with a firmware current limit (ADR-0019). |
 | Risk register | Open. Each risk has a mitigation and a verification link. |
 | Reviews | Independent "goldfish" reviews recorded for the system design, the first spike plan and the hardware flow decision ([`docs/reviews/`](docs/reviews/)). |
-| Software | Zephyr 4.5.0 workspace pinned. A first build check ran. A mapping extractor and an LED current limiter were tried as **PC-only prototypes**; the results are in the reports, the code is not in `sw/`. |
-| Hardware | A scripted KiCad flow produced a **spike** full-board schematic (USB-C input, current-limit gate, hold-off, ESP32-C3 module, 16 LEDs) and a script-generated 4-layer board on the mechanical-spike outline, routed with Freerouting. The board is **not fully routed and not DRC clean**, and nothing is reviewed or approved. Part datasheet evidence is recorded in a schema, **none verified**. **No product schematic or layout yet.** |
-| Mechanics | A FreeCAD housing concept (opaque base, translucent lid, about 53 mm) was modelled with placeholder parts. **Nothing printed or fit-tested.** |
+| Software | Zephyr 4.5.0 workspace pinned. The input-current gate logic (`sw/app/src/gate.c`) has **20 host unit tests that pass** on `native_sim`; nothing runs on a board. A mapping extractor and an LED current limiter were tried as PC-only prototypes (results in the reports, code not in `sw/`). |
+| Hardware | A scripted KiCad flow produces a **spike** full-board schematic (USB-C input, current-limit gate, hold-off, AND-gate fault readback, supply-pin surge protection, ESP32-C3 module, 16 LEDs) and a 4-layer board on the mechanical-spike outline, routed with Freerouting. The board is **not fully routed and not DRC clean**, and nothing is reviewed. Part datasheet evidence is recorded in a schema, **none verified**. The surge on the 5 V side is still to be **measured** on a built board. **No product schematic or layout yet.** |
+| Mechanics | FreeCAD scripts generate the housing (base with USB-C window, button hole, PCB posts and snap hooks, annular back bayonet with lock lips and a mating accessory ring, lid with snap bumps), print coupons for the diffuser and the bayonet, and a tolerance check with tests. **Nothing printed or fit-tested**; the tolerances are assumptions. |
 | Regulatory | Applicability analysis and compliance matrix started. No evidence collected, no declaration made. |
 
 The reports behind these lines are in [`docs/verification/reports/`](docs/verification/reports/).
@@ -107,24 +107,24 @@ All images are generated from text sources or tool exports; none is hand-drawn. 
 
 | Schematic (spike), part 1: USB-C input, CC detection, current-step gate, hold-off, regulator |
 |---|
-| <a href="docs/verification/reports/images/spike-schematic-gate-power.png"><img src="docs/verification/reports/images/spike-schematic-gate-power.png" alt="Left part of the spike schematic: USB-C receptacle, TUSB321, 74LVC1G gates, TPS2553 current limit with two ILIM resistors and 2N7002 switches, TPS3840 hold-off timer, 3.3 V regulator box" width="900"></a> |
+| <a href="docs/verification/reports/images/spike-schematic-gate-power.png"><img src="docs/verification/reports/images/spike-schematic-gate-power.png" alt="Left part of the spike schematic: USB-C receptacle, TUSB321, 74LVC1G gates, two TMUX1101 switches for the current-limit steps, TPS2553 current limit, TPS3840 hold-off timer, 3.3 V regulator box, and the supply-pin protection (resistor, 100 nF, 5.1 V zener)" width="900"></a> |
 
-| Schematic (spike), part 2: ESP32-C3 module, button, 5 V buffers, 16 LEDs |
+| Schematic (spike), part 2: ESP32-C3 module, button, AND-gate fault readback, LED buffer, 16 LEDs |
 |---|
-| <a href="docs/verification/reports/images/spike-schematic-mcu-leds.png"><img src="docs/verification/reports/images/spike-schematic-mcu-leds.png" alt="Lower part of the spike schematic: ESP32-C3-MINI-1 module, button, level buffers and a chain of 16 LEDs in two rows of eight" width="900"></a> |
+| <a href="docs/verification/reports/images/spike-schematic-mcu-leds.png"><img src="docs/verification/reports/images/spike-schematic-mcu-leds.png" alt="Lower part of the spike schematic: ESP32-C3-MINI-1 module, button, the AND gate that combines HOLD_OK and FAULT_N, the LED data buffer and a chain of 16 LEDs in two rows of eight" width="900"></a> |
 | Two crops of one single-sheet schematic, exported with `kicad-cli`; click an image for full size. Some labels overlap (for example C1 and C1B) and part values are open (`tbd`). The schematic is a spike under ADR-0012 (Proposed), not reviewed and not approved. |
 
 | Board, 4 layers, top view (3D render) | Board, all copper layers and silkscreen |
 |---|---|
 | <img src="docs/verification/reports/images/spike-pcb-4layer-top3d.png" alt="Round green board with a ring of 16 square LED footprints, an ESP32 module, a button and a USB-C receptacle tab on the right" width="420"> | <img src="docs/verification/reports/images/spike-pcb-4layer-layers.png" alt="Copper layers of the round board in colour: ground pours, tracks and vias" width="420"> |
-| Generated by script from the schematic netlist on the outline of the mechanical spike, routed with Freerouting v2.5.0. | Two numbers, two stages. Freerouting left **40 nets unrouted** (39 in an earlier run; not deterministic). After plane stitching, the KiCad design-rule check of this run reports **252 violations and 57 unconnected items on 4 nets** (+5V, GND, CC2, one strap net); schematic parity 0 differences. The strict waiver check (475 waived items) ran on an earlier routing and was **not** rerun on this one. A spike result, **not** a clean board. |
+| Generated by script from the schematic netlist on the outline of the mechanical spike, routed with Freerouting v2.5.0. The netlist now has the AND gate and the supply-pin protection. | One run, two stages (routing is not deterministic). Freerouting started with 266 unrouted connections and ended with **48 unrouted** and 0 violations of its own rules. After plane stitching, KiCad reports **247 findings in total: 46 design-rule violations, 86 unconnected items on 4 nets** (+5V is clear; /CC1, /GATE_OK_RB, GND and one 887 k net remain) and 110 schematic-parity warnings (the placeholder box symbols and stand-in footprints). The strict waiver check **fails**: 86 unconnected items, 6 track-width errors, 9 dangling vias and 1 hole-to-hole warning are not on the waiver list. A spike result, **not** a clean board. |
 
 Regenerate with [`hw/kicad/spike-gate/render_readme_images.sh`](hw/kicad/spike-gate/render_readme_images.sh). The 3D render has no component models for most parts and is not a fit check. See [`spike-pcb-placement-routing.md`](docs/verification/reports/spike-pcb-placement-routing.md).
 
-| Housing concept B (FreeCAD model, placeholder parts) |
-|---|
-| <img src="docs/verification/reports/images/spike-mech-housing-concept-b.png" alt="Flat round housing with a translucent lid and a cross-section showing the board, posts and lid joint" width="480"> |
-| From the mechanical spike. The concept is **under revision**: the owner decided that the unit is mounted horizontal and vertical, with a mounting interface on the back ([ADR-0014](docs/decisions/ADR-0014-back-mounting-interface.md)). |
+| Housing model (FreeCAD script), exploded | Back of the base |
+|---|---|
+| <img src="docs/verification/reports/images/housing-model-exploded.png" alt="Exploded view of the generated housing model: a flat round lid, the base cup with a USB-C window, a button hole, PCB posts and hooks, and below it the accessory ring" width="480"> | <img src="docs/verification/reports/images/housing-model-back.png" alt="Back of the base with the annular bayonet groove: three entry sectors, lock lips and stops, and the open centre for the label" width="420"> |
+| Generated by [`mech/freecad/housing.py`](mech/freecad/housing.py) and [`accessory.py`](mech/freecad/accessory.py), drawn by [`mech/render_readme_images.sh`](mech/render_readme_images.sh). Parts: lid with snap bumps, base with USB-C window, button hole (working values, the switch is not chosen), posts, snap hooks and the bayonet groove with lock lips, stop and detent; the orange ring is the accessory with three T-lugs. The model passes its own checks (valid solids, no overlap, board fits, the lock holds and stops). **Nothing is printed or fit-tested**; the release tab is not modelled. Results: [`mech-housing-first-model.md`](docs/verification/reports/mech-housing-first-model.md). |
 
 ## Roadmap
 
