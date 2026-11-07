@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - CI: the licence-map check lists the TLV75733P and TMUX1101 evidence files as data (HW-012, ADR-0015).
 
 ### Added
+- Mechanics: FreeCAD coupon generator for the diffuser (3 plates, 3 spacer rings) and the bayonet floor (MECH-002, MECH-007).
 - Mechanics: first FreeCAD housing generator (base with USB-C window, annular bayonet recess, three PCB snap hooks, lid), shared dimension file and a tolerance check with tests; evidence report `mech-housing-first-model.md` (MECH-001, MECH-004, MECH-006, MECH-007, MECH-009).
 - HW-012 evidence files for the TLV75733P (supply, current and thermal-resistance ratings) and the TMUX1101 (supply ratings): 9 claims, all `unverified` (AI-extracted, quotes checked against the PDF pages by `scripts/check_part_evidence.py`, 0 errors); the PDFs are in the local datasheets folder, not in the repository (HW-012, ADR-0017, ADR-0019, ADR-0016).
 - Gate logic `sw/app/src/gate.c` with 20 unit tests on native_sim (SW-005, SW-006, SW-007, SW-009, SW-010; host level only, 20 of 20 pass, mutation check 8 of 20 fail, gcc and clang-tidy clean); evidence report `docs/verification/reports/sw-gate-unit-tests.md`; no Zephyr binding, no target build, no bench (plan 07).

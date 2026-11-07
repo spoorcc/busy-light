@@ -15,3 +15,8 @@
 
 ## Not run
 No print, no fit test with cables, no FEM, no heat run. FDM tolerances (+-0.3 mm, +-0.2 mm fine) are assumptions from the concept report, not measured on the printer.
+
+## Coupon generator (MECH-002, MECH-007)
+- `mech/freecad/coupons.py` builds 7 print pieces: 3 diffuser plates (0.8, 1.2, 1.6 mm), 3 spacer rings (4, 6, 8 mm) that give the 9 combinations of MECH-002 on the real LED board, and a bayonet floor disc with the recess, the lugs and the 0.8 mm floor skin.
+- Observed: every piece is one valid solid; the floor skin measured in the model is 0.80 mm. Run through `scripts/ci_mech.sh` together with the housing.
+- Not done: the mating accessory ring is not designed, so the bayonet coupon tests print quality of recess, lugs and skin, not the lock action. The procedures of TC-302 and TC-307 are still "TBD" and need the owner's approval once written. Nothing is printed.
