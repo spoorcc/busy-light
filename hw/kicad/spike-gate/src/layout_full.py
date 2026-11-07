@@ -45,7 +45,8 @@ TVS = ("Device", "D_TVS", "Diode_SMD:D_SOD-323")
 G04 = ("74xGxx", "74LVC1G04", "Package_TO_SOT_SMD:SOT-23-5")
 G02 = ("74xGxx", "74LVC1G02", "Package_TO_SOT_SMD:SOT-23-5")
 G11 = ("74xGxx", "74LVC1G11", "Package_TO_SOT_SMD:SOT-23-6")
-G125 = ("74xGxx", "74LVC1G125", "Package_TO_SOT_SMD:SOT-23-5")
+G08 = ("74xGxx", "74LVC1G08", "Package_TO_SOT_SMD:SOT-23-5")
+ZENER = ("Diode", "BZX84Cxx", "Package_TO_SOT_SMD:SOT-23")
 AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-23-5")
 TP = ("Connector", "TestPoint", "TestPoint:TestPoint_Pad_D1.5mm")
 LED = ("LED", "WS2812B", "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
@@ -77,8 +78,12 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R9": (*R, "10k"), "C7": (*C, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
-    "U10": (*G125, "74LVC1G125"), "U11": (*AHCT125, "74AHCT1G125"),
+    "U10": (*G08, "74LVC1G08"), "U11": (*AHCT125, "74AHCT1G125"),
     "R10": (*R, "330"), "R11": (*R, "10k"), "C4": (*C, "bulk tbd"),
+    # supply-pin protection (HW-010 amendment, owner 2026-11-07): series resistor, 100 nF and 5.1 V zener per 6 V pin
+    "R_SU1": (*R, "470"), "R_SU14": (*R, "1k"), "R_SU15": (*R, "1k"),
+    "C26": (*C, "100n"),
+    "DZ1": (*ZENER, "BZX84C5V1"), "DZ14": (*ZENER, "BZX84C5V1"), "DZ15": (*ZENER, "BZX84C5V1"),
 }
 for i in range(1, 17):
     PARTS[f"D{i}"] = (*LED, "WS2812B")
@@ -148,6 +153,9 @@ PLACE = {
     "SW1": (174.0, 190.0, 0),
     "U10": (158.0, 232.0, 0), "U11": (158.0, 266.0, 0), "R11": (138.0, 269.81, 0),
     "R10": (203.0, 190.0, 90), "C4": (206.0, 205.0, 0),
+    "R_SU1": (302.0, 140.0, 90), "C26": (312.0, 146.0, 0), "DZ1": (322.0, 146.0, 270),
+    "R_SU14": (302.0, 160.0, 90), "DZ14": (322.0, 166.0, 270),
+    "R_SU15": (302.0, 180.0, 90), "DZ15": (322.0, 186.0, 270),
 }
 TEXT = {
     "J1": (-7.62, 26.0, "left"), "TVS1": (-3.81, -5.5, "left"), "U6": (6.0, 8.0, "left"),
@@ -285,6 +293,14 @@ class Full(L.Sheet):
         self.text(msg, x, y, size)
 
 
+def _away(s, ref, pin, other):
+    """Stub offset (dx, dy) that points from the other pin of a two-pin part through this pin."""
+    (x1, y1), (x0, y0) = s.pin(ref, pin), s.pin(ref, other)
+    dx, dy = x1 - x0, y1 - y0
+    n = max(abs(dx), abs(dy)) or 1.0
+    return round(5.08 * dx / n, 4), round(5.08 * dy / n, 4)
+
+
 def build():
     saved = dict(L.BOX)
     L.BOX.update(BOXES)
@@ -373,7 +389,7 @@ def _build():
     s.stub("USB_DP", ("U6", "4"), 6.6, 0, 0)
 
     # ------------------------------------------------------------ CC IC, pull-ups, inverters
-    s.pw("VBUS_IC", ("U1", "VDD"), True)
+    s.stub("VDD_U1", ("U1", "VDD"), 0, -5.08, 90)   # supply through R_SU1 (surge protection)
     s.pw("GND", ("U1", "GND"))
     s.pw("GND", ("U1", "PORT"), True)
     for pin in ("3", "6", "9", "11"):  # CURRENT_MODE, VCONN_FAULT, ID, DIR: DFP/VCONN/orientation features, unused (UFP)
@@ -428,11 +444,12 @@ def _build():
         # switch supply with 0.1 uF; S and GND pins to ground
         vdd = P(sw, 5)
         ty = P(cap, 1)[1]
-        s.bind("VBUS_IC", sw, 5)
-        s.bind("VBUS_IC", cap, 1)
+        vnet = f"VDD_{sw}"   # supply through R_SU14 / R_SU15 (surge protection)
+        s.bind(vnet, sw, 5)
+        s.bind(vnet, cap, 1)
         s.wire(vdd, (vdd[0], ty), P(cap, 1))
         s.junction(vdd[0], ty)
-        s.pw("VBUS_IC", (vdd[0], ty), True)
+        s.label(vnet, vdd[0], ty, 90)
         s.pw("GND", (cap, "2"), True)
         s.bind("GND", sw, 3)
         s.bind("GND", sw, 2)
@@ -549,9 +566,10 @@ def _build():
     s.pw("+3V3", ("U9", "3V3"))
     s.pw("GND", ("U9", "GND"))
     for pin, net in (("GPIO0", "CC_OK_1A5"), ("GPIO3", "SEL_STEP2_GPIO"),
-                     ("GPIO10", "SEL_STEP3_GPIO"), ("GPIO4", "FAULT_N"), ("GPIO5", "BUTTON"),
-                     ("GPIO6", "HOLD_OK_RB"), ("GPIO7", "LED_DATA")):
+                     ("GPIO10", "SEL_STEP3_GPIO"), ("GPIO5", "BUTTON"),
+                     ("GPIO6", "GATE_OK_RB"), ("GPIO7", "LED_DATA")):
         s.stub(net, ("U9", pin), 5.08, 0, 0)
+    s.nc(P("U9", "GPIO4"))   # reserved for the orientation sensor (HW-011); FAULT_N is read through U10
     s.nc(P("U9", "GPIO1"))   # was CC_OK_3A: OUT2 reading deleted (owner decision 2026-11-07)
     s.stub("USB_DN", ("U9", "GPIO18"), -5.08, 0, 180)
     s.stub("USB_DP", ("U9", "GPIO19"), -5.08, 0, 180)
@@ -627,21 +645,37 @@ def _build():
     s.wire(sw2, (sw2[0] + 4.0, sw2[1]))
     s.pw("GND", (sw2[0] + 4.0, sw2[1]))
 
-    # ------------------------------------------------------------ HOLD_OK buffer
+    # ------------------------------------------------------------ gate OK readback: AND of HOLD_OK and FAULT_N
+    # ADR-0018 option E: one input pin on GPIO6 reports "hold-off done AND no load-switch fault"
+    a1 = P("U10", 1)
+    s.bind("FAULT_N", "U10", 1)
+    s.wire(a1, (a1[0] - 6.0, a1[1]))
+    s.label("FAULT_N", a1[0] - 6.0, a1[1], 180)
     a = P("U10", 2)
     s.bind("HOLD_OK", "U10", 2)
     s.wire(a, (a[0] - 6.0, a[1]))
     s.label("HOLD_OK", a[0] - 6.0, a[1], 180)
     y = P("U10", 4)
-    s.bind("HOLD_OK_RB", "U10", 4)
+    s.bind("GATE_OK_RB", "U10", 4)
     s.wire(y, (y[0] + 6.0, y[1]))
-    s.label("HOLD_OK_RB", y[0] + 6.0, y[1])
+    s.label("GATE_OK_RB", y[0] + 6.0, y[1])
     s.pw("+3V3", ("U10", "5"), True)
     s.pw("GND", ("U10", "3"), True)
-    oe = P("U10", 1)
-    s.bind("GND", "U10", 1)
-    s.wire(oe, (oe[0], oe[1] - 4.0))
-    s.pw("GND", (oe[0], oe[1] - 4.0), True, 180)
+
+    # ------------------------------------------------------------ supply-pin protection (HW-010 amendment)
+    s.caption("Supply pins with 6 V maximum (TUSB321, TMUX1101): series resistor, 100 nF, 5.1 V zener", 296, 128, 1.27)
+    for rs, dz, vnet, cap in (("R_SU1", "DZ1", "VDD_U1", "C26"), ("R_SU14", "DZ14", "VDD_U14", None),
+                              ("R_SU15", "DZ15", "VDD_U15", None)):
+        s.pw("VBUS_IC", (rs, "1"), True)
+        away = _away(s, rs, "2", "1")
+        s.stub(vnet, (rs, "2"), *away, 0)
+        s.pw("GND", (dz, "1"), True)
+        e = s.stub(vnet, (dz, "3"), 0, -5.08, 90)
+        s.flags += 1
+        s.flag(e[0], e[1], s.flags)   # the resistor is passive: the node needs a power flag
+        if cap:
+            s.stub(vnet, (cap, "1"), 0, -5.08, 90)
+            s.pw("GND", (cap, "2"), True)
 
     # ------------------------------------------------------------ LED data buffer
     a = P("U11", 2)

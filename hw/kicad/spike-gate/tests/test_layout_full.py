@@ -56,7 +56,7 @@ class FullBoard(unittest.TestCase):
 
     def test_cc_ic_is_sink_only_and_supplied_from_vbus(self):
         self.assertEqual(self.pin_net[("U1", "PORT")], "GND")
-        self.assertEqual(self.pin_net[("U1", "VDD")], "VBUS_IC")
+        self.assertEqual(self.pin_net[("U1", "VDD")], "VDD_U1")
         self.assertEqual(self.pin_net[("R1", "1")], "VBUS_IC")     # pull-up on the IC supply, not 3V3
         self.assertNotIn("R7", layout_full.PARTS)                  # OUT2 reading deleted (owner decision 2026-11-07)
         self.assertNotIn("U12", layout_full.PARTS)
@@ -81,12 +81,12 @@ class FullBoard(unittest.TestCase):
 
     def test_switch_and_buffer_pins_follow_the_datasheets(self):
         """TPS2553 DBV (SLVS841G tab. 5-1): 1 IN, 2 GND, 3 EN, 4 FAULT, 5 ILIM, 6 OUT.
-        SN74LVC1G125 / SN74AHCT1G125 DBV (SCES223U / SCLS378P): 1 OE, 2 A, 3 GND, 4 Y, 5 VCC."""
+        SN74LVC1G08 DBV (SCES217AA): 1 A, 2 B, 3 GND, 4 Y, 5 VCC. SN74AHCT1G125 DBV (SCLS378P): 1 OE, 2 A, 3 GND, 4 Y, 5 VCC."""
         pn = self.pin_net
         self.assertEqual([pn[("U7", str(i))] for i in (1, 2, 3, 4, 5, 6)],
                          ["VBUS_IC", "GND", "VBUS_IC", "FAULT_N", "ILIM", "+5V"])
         self.assertEqual([pn[("U10", str(i))] for i in (1, 2, 3, 4, 5)],
-                         ["GND", "HOLD_OK", "GND", "HOLD_OK_RB", "+3V3"])
+                         ["FAULT_N", "HOLD_OK", "GND", "GATE_OK_RB", "+3V3"])
         self.assertEqual([pn[("U11", str(i))] for i in (1, 2, 3, 4, 5)],
                          ["GND", "LED_DATA", "GND", "LED_BUF", "+5V"])
         for ref in ("U10", "U11"):
@@ -99,8 +99,8 @@ class FullBoard(unittest.TestCase):
         for g in ("U3", "U4"):
             self.assertEqual(self.pin_net[(g, "6")], "HOLD_OK")
         self.assertEqual(self.pin_net[("U9", "GPIO0")], "CC_OK_1A5")
-        self.assertEqual(self.pin_net[("U10", "4")], "HOLD_OK_RB")
-        self.assertEqual(self.pin_net[("U9", "GPIO6")], "HOLD_OK_RB")
+        self.assertEqual(self.pin_net[("U10", "4")], "GATE_OK_RB")
+        self.assertEqual(self.pin_net[("U9", "GPIO6")], "GATE_OK_RB")
 
     def test_no_mcu_net_is_pulled_to_5v_or_driven_by_a_5v_output(self):
         """Derived from the connections, not from net names: a pull-up resistor to a 5 V rail, or a
@@ -158,9 +158,9 @@ class FullBoard(unittest.TestCase):
         pn, P = self.pin_net, layout_full.PARTS
         for sw, en, r_ilim, cap, rpd in (("U14", "ILIM_STEP2_EN", "R_ILIM2", "C24", "R18"),
                                          ("U15", "ILIM_STEP3_EN", "R_ILIM3B", "C25", "R19")):
-            self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, "VBUS_IC"])   # VDD from VBUS_IC (2026-11-07)
+            self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, f"VDD_{sw}"])   # VDD from VBUS_IC through R_SU14 / R_SU15
             self.assertEqual(pn[(sw, "1")], pn[(r_ilim, "1")])
-            self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), ("VBUS_IC", "GND"))
+            self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), (f"VDD_{sw}", "GND"))
             self.assertEqual({pn[(rpd, "1")], pn[(rpd, "2")]}, {en, "GND"})
             self.assertEqual(P[rpd][-1], "100k")
             self.assertEqual(P[cap][-1], "100n")
@@ -187,12 +187,65 @@ class FullBoard(unittest.TestCase):
 
     def test_every_gpio_in_use_is_listed(self):
         used = {p[1] for p in self.pin_net if p[0] == "U9"} - {"3V3", "GND"}
-        self.assertEqual(used, {"GPIO0", "GPIO3", "GPIO10", "GPIO4", "GPIO5", "GPIO6", "GPIO7",
+        self.assertEqual(used, {"GPIO0", "GPIO3", "GPIO10", "GPIO5", "GPIO6", "GPIO7",
                                 "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "GPIO2", "GPIO8", "EN"})
 
     def test_test_points(self):
         nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 7)}
         self.assertEqual(nets, {"+5V", "+3V3", "GND", "LED_DATA", "CHIP_EN", "BOOT"})
+
+
+
+class SupplyPinProtection(unittest.TestCase):
+    """HW-010 amendment (owner 2026-11-07): 470 ohm and 1 kohm in series, 100 nF and a 5.1 V zener at each 6 V pin."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sch, cls.intent = layout_full.build()
+        cls.pin_net = {p: n for n, pins in cls.intent.items() for p in pins}
+
+    def test_resistor_from_vbus_to_each_protected_pin(self):
+        for r, node, ohm in (("R_SU1", "VDD_U1", "470"), ("R_SU14", "VDD_U14", "1k"), ("R_SU15", "VDD_U15", "1k")):
+            self.assertEqual(self.pin_net[(r, "1")], "VBUS_IC")
+            self.assertEqual(self.pin_net[(r, "2")], node)
+            self.assertEqual(layout_full.PARTS[r][3], ohm)
+
+    def test_pins_are_on_the_protected_nodes_with_a_zener_and_a_capacitor(self):
+        for pin, node, dz, cap in ((("U1", "VDD"), "VDD_U1", "DZ1", "C26"), (("U14", "5"), "VDD_U14", "DZ14", "C24"),
+                                   (("U15", "5"), "VDD_U15", "DZ15", "C25")):
+            self.assertEqual(self.pin_net[pin], node)
+            self.assertEqual(self.pin_net[(dz, "3")], node)      # cathode on the node
+            self.assertEqual(self.pin_net[(dz, "1")], "GND")     # anode on ground
+            self.assertEqual(self.pin_net[(cap, "1")], node)
+            self.assertEqual(self.pin_net[(cap, "2")], "GND")
+            self.assertEqual(layout_full.PARTS[dz][3], "BZX84C5V1")
+
+    def test_no_6v_supply_pin_is_left_on_the_raw_rail(self):
+        for pin in (("U1", "VDD"), ("U14", "5"), ("U15", "5")):
+            self.assertNotEqual(self.pin_net[pin], "VBUS_IC")
+
+
+class GateOkReadback(unittest.TestCase):
+    """ADR-0018 option E: GATE_OK_RB = HOLD_OK AND FAULT_N; GPIO4 and GPIO1 are free for the sensor."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sch, cls.intent = layout_full.build()
+        cls.pin_net = {p: n for n, pins in cls.intent.items() for p in pins}
+
+    def test_fault_n_reaches_the_and_gate_with_a_3v3_pull_up_and_not_the_mcu(self):
+        self.assertEqual(self.pin_net[("U10", "1")], "FAULT_N")
+        self.assertEqual(self.pin_net[("U7", "4")], "FAULT_N")
+        self.assertEqual(self.pin_net[("R8", "1")], "+3V3")
+        self.assertEqual(self.pin_net[("R8", "2")], "FAULT_N")
+        self.assertNotIn(("U9", "GPIO4"), self.pin_net)
+
+    def test_sensor_pins_are_unused(self):
+        for pin in ("GPIO1", "GPIO4"):
+            self.assertNotIn(("U9", pin), self.pin_net)
+
+    def test_gate_is_the_and_part(self):
+        self.assertEqual(layout_full.PARTS["U10"][1], "74LVC1G08")
 
 
 if __name__ == "__main__":
