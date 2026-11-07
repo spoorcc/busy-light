@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the TMUX1101 analog switch (U14, U15; ILIM select switches, HW-010, ADR-0016). See hw/evidence/README.md.
+# Only the supply ratings used by the surge analysis. The supply-current row is split over several lines
+# in the text and is not entered.
+schema_version: 1
+part:
+  key: TMUX1101
+  mpn: TMUX1101DCKR
+  manufacturer: Texas Instruments
+  description: 1:1 SPST analog switch, 1.08 V to 5.5 V supply, SC70-5
+  selection: chosen
+  package:
+    code: DCK
+    name: SC70-5
+    pin_count: 5
+  used_in:
+  - U14
+  - U15
+documents:
+- id: tmux1101-ds
+  title: TMUX1101, TMUX1102 Low-Leakage-Current, 1:1 SPST Switch
+  doc_number: SCDS410D
+  revision_date: March 2019, revised February 2024
+  origin: manufacturer
+  url: https://www.ti.com/lit/ds/symlink/tmux1101.pdf
+  file: tmux1101.pdf
+  sha256: c1b3a8da1ddef89f535f615c9fb92a3cff4c096b1a75d546e7b57d6a9aa64155
+  pages: 38
+  retrieved_on: '2026-11-07'
+defaults:
+  source_document: tmux1101-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-07'
+  status: unverified
+  package: DCK
+claims:
+- id: TMUX1101.abs_max_vdd
+  parameter: Supply voltage VDD
+  category: abs_max
+  min: -0.5
+  max: 6
+  unit: V
+  source: {page: 4, locator: Section 6.1, quote: VDD Supply voltage –0.5 6 V}
+- id: TMUX1101.rec_vdd
+  parameter: Supply voltage VDD
+  category: recommended
+  min: 1.08
+  max: 5.5
+  unit: V
+  source: {page: 4, locator: Section 6.3, quote: VDD Supply voltage 1.08 5.5 V}

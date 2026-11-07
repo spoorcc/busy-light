@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- HW-012 evidence files for the TLV75733P (supply, current and thermal-resistance ratings) and the TMUX1101 (supply ratings): 9 claims, all `unverified` (AI-extracted, quotes checked against the PDF pages by `scripts/check_part_evidence.py`, 0 errors); the PDFs are in the local datasheets folder, not in the repository (HW-012, ADR-0017, ADR-0019, ADR-0016).
 - Gate logic `sw/app/src/gate.c` with 20 unit tests on native_sim (SW-005, SW-006, SW-007, SW-009, SW-010; host level only, 20 of 20 pass, mutation check 8 of 20 fail, gcc and clang-tidy clean); evidence report `docs/verification/reports/sw-gate-unit-tests.md`; no Zephyr binding, no target build, no bench (plan 07).
 - Plan 07 increment 1: ztest smoke test under `sw/app/tests/gate/` (builds and passes on native_sim/native/64 with Zephyr v4.5.0 locally; tests no requirement); `scripts/ci_sw.sh` runs twister on `native_sim/native/64` (plan 07, SW-005, SW-009).
 - Owner accepted ADR-0014 (annular bayonet, coupon test as the gate, dovetail fallback) and approved MECH-006, MECH-007 and MECH-008 on 2026-11-07 (ADR-0014, MECH-006, MECH-007, MECH-008).
