@@ -44,3 +44,5 @@ review `docs/reviews/RV-010-hw-010-gate-bundle-goldfish.md`. Nothing here is App
 
 ## Decision 3 result: ILIM switch supply from VBUS_IC
 Analysis in `docs/verification/reports/analysis-tmux1101-supply-from-vbus.md`. Recommended and drafted: option A (VDD of U14 and U15 from VBUS_IC with 100 nF). Rejected: series resistor or clamp, TS5A3166 fallback, keep with DEV-001. Open: TVS clamp voltage against the 6 V rating, dropout scope record, the 1 V ILIM assumption. The owner approves; the spike schematic is not changed.
+
+TVS check (2026-11-07): TVS1 is a placeholder with no part chosen, so the 6 V question for the switch supply is a selection requirement for TVS1 (clamp voltage at the surge current against the VDD ratings of the parts on VBUS_IC), not a datasheet check. Open.

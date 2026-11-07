@@ -36,7 +36,7 @@ The TPS2553 (U7) takes IN and EN from VBUS_IC (spike netlist, `layout_full.py`: 
 | VBUS present, 3V3 absent | 5 V | about 1 V | low (pull-down; the fail-safe input allows any level up to 5.5 V) | off, step 1; inside rating |
 | VBUS gone, 3V3 present (D+ back-feed, VBUS_IC about 2.7 V) | about 2.7 V | 0 V (TPS2553 off) | gate output low | inside rating; within the 1.08 to 5.5 V operating range |
 | VBUS drops out | falls with VBUS_IC and its decoupling capacitor, which discharges only through the switch supply current | falls with the TPS2553 (UVLO) | low | VDD stays at or above the ILIM node during the fall (the decoupling capacitor holds VDD up); to confirm with the scope in TC-210 |
-| Hot-plug surge on VBUS_IC | up to the TVS clamp (TVS1 on VBUS_IC in the spike) | n/a | n/a | the 6 V absolute maximum of VDD needs the TVS clamp voltage under 6 V: **check the TVS part**; not read here |
+| Hot-plug surge on VBUS_IC | up to the TVS clamp (TVS1 on VBUS_IC in the spike) | n/a | n/a | the 6 V absolute maximum of VDD needs a TVS clamp voltage under 6 V at the surge current. **TVS1 is a placeholder; the part is not chosen** (`part-evidence-fill-report.md`), so this cannot be checked from a datasheet yet. It is a selection requirement for TVS1 and applies equally to the other parts on VBUS_IC (TUSB321 VDD, TPS3840). Clamp voltages of common 5 V TVS diodes at surge are often above 6 V (a general expectation, not read here) |
 
 ## Effects on the numbers
 - Off leakage at VDD = 5 V is 0.3 nA to 85 degC against 0.2 nA used so far: the step windows move by far less than 0.01 mA (the leakage budget is 118 nA per switch at 1 V ILIM).
