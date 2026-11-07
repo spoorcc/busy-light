@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Supply-pin surge analysis: ngspice script and tests derive 1 kohm (TMUX1101) and 470 ohm (TUSB321) series resistors with 100 nF and a 5.1 V zener at the pins; Proposed amendment of HW-010 updated; zener datasheet not read, nothing measured (HW-010, ADR-0016, DEV-001; `docs/verification/reports/analysis-supply-pin-surge.md`).
 - Owner decisions of 2026-11-07 recorded as Proposed amendments: series resistor and 5.1 V zener at the TMUX1101 and TUSB321 supply pins, TLV75733P as the 3V3 regulator candidate, FAULT_N given up for the orientation sensor pins, SW-005 gives the middle step for 1.5 A and 3 A chargers until TC-213 (HW-010, HW-011, SW-005, SW-009, HW-013; `docs/journal/2026-11-07-surge-regulator-pins-steps.md`).
 - Firmware plan 07 for the gate logic slice (Draft, not reviewed) with the spike GPIO pin map taken from the generator, and a draft TC-107 procedure; the shortlist report now carries the TUSB321, TPS3840 and TLV757P datasheet readings (SW-005, SW-006, SW-007, SW-009, SW-010, HW-010; `docs/plans/07-gate-firmware.md`).
 - Draft test procedures for TC-210, TC-213, TC-105, TC-109 and TC-110 (HW-010, HW-013, SW-005, SW-009, SW-010; Draft, not reviewed, not run) and a shortlist report for TVS1 and the 3V3 regulator with the finding that a plain 5 V TVS cannot clamp below the 6 V switch supply rating (`docs/verification/reports/shortlist-tvs1-3v3-regulator.md`; HW-010, HW-012, ADR-0016).

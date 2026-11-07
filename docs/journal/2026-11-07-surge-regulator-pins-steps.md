@@ -10,3 +10,5 @@ Owner decisions taken in the session after a plain-language walkthrough (the ass
 | SW-005 step table | A 1.5 A and a 3 A charger both give the middle step until TC-213 shows that the top step is thermally safe. | The top step is unlocked by a later documented change. SW-005 criterion 3 and ADR-0010 open point 3 are updated as Proposed amendments. |
 
 Not run: no calculation of the resistor and zener values, no bench, no build.
+
+Follow-up (same day): values derived in `docs/verification/reports/analysis-supply-pin-surge.md`: 1 kohm for the TMUX1101 and 470 ohm for the TUSB321, each with 100 nF and a 5.1 V zener. Assumptions: zener model, surge shapes. Not run: no bench, no zener datasheet.
