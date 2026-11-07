@@ -44,3 +44,7 @@
 
 ## Not done
 No datasheet of PTN5150A, no TUSB321 evaluation board test, no check of the Type-C specification, no stock or price check.
+
+## Note 2026-11-07: TUSB321 CC debounce (RV-010 finding 3)
+
+Read in the TI datasheet SLLSEO6C (revision of August 2018, section 6.6 Switching Characteristics): tCCCB_DEFAULT, "Power on default of CC1 and CC2 voltage debounce time", **133 ms typical, no minimum and no maximum stated**. tVBUS_DB is 2 ms typical. The datasheet states no maximum, so the maximum CC debounce of the TUSB321 is not known from the datasheet. A newer revision was not looked for. The "120 ms typ" in row 16 above belongs to the PTN5150A rows (items 12 to 16), not to the TUSB321, so the two typical values do not disagree. Whether the USB Type-C specification limits the debounce (a range of 100 to 200 ms was quoted by the goldfish reviewers from memory) was not checked against the specification text.

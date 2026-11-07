@@ -1,14 +1,16 @@
 # ADR-0001: Coding standard basis for project C code
 
-- **Status:** Proposed
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, option A, after the gaps in the text were fixed; recorded by the assistant)
 - **Date:** 2026-11-03
-- **Deciders / reviewers:** (maintainer to accept)
-- **Related:** `docs/standards/coding-sw.md`
+- **Deciders / reviewers:** Ben Spoor (owner, the only one who accepts); gaps fixed 2026-11-07 before acceptance (criteria linked, scores completed)
+- **Related:** NEED-011, SYS-025, SYS-043, SYS-044, SYS-045; `docs/standards/coding-sw.md`; `docs/regulatory/applicability.md` (CRA)
 
 ## Context and problem
 Zephyr C firmware must be developed to a recognised standard to support robustness, security and audit.
-Requirement IDs for this do not exist yet (no SYS requirements written) -- criteria below are provisional and
-must be re-based on SYS-level safety/security requirements once those exist.
+The criteria below are derived from NEED-011 (engineered like a product from a regulated company: testable and auditable),
+SYS-025 (logic testable on the host, so a tool-checked standard fits CI), SYS-043 to SYS-045 (secure boot, software bill of materials,
+vulnerability handling: security coverage and audit evidence) and the CRA applicability record (`docs/regulatory/applicability.md`).
+No SYS requirement names a coding standard; this ADR is the decision that `docs/standards/coding-sw.md` implements.
 
 ## Decision criteria
 | Criterion | Weight (1-5) |
@@ -32,11 +34,21 @@ Lowest effort and friction. Cons: weakest audit story; no formal rule-level comp
 Risks inconsistent early code that is expensive to retrofit.
 
 ## Comparison
-Qualitative: A best balances automation, cost and credibility; B best on recognition but worst on openness; C cheapest, weakest evidence.
-Scores to be completed when criteria are linked to requirements.
+Scores 0 to 5 per criterion, the author's judgement from the alternative descriptions above (not measured; no tool was run for this ADR). Maximum 100.
+
+| Criterion (weight) | A CERT C + MISRA subset | B MISRA only | C Zephyr style only | D Defer |
+|---|---|---|---|---|
+| CI automation at low cost (5) | 4 | 2 | 3 | 0 |
+| Alignment with Zephyr (4) | 4 | 2 | 5 | 3 |
+| Recognised in regulated industries (4) | 3 | 5 | 1 | 0 |
+| Free for open-source contributors (4) | 5 | 1 | 5 | 5 |
+| Security coverage (3) | 5 | 3 | 1 | 0 |
+| **Weighted sum (max 100)** | **83** | 51 | 62 | 32 |
+
+A leads C by 21 points, more than the scoring error. B scores highest on recognition and lowest on openness. Qualitative reading: A best balances automation, cost and credibility; B best on recognition but worst on openness; C cheapest, weakest evidence.
 
 ## Decision
-Proposed: A. Awaiting maintainer acceptance.
+A: CERT C primary plus a MISRA C subset aligned with Zephyr. Accepted by the owner on 2026-11-07.
 
 ## Consequences
 - Positive: automatable evidence (clang-tidy, warnings-as-errors), freely reproducible by contributors.

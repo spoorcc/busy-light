@@ -1,10 +1,10 @@
 # ADR-0017: Datasheet evidence format (per-part YAML, JSON Schema, checked by a script)
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, option A, without a goldfish review; recorded by the assistant). A goldfish review can still be run; the format is cheap to reverse.
 - **Date:** 2026-11-05
 - **Deciders / reviewers:** Ben Spoor (owner). No goldfish review has been run on this ADR.
-- **Related:** HW-012, HW-009, ADR-0012; `hw/evidence/README.md`. The rule that vendor documents are linked, not committed is item 8 of the licensing-corrections ADR on branch `docs/review-actions` (not yet on `main`).
-- **Numbering note:** ADR-0015 and ADR-0016 exist on branches that are not merged to `main` yet. This ADR takes 0017 so the numbers do not clash. HW-012 and TC-212 are the next free IDs on `main`; check for a clash before merging.
+- **Related:** HW-012, HW-009, ADR-0012, ADR-0015; `hw/evidence/README.md`. The rule that vendor documents are linked, not committed is item 8 of ADR-0015 (on `main`).
+- **Numbering note (2026-11-07):** ADR-0015 and ADR-0016 are on `main` now; the earlier note about unmerged branches is history.
 
 ## Context and problem
 Hardware analyses (current-limit steps, readback margin, hold-off capacitor) use numbers from vendor datasheets.
@@ -83,7 +83,7 @@ Scores 1 (poor) to 5 (good). Weighted sum in brackets (maximum 140).
 The scores are the author's judgement and are not measured. The ranking is stable for A first and D second; the gap between D and E (8 points) is small.
 
 ## Decision
-Recommendation: choose **A**. It is the only option that gives traceable values, a verification status and a CI check with the tools the project already uses,
+Accepted by the owner on 2026-11-07: choose **A**. It is the only option that gives traceable values, a verification status and a CI check with the tools the project already uses,
 and it keeps the owner's standards (JSON Schema 2020-12, Web Annotation selectors, PROV, `pint`) as the model for the fields.
 Units: **pint** strings, not UCUM, because the consumers are Python scripts and pint parses the strings without a table. A UCUM export is mechanical if needed.
 The verified rule: an extracted value starts `unverified`; only a human or an agent with a different name than the extractor may set `verified`; the checker enforces it.

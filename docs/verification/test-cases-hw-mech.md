@@ -145,7 +145,7 @@
 - **Expected result / pass criteria:** see acceptance criteria of HW-010
 - **Automated:** TBD
 - **Evidence:** TBD
-- **Proposed procedure outline (Draft, 2026-11-05, owner decision; proposal P6 of `docs/verification/reports/analysis-sw005-holdoff-timing.md`; it belongs to the Proposed amendment of HW-010 and is not Approved; "Procedure: TBD" above stays until the owner approves the amendment):** Add to the points listed in the procedure above: (a) hold-off measured as the time from VBUS_IC passing [4.3] V to the rise of each enable output through [1.65] V, with a VBUS ramp of at most [10] ms, on at least [10] units or [10] repeats, against the window 205.9 to 560.6 ms of the capacitor set 220 + 220 + 100 + 68 nF C0G 5 %, and against the CC IC debounce (scope on the CC IC outputs at plug-in and at a source change; margin of at least [20] ms); (b) each limit step measured with an electronic load: step 1 at most 623 mA, step 2 within 850 to 1150 mA, step 3 within 1366 to 1577 mA (calculated: 504.2 to 616.6, 934.9 to 1091.7 and 1381.2 to 1566.6 mA), also at 70 C ambient if the setup allows (leakage of the select switches); (c) truth table of the exclusive steps: no input pattern turns Q2 and Q3 on together; (d) with a scope, VBUS_IC, +5V, 3V3 and the ILIM node (one high-impedance probe) at plug-in and at VBUS dropout, for each build: time with 3V3 below 0.5 V, peak of the ILIM node minus 3V3, and the limit error in that window (evidence for DEV-001 and RISK-045; fallback TS5A3166 if not acceptable); (e) ramp VBUS_IC slowly from 3.5 V to 5 V with a default-current source: no enable output rises; (f) VBUS_IC, +5V, 3V3 and FAULT_N during the unplug decay and with 5 V on TP1 only; (g) the VBUS dip of 10 us to 100 ms and the full-restart question (RISK-044). Not run: nothing was measured.
+- **Proposed procedure outline (Draft, 2026-11-05, owner decision; proposal P6 of `docs/verification/reports/analysis-sw005-holdoff-timing.md`; it belongs to the Proposed amendment of HW-010 and is not Approved; "Procedure: TBD" above stays until the owner approves the amendment):** Add to the points listed in the procedure above: (a) hold-off measured as the time from VBUS_IC passing [4.3] V to the rise of each enable output through [1.65] V, with a VBUS ramp of at most [10] ms, on at least [10] units or [10] repeats, against the window 203.2 to 553.2 ms of the capacitor set 6 x 100 nF C0G 5 % (owner choice 2026-11-06, HW-010 Proposed revision, table of current values; the set 220 + 220 + 100 + 68 nF gave 205.9 to 560.6 ms), and against the CC IC debounce (scope on the CC IC outputs at plug-in and at a source change; margin of at least [20] ms); (b) each limit step measured with an electronic load: step 1 at most 623 mA, step 2 within 850 to 1150 mA, step 3 within 1366 to 1577 mA (calculated: 504.2 to 616.6, 934.9 to 1091.7 and 1381.2 to 1566.6 mA), also at 70 C ambient if the setup allows (leakage of the select switches); (c) truth table of the exclusive steps: no input pattern turns Q2 and Q3 on together; (d) with a scope, VBUS_IC, +5V, 3V3 and the ILIM node (one high-impedance probe) at plug-in and at VBUS dropout, for each build: time with 3V3 below 0.5 V, peak of the ILIM node minus 3V3, and the limit error in that window (evidence for DEV-001 and RISK-045; fallback TS5A3166 if not acceptable); (e) ramp VBUS_IC slowly from 3.5 V to 5 V with a default-current source: no enable output rises; (f) VBUS_IC, +5V, 3V3 and FAULT_N during the unplug decay and with 5 V on TP1 only; (g) the VBUS dip of 10 us to 100 ms and the full-restart question (RISK-044). Not run: nothing was measured.
 
 ### TC-211 Orientation sensor
 
@@ -180,5 +180,14 @@
 - **Level:** Prototype
 - **Procedure:** TBD
 - **Expected result / pass criteria:** see acceptance criteria of MECH-008
+- **Automated:** TBD
+- **Evidence:** TBD
+
+### TC-213 Thermal limit in the closed housing at the top current step
+
+- **Verifies:** HW-013
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of HW-013
 - **Automated:** TBD
 - **Evidence:** TBD

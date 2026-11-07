@@ -65,7 +65,7 @@ Scores 0 (poor) to 5 (good), my judgement; weights as above (max 130).
 The score for A on radio range is a guess. B scores only 4 points above A on paper, and it costs about EUR 1-2 and a manual step, and A could still pass the measurement.
 
 ## Decision
-Proposed: **try A first, with B as the pre-agreed fallback, and decide with measured data, not with the table.**
+Proposed (see the update of 2026-11-07 below, which changes the fallback): **try A first, with B as the pre-agreed fallback, and decide with measured data, not with the table.**
 1. Spike 7.2: measure RSSI (and packet loss at a fixed rate) at three distances for (i) the bare module on its dev board, (ii) the module inside a mock ring with LEDs, tracks, plane and a 3D-printed housing.
 2. Pass criterion (proposed, to be confirmed by the owner): the loss against (i) is at most 6 dB at every distance, and the link stays up at the longest distance tested (10 m through one interior wall).
 3. If A fails, use B. If B fails too, use D. C stays a later volume option, after a separate ADR and a radio test plan.
@@ -73,6 +73,13 @@ Proposed: **try A first, with B as the pre-agreed fallback, and decide with meas
 5. Owner decision recorded for review: the goldfish review recommends B as the baseline, because a module antenna inside a ring of LEDs is high risk. This ADR keeps A first only because the cost difference is small and the data is missing; the owner may choose B now.
 
 I do not recommend the final choice yet because the data is missing. If the owner wants to commit now, the choice is B: slightly higher cost, much lower range risk.
+
+## Update 2026-11-07 (owner answers in the working session; status stays Proposed until the owner accepts)
+- **SYS-022 is read as "no manual steps".** The owner answered that plugging the u.FL antenna cable is not acceptable. Option B (cable plus wall antenna) is therefore excluded unless the owner relaxes SYS-022. Option D (two stacked boards) is excluded on the same reading (stacking is a manual step; the assistant's reading, the owner did not rule on D).
+- **Rim placement was asked and does not clear a full ring (assistant's first-order geometry, not measured).** Board radius 23 mm, antenna area 13.2 x 5.4 mm with its end at the rim, ring radius 19 to 21 mm, 16 LEDs evenly spaced, Espressif clearance 15 mm as a straight distance from the antenna area: 5 to 6 of the 16 LEDs fall inside the keep-out (4 to 5 at 10 mm clearance). The vendor drawing of the keep-out shape was not checked. The rim is better than the centre, where the nearest LED is about 9.5 mm from the antenna area, but it does not remove the conflict.
+- **Decision (owner, 2026-11-07, recommended option): A first, decided by spike 7.2.** The module with its on-board antenna sits off-centre toward the rim as in the current layout. Range is decided by the relative loss of at most [6] dB against a bare module at three distances (item 1 and 2 above), not by the 15 mm guideline.
+- **Fallback chain changed.** B is no longer a pre-agreed fallback. If A fails the spike, the owner chooses between: relaxing SYS-022 (then B), fewer or unevenly spaced LEDs (changes the ring, ADR-0012 and the mechanics), or a bare chip with a chip antenna (C, with a separate ADR and radio test plan).
+- **Deviation DEV-004** (the keep-out overlap on the PCB spike) stays Proposed until the spike result exists.
 
 ## Consequences
 - Positive: no redesign if A passes; known fallback if it fails; one board in both cases.

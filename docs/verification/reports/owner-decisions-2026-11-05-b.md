@@ -6,6 +6,8 @@ Traces: SYS-020, HW-010, SW-005, SW-006, SW-007, SW-009, TC-105, TC-109, TC-210,
 Continues `owner-decisions-2026-11-05.md`. Where an earlier proposal differs (ILIM resistor values, capacitor set), the new Proposed text of HW-010 says that it replaces those items.
 Nothing here was run on the bench or in firmware. Numbers marked "calculated" come from the existing scripts `hw/kicad/spike-gate/sim/ilim_steps.py` and `holdoff_cap.py` (unchanged), called with the new values.
 
+Note 2026-11-06 (added by the assistant, text below unchanged): the owner decided again on 2026-11-06 in the working session. The resistors are the E96 set 47.0 / 56.2 / 27.4 kohm plus 301 ohm (decision 3 and its table below name the E192 values and are superseded), and the hold-off capacitor is six 100 nF C0G in parallel (203.2 to 553.2 ms). See `docs/journal/2026-11-06-decisions-and-live-stock.md` and the consolidated HW-010 Proposed revision.
+
 ## 1. Decisions
 
 | # | Decision | Where recorded | Evidence | Open or bench check |

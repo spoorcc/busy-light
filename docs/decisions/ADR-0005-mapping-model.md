@@ -1,6 +1,6 @@
 # ADR-0005: Mapping model from source data to ring state and level
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, option A, with the open point on push settled as the neutral body; recorded by the assistant). Target RAM and time of the extractor are still to be measured (spike 7.1).
 - **Date:** 2026-11-03
 - **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-004, NEED-006, NEED-007, SYS-004, SYS-005, SYS-006, SYS-007, SYS-008, SYS-009, SYS-025, SYS-026, SYS-032; design doc `docs/plans/02-system-design.md` (section 4.9)
@@ -63,7 +63,7 @@ Scores 0 to 5, my judgement.
 | **Weighted sum (max 140)** | 115 | 99 | 87 | 64 | 96 |
 
 ## Decision
-Choose **A** for release 1, behind an interface that lets B replace it later.
+Accepted by the owner on 2026-11-07. Choose **A** for release 1, behind an interface that lets B replace it later.
 1. Interface (in `core/`, no OS calls): a mapper takes the source id and the received text and returns `{kind: state | level | none, state, level_permille}`. The extractor and mapper are pure functions on buffers, run on the PC.
 2. Path syntax: a restricted JSON Pointer (object keys and array indexes, maximum depth [8], maximum path length [64] characters). No wildcards or filters.
 3. Limits: input text at most [8] KiB per message or poll answer (a larger answer is cut off and reported as an error); a number must fit a 32-bit integer or be a decimal with at most [6] fractional digits (exponent form is not accepted as a target; PC prototype F2, F3); the document nesting is limited to [32] levels, also in skipped parts (F1); at most [16] table rows per source; extraction time bounded by the input size (single pass).
@@ -73,7 +73,7 @@ Choose **A** for release 1, behind an interface that lets B replace it later.
 7. Push events carry a neutral body of the same shape as the mapper result, so push needs no mapping (the Jenkins side sends `state` or `level`); a push to a configured path-mapping source is a later increment.
 8. A later expression language (B) can plug in as a second mapper kind with the same return type. Sources do not change.
 
-Open point for the owner: should push accept an arbitrary Jenkins notification body (needs the mapping on push) or only the neutral body of item 7? I recommend the neutral body: the sender is under the user's control.
+Owner decision 2026-11-07: push accepts only the neutral body of item 7 (the sender is under the user's control); an arbitrary Jenkins notification body is a later increment.
 
 ## Consequences
 - Positive: small and deterministic; fuzz-friendly; one place for limits; no new language to secure.
