@@ -65,7 +65,7 @@ Failure behaviour: any unknown input pattern gives the lowest step. Safety: this
 Note: the first goldfish read guessed GPIO2 and GPIO3 for the selects; the map shows GPIO3 and GPIO10. The owner decided on 2026-11-07 to give up FAULT_N so that GPIO1 and GPIO4 can carry the orientation sensor; the spike schematic still shows FAULT_N on GPIO4 until HW-010 is amended.
 
 - **Files to create (this change set, after approval):** `sw/app/src/gate.c`, `sw/app/src/gate.h`, `sw/app/src/gate_hal.h` (interface only), `sw/app/tests/gate/` (ztest sources, `CMakeLists.txt`, `prj.conf`, `testcase.yaml`), `sw/app/Kconfig` (constants), `sw/app/boards/esp32c3_devkitm.overlay` is **not** created in this slice.
-- **Kconfig symbols:** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_ADVERT_FALL_MS` (50, SW-006), `BL_WDT_S` (8, Proposed amendment of SW-010).
+- **Kconfig symbols (the advertised-current step is `BL_ADVERT_STEP`, default 2):** `BL_READ_PERIOD_MS` (100), `BL_STABLE_READS` (6), `BL_SELECT_WINDOW_MS` (700), `BL_BACKOFF_S` (60), `BL_BROWNOUT_MAX` (3), `BL_BROWNOUT_WINDOW_MIN` (10), `BL_SHED_MS` (no default), `BL_ADVERT_FALL_MS` (50, SW-006), `BL_WDT_S` (8, Proposed amendment of SW-010).
 - **Order of work:** (1) value table and interlock; (2) SW-005 counter; (3) SW-009 edge latch and shed; (4) SW-007 counter and store; (5) SW-006 time base; (6) SW-010 watchdog.
 
 ## 6. Test and verification plan
