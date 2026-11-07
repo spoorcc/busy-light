@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+tests:
+  busy_light.gate:
+    platform_allow: native_sim/native/64
+    tags: gate

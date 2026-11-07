@@ -17,7 +17,7 @@ python3 -m pip install --quiet west
 west update --narrow -o=--depth=1
 west packages pip --install
 if compgen -G "sw/app/tests/*/testcase.yaml" >/dev/null || compgen -G "sw/app/tests/*/sample.yaml" >/dev/null; then
-  west twister -T sw/app/tests -p native_sim --inline-logs
+  west twister -T sw/app/tests -p native_sim/native/64 --inline-logs
 else
   echo "sw: unit tests NOT RUN - no testcase.yaml under sw/app/tests"
 fi

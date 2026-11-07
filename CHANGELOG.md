@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Plan 07 increment 1: ztest smoke test under `sw/app/tests/gate/` (builds and passes on native_sim/native/64 with Zephyr v4.5.0 locally; tests no requirement); `scripts/ci_sw.sh` runs twister on `native_sim/native/64` (plan 07, SW-005, SW-009).
 - Owner accepted ADR-0014 (annular bayonet, coupon test as the gate, dovetail fallback) and approved MECH-006, MECH-007 and MECH-008 on 2026-11-07 (ADR-0014, MECH-006, MECH-007, MECH-008).
 - Owner approved MECH-001, MECH-002, MECH-003, MECH-004, MECH-005 and MECH-009 on 2026-11-07; MECH-006 to MECH-008 wait for ADR-0014 (MECH-001 to MECH-009).
 - Mechanical requirements MECH-001 to MECH-008 redrafted (version 0.2, all Draft) to match ADR-0003, ADR-0011 and ADR-0014 (PETG, off-centre module, annular bayonet, thermal limit, window and label), new MECH-009 (PCB snap hooks and reopening) with stub TC-309; open items are listed in the journal (MECH-001 to MECH-009, ADR-0011, ADR-0014).
