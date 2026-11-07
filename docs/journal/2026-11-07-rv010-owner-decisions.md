@@ -32,7 +32,12 @@ review `docs/reviews/RV-010-hw-010-gate-bundle-goldfish.md`. Nothing here is App
 
 ## Drafted on 2026-11-07 (all Draft or Proposed, nothing Approved)
 
-- Decision 2: SYS-020 Proposed amendment defining the three steps. **The purpose of the middle step is not recorded anywhere; the draft names two candidates (staged raise, thermal cap) and leaves the choice to the owner.** A Type-C source never advertises "about 1 A", so step 2 can only be a firmware choice.
+- Decision 2: SYS-020 Proposed amendment defining the three steps. The purpose of the middle step was not recorded anywhere. The owner confirmed on 2026-11-07, on the assistant's recommendation: a cap for the case that the thermal limit (HW-013) does not allow step 3; the staged-raise purpose was rejected. A Type-C source never advertises "about 1 A", so step 2 can only be a firmware choice. Revisit after TC-213.
 - Decision 5: DEV-005 (Proposed), ADR-0016 accepted before its own review.
 - Decision 6: HW-013 (thermal limit at the top step, TC-213) and SW-010 (watchdog restart returns the limit to the lowest step, TC-110), both Draft with bracketed working figures. SYS-027 already requires a restart within [10] s of a hang; SW-010 ties it to the select outputs.
 - Compliance matrix row for HW-013 (EN 62368-1) is not added yet.
+
+## Follow-up answers of 2026-11-07
+- Middle step purpose: (B) thermal cap, as recommended.
+- Debounce: measure first (bench, several units, 70 degC) and look for a newer TUSB321 datasheet revision; widen the upper limit to about [700] ms only if the measured debounce is above about 180 ms.
+- Commit and push the drafts: yes.
