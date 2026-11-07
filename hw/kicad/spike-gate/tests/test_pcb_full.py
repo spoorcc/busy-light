@@ -205,10 +205,31 @@ class Board(unittest.TestCase):
                 y0, y1 = (pcb_full.CY - pcbnew.ToMM(v) for v in (bb.GetBottom(), bb.GetY()))
                 self.assertFalse(x1 > ax0 and x0 < ax1 and y1 > ay0 and y0 < ay1, "%s pad %s" % (ref, p.GetNumber()))
 
+    def test_module_pads_start_outside_the_antenna_strip(self):
+        """The module pad rows (36 to 48 side) lie at or beyond the strip end: no module pad inside the strip."""
+        ax0, ay0, ax1, ay1 = mech_outline.antenna_strip()
+        for p in self.fps["U9"].Pads():
+            bb = p.GetBoundingBox()
+            x0 = pcbnew.ToMM(bb.GetX()) - pcb_full.CX
+            self.assertGreaterEqual(x0, ax1 - 0.01, "U9 pad %s starts at %.2f, strip ends at %.2f" % (p.GetNumber(), x0, ax1))
+
+    def test_slot_is_cut_and_kept_clear(self):
+        sx0, sy0, sx1, sy1 = mech_outline.slot_rect()
+        self.assertLess(sx1, mech_outline.module_rect()[0])          # between the antenna end and the ring
+        self.assertGreater(sx0, -mech_outline.R_PCB)                  # inside the board
+        for ref, f in self.fps.items():
+            for p in f.Pads():
+                bb = p.GetBoundingBox()
+                x0, x1 = (pcbnew.ToMM(v) - pcb_full.CX for v in (bb.GetX(), bb.GetRight()))
+                y0, y1 = (pcb_full.CY - pcbnew.ToMM(v) for v in (bb.GetBottom(), bb.GetY()))
+                self.assertFalse(x1 > sx0 - 0.3 and x0 < sx1 + 0.3 and y1 > sy0 - 0.3 and y0 < sy1 + 0.3, "%s pad %s" % (ref, p.GetNumber()))
+
     def test_module_antenna_points_to_minus_x(self):
         u9 = self.fps["U9"]
         mx, _ = pcb_full.mech_of(pcbnew.ToMM(u9.GetPosition().x), pcbnew.ToMM(u9.GetPosition().y))
-        self.assertAlmostEqual(mx, 1.0, places=0)          # MOD_OFF
+        ax1 = mech_outline.antenna_strip()[2]
+        self.assertGreater(mx, ax1)                         # the pad area starts at the end of the antenna strip
+        self.assertLess(mx, ax1 + 7.0)
         self.assertEqual(round(u9.GetOrientationDegrees()) % 360, pcb_full.MODULE_ROT)
 
     def test_no_overlap_among_movable_parts(self):

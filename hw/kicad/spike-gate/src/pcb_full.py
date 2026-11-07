@@ -188,7 +188,7 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
                 ("C1", "U5", 8.0), ("C1B", "U5", 12.0), ("C1C", "U5", 14.0), ("C1D", "U5", 14.0),
                 ("C1E", "U5", 14.0), ("C1F", "U5", 14.0))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
-R_MOVE = 16.6                 # movable parts stay inside this radius (the LED ring pads start at about 17.8)
+R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 SA_ITERS = 160000
 SA_SEEDS = tuple(range(1, 17))
 
@@ -412,10 +412,13 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     u9.SetPosition(vec(0, 0))
     orient(u9, MODULE_ROT, "F")
     mx0, my0, mx1, my1 = MO.module_rect()
-    mcx, mcy = K((mx0 + mx1) / 2, (my0 + my1) / 2)
+    ax0, ay0, ax1, ay1 = MO.antenna_strip()
+    # the pad area starts at the end of the antenna strip (datasheet fig 11-1: antenna area beyond the pad rows);
+    # the pad area is not centred in the module body, so the pads are centred on the strip end plus half their length
+    ex0, _, ex1, _ = pad_extent_mm(u9, 0.0)
+    mcx, mcy = K(ax1 + (ex1 - ex0) / 2, (my0 + my1) / 2)
     centre_at(u9, mcx, mcy, 0.0)
     note_fixed("U9", "F", 0.0)
-    ax0, ay0, ax1, ay1 = MO.antenna_strip()
     # module body as a top-side obstacle
     kx0, ky0 = K(mx0, my1)
     kx1, ky1 = K(mx1, my0)
@@ -500,6 +503,17 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         s.SetUuid(det_uuid("edge:%d" % i))
         board.Add(s)
 
+    # ---- slot between the antenna end and the LED ring (Edge.Cuts)
+    for i, seg in enumerate(MO.slot_segments()):
+        s = pcbnew.PCB_SHAPE(board)
+        s.SetShape(pcbnew.SHAPE_T_SEGMENT)
+        s.SetStart(vec(*K(*seg[1])))
+        s.SetEnd(vec(*K(*seg[2])))
+        s.SetLayer(pcbnew.Edge_Cuts)
+        s.SetWidth(mm(0.1))
+        s.SetUuid(det_uuid("edge:slot:%d" % i))
+        board.Add(s)
+
     # ---- GND pours on both layers (the outline polygon; the fill keeps its own edge clearance)
     hw, xj = MO.tab_half_intersection()
     poly = []
@@ -533,6 +547,11 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     # ---- rule areas: antenna strip (no copper on either layer), hooks (top) and posts (bottom)
     ap = [K(ax0, ay0), K(ax1, ay0), K(ax1, ay1), K(ax0, ay1)]
     add_rule_area(board, "antenna_strip", (pcbnew.F_Cu, pcbnew.B_Cu) + ((pcbnew.In1_Cu, pcbnew.In2_Cu) if layers == 4 else ()), ap, footprints=False)   # U9 itself sits here
+    # keep-out around the slot: copper at least EDGE_CLEARANCE plus 0.2 mm from its edge (the router does not see Edge.Cuts slots)
+    sx0, sy0, sx1, sy1 = MO.slot_rect()
+    g = pcb_rules.EDGE_CLEARANCE + 0.2
+    add_rule_area(board, "slot_keepout", (pcbnew.F_Cu, pcbnew.B_Cu) + ((pcbnew.In1_Cu, pcbnew.In2_Cu) if layers == 4 else ()),
+                  [K(sx0 - g, sy0 - g), K(sx1 + g, sy0 - g), K(sx1 + g, sy1 + g), K(sx0 - g, sy1 + g)], footprints=False)
     for az, r0, r1, hw_ in MO.hook_keepouts():
         add_rule_area(board, "hook_%d" % az, (pcbnew.F_Cu,), corner_points(az, r0, r1, hw_),
                       tracks=False, vias=False, pours=False, footprints=True)

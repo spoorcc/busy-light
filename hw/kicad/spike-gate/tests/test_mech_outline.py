@@ -22,6 +22,36 @@ class Table(unittest.TestCase):
         self.assertEqual(MO.m("POST_AZ"), (30.0, 150.0, 270.0))
         self.assertEqual(MO.m("MOD_OFF"), 1.0)
 
+    def test_antenna_strip_is_the_datasheet_length(self):
+        """ESP32-C3-MINI-1 datasheet fig 11-1: 16.6 mm - 11.2 mm pad area - 0.8 mm = 4.6 mm."""
+        self.assertAlmostEqual(MO.m("MOD_ANT_L"), 16.6 - 11.2 - 0.8, places=6)
+        ax0, _, ax1, _ = MO.antenna_strip()
+        self.assertAlmostEqual(ax1 - ax0, 4.6, places=6)
+
+    def test_slot_lies_between_antenna_end_and_the_ring_and_cuts_no_ring_led(self):
+        sx0, sy0, sx1, sy1 = MO.slot_rect()
+        mx0 = MO.module_rect()[0]
+        self.assertLess(sx1, mx0)
+        self.assertAlmostEqual(mx0 - sx1, MO.m("SLOT_GAP"))
+        self.assertAlmostEqual(sx1 - sx0, MO.m("SLOT_W"))
+        self.assertGreater(sy1 - sy0, MO.m("MOD_W"))                       # covers the module width
+        r_ring = MO.m("D_RING") / 2.0
+        for corner in ((sx0, sy0), (sx0, sy1), (sx1, sy0), (sx1, sy1)):
+            self.assertLess(math.hypot(*corner), r_ring - 3.0)           # well inside the ring
+        self.assertEqual(len(MO.slot_segments()), 4)
+
+    def test_points_in_or_near_the_slot_are_not_inside_the_pcb(self):
+        sx0, sy0, sx1, sy1 = MO.slot_rect()
+        cx, cy = (sx0 + sx1) / 2, (sy0 + sy1) / 2
+        self.assertFalse(MO.inside_pcb(cx, cy))
+        self.assertFalse(MO.inside_pcb(sx1 + 0.2, cy, 0.6))
+        self.assertTrue(MO.inside_pcb(sx1 + 1.0, cy, 0.3))
+
+    def test_parts_are_kept_off_the_slot(self):
+        sx0, sy0, sx1, sy1 = MO.slot_rect()
+        self.assertFalse(MO.region_rect_ok("F", sx0 - 1.5, 0, sx0 - 0.3, 1.0))   # within 0.6 mm of the slot
+        self.assertFalse(MO.region_rect_ok("B", sx0 - 0.5, 0, sx1 + 0.5, 1.0))
+
     def test_mouth_and_largest_dimension_match_the_mech_report(self):
         self.assertAlmostEqual(MO.USB_MOUTH_R, 29.85, places=2)
         self.assertAlmostEqual(MO.largest_dim_mm(MO.USB_MOUTH_R), 57.45, places=2)   # report 4.1: 57.43
