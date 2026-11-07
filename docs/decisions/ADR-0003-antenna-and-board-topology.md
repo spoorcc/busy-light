@@ -1,6 +1,6 @@
 # ADR-0003: Antenna placement and board topology
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session; option A first with spike 7.2 as a hard gate before any product layout; recorded by the assistant). The fallback chain of the update of 2026-11-07 applies (B is not pre-agreed); the stale fallback wording of the 2026-11-04 finding below is superseded by it. The spike has not been run: no range claim is made. DEV-004 stays Proposed.
 - **Date:** 2026-11-03
 - **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-014, NEED-010, SYS-021, SYS-022, SYS-023, SYS-028, ADR-0002; design doc `docs/plans/02-system-design.md` (section 4.3, spike 7.2)
