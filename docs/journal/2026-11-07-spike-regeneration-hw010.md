@@ -16,5 +16,5 @@ Branch `spike/hw010-regenerate`. Traces to HW-010 (revision approved 2026-11-07)
 ## Not done / not run
 - No routing: no Freerouting jar here, so no routed DRC. The unrouted placed 4-layer board builds from the new netlist and is identical on two builds. DRC (placed, 4 layers, planes inner) reports unconnected_items 256 against an allow-list maximum of 241; the same run on `main` gives 257, so the allow-list does not match this invocation and was not changed. Not analysed further.
 - Placement seeds and the routed/stitched DRC fixtures (`tests/data/drc_*.json`) are not regenerated.
-- Open question on HW-010 text: the revision names "100 kohm pull-downs on the select control pins, 10 kohm on the gate enable nets"; the spike has both (10 k R2/R3 and 100 k R18/R19) on the enable nets. Not changed; the owner decides which network is meant.
+- Pull-down question answered (owner: follow the recommendation): the spike network stays (10 k R2/R3 and 100 k R18/R19 in parallel on each enable net, 100 k R4/R5 on the select lines). The HW-010 sentence is clarified to describe it; R18 and R19 are not removed, because the owner decision of 2026-11-05 (a) chose 100 k at the switch pin and `tests/test_readback_margin.py` tests the parallel value.
 - `gen_gate.py` needs `skidl==3.0.0`, which is not in `pyproject.toml`.

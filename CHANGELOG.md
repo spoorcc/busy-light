@@ -63,6 +63,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - ADR-0012 (hardware design flow, Proposed) with goldfish review RV-003, a KiCad feasibility spike report (Draft) and RISK-032 to RISK-034.
 
 ### Changed
+- HW-010 revision: the pull-down sentence now describes the network that the spike draws (10 kohm and 100 kohm in parallel on each gate enable net); no part change (HW-010, SW-009).
 - DEV-005 (ADR-0016 accepted before its own goldfish review) Approved by the owner on 2026-11-07 with updated compensating measures; DEV-001 stays Proposed until TC-210 (d) (DEV-005, DEV-001, ADR-0016).
 - HW-013 Approved by the owner on 2026-11-07 (thermal limit in the closed housing at the top current step); bracketed figures stay open and the TC-213 procedure is still to be written (HW-013, SYS-020, RISK-005).
 - SW-010 Approved by the owner on 2026-11-07 (watchdog serviced only from the select loop, restart returns the select outputs to low within [10] s); the select pin state at reset is checked on the prototype (SW-010, SYS-020, SYS-027).
