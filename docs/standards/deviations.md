@@ -38,7 +38,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow`, classes `courtyards_overlap` (max 16) and `items_not_allowed` (max 1), only findings that include U9
 - **Justification:** the library courtyard of ESP32-C6-MINI-1 is the antenna keep-out; the mech design puts ring LEDs and other parts inside it. The courtyard is not shrunk.
 - **Risk assessment:** the antenna environment is not acceptable as it stands; no statement on antenna performance is made. Open items for the owner: board cutout, separate antenna board, U.FL variant or module at the edge (mech or HW-005 decision).
-- **Scope & duration:** spike only, until the owner decides the antenna arrangement
+- **Scope & duration:** spike only, until the owner decides the antenna arrangement.
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
 ### DEV-005 ADR-0016 accepted before its own goldfish review
@@ -50,3 +50,13 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Risk assessment:** an unreviewed decision could carry errors into HW-010. The goldfish reviews RV-008 (after acceptance) and RV-010 (2026-11-06) found material points (truth table, hold-off margin, abs-max exceedance) that were then added as amendments and open actions, so the risk was real and is being closed by those records. Compensating measures: Amendment 2 was reviewed by RV-010 before the owner accepted it on 2026-11-07, and the HW-010 revision was approved by the owner on 2026-11-07 after that review; the readiness check of RV-010 stays NO-GO until its open actions are closed.
 - **Scope & duration:** one-off, closed when the open actions of RV-010 are closed, the readiness check answers GO, and the owner confirms the closure.
 - **Approved by / date:** the owner (Ben Spoor), 2026-11-07, in the session; recorded by the assistant
+
+### DEV-006 Silkscreen findings ignored for five spike footprints
+
+- **Status:** Proposed (the owner decides)
+- **Rule / requirement deviated from:** the silk checks of the strict PCB gate (plan 06 section 1 item 3: `silk_edge_clearance`, `silk_over_copper`, `silk_overlap` must be 0)
+- **Location:** `hw/kicad/spike-gate/src/pcb_rules.py` (`SILK_WAIVER_REFS`, rules `spike_silk_waiver` and `spike_silk_edge_waiver` in the written `.kicad_dru`); footprints U9, U2, U4, TVS2, J1
+- **Justification:** the outline of U9 (module) crosses parts placed inside its courtyard (see DEV-004); J1 silk lies at the board edge; U2, U4 and TVS2 silk touches neighbours. The silk of a prototype board does not change function; fabricators clip silk over pads. The footprints are not edited, so they still match the library.
+- **Risk assessment:** a real silk problem on these five parts is hidden. Compensating measure: the rule names the footprints and only silkscreen layers; copper clearance, edge clearance of copper and all other checks stay on. A production board needs the silk fixed instead.
+- **Scope & duration:** spike only, until the placement is decided by the owner
+- **Approved by / date:** proposed 2026-11-07; not approved (owner approval pending)

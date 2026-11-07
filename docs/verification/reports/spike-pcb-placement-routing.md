@@ -181,3 +181,57 @@ Choose the layer count (the evidence is in 10.5 and 10.6) and whether ADR-0012 c
 - Observed: unplaced-board DRC (4 layers, no router): only `unconnected_items` above the waiver (266 > 241). Routed: Freerouting started with 266 unrouted connections and finished with 48 unrouted and 0 violations in 221 s; M1 (routed board, plane nets excluded) 3 unrouted. Stitched: 247 DRC findings = 46 violations + 86 unconnected items on 4 nets (/CC1, /GATE_OK_RB, GND, one 887 k net) + 110 schematic-parity warnings (84 net_conflict, 26 footprint_symbol_mismatch, the known placeholder and stand-in cases).
 - The strict waiver check **fails**: 86 unconnected items, 6 track_width errors, 9 via_dangling warnings and 1 hole_to_hole warning are not on the waiver list. This is worse than the earlier run on unconnected items and has not been analysed. Routing is not deterministic.
 - Not done: the net fixture `tests/data/full.net` and the committed DRC fixtures are not refreshed; no manufacturing check; the new parts are not placed with intent (the annealer did it).
+
+## Update 2026-11-07: strict-gate fixes after the AND-gate rerun (HW-010, DEV-006)
+- Causes found: Freerouting 2.5.0 writes 0.10 and 0.12 mm wires at tight pads (the SES file has them), so `track_width` failed; it also leaves vias with copper on one layer (`via_dangling`); the stitcher checked every pad against all layers and in sorted order, so a pad never joined a via that its neighbour got later; the stitcher did not check hole-to-hole distance between vias of the same net.
+- Changes: default track 0.15 mm (the 0.2 mm default made the router squeeze); dangling vias removed before stitching; stitcher retries in passes and joins existing ground vias with a track on the pad's layer only; via search keeps 0.7 mm centre distance to every via; silk of U9, U2, U4, TVS2 and J1 ignored by a named `.kicad_dru` rule (DEV-006, proposed).
+- Observed (run on the full flow, 4 layers, planes `none`, Freerouting 522 s, 34 unrouted in its log; one run, not deterministic): stitched board strict check: `clearance`, `track_width`, `via_dangling`, `hole_to_hole`, `isolated_copper`, silk classes and `lib_footprint_mismatch` all 0; still failing: `unconnected_items` 50 (21 ground pads of the module U9 inside the antenna keep-out, 7 small ground pads, the rest on signal nets the router left open) and `track_dangling` 2 (ends of the open signal nets).
+- A via in a U9 ground pad inside the keep-out was tried; it gave 18 `items_not_allowed` and dangling vias (the inner plane has the cut-out), so it was reverted.
+- Not run: a second router run; the committed DRC fixtures are not refreshed.
+
+## Update 2026-11-07 (later): antenna strip corrected, slot added (HW-005, ADR-0003, DEV-004)
+- Cause of the 21 module ground pads in the strip: the strip was 5.4 mm and the pad area was centred in the module body. The ESP32-C3-MINI-1 datasheet v2.2 (fig 11-1, section 3.1) puts the antenna area beyond the pad rows: 16.6 - 11.2 - 0.8 = 4.6 mm, and the pad area is not centred. The board also uses the ESP32-C6-MINI-1 footprint as a stand-in for the C3 (pad rows 9.8 mm apart, as in the C3 figure; other dimensions not compared).
+- Changes: `MOD_ANT_L` 4.6 mm; U9 placed so that its pad area starts at the end of the strip (moved 1.6 mm toward +X); a 1.0 mm slot in Edge.Cuts 1.5 mm beyond the antenna end (owner idea, vendor guide 1.4.7 advises cutting the board around the antenna), with a copper keep-out of 0.5 mm round it because the router does not see Edge.Cuts slots (first run without it: 22 `copper_edge_clearance`); tests for the strip length, the pad position and the slot (pure and pcbnew).
+- Observed (one run, Freerouting 177 s, 20 unrouted in its log): stitched board strict check: 0 unconnected ground items, 0 copper-edge, 0 silk, 0 `via_dangling`, 0 `track_width`, 0 `hole_to_hole`; still failing: `unconnected_items` 30 (14 on VBUS_IC, 14 on +3V3, 1 /ILIM_STEP2_EN, 1 /CC_OK_NOT_S3), `clearance` 2 (an In2 track at 0.114 and 0.121 mm from a SUP_CT via), `track_dangling` 1.
+- Not done: the slot is not in the housing or the mechanical model (the housing has no part under it; posts and hooks are at 30, 150 and 270 degrees); no RF check that the slot helps; the real C3 footprint (pad sizes) is not drawn; fabricator slot rules not checked (1.0 mm router bit assumed). The STEP model is saved in the datasheet folder; the Autodesk footprint source link of the datasheet returns 404.
+
+## Update 2026-11-07 (last): placement and routing experiments (HW-010, ADR-0012)
+All runs: same netlist, 4 layers, Freerouting 2.5.0, KiCad 10.0.6, strict check of the stitched board (`stitched-4l`). Numbers are from single runs.
+
+| Run | Change | Unconnected items | Other strict findings |
+|---|---|---|---|
+| A | antenna strip 4.6 mm, slot, slot keep-out | 30 | 2 clearance, 1 dangling track |
+| B | threads 1, 2, 4 and passes 25 to 150 | 30 each (identical) | same; the router is deterministic here, its settings are exhausted |
+| C | +3V3 width 0.4 to 0.3 mm (1.0 A by IPC-2221, TLV757P rating) | 23 | 0 clearance, 5 dangling tracks |
+| D | C plus VBUS_IC placement weight 3.0 and `R_MOVE` 16.6 to 17.3 mm (owner choice: loosen the ring) | **14, all VBUS_IC** | 1 clearance, 1 dangling track |
+| E | D with VBUS_IC routed first and locked (`KEYFIRST=1`) | 8 (2 GND, 5 USB data, 1 UART RX) | 4 clearance, 3 dangling tracks |
+| F | E with the four USB data nets also first | 12 | 11 clearance |
+| (earlier) | all 17 key nets first and locked, before the placement change | 56 | 2 `items_not_allowed` |
+
+- Reading: placement was the lever (D); routing order is not: locking the first stage's tracks pushes the failure to other nets (E, F). Neither D nor E is clean.
+- The 14 items of D are the pads of VBUS_IC (R_SU1, R_SU14, R_SU15, R_VD, R1, R6, C2, TVS1, U5, U6, U7 and the J1 pins), a net of 10 or more pins that is routed at 0.6 mm everywhere, although only the path J1 to U6 carries the 1.5 A; the branches (supply-pin resistors, divider, TMUX supply) carry microamps. A router class cannot give one net two widths.
+- Options that need a decision (not made): (a) a VBUS_IC copper pour on one layer near the connector; (b) a schematic change that names the low-current branches as a separate net behind the main path; (c) narrower tracks on the branches by a post-route step that is not yet written.
+- Not done: no commit; the committed DRC fixtures and the README images are not refreshed; no electrical or RF check of the result.
+
+## Update 2026-11-07 (main path split): VBUS_IC routed in two classes (HW-010, ADR-0012)
+- Idea: only the path connector J1, TPS2553 input (U7 pin 1), C2 and TVS1 carries the switch current (up to 1.577 A, 0.6 mm by IPC-2221). The other pins of VBUS_IC (supervisor, ESD part, dividers, supply-pin resistors, enable) draw microamps. `run_pcb.sh` with `KEYFIRST=1` routes the main path alone at 0.6 mm (stage 1), locks it, then routes everything else with the VBUS_IC class at `BRANCH_WIDTH` 0.2 mm (stage 2); the branches join the locked main path. No schematic change. Code: `pcb_rules.MAIN_PATH_PADS`, `is_main_path_pad`, `pcb_dsn.py keyonly` and `branchwidth`.
+- Observed, one run each (4 layers, planes `inner`, Freerouting 2.5.0; the router is not deterministic with 4 threads):
+
+| Run | Setting | Unconnected | Clearance | Dangling |
+|---|---|---|---|---|
+| pl4 | planes `none` | 2 | 1 | 0 |
+| pl5 | planes `inner` | **3** | **0** | **0** |
+| pl6 | `inner`, In1 and In2 as power layers in the DSN | 22 | 3 | 0 |
+| pl7 | as pl5 (same settings), after changing the via removal | 7 | 5 | 1 |
+
+  pl5 and pl7 have the same settings; the difference is router variance, not a design change. The best run is not a result that can be repeated on demand.
+- Reading: the split removes the VBUS_IC problem (stage 1 routes all main-path nets without an open item; the 14 open VBUS_IC items of the single-pass run are gone). What is left is 2 to 12 mixed findings that change from run to run: ground stubs, /ILIM_STEP2_EN, a few clearance findings at U9 and a via. Marking In1 and In2 as power layers (so that signals stay off the planes) leaves the board unroutable (pl6): this stack needs signals on the inner layers, and the router puts some VBUS_IC and signal tracks on In1 and In2, which cuts the GND plane in places. That is a layout weakness, not checked electrically.
+- Via removal: a via that the DRC calls dangling is removed only when no pad is there and its track ends lie on one layer (`pcb_rules.joins_nothing`); the earlier version could remove a layer change.
+- Not done: no run is clean; no repeatable result; a post-route cleanup of the leftovers (a small maze router, or hand-placed copper by script) is the next step; the README images and the DRC fixtures are not refreshed; no commit.
+
+## Update 2026-11-07 (clean-up): post-route grid router `pcb_fix.py` (HW-010, ADR-0012)
+- Method: after Freerouting and the stitcher, `run_pcb.sh` (`CLEANUP=1`, default) calls `src/pcb_fix.py auto`: up to 3 rounds of (1) remove the track run (up to junctions, vias and pads) at each `clearance` finding, (2) connect every `unconnected_items` pair with a deterministic A* grid router (0.05 mm grid, four layers, through vias; obstacles are the copper of other nets, the board edge, the slot, rule areas and the hole-to-hole distance, grown by the clearance plus half the track width plus 0.06 mm), (3) rip up and reroute a net from its pads when a pair still fails (also with the nearest blocking nets; all or nothing), (4) remove free-ended track pieces and dangling vias, (5) check with the strict DRC. The result is `final.kicad_pcb`. The router is checked only by the KiCad DRC.
+- Observed (run pl8: `KEYFIRST=1`, planes `inner`, Freerouting 2.5.0, KiCad 10.0.6; the clean-up itself has no random part): stitched board 5 unconnected items and 135 findings; after the clean-up **1 unconnected item** (/ILIM, U7 pin 5 on the back to R_ILIM3 on the front) and in the strict check only the tolerated known classes: `courtyards_overlap` 14 and `items_not_allowed` 1 (both U9, DEV-004), `footprint_symbol_mismatch`, `net_conflict`, `ignored_checks`. Clearance, track width, hole-to-hole, copper-to-edge, silk (DEV-006), dangling vias and dangling tracks: 0.
+- Rerun of the clean-up alone on the same stitched board of pl8: rounds gave 2, 8, 1, 1 open items (the second figure is after the ripup step, before routing).
+- Open: the /ILIM connection (pin 5 of the TPS2553 sits in a crowded spot on the back); Freerouting's own output varies from run to run, so the stitched input differs between runs (pl5 to pl8: 3 to 7 open items); the clean-up has been run on pl7 and pl8 only. The inner layers still carry some signal and VBUS_IC tracks (cuts in the GND plane, not checked electrically). Stand-in footprints, antenna arrangement (DEV-004), electrical and RF checks: not done.
+- Tests: `tests/test_pcb_fix.py` (6: description parsing, track runs, counts, a real route round a foreign pad on a small board with the clearance checked, a blocked board gives no path); 87 tests pass in the pcb, mech-outline, placement and run-script files.
