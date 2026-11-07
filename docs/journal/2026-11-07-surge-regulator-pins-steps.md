@@ -12,3 +12,5 @@ Owner decisions taken in the session after a plain-language walkthrough (the ass
 Not run: no calculation of the resistor and zener values, no bench, no build.
 
 Follow-up (same day): values derived in `docs/verification/reports/analysis-supply-pin-surge.md`: 1 kohm for the TMUX1101 and 470 ohm for the TUSB321, each with 100 nF and a 5.1 V zener. Assumptions: zener model, surge shapes. Not run: no bench, no zener datasheet.
+
+Owner answers (same day, later): the surge values (1 kohm, 470 ohm, 100 nF, 5.1 V zener) are approved; the CC-pin options were asked for and are in `analysis-cc-pin-protection.md`; the regulator heat estimate was asked for and is in `analysis-regulator-heat.md`. Not run: no bench, no zener datasheet.
