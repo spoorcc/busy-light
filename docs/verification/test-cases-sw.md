@@ -43,7 +43,8 @@
 
 - **Verifies:** SW-005
 - **Level:** Unit / integration, then bench with TC-203
-- **Procedure:** TBD
+- **Procedure:** see the draft procedure below
+- **Draft procedure (2026-11-07, written by the assistant after the owner approvals; not reviewed by a goldfish, not run; values in brackets are the open values of the requirement):** Unit level: the injected-clock and fake-GPIO cases (a) to (g) of the proposed outline below, written as ztest cases in `sw/app/tests/` with the module under test linked on the host (native_sim). Each case lists the read sequence as a table and the expected select output at each tick. Add: (h) the value table of SW-005 criterion 3, one case per CC_OK input combination; (i) a changed read period of [50] ms keeps the count at [6]; (j) HOLD_OK_RB low for one read inside the count restarts it. Bench: as the outline below, with a scope on HOLD_OK_RB and the select GPIO. Pass: all unit cases green in CI; at the bench the step is selected within [700] ms of the HOLD_OK_RB rise. Not run; no firmware or test harness exists.
 - **Expected result / pass criteria:** see acceptance criteria of SW-005
 - **Automated:** TBD
 - **Evidence:** TBD
@@ -80,7 +81,8 @@
 
 - **Verifies:** SW-009
 - **Level:** Unit / integration, then bench with TC-210
-- **Procedure:** TBD
+- **Procedure:** see the draft procedure below
+- **Draft procedure (2026-11-07, written by the assistant after the owner approvals; not reviewed by a goldfish, not run; values in brackets are the open values of the requirement):** Unit level: cases (a) to (g) of the proposed outline below, with a fake GPIO that can raise an edge and an injected clock, in `sw/app/tests/`. The time [X] is a parameter of the test; the test fails if [X] is left unset. Inspection: the build-configuration items of the outline below are checked by a script that reads `.config` and the devicetree output and fails on any difference. Bench, with TC-210: dips of 10 us, 10 ms and 100 ms on VBUS; record the time from the HOLD_OK_RB fall to the lower LED current, whether the processor resets, and the 5 V and 3V3 fall times (this gives the hold-up time that sets [X]); read the pad configuration registers of GPIO20 and GPIO21 over the debug port at the first read of the readbacks. Pass: unit cases green; bench numbers recorded; [X] is set by the owner from the record. Not run; no firmware exists.
 - **Expected result / pass criteria:** see acceptance criteria of SW-009
 - **Automated:** TBD
 - **Evidence:** TBD
@@ -90,7 +92,8 @@
 
 - **Verifies:** SW-010
 - **Level:** Unit / integration, then bench with TC-210
-- **Procedure:** TBD
+- **Procedure:** see the draft procedure below
+- **Draft procedure (2026-11-07, written by the assistant after the owner approvals; not reviewed by a goldfish, not run; values in brackets are the open values of the requirement):** Unit level: a test build with a hook that stops the select loop but leaves a timer and an interrupt running; the watchdog fake must show no service from the timer or the interrupt, and a timeout within [10] s. Bench, with TC-210: with a select output high and a 1.5 A source, trigger the hook; record the time to reset with a scope on the 3V3 rail and the select GPIO, the select GPIO state through the reset (pull-downs at reset, ADR-0010), and the input current after the restart (at most [623] mA until SW-005 raises a step again). Pass: reset within [10] s, select outputs low after the reset, current at most [623] mA. Repeat 10 times. Not run; no firmware exists.
 - **Expected result / pass criteria:** see acceptance criteria of SW-010
 - **Automated:** TBD
 - **Evidence:** TBD

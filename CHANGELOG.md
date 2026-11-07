@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Draft test procedures for TC-210, TC-213, TC-105, TC-109 and TC-110 (HW-010, HW-013, SW-005, SW-009, SW-010; Draft, not reviewed, not run) and a shortlist report for TVS1 and the 3V3 regulator with the finding that a plain 5 V TVS cannot clamp below the 6 V switch supply rating (`docs/verification/reports/shortlist-tvs1-3v3-regulator.md`; HW-010, HW-012, ADR-0016).
 - Owner decisions of 2026-11-07 recorded: ADR-0003 Accepted (antenna option A first, spike 7.2 as a hard gate), ADR-0011 Accepted for the prototype only (concept B, FDM, PETG); ADR-0014 stays Proposed; M4 sag band to be measured first. Record: `docs/journal/2026-11-07-adr-0003-0011-decisions.md` (ADR-0003, ADR-0011, ADR-0014, HW-010).
 - Spike generators and test fixtures brought to the approved HW-010 values: E96 ILIM resistors, six 100 nF hold-off capacitors, TMUX1101 supply from VBUS_IC, CC_OK_3A path deleted; 185 spike tests pass; routing and the routed DRC fixtures are not regenerated (HW-010, ADR-0016, ADR-0012).
 - ADR walkthrough of 2026-11-07: ADR-0001, ADR-0002, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0010, ADR-0012, ADR-0017 and ADR-0016 Amendment 2 Accepted by the owner (with the open conditions recorded in each ADR); ADR-0003, ADR-0011 and ADR-0014 revised and not accepted. Record: `docs/journal/2026-11-07-adr-approval-walkthrough.md`.
