@@ -63,7 +63,8 @@
 
 - **Verifies:** SW-007
 - **Level:** Unit / integration, then bench with TC-203
-- **Procedure:** TBD
+- **Procedure:** see the draft procedure below
+- **Draft procedure (2026-11-07, written by the assistant; not reviewed by a goldfish, not run):** Unit level in `sw/app/tests/gate/` on native_sim with a fake retained store, a fake reset-cause source, an injected clock and a fake HOLD_OK_RB. Cases: (a) a forced brown-out with both HOLD_OK_RB high and the flag clear counts once and holds the lowest step for [60] s on the injected clock; the step is not raised at [60] s minus one tick and may be raised at [60] s; (b) [3] counted resets within [10] min keep the lowest step after a further reset until a power-up, and the LED state shows it; the third reset at [10] min plus one tick does not trigger it; (c) a forced reset with HOLD_OK_RB low at the first read does not change the counter; (d) a forced reset with the retained flag set does not change the counter, and the flag is read before the readback configuration of SW-009 and cleared only after use; (e) the counter and the reset cause survive the reset hook; (f) with the retention switched off by the test (fallback option (b) of SW-007) only HOLD_OK_RB at the first read decides, and a reset longer than the remaining hold-off is counted (documented cost). Bench, with TC-203: force a brown-out by a VBUS dip with a hold-off active and one with it finished; read the counter over the debug port; check that the RTC memory keeps the flag over this reset cause (the open check of SW-007). Pass: all unit cases green in CI; at the bench the retention result is recorded either way. Not run; no firmware exists.
 - **Expected result / pass criteria:** see acceptance criteria of SW-007
 - **Automated:** TBD
 - **Evidence:** TBD
