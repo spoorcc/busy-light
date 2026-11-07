@@ -1,6 +1,6 @@
 # ADR-0006: Provisioning channel and per-unit access point password
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, V1 + W1b, with the web login password settled as user-chosen; recorded by the assistant). Spike 7.1 checks (soft AP with WPA2, random seeding, AP plus station, captive-portal upload) are still open.
 - **Date:** 2026-11-03
 - **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-001, NEED-016, NEED-019, SYS-012, SYS-013, SYS-023, SYS-034, SYS-035, ADR-0002, ADR-0008; design doc `docs/plans/02-system-design.md` (sections 4.5, 4.6)
@@ -65,7 +65,7 @@ Scores 0 to 5, my judgement. I compare packages of channel plus password.
 W2 and V4 are not scored: W2 would score 0 on the "no irreversible steps" row and V4 fails confidentiality, so neither could beat V1+W1.
 
 ## Decision
-Choose **V1 + W1b**, with V3 as the production and recovery path.
+Accepted by the owner on 2026-11-07. Choose **V1 + W1b**, with V3 as the production and recovery path.
 1. The AP starts only when there are no credentials or the user asks for it (long button press, SYS-012). It is not on in normal use. It stops after [10] min without a completed setup and then waits for a new long press (an unprovisioned unit does not stay open indefinitely; RV-001, finding 5). It accepts one client at a time. The Zephyr ESP32 driver fixes the limit at 5 clients, so our code enforces one (or a driver change with a `DEV-` record, spike 7.1). The page never shows stored credentials or keys.
 2. WPA2-PSK with a 16-character passphrase from a 32-character set without look-alike characters (80 bits), created on the device from the hardware random generator, only after the radio has been started (the generator gets extra entropy only while Wi-Fi or Bluetooth is enabled, desk survey E0), and shown once through USB in the production step.
    Reason for W1b over W1a: no file with the secrets of all units has to exist on a production PC. The owner prints the label from the one-time output and then does not keep it, or keeps it in a password manager. If the random generator cannot be shown to be seeded at that moment (spike 7.1), fall back to W1a with `secrets` from the host.
@@ -78,7 +78,7 @@ Choose **V1 + W1b**, with V3 as the production and recovery path.
 9. **Provisioning state machine** (to specify in the SW requirements): AP up, user submits credentials, the device tests the join, on failure it stays in AP mode and shows the failure on the ring, on success it stops the AP. Spike 7.1 must show whether the AP and station can run together; if not, the test join closes the AP and reopens it on failure.
 10. Certificate upload inside the AP may fail in the restricted browser that phones open for captive portals (no file picker). The page therefore also accepts pasted PEM text, and the spike tests one iPhone and one Android phone.
 
-Open point for the owner: the **web interface login password** (SYS-016) on the LAN. This ADR assumes it is chosen by the user during first setup and stored hashed (not the same as the AP passphrase). SYS-039 exists.
+Owner decision 2026-11-07: the **web interface login password** (SYS-016) on the LAN is chosen by the user during first setup and stored hashed; it is not the AP passphrase (SYS-039).
 
 ## Consequences
 - Positive: no app; secrets protected by the Wi-Fi layer; no password list in the file system; works with the camera app on phones.

@@ -1,6 +1,6 @@
 # ADR-0004: LED type, data drive and current limiting
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, option A, after the update of the same day; recorded by the assistant). Spikes 7.3 and 7.5 are not run; the revisit conditions stay in force.
 - **Date:** 2026-11-03
 - **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-003, NEED-009, NEED-010, NEED-014, SYS-001, SYS-011, SYS-020, SYS-021, SYS-022, SYS-027, SYS-028, SYS-032, ADR-0002, ADR-0003; design doc `docs/plans/02-system-design.md` (sections 4.4, G4, G10, G11, G14, spikes 7.3 and 7.5)
@@ -54,7 +54,7 @@ Scores 0 to 5, my judgement; no datasheet values checked yet. The scores are clo
 | **Weighted sum (max 125)** | 91 | 87 | 87 | 0 |
 
 ## Decision
-Choose **A** with these design rules; items marked (7.3) or (7.5) are confirmed by the spike before the schematic is frozen.
+Accepted by the owner on 2026-11-07. Choose **A** with these design rules; items marked (7.3) or (7.5) are confirmed by the spike before the schematic is frozen.
 1. **Drive by hardware peripheral**, not by software timing: SPI (the Zephyr `worldsemi,ws2812-spi` driver, the only route found in v4.5.0; no Zephyr RMT driver for the C3 was found, desk survey E0), with the buffer sent by the driver. Software bit-banging is not used. Interrupt latency from Wi-Fi then cannot corrupt a frame (7.1 verifies the driver exists for the pinned revision).
 2. **Data level (7.3):** fit one small buffer with a 5 V supply and a TTL-compatible input (for example a 74AHCT1G125 type, one gate) between the processor and the first LED, with a series resistor of about 330 ohm near the first LED and a pull-down resistor on the data input. If 7.3 shows the LED reliably accepts 3.3 V over the temperature range, the buffer is removed. The cost of the buffer is about EUR 0.1 or less (estimate).
 3. **Current limit in firmware, in `core/`** with unit tests: the display engine estimates the current from the final 8-bit colour values that go to the driver (per-channel current model from the datasheet, plus a margin for LED spread, value from 7.5), and scales the frame so the estimate stays at or below the LED budget from the power analysis (7.5). The limit is the **last step before the driver**, after animation and gamma, so no later stage can raise the current (goldfish review RV-001, finding 3). Scaling is global; the effect on level-mode resolution is tested (SYS-001, SYS-032). This is a safety function (SYS-020). The budget is a configuration constant in one place. PC prototype (`docs/verification/reports/spike-adr0004-limiter-prototype.md`, scratchpad only, run on the PC): integer-only, rounding applied to the output pixel only so that the estimate of the rounded output never exceeds the budget; 31.7 M grid frames and 10 M random frames with no failure; 532 B and 48 B stack on rv32imc, no libgcc helpers. Two proposals from it: in level mode use a fixed scale so lit LEDs do not dim as the arc grows (global scaling leaves 417 of 1001 levels at a 10 % scale); when the budget is below the total dark current the limiter outputs all zero and raises a fault flag.
@@ -62,6 +62,12 @@ Choose **A** with these design rules; items marked (7.3) or (7.5) are confirmed 
 5. **Power-up and reset state:** the pull-down holds the data line low at reset; the firmware sends an all-dark frame as its first action (SYS-011) and a frame that matches the real state only after the state is known. **Known gap (RV-001, finding 4):** LEDs hold their last frame while powered. A pull-down does not darken them. During a hang, a watchdog reset, the bootloader, or an image swap (many seconds, no LED driver) the ring keeps showing the old state, for example green. SYS-011 cannot be met in that window. Options: (a) accept and document, (b) a switch on the LED supply that the bootloader or a hardware timer opens, (c) a bootloader LED hook. Decision belongs to the owner; (a) is the default until 7.5 and the swap-time measurement are done.
 6. **Part choice:** pick the specific 2020 or 3535 part from the shop's current list during design, with a second source of the same footprint noted in the BOM. The part number is not fixed in this ADR.
 7. **Brightness requirement:** set in SYS-001 (working value, from spike 7.5).
+
+## Update 2026-11-07 (before acceptance; the decision A is unchanged)
+- **Item 4 is closed by later ADRs.** The hardware backstop (a current-limited load switch in the VBUS path) is decided in ADR-0010 (TPS2553 with ILIM steps) and ADR-0016 (Accepted: CC detection IC ANDed with the firmware select). The firmware limiter of item 3 stays as the first line; the hardware limit is HW-010. Item 4 of the Decision section above is history.
+- **Spike status.** Spike 7.3 (data level, ngspice and breadboard) is not run. Spike 7.5 has only the paper result `docs/verification/reports/spike-7-5-power-budget-paper.md`; no bench measurement exists. The facts that items 1 to 3 depend on (3.3 V data level over temperature, Wi-Fi peak current, LED brightness and thermal margin) remain unmeasured, and the revisit conditions below stay in force.
+- **LED part.** No LED part is chosen. The PCB spike (plan 06, A2 and A6) uses `LED_WS2812B-2020_PLCC4_2.0x2.0mm` as a footprint stand-in only, with no claim on current, data timing or thermal behaviour. The real part and its evidence (HW-012) are open.
+- **Known gap stays.** LEDs hold their last frame while powered. During a hang, a watchdog reset, the bootloader or an image swap the ring keeps its old state and SYS-011 cannot be met in that window (item 5 above, RV-001 finding 4). This ADR does not close it; SW-010 (Draft) restarts a hung firmware but does not darken the LEDs.
 
 ## Consequences
 - Positive: one LED part type; low cost; hardware timing; firmware limiter testable on the PC.

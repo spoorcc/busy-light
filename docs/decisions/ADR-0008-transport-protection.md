@@ -1,6 +1,6 @@
 # ADR-0008: Transport protection for the web interface and the push endpoint
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, option C with D as the fallback; recorded by the assistant). The spike 7.1 RAM and key-creation measurements are still open and are the revisit trigger.
 - **Date:** 2026-11-03
 - **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-002, NEED-018, SYS-003, SYS-004, SYS-016, SYS-031, SYS-034, SYS-035, SYS-026, ADR-0002; design doc `docs/plans/02-system-design.md` (section 4.8, gap G3)
@@ -69,7 +69,7 @@ Scores 0 (poor) to 5 (good), weighted sum in the last row.
 A and E pass only if the LAN is trusted, which the owner has ruled out. Scores are my judgement, not measurements; the RAM row is the least certain.
 
 ## Decision
-Choose **C**: plain HTTP only inside the provisioning access point, TLS with a device-generated EC P-256 key on the LAN, pinned by fingerprint.
+Accepted by the owner on 2026-11-07. Choose **C**: plain HTTP only inside the provisioning access point, TLS with a device-generated EC P-256 key on the LAN, pinned by fingerprint.
 It is the only low-cost option that keeps the password and token off the LAN without needing a clock, and it keeps the door open for company certificates (SYS-035).
 D scores almost the same (94 vs 95), and is the fallback if the two-mode test matrix proves too costly.
 

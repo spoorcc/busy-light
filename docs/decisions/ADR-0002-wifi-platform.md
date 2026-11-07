@@ -1,6 +1,6 @@
 # ADR-0002: Wi-Fi platform for the first prototype and production candidate
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session, option A as the prototype platform; recorded by the assistant). Spike 7.1 is only partly run (desk and PC parts); the measured checks of the Verification section are still open and the revisit conditions stay in force.
 - **Date:** 2026-11-03
 - **Deciders / reviewers:** Ben Spoor (owner); Reviewed in RV-001 (as referenced by plan 02); no separate ADR review
 - **Related:** NEED-009, NEED-012, NEED-014, NEED-015, NEED-017, SYS-021, SYS-022, SYS-023, SYS-026, SYS-029, SYS-030, SYS-036, SYS-037; design doc `docs/plans/02-system-design.md` (sections 4.2, 4.2a, 4.2b, 4.12-4.14)
@@ -56,7 +56,7 @@ Scores 1-5 (judgement, not measured); totals use the weights above and the score
 D and E are not scored: D has too little evidence (SoftAP, simulation, price at 1000 units), E fails SYS-012. The margin of A over C comes from cost, area and shop availability; C leads on Zephyr readiness by one point.
 
 ## Decision
-Proposed: choose **A, ESP32-C3**, because it is the only candidate that meets cost, area and shop limits together and is in mainline Zephyr with Wi-Fi AP support listed. Keep a thin hardware layer (Wi-Fi, LED output, button, storage, clock) so that B or C can replace it.
+Accepted by the owner on 2026-11-07: choose **A, ESP32-C3**, because it is the only candidate that meets cost, area and shop limits together and is in mainline Zephyr with Wi-Fi AP support listed. Keep a thin hardware layer (Wi-Fi, LED output, button, storage, clock) so that B or C can replace it.
 Decision applies to the prototype board and is confirmed for production at the 1000-unit quote gate.
 
 ## Consequences
