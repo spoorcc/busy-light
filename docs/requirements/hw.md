@@ -138,7 +138,7 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Must
 - **Status:** Approved
 - **Approval:** the owner (Ben Spoor), 2026-11-04, by instruction in the session; recorded by the assistant. Not covered and still open: a fault of the detection IC itself (RISK-042), a stuck gate output or shorted select MOSFET (RISK-029), a non-compliant cable, hung firmware (ADR-0010 open point 4). Bracketed values stay open.
-- **Proposed revision (consolidated 2026-11-06; status Proposed, nothing here is Approved; the Approved text above is unchanged until the owner approves).** This block replaces the three earlier Proposed paragraphs of 2026-11-04 and 2026-11-05 (superseded; their facts are kept below, their E192 resistor values and 220+220+150+33 nF and 220+220+100+68 nF capacitor sets are not). It follows the goldfish review RV-010 (finding numbers in brackets). Evidence level: desk analysis only. No bench, no SPICE, no firmware run.
+- **Approved revision (consolidated 2026-11-06; approved by the owner, Ben Spoor, 2026-11-07, in the session; recorded by the assistant). Where this block and the text above differ, this block applies.** The debounce margin (the [20] ms criterion below), the M4 sag band (criterion 5) and the unchosen parts (TVS1, 3V3 regulator) stay open and the bracketed values stay open until measured. This block replaces the three earlier Proposed paragraphs of 2026-11-04 and 2026-11-05 (superseded; their facts are kept below, their E192 resistor values and 220+220+150+33 nF and 220+220+100+68 nF capacitor sets are not). It follows the goldfish review RV-010 (finding numbers in brackets). Evidence level: desk analysis only. No bench, no SPICE, no firmware run.
   - **Statement addition:** "The board shall give the processor a readback input for the hold-off state and one for the gate enable of each gated step, at levels that the processor input accepts (3.3 V logic, no more than the processor rating at any power order), so that the firmware can reduce its load when the gate closes (SW-009)."
   - **Current values (one table):**
 
@@ -210,4 +210,4 @@ Process rules: `docs/process/README.md`.
 - **Category:** Safety
 - **Regulatory:** EN 62368-1 *(verify)*
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved (owner, 2026-11-07; the bracketed figures stay open; the TC-213 procedure is to be written; the hung-firmware run is recorded, not required to pass)
