@@ -1,6 +1,6 @@
 # ADR-0019: 3V3 regulator topology and package
 
-- **Status:** Proposed (only the owner sets Accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session; option A, standard package with a firmware limit; recorded by the assistant, who recommended option B). Accepted before the transmit-duty requirement exists; TC-213 gates any thermal claim.
 - **Date:** 2026-11-07
 - **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-011 (finding 3)
 - **Related:** SYS-021, HW-004, HW-010, HW-013, ADR-0003, ADR-0007, ADR-0011, RISK-004, RISK-005

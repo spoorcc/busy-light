@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Owner approvals of 2026-11-07 recorded: ADR-0019 Accepted (standard-package regulator with a firmware limit); SW-005 single-input table and unknown states, SW-007 flag, clock and watchdog counting, SW-010 timeout of [8] s folded into the requirements; ADR-0010 update for open points 3 and 4 (ADR-0019, ADR-0010, SW-005, SW-007, SW-010).
 - Proposed single-input rewrite of SW-005 criterion 4 and TC-105 cases (g) and (h): one CC input, unknown states are readback inconsistencies (SW-005, RV-011 findings 8 and 9).
 - ADR-0018 (FAULT_N input removed for the sensor pins; the assistant recommended keeping it, the owner chose removal) and ADR-0019 (3V3 regulator, standard package with a firmware limit; the assistant recommended the pad package), both Proposed; Proposed amendments of SW-007 and SW-010 for the flag, elapsed-time clock and watchdog resets (ADR-0018, ADR-0019, SW-007, SW-010, SW-009, HW-010).
 - Goldfish review RV-011 of plan 07, the draft test procedures and the supply-pin, regulator and CC-pin analyses: 17 merged findings, outcome "approved with actions"; fixes to the surge script (zener corners, 27 tests), TC-106, TC-107, TC-109, TC-110 and TC-210 (RV-011, HW-010, SW-005, SW-006, SW-007, SW-009, SW-010).
