@@ -1,6 +1,6 @@
 # Mechanical Requirements
 
-- **Status:** Draft
+- **Status:** Partly approved (MECH-001 to MECH-005 and MECH-009 Approved 2026-11-07; MECH-006 to MECH-008 Draft, waiting for ADR-0014)
 - **Version:** 0.2 (2026-11-07, assistant redraft after ADR-0003 and ADR-0011 Accepted, ADR-0014 Proposed, RV-004, RV-007; all entries stay Draft; only the owner approves)
 - **Owner:**
 
@@ -18,7 +18,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Functional
 - **Regulatory:** none
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 
 ### MECH-002 Light diffuser
 
@@ -31,7 +31,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Functional
 - **Regulatory:** none
 - **Priority:** Should
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 
 ### MECH-003 Antenna clearance
 
@@ -44,7 +44,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Performance
 - **Regulatory:** none
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 
 ### MECH-004 Access to USB-C and button
 
@@ -57,7 +57,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Usability
 - **Regulatory:** none
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 
 ### MECH-005 Thermal and material
 
@@ -70,7 +70,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Safety
 - **Regulatory:** EN 62368-1 *(verify)*
 - **Priority:** Must
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 
 ### MECH-006 Label area
 
@@ -122,4 +122,4 @@ Process rules: `docs/process/README.md`.
 - **Category:** Reliability
 - **Regulatory:** none
 - **Priority:** Should
-- **Status:** Draft
+- **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)

@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Owner approved MECH-001, MECH-002, MECH-003, MECH-004, MECH-005 and MECH-009 on 2026-11-07; MECH-006 to MECH-008 wait for ADR-0014 (MECH-001 to MECH-009).
 - Mechanical requirements MECH-001 to MECH-008 redrafted (version 0.2, all Draft) to match ADR-0003, ADR-0011 and ADR-0014 (PETG, off-centre module, annular bayonet, thermal limit, window and label), new MECH-009 (PCB snap hooks and reopening) with stub TC-309; open items are listed in the journal (MECH-001 to MECH-009, ADR-0011, ADR-0014).
 - TC-210 step 4 extended: peak of VBUS_IC and +5V at hot-plug against the part ratings, with a trigger for the fallback options; owner chose to measure first (HW-010, TC-210, ADR-0010).
 - Part-rating table for VBUS_IC and +5V (`docs/verification/reports/analysis-vbus-5v-part-ratings.md`): the TPS2553 (7 V), the 3V3 regulator (6 V) and the LED placeholder (5.3 V) are not safe against an 8 to 15 V TVS clamp, so the surge problem is wider than the two pins that got a resistor and a zener; three options for the owner, nothing decided (HW-010, ADR-0010, ADR-0016, RV-011).
