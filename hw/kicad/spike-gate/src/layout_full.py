@@ -153,9 +153,9 @@ PLACE = {
     "SW1": (174.0, 190.0, 0),
     "U10": (158.0, 232.0, 0), "U11": (158.0, 266.0, 0), "R11": (138.0, 269.81, 0),
     "R10": (203.0, 190.0, 90), "C4": (206.0, 205.0, 0),
-    "R_SU1": (302.0, 140.0, 90), "C26": (312.0, 146.0, 0), "DZ1": (322.0, 146.0, 270),
-    "R_SU14": (302.0, 160.0, 90), "DZ14": (322.0, 166.0, 270),
-    "R_SU15": (302.0, 180.0, 90), "DZ15": (322.0, 186.0, 270),
+    "R_SU1": (290.0, 143.0, 90), "C26": (306.0, 149.0, 0), "DZ1": (316.0, 149.0, 270),
+    "R_SU14": (330.0, 143.0, 90), "DZ14": (346.0, 149.0, 270),
+    "R_SU15": (356.0, 143.0, 90), "DZ15": (372.0, 149.0, 270),
 }
 TEXT = {
     "J1": (-7.62, 26.0, "left"), "TVS1": (-3.81, -5.5, "left"), "U6": (6.0, 8.0, "left"),
@@ -335,8 +335,7 @@ def _build():
     s.caption("TPS3840DL40 is a candidate, not chosen", gx(38.1), 164.0, 1.27)
     s.caption("ESP32-C3-MINI-1 module (box uses GPIO names, module pin numbers not drawn)", 15, 172)
     s.caption("Button (HW-007; GPIO5 is not a strapping pin)", 128, 172)
-    s.caption("HOLD_OK is 5 V: buffered to 3.3 V for the MCU", 128, 211)
-    s.caption("OE tied to GND (symbol drawn pointing up)", 160.0, 215.5, 1.0)
+    s.caption("GATE_OK_RB = HOLD_OK AND FAULT_N (ADR-0018 option E); 3.3 V gate, inputs accept 5 V", 128, 211)
     s.caption("OE tied to GND (symbol drawn pointing up)", 160.0, 249.5, 1.0)
     s.caption("LED data: 5 V buffer (HW-002)", 128, 246)
     s.caption("16 LEDs as a chain; the ring geometry is a PCB matter (HW-001)", 200, 172)
@@ -663,7 +662,7 @@ def _build():
     s.pw("GND", ("U10", "3"), True)
 
     # ------------------------------------------------------------ supply-pin protection (HW-010 amendment)
-    s.caption("Supply pins with 6 V maximum (TUSB321, TMUX1101): series resistor, 100 nF, 5.1 V zener", 296, 128, 1.27)
+    s.caption("Supply pins with 6 V maximum (TUSB321, TMUX1101): series resistor, 100 nF, 5.1 V zener", 288, 132, 1.27)
     for rs, dz, vnet, cap in (("R_SU1", "DZ1", "VDD_U1", "C26"), ("R_SU14", "DZ14", "VDD_U14", None),
                               ("R_SU15", "DZ15", "VDD_U15", None)):
         s.pw("VBUS_IC", (rs, "1"), True)

@@ -175,3 +175,9 @@ Not run on the new board: `src/route_grid.py` knows only the old rectangular out
 ### 10.10 Owner items
 Choose the layer count (the evidence is in 10.5 and 10.6) and whether ADR-0012 covers a 4-layer board. Decide the receptacle conflict (10.2: 59.8 mm against the 58 mm limit; options: smaller LED, shifted LED phase, larger limit, variant V2). Choose a side-actuated button. Decide how to treat the antenna keep-out against the LED ring (ADR-0003). Confirm that Freerouting v2.5.0 may be used in this flow, and the via-in-pad rule for the module ground pads.
 
+
+## Update 2026-11-07: rerun with the AND gate and the supply-pin protection (HW-010, ADR-0018)
+- Command: `run_full.sh`, then `run_pcb.sh <dir> <out> 4 inner` with Freerouting v2.5.0 (pinned jar, KiCad 10.0.6). The placer put the new parts (R_SU1, R_SU14, R_SU15, C26, DZ1, DZ14, DZ15, the AND gate U10) without a change to the placement rules.
+- Observed: unplaced-board DRC (4 layers, no router): only `unconnected_items` above the waiver (266 > 241). Routed: Freerouting started with 266 unrouted connections and finished with 48 unrouted and 0 violations in 221 s; M1 (routed board, plane nets excluded) 3 unrouted. Stitched: 247 DRC findings = 46 violations + 86 unconnected items on 4 nets (/CC1, /GATE_OK_RB, GND, one 887 k net) + 110 schematic-parity warnings (84 net_conflict, 26 footprint_symbol_mismatch, the known placeholder and stand-in cases).
+- The strict waiver check **fails**: 86 unconnected items, 6 track_width errors, 9 via_dangling warnings and 1 hole_to_hole warning are not on the waiver list. This is worse than the earlier run on unconnected items and has not been analysed. Routing is not deterministic.
+- Not done: the net fixture `tests/data/full.net` and the committed DRC fixtures are not refreshed; no manufacturing check; the new parts are not placed with intent (the annealer did it).

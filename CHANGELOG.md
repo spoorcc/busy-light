@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - CI: the licence-map check lists the TLV75733P and TMUX1101 evidence files as data (HW-012, ADR-0015).
 
 ### Added
+- README: status table, schematic and board images and captions refreshed for the spike board with the AND gate and the supply-pin protection (one routed run, strict check fails), new housing model images (exploded and back view) drawn by `mech/render_readme_images.sh`; FreeCAD views are tool output (HW-010, MECH-007, ADR-0014).
 - Hardware spike schematic: SN74LVC1G08 AND gate for GATE_OK_RB (HOLD_OK and FAULT_N), GPIO4 and GPIO1 freed, series resistor, 100 nF and BZX84C5V1 zener at the TUSB321 and TMUX1101 supply pins; six new tests; PCB stage not rerun (HW-010, HW-012, ADR-0016, ADR-0018).
 - Hardware: datasheet evidence for the BZX84C5V1 zener and the SN74LVC1G08 AND gate (quotes checked against the PDF pages); surge analysis rerun with the zener datasheet corners (HW-010, HW-012, ADR-0016, ADR-0018).
 - Mechanics: housing model completed with lid spigot and snap bumps, PCB posts, button hole and a bayonet detent; tolerance check for the spigot, skirt and ledge (MECH-001, MECH-004, MECH-005, MECH-007, MECH-009).
