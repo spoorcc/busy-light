@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- TC-210 step 4 extended: peak of VBUS_IC and +5V at hot-plug against the part ratings, with a trigger for the fallback options; owner chose to measure first (HW-010, TC-210, ADR-0010).
 - Part-rating table for VBUS_IC and +5V (`docs/verification/reports/analysis-vbus-5v-part-ratings.md`): the TPS2553 (7 V), the 3V3 regulator (6 V) and the LED placeholder (5.3 V) are not safe against an 8 to 15 V TVS clamp, so the surge problem is wider than the two pins that got a resistor and a zener; three options for the owner, nothing decided (HW-010, ADR-0010, ADR-0016, RV-011).
 - Owner approvals of 2026-11-07 (second round): SW-009 and HW-010 amendments folded in as Approved, the TC-105, TC-106, TC-107, TC-109, TC-110, TC-210 and TC-213 procedures approved as working procedures (nothing run), plan 07 approved with conditions; RV-011 resolution record (SW-009, HW-010, RV-011, TC-105, TC-210).
 - ADR-0018 Accepted by the owner as option E: FAULT_N is combined with the hold-off readback by an AND gate that replaces the buffer, so GPIO1 and GPIO4 are free for the orientation sensor and the firmware still sheds on a limiter fault; SW-009 and HW-010 text changes are Proposed (ADR-0018, SW-009, HW-010, HW-011).
