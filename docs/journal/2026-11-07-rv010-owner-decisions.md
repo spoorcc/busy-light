@@ -41,3 +41,6 @@ review `docs/reviews/RV-010-hw-010-gate-bundle-goldfish.md`. Nothing here is App
 - Middle step purpose: (B) thermal cap, as recommended.
 - Debounce: measure first (bench, several units, 70 degC) and look for a newer TUSB321 datasheet revision; widen the upper limit to about [700] ms only if the measured debounce is above about 180 ms.
 - Commit and push the drafts: yes.
+
+## Decision 3 result: ILIM switch supply from VBUS_IC
+Analysis in `docs/verification/reports/analysis-tmux1101-supply-from-vbus.md`. Recommended and drafted: option A (VDD of U14 and U15 from VBUS_IC with 100 nF). Rejected: series resistor or clamp, TS5A3166 fallback, keep with DEV-001. Open: TVS clamp voltage against the 6 V rating, dropout scope record, the 1 V ILIM assumption. The owner approves; the spike schematic is not changed.

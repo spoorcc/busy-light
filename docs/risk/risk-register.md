@@ -496,7 +496,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Cause:** The TPS2553 is enabled from VBUS_IC and 3V3 is derived from its output, so 3V3 always rises after the ILIM node; the TMUX1101 (owner decision 2026-11-05) states no behaviour for a signal above VDD + 0.5 V
 - **Effect:** A current into or out of the switch pin changes the ILIM current for a short time and so the current limit at power-up (up to about 7 uA of the 21 uA of step 1, first-order, assumed clamp); possible slow damage of the switch; with the fallback TS5A3166 a powered-off leakage of 1 to 5 uA breaks the step margins
 - **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
-- **Mitigated by:** HW-010 (proposed amendment items (a) and (e)), DEV-001 (Proposed), the lowest step at power-up (switch off by the 100 kohm pull-down, SW-005), fallback part TS5A3166, ADR-0010, ADR-0016
+- **Mitigated by:** the switch supply from VBUS_IC (owner decision 2026-11-07, `analysis-tmux1101-supply-from-vbus.md`, Proposed; removes the exceedance by the supply ordering, not yet shown on a bench), HW-010 (proposed amendment items (a) and (e)), DEV-001 (Proposed), the lowest step at power-up (switch off by the 100 kohm pull-down, SW-005), fallback part TS5A3166, ADR-0010, ADR-0016
 - **Residual risk (after mitigation):** Not assessed. ILIM pin voltage, the 3V3 ramp (regulator not chosen) and the TMUX1101 behaviour are unknown; no bench record exists. The scores are the author's judgement
 - **Verified by:** TC-210
 - **Status:** Open
