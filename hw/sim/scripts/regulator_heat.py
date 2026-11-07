@@ -75,6 +75,5 @@ if __name__ == "__main__":
     print("\n".join(table()))
     for label, rth in RTH:
         for cr in CASE_RISE:
-            print(
-                f"max average 3V3 current, {label}, +{cr:.0f} K: {max_avg_current(rth, cr) * 1e3:.0f} mA"
-            )
+            i_max = max_avg_current(rth, cr) * 1e3
+            print(f"max average 3V3 current, {label}, +{cr:.0f} K: {i_max:.0f} mA")
