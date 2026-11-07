@@ -4,7 +4,7 @@
 - **Type:** Design
 - **Date:** 2026-11-06  **Reviewer(s):** four stateless goldfish subagents (comprehension; failure modes and safety; testability and non-functional; dependencies and integration)  **Independent?** yes
 - **Entry document given to the goldfish:** `docs/decisions/ADR-0016-independent-hardware-gate-for-high-current-step.md` (they followed its references)
-- **Not done:** the implementation-readiness goldfish (step 4 of the protocol). It makes no sense before the High findings are closed. No bench, SPICE or build was run by any reviewer.
+- **Implementation readiness (protocol step 4):** run on 2026-11-07 after the drafts of that date. Verdict **NO-GO** (below). No bench, SPICE or build was run by any reviewer.
 
 ## Comprehension result
 The goldfish explained the gate design as intended (TUSB321 plus AND gate, hold-off, E96 limit steps, TMUX1101). It could not find one place that states the built circuit, and it listed unclear points 1 to 10. These repeat in the findings below.
@@ -47,5 +47,19 @@ Source tags: S = failure modes and safety, T = testability and non-functional, I
 ## Rejected points
 None rejected outright. Two reviewer statements are not accepted as facts: the USB Type-C debounce range (quoted from memory, not in the repo) and the 1.5 mA temperature coefficient estimate (a rough number; the model change in finding 13 settles it).
 
+## Implementation readiness (2026-11-07): NO-GO
+A fresh goldfish was asked whether it could implement the gate hardware, the firmware of SW-005 to SW-010 and the bench verification exactly, without questions. Verdict NO-GO. Reasons and what closes each:
+
+| # | Reason | Closed by | Owner of the action |
+|---|--------|-----------|---------------------|
+| 1 | Every amended requirement, ADR-0016 Amendment 2, DEV-001 and DEV-005 are Proposed, HW-013 and SW-010 are Draft; rule 1 forbids `hw/` and `sw/` changes until Approved | Approval | Owner only |
+| 2 | Firmware values open: SW-009 [X] ms (needs a rail hold-up measurement), SW-006 [50] ms (no derivation), SW-005 value table "to be agreed with ADR-0010 open point 3", SW-007 retention unmeasured, SYS-020 [2] s only proposed | Bench measurement; owner agrees the table | Bench, owner |
+| 3 | Hardware inputs open: TVS1 not chosen (6 V clamp requirement), 1 V ILIM assumed, maximum CC debounce unknown, 3.2 ms hold-off margin, no 3V3 regulator chosen, sag band (M4) has no design answer | TVS and regulator selection, bench, design decision on M4 | Assistant drafts selection; owner decides; bench |
+| 4 | Tests have no procedure: TC-210, TC-213, TC-105, TC-109 are "TBD", TC-110 and TC-213 have no outline, HW-013 values are working figures; `sw/app/tests` is empty | Write procedures and outlines; test harness is its own change | Assistant (after approval for the harness) |
+| 5 | The spike generator (`gen_gate.py`, `layout_full.py`) still holds E192 values, a single ILIM resistor per step, the 3V3 switch supply, U12 and CC_OK_3A, and the old capacitor set | Scripted regeneration with ERC/DRC (rule 12) after approval | Assistant, after approval |
+| 6 | HW-012 part evidence is missing for the TMUX1101, the new resistors and capacitor | Evidence files and `check_part_evidence.py` | Assistant |
+
+The goldfish asked 20 questions. Triage: questions 1, 13, 18, 19 and 20 ask whether rules may be bent or whether work belongs in this change (answer: no, and no); questions 2, 3, 4, 6, 7, 9, 10, 11, 12, 14, 15, 16 and 17 are the open decisions and bench items in the table; question 8 (SW-008 reading in the new context) and question 5 (which time base governs SW-006 against SW-009) are drafting gaps for the assistant. The stale "owner decision needed" note on step 2 in the HW-010 table was fixed on 2026-11-07.
+
 ## Outcome
-Rejected for approval as written. The Fixed items are in this branch. The Action and Owner items must be closed, then a fresh readiness goldfish (protocol step 4) must answer GO, before the owner approves. This record states no approval.
+Rejected for approval as written, and the readiness check is NO-GO. Most of the Action items are drafted; what remains is listed in the readiness table above. A fresh readiness goldfish must answer GO before the owner approves. This record states no approval.

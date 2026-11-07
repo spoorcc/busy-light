@@ -150,7 +150,7 @@ Process rules: `docs/process/README.md`.
     | R_ILIM3 (step 3) | 27.4 kohm 0.1 % 0603, Yageo RT0603BRD0727K4L (C861274, 14,937) plus 301 ohm 0.1 % 0603, Panasonic ERA-3AEB3010V (C2074494, 5,222) in series | same; without the 301 ohm the step 3 maximum is 1576.8 mA, margin 0.2 mA |
     | Hold-off capacitor C1 | six 100 nF C0G 5 % 50 V 1206 in parallel, Murata GRM31C5C1H104JA01L (C97946, 96,458), 600 nF in total | owner choice 2026-11-06 |
     | Step 1 window | 504.2 to 616.6 mA (maximum 623 mA, margin 6.4 mA) | calculated, `hw/sim/scripts/amendment2_numbers.py` |
-    | Step 2 window | 934.9 to 1091.7 mA, inside the proposed 850 to 1150 mA (margins 84.9 and 58.3 mA). The middle step has no SYS requirement (RV-010 9) | calculated; owner decision needed |
+    | Step 2 window | 934.9 to 1091.7 mA, inside the proposed 850 to 1150 mA (margins 84.9 and 58.3 mA). Step 2 is a thermal cap (SYS-020 Proposed text, owner decision 2026-11-07); it is built now and may be dropped after TC-213 (RV-010 9) | calculated; owner decision 2026-11-07 |
     | Step 3 window | 1381.2 to 1566.6 mA, inside 1366 to 1577 mA (margins 15.2 and 10.4 mA) | calculated |
     | Q2 and Q3 both on | 1817 to 2020 mA, prevented by the exclusive gate (see below) | calculated |
     | Hold-off window | 203.2 to 553.2 ms (202.5 to 554.8 ms with the 0.6 % allowance); inside [200] to [600] ms; margin to the lower edge 3.2 ms (2.5 ms) | calculated; ageing, DC bias and C0G leakage taken as 0 and not checked |
