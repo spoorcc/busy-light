@@ -1,10 +1,10 @@
 # 07 -- Gate firmware logic (design doc)
 
-- **Status:** Draft (not reviewed by a goldfish; not approved by the owner)
+- **Status:** Approved with conditions (owner, Ben Spoor, 2026-11-07, after RV-011; recorded by the assistant). Conditions: the first increment is only a smoke test that a ztest runs on native_sim; the pin map is a spike map and is not valid for layout; the transmit-duty requirement and the CC-pin ESD requirement are still to be written; nothing has been built or run.
 - **Date:** 2026-11-07  **Owner:** Ben Spoor (author: assistant)
 - **Area:** sw
 - **Requirements addressed:** SW-005, SW-006, SW-007, SW-009, SW-010 (all Approved 2026-11-07); SYS-020; HW-010 (readback inputs)
-- **EGM review record:** RV-011 (goldfish review of 2026-11-07, in progress). The readiness rerun of 2026-11-07 is in RV-010 and asked for this plan.
+- **EGM review record:** RV-011 (goldfish review of 2026-11-07, outcome approved with actions). The readiness rerun of 2026-11-07 is in RV-010 and asked for this plan.
 
 ## 1. Problem definition
 The USB input current limit has a hardware gate (ADR-0016) and needs the firmware that raises the step only after a stable reading, sheds load when the gate closes, backs off after brown-outs and restarts when hung. Out of scope: the LED, Wi-Fi and mapping firmware, HW-011 sensor, bench measurements, any hardware change.
@@ -36,7 +36,7 @@ Failure behaviour: any unknown input pattern gives the lowest step. Safety: this
 ## 5. Detailed implementation plan
 **Decisions of 2026-11-07 (owner):** FAULT_N combined into GATE_OK_RB (ADR-0018, Accepted); regulator in the standard package with a firmware limit (ADR-0019, Proposed); retained flag cleared when the gate reopens, elapsed-time clock, watchdog resets count toward the back-off, watchdog timeout 8 s (Proposed amendments of SW-007 and SW-010).
 
-**Gate on approval (rule 1):** the SW-005 step table, the removal of FAULT_N from SW-009 and the pin map are Proposed amendments or spike data. No `sw/` file is created until the owner has approved them and this plan.
+**Gate (rule 1):** the SW-005, SW-007, SW-009 and SW-010 amendments are Approved (owner, 2026-11-07); the pin map is spike data. The first `sw/` change is the smoke test only.
 
 **Hardware abstraction `gate_hal.h` (interface list, to be fixed in the review):** `gate_hal_read_inputs(snapshot *)`, `gate_hal_write_selects(step2, step3)`, `gate_hal_now_ms()`, `gate_hal_request_budget(level)` (the LED-layer call; level lowest or normal; the layer must reach the budget within [X] ms), `gate_hal_store_read(*)` and `gate_hal_store_write(*)` (retained store), `gate_hal_reset_cause()`, `gate_hal_wdt_service()`. Edge events: `gate_hal` calls `gate_on_edge(which)` from the GPIO interrupt; on native_sim a test injects the edge.
 

@@ -33,3 +33,6 @@ None rejected. One reviewer statement stays unverified: the claim that a power-o
 
 ## Outcome
 Approved with actions. The drafts are consistent enough to go on, but plan 07 and the test procedures are not ready for the owner's approval until findings 1, 4, 5, 9 and 14 are decided or fixed. No approval is stated here.
+
+## Resolution record (2026-11-07, later)
+Findings 1 (ADR-0018 option E), 3 (ADR-0019 Accepted), 4 and 14 (SW-007 and SW-010 amendments approved), 5 (plan 07 edge handler), 6, 7, 8, 9 (SW-005 single input approved), 10 and 13 are closed by the owner's decisions and the edits listed in the journal and CHANGELOG. Still open: finding 2 (table of every part on VBUS and +5V with its absolute maximum), the CC-pin requirement and ESD test (12), the transmit-duty requirement (3), ADR status lines and HW-012 entries (15), regulatory-check (17). The owner approved plan 07 with conditions and the test procedures as working procedures on 2026-11-07.

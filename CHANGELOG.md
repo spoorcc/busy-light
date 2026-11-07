@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Owner approvals of 2026-11-07 (second round): SW-009 and HW-010 amendments folded in as Approved, the TC-105, TC-106, TC-107, TC-109, TC-110, TC-210 and TC-213 procedures approved as working procedures (nothing run), plan 07 approved with conditions; RV-011 resolution record (SW-009, HW-010, RV-011, TC-105, TC-210).
 - ADR-0018 Accepted by the owner as option E: FAULT_N is combined with the hold-off readback by an AND gate that replaces the buffer, so GPIO1 and GPIO4 are free for the orientation sensor and the firmware still sheds on a limiter fault; SW-009 and HW-010 text changes are Proposed (ADR-0018, SW-009, HW-010, HW-011).
 - Owner approvals of 2026-11-07 recorded: ADR-0019 Accepted (standard-package regulator with a firmware limit); SW-005 single-input table and unknown states, SW-007 flag, clock and watchdog counting, SW-010 timeout of [8] s folded into the requirements; ADR-0010 update for open points 3 and 4 (ADR-0019, ADR-0010, SW-005, SW-007, SW-010).
 - Proposed single-input rewrite of SW-005 criterion 4 and TC-105 cases (g) and (h): one CC input, unknown states are readback inconsistencies (SW-005, RV-011 findings 8 and 9).
