@@ -191,6 +191,8 @@ class Fixer:
             hard_t = ndimage.binary_dilation(self.hard[L], structure=disc(width / 2 + sight)) if self.hard[L].any() else self.hard[L]
             hard_v = ndimage.binary_dilation(self.hard[L], structure=disc(R.VIA_DIA / 2 + sight)) if self.hard[L].any() else self.hard[L]
             ok[L] = (dist >= clr + width / 2) & inside_t & ~hard_t
+            if L not in R.layers_allowed(net, LAYERS):          # plane layers are closed to the outer-only nets
+                ok[L] = np.zeros_like(ok[L])
             vo = (dist >= clr + R.VIA_DIA / 2) & inside_v & ~hard_v
             via_ok = vo if via_ok is None else (via_ok & vo)
         hole = np.zeros((self.ny, self.nx), dtype=bool)
@@ -368,8 +370,18 @@ def ripup_clearance(src, drc, dst):
             stop.add((rnd(p.GetPosition().x), rnd(p.GetPosition().y)))
     removed, gone = 0, []
     for v in rep["violations"]:
-        if v["type"] != "clearance":
+        if v["type"] not in RIPUP_KINDS:
             continue
+        for vi in [i for i in v["items"] if i["description"].startswith("Via")]:     # a via at fault goes with its tracks
+            vx, vy = vi["pos"]["x"], vi["pos"]["y"]
+            for it in items:
+                if all(it is not g for g in gone) and (
+                        (it.GetClass() == "PCB_VIA" and math.hypot(mmf(it.GetPosition().x) - vx, mmf(it.GetPosition().y) - vy) < 0.02)
+                        or (it.GetClass() == "PCB_TRACK" and any(math.hypot(mmf(e.x) - vx, mmf(e.y) - vy) < 0.02
+                                                                  for e in (it.GetStart(), it.GetEnd())))):
+                    gone.append(it)
+                    board.Remove(it)
+                    removed += 1
         cand = [i for i in v["items"] if i["description"].startswith("Track")]
         cand.sort(key=lambda i: i["description"].startswith("Track [GND]"))
         if not cand:
@@ -397,6 +409,7 @@ def ripup_clearance(src, drc, dst):
     return removed
 
 
+RIPUP_KINDS = ("clearance", "copper_edge_clearance", "hole_clearance", "track_not_centered_on_via")
 _KEEP = []     # removed items stay referenced (the Python wrapper would free them twice)
 
 
@@ -535,7 +548,7 @@ def count(drc_path, kinds):
     return sum(1 for v in d.get("violations", []) if v["type"] in kinds) + (len(d["unconnected_items"]) if "unconnected_items" in kinds else 0)
 
 
-def auto(folder, stem="stitched", profile="stitched-4l", rounds=3):
+def auto(folder, stem="stitched", profile="stitched-4l", rounds=5):
     """Rounds of clean-up in `folder` starting from <stem>.kicad_pcb and <stem> DRC json: remove the track runs at clearance
     findings, route the unconnected pairs, check again. Writes fix<N>.kicad_pcb (+ project files, drc_fix<N>.json) and
     returns the stem of the last board. Stops when no clearance finding and no unconnected item is left."""
@@ -554,10 +567,10 @@ def auto(folder, stem="stitched", profile="stitched-4l", rounds=3):
     cur = stem
     for n in range(1, rounds + 1):
         js = "%s/drc_%s.json" % (folder, cur)
-        if count(js, ("unconnected_items", "clearance", "track_dangling", "via_dangling")) == 0:
+        if count(js, ("unconnected_items", "track_dangling", "via_dangling") + RIPUP_KINDS) == 0:
             break
         src = "%s/%s.kicad_pcb" % (folder, cur)
-        if count(js, ("clearance",)):
+        if count(js, RIPUP_KINDS):
             rip = "fix%dr" % n
             ripup_clearance(src, js, "%s/%s.kicad_pcb" % (folder, rip))
             aux(rip)

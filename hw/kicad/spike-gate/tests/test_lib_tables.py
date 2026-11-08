@@ -169,3 +169,10 @@ class Pcb(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_minimal_project_switches_on_default_ignored_erc_checks():
+    import lib_tables as LT
+
+    sev = LT.minimal_project("x")["erc"]["rule_severities"]
+    assert set(sev) == set(LT.ERC_ON) and set(sev.values()) == {"warning"}

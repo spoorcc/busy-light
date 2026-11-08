@@ -109,15 +109,24 @@ _DRU_RULES = (
 SILK_WAIVER_REFS = ("U9", "U2", "U4", "TVS2", "J1")
 
 
-def write_dru(path, layers=4):
+def write_dru(path, layers=4, silk_waiver=None):
     """Write the KiCad custom rules file (`(version 1)` syntax): the same minimums as the project file, as named rules,
-    so a violation names the rule. Deterministic: same input, same bytes."""
+    so a violation names the rule. Deterministic: same input, same bytes. The silk waiver (DEV-006) is written only when
+    `silk_waiver` is true or the environment variable SPIKE_SILK_WAIVER is 1; the owner did not approve it (2026-11-08),
+    so the default is off and the silk findings show."""
+    import os
     g = globals()
+    if silk_waiver is None:
+        silk_waiver = os.environ.get("SPIKE_SILK_WAIVER", "0") == "1"
     lines = ["(version 1)", "# written by pcb_rules.write_dru (spike, plan 06 G2); do not edit by hand; layers: %d" % layers]
     for name, constraint, const in _DRU_RULES:
         lines.append('(rule "%s"' % name)
         lines.append("\t(constraint %s (min %gmm)))" % (constraint, g[const]))
     cond = " || ".join("A.memberOfFootprint('%s')" % ref for ref in SILK_WAIVER_REFS)
+    if not silk_waiver:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+        return
     lines.append("# silk of the stand-in and crowded footprints (DEV-006, proposed): the outline of U9 crosses parts inside its courtyard,")
     lines.append("# J1 sits at the board edge; fabricators clip silk over pads; the rule ignores only these footprints")
     lines.append('(rule "spike_silk_waiver"\n\t(severity ignore)\n\t(condition "(A.Layer == \'F.Silkscreen\' || A.Layer == \'B.Silkscreen\') && (%s)")\n\t(constraint silk_clearance))' % cond)
@@ -201,3 +210,14 @@ def joins_nothing(x, y, track_ends, pad_boxes, tol=0.01):
     layers = {lay for ex, ey, lay in track_ends if _math.hypot(ex - x, ey - y) < tol}
     on_pad = any(x0 <= x <= x1 and y0 <= y <= y1 for x0, y0, x1, y1 in pad_boxes)
     return len(layers) <= 1 and not on_pad
+
+
+# Nets kept on the outer layers: their tracks on In1 (GND plane) or In2 (+5V plane) would cut the plane and the return path
+# (2026-11-07). The router gets a `use_layer` rule for them; the clean-up router obeys the same list.
+OUTER_ONLY = ("VBUS_IC", "+3V3")
+OUTER_LAYERS = ("F.Cu", "B.Cu")
+
+
+def layers_allowed(net: str, layers):
+    """The layers a track of `net` may use: all of them, or the outer ones for the nets of OUTER_ONLY."""
+    return [L for L in layers if L in OUTER_LAYERS] if net in OUTER_ONLY else list(layers)

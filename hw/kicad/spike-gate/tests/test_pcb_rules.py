@@ -173,8 +173,11 @@ class Dru(unittest.TestCase):
     def test_silk_waiver_names_only_the_listed_footprints(self):
         with tempfile.TemporaryDirectory() as t:
             p = Path(t) / "x.kicad_dru"
-            R.write_dru(str(p), 4)
+            R.write_dru(str(p), 4, silk_waiver=True)
             text = p.read_text()
+            q = Path(t) / "y.kicad_dru"
+            R.write_dru(str(q), 4, silk_waiver=False)
+            self.assertNotIn("severity ignore", q.read_text())          # default: no waiver (DEV-006 not approved)
         self.assertIn('(rule "spike_silk_waiver"', text)
         self.assertIn("(severity ignore)", text)
         for ref in R.SILK_WAIVER_REFS:
@@ -366,3 +369,28 @@ class DruCanary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OuterOnly(unittest.TestCase):
+    def test_layers_allowed(self):
+        L = ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"]
+        self.assertEqual(R.layers_allowed("VBUS_IC", L), ["F.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("+3V3", L), ["F.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("/ILIM", L), L)
+
+    def test_dsn_outer_rule(self):
+        import subprocess
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        dsn = ("(pcb x (network (class kicad_default /A) (class PWR_VBUS_IC VBUS_IC\\n      (circuit\\n        (use_via V)\\n      )"
+               "\\n      (rule (width 600))) (class PWR_3V3 +3V3 (circuit (use_via V)) (rule (width 300)))))")
+        with tempfile.TemporaryDirectory() as t:
+            a, b = Path(t, "a.dsn"), Path(t, "b.dsn")
+            a.write_text(dsn)
+            subprocess.run([sys.executable, str(Path(__file__).resolve().parent.parent / "src" / "pcb_dsn.py"), "outer", str(a), str(b)],
+                           check=True, capture_output=True)
+            out = b.read_text()
+        self.assertEqual(out.count("(use_layer F.Cu B.Cu)"), 2)
+        self.assertLess(out.index("PWR_VBUS_IC"), out.index("use_layer"))

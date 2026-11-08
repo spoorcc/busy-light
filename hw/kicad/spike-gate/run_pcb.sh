@@ -5,7 +5,7 @@
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
 #   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
-# Env: CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
+# Env: OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
 #      FREEROUTING_JAR  path of freerouting-2.5.0.jar (v2.5.0, sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7, a pinned release downloaded
 #      from the official GitHub releases; not part of the repository). Without it the board is built and checked
 #      unrouted. PCB_PYTHON (default python3) must have KiCad's pcbnew module (KiCad 10). FR_PASSES (default 60).
@@ -54,6 +54,7 @@ if [ -n "$FREEROUTING_JAR" ]; then
   if [ "${KEYFIRST:-0}" = 1 ]; then
     # stage 1: only the nets of pcb_rules.ROUTE_FIRST are routed (the other pads are obstacles); the tracks are then locked
     "$PY" "$HERE/src/pcb_dsn.py" export "$BASE" "$A/s1.dsn" "$PLANES" keyonly 2>&1 | filter
+    if [ "${OUTER_ONLY:-1}" = 1 ]; then "$PY" "$HERE/src/pcb_dsn.py" outer "$A/s1.dsn" "$A/s1o.dsn" 2>&1 | filter && mv "$A/s1o.dsn" "$A/s1.dsn"; fi
     java -jar "$FREEROUTING_JAR" -de "$A/s1.dsn" -do "$A/s1.ses" -mp "${FR_PASSES:-60}" -mt "${FR_THREADS:-4}" > "$A/freerouting_s1.log" 2>&1
     grep -E "Auto-routing stage completed" "$A/freerouting_s1.log" | tail -1 | cut -c1-300
     "$PY" "$HERE/src/pcb_dsn.py" import "$BASE" "$A/s1.ses" "$A/stage1.kicad_pcb" 2>&1 | filter
@@ -64,6 +65,9 @@ if [ -n "$FREEROUTING_JAR" ]; then
   fi
   # all remaining nets (stage 2, or the only stage with KEYFIRST=0); locked stage-1 tracks stay
   "$PY" "$HERE/src/pcb_dsn.py" export "$BASE" "$A/b.dsn" "$PLANES" 2>&1 | filter
+  if [ "${OUTER_ONLY:-1}" = 1 ]; then      # VBUS_IC and +3V3 stay off the plane layers (pcb_rules.OUTER_ONLY)
+    "$PY" "$HERE/src/pcb_dsn.py" outer "$A/b.dsn" "$A/b3.dsn" 2>&1 | filter && mv "$A/b3.dsn" "$A/b.dsn"
+  fi
   if [ "${KEYFIRST:-0}" = 1 ]; then       # stage 2: the branches of the main-path net take the narrow width (pcb_rules.BRANCH_WIDTH)
     "$PY" "$HERE/src/pcb_dsn.py" branchwidth "$A/b.dsn" "$A/b2.dsn" 2>&1 | filter && mv "$A/b2.dsn" "$A/b.dsn"
   fi

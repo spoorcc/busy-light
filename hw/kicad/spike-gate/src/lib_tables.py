@@ -56,10 +56,22 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+# ERC checks that KiCad ignores by default; the strict gate counts every ignored check, so they are switched on
+# (the full-board sheet has no finding for any of them, checked 2026-11-07).
+ERC_ON = ("single_global_label", "four_way_junction", "simulation_model_issue", "footprint_filter")
+
+
+def minimal_project(stem: str) -> dict:
+    return {
+        "meta": {"filename": f"{stem}.kicad_pro", "version": 3},
+        "erc": {"rule_severities": {k: "warning" for k in ERC_ON}},
+    }
+
+
 def write_minimal_project(outdir: Path, stem: str) -> None:
     pro = outdir / f"{stem}.kicad_pro"
     if not pro.exists():
-        write_text(pro, json.dumps({"meta": {"filename": f"{stem}.kicad_pro", "version": 3}}, indent=2) + "\n")
+        write_text(pro, json.dumps(minimal_project(stem), indent=2) + "\n")
 
 
 def write_custom_symbol_libs(sch_path: Path, outdir: Path, custom=CUSTOM_SYM) -> None:
