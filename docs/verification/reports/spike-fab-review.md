@@ -41,3 +41,6 @@ Checks on the finished stored board: strict gate (tolerated classes only: courty
 
 Name map for the older documents: C1B to C1F = C27 to C31, R_ILIM3B = R20, R_VD = R21.
 
+
+## Update 2026-11-08 (finding 5, BOM sourcing fields)
+`src/sourcing.py` maps a part value to `MPN`, `Manufacturer` and `LCSC`; `layout_full.py` writes them as hidden symbol fields, and the stored schematic was regenerated (ERC 0 findings; the only difference to the old file is the added fields). Only TMUX1101DCKR (U14, U15) has a recorded source (owner decision 2026-11-05, datasheet SCDS410D). `pcb_fabreview.py` now reports parts without an MPN: **92 of the BOM references** (BOM exported with `--ref-range-delimiter ""` so that ranges such as C8-C26 are not counted as one). Finding 5 is therefore half closed: the field exists and is checked; the numbers are not filled in. Filling them needs a datasheet or shop check per part (HW-008, spike 7.4) and was not done; no number was taken from memory. Tests: `tests/test_sourcing.py` (5), `tests/test_pcb_fabreview.py` (+1). Existing defect found, not fixed: a second `layout_full.build()` in one process draws extra symbols (253 then 295), so the new test builds in a fresh process.

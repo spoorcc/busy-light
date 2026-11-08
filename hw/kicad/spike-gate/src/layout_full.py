@@ -18,6 +18,7 @@ from kiutils.items.schitems import SchematicSymbol, SymbolProjectInstance, Symbo
 import layout_sch as L
 import lib_tables
 import write_sch as w
+from sourcing import sourcing_fields
 
 GRID = 1.27
 
@@ -258,6 +259,9 @@ class Full(L.Sheet):
             for p in self.syms[-1].properties:
                 if p.key in ("Reference", "Value"):
                     p.position.angle = (-rot) % 360
+        sym = self.syms[-1]             # hidden BOM fields from the sourcing table (empty when the part has no recorded source)
+        sym.properties.extend(w.prop(k, v, sym.position.X, sym.position.Y, 4 + n, True)
+                              for n, (k, v) in enumerate(sourcing_fields(PARTS[ref][3]).items()))
         if ref.startswith("TP"):        # bare test pads: the footprint is excluded from the BOM, so is the symbol
             self.syms[-1].inBom = False
         if ref in HIDE_VALUE:
