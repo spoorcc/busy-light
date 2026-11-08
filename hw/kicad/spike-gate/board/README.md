@@ -5,6 +5,8 @@ Made by `run_best.sh` with `SPIKE_PROFILE=fine`, `PLACE_GRID=1.0`, `PLACE_ANT_KE
 
 Files: `busy_light_spike.kicad_pcb`, `.kicad_pro`, `.kicad_sch`, `.kicad_dru` (rules), `.placement.json`, `fp-lib-table` and `CUSTOM.pretty` (open the board next to them). Script output, never edited by hand.
 
+Finishing (2026-11-08): the seven unannotated parts were renamed (`src/pcb_rename.py`: C1B to C1F are now C27 to C31, R_ILIM3B is R20, R_VD is R21), and silkscreen designators and four fiducials were added (`src/pcb_finish.py`; 27 parts have no free place for a designator). Routing did not change.
+
 Checks run on this file (2026-11-08):
 - strict gate `SPIKE_ALLOW_KNOWN_OPEN=0 python3 src/kicad_strict.py drc board/busy_light_spike.kicad_pcb stitched-4l`: 0 open items, only the tolerated classes: courtyards_overlap 8 (max 14, U9 antenna, DEV-004), items_not_allowed 1 (DEV-004), footprint_symbol_mismatch 2 (C3, C4; HW-014 Draft);
 - `src/pcb_fabcheck.py`: PASS against the JLCPCB numbers of ADR-0020, with the via ring at the absolute minimum (0.15 mm) on all 131 vias;

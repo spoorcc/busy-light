@@ -80,7 +80,7 @@ Env knobs of `run_best.sh`: `PLACE_GRID` (mm grid), `PLACE_ANT_KEEPOUT=1`, `PLAC
 rows 0.5 (ring15: 3 of 12 gate-clean, no better board)
 The picker ranks: unconnected, strict FAIL, hard, power-check FAIL (nets over 50 mV or without a path), then tidiness. `PLACE_STRICT=1` and rows 3 gave no fully routed run (ring13): do not repeat.
 Fab minimum: `python3 src/pcb_fabcheck.py <pcb>` (exit 0 pass, 1 fail, 2 not run; JLCPCB numbers of ADR-0020, which is
-Proposed). Tidiness: `python3 src/pcb_quality.py <pcb>`. Tests: `GATE_NET` is needed for `tests/test_gate_logic.py` only.
+Proposed). Tidiness: `python3 src/pcb_quality.py <pcb>`. Assembly: `pcb_fabreview.py <pcb> <bom.csv>`; finishing of a picked board (no routing change): `pcb_finish.py` (silkscreen designators, fiducials; run twice, the second time with the DRC json of the first) and `pcb_rename.py`. Tests: `GATE_NET` is needed for `tests/test_gate_logic.py` only.
 
 ## Reporting and approvals
 - Report counts exactly as the logs show them. List what was not run (antenna/RF, thermal, fab DFM check, other fabs).

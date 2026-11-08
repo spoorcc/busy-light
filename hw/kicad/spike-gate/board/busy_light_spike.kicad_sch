@@ -2844,8 +2844,8 @@
 
   (symbol (lib_id "Device:R") (at 107.95 49.53 0) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid c0608812-78ac-50eb-b38a-031b48af25e2)
-    (property "Reference" "R_VD" (id 0) (at 110.49000000000001 48.26 0)
+    (uuid a24ee75b-e733-5dbb-bbfb-3190c008be8d)
+    (property "Reference" "R21" (id 0) (at 110.49000000000001 48.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "887k" (id 1) (at 110.49000000000001 50.8 0)
@@ -2857,12 +2857,12 @@
     (property "Datasheet" "" (id 3) (at 107.95 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 27914294-acd0-532f-9b9b-9d3281b32b98))
-    (pin "2" (uuid 2a36ed92-8fce-536b-bfea-0bf57e892876))
+    (pin "1" (uuid 18a7891f-248f-5418-acaf-dc9f730e48a6))
+    (pin "2" (uuid 792f0c27-b143-5a02-8265-eeb195883538))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "R_VD") (unit 1)
+          (reference "R21") (unit 1)
         )
       )
     )
@@ -3306,8 +3306,8 @@
 
   (symbol (lib_id "Device:R") (at 295.91 91.44 90) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid 97f7fdf6-781c-5f5b-b35a-168234c83062)
-    (property "Reference" "R_ILIM3B" (id 0) (at 293.37 93.98 270)
+    (uuid e59f0edd-50ca-590e-8123-54f3cecbf736)
+    (property "Reference" "R20" (id 0) (at 293.37 93.98 270)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "301 0.1%" (id 1) (at 293.37 96.52000000000001 270)
@@ -3319,12 +3319,12 @@
     (property "Datasheet" "" (id 3) (at 295.91 91.44 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 1f4505c1-0c28-5f42-8919-03a0d19d7a7c))
-    (pin "2" (uuid de1a886d-b4ea-5401-8a1c-362126c6529d))
+    (pin "1" (uuid 5a1247ca-8bdc-5efd-8fac-a94d11771774))
+    (pin "2" (uuid fb7fbad7-8962-5a26-9e15-21173c5c8ee0))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "R_ILIM3B") (unit 1)
+          (reference "R20") (unit 1)
         )
       )
     )
@@ -3439,8 +3439,8 @@
 
   (symbol (lib_id "Device:C") (at 140.97 146.05 0) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid dbed78bd-53aa-5269-8df0-1bd9202cb4f3)
-    (property "Reference" "C1B" (id 0) (at 143.51 144.78 0)
+    (uuid dc1183c7-c883-5a81-be9f-af4ab6bd64a9)
+    (property "Reference" "C27" (id 0) (at 143.51 144.78 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n C0G 5% 50V" (id 1) (at 143.51 147.32 0)
@@ -3452,12 +3452,12 @@
     (property "Datasheet" "" (id 3) (at 140.97 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 59a494a1-7d6c-5d22-87e1-b1d3bd969971))
-    (pin "2" (uuid 738634fe-af2c-5500-860b-e23b0e34739c))
+    (pin "1" (uuid 512c5798-552d-5e04-adf6-0489c81c3b9d))
+    (pin "2" (uuid e5392c8c-41ba-5539-8729-567ffee68ff0))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "C1B") (unit 1)
+          (reference "C27") (unit 1)
         )
       )
     )
@@ -3465,8 +3465,8 @@
 
   (symbol (lib_id "Device:C") (at 148.59 146.05 0) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid 310c5579-78d7-5d17-9809-9ad99ab9272a)
-    (property "Reference" "C1C" (id 0) (at 151.13 144.78 0)
+    (uuid 7bfe415f-3b97-52c3-8031-22d4100de964)
+    (property "Reference" "C28" (id 0) (at 151.13 144.78 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n C0G 5% 50V" (id 1) (at 151.13 147.32 0)
@@ -3478,12 +3478,12 @@
     (property "Datasheet" "" (id 3) (at 148.59 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid c9817bec-a3b5-541e-b3c0-5e6055cb2bfc))
-    (pin "2" (uuid 3e557295-09d9-5b5a-bbc6-cc64997b8e20))
+    (pin "1" (uuid 4a661d9d-ee94-54d7-9b4a-2ea999012ec0))
+    (pin "2" (uuid e410d2a1-8804-5ee3-b565-949da212f277))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "C1C") (unit 1)
+          (reference "C28") (unit 1)
         )
       )
     )
@@ -3491,8 +3491,8 @@
 
   (symbol (lib_id "Device:C") (at 156.21 146.05 0) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid 5dfa0c94-3e5c-5219-ae26-62bc0a35e00e)
-    (property "Reference" "C1D" (id 0) (at 158.75 144.78 0)
+    (uuid 43d087cd-bc22-5081-afda-d775b17a8c2d)
+    (property "Reference" "C29" (id 0) (at 158.75 144.78 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n C0G 5% 50V" (id 1) (at 158.75 147.32 0)
@@ -3504,12 +3504,12 @@
     (property "Datasheet" "" (id 3) (at 156.21 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid d653ad7e-b7fe-5791-a9f1-faa71ffc8cd4))
-    (pin "2" (uuid 2e221552-4b05-5c1c-87ec-b68cf1b8901e))
+    (pin "1" (uuid 638a532a-9a38-5457-85db-bca84bf4948c))
+    (pin "2" (uuid 4562651c-816c-5805-8c1c-2d3703c069d0))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "C1D") (unit 1)
+          (reference "C29") (unit 1)
         )
       )
     )
@@ -3517,8 +3517,8 @@
 
   (symbol (lib_id "Device:C") (at 163.83 146.05 0) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid 7d7d0fe2-6ef0-547d-bced-33bf76599582)
-    (property "Reference" "C1E" (id 0) (at 166.37 144.78 0)
+    (uuid ab2de14e-68c4-543f-87dc-f6949b6e0852)
+    (property "Reference" "C30" (id 0) (at 166.37 144.78 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n C0G 5% 50V" (id 1) (at 166.37 147.32 0)
@@ -3530,12 +3530,12 @@
     (property "Datasheet" "" (id 3) (at 163.83 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 51d282d8-c6a4-5749-a4cc-7e81604bc91a))
-    (pin "2" (uuid 639bdc8e-2c0a-5083-b900-051df46a91f7))
+    (pin "1" (uuid e2ef2c3f-c19e-59d8-9705-6ecb26e23f9b))
+    (pin "2" (uuid 1fc196cb-5bd3-5685-9681-94d9629899eb))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "C1E") (unit 1)
+          (reference "C30") (unit 1)
         )
       )
     )
@@ -3543,8 +3543,8 @@
 
   (symbol (lib_id "Device:C") (at 171.45 146.05 0) (unit 1)
     (in_bom yes) (on_board yes)
-    (uuid ea1a6644-6aed-5d8d-b7c8-5a439dcff6eb)
-    (property "Reference" "C1F" (id 0) (at 173.98999999999998 144.78 0)
+    (uuid 5f8be564-1232-511d-819f-3bfe4ccfa010)
+    (property "Reference" "C31" (id 0) (at 173.98999999999998 144.78 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n C0G 5% 50V" (id 1) (at 173.98999999999998 147.32 0)
@@ -3556,12 +3556,12 @@
     (property "Datasheet" "" (id 3) (at 171.45 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 97ccdaf9-a2b7-50dd-afa6-7c98b447c32f))
-    (pin "2" (uuid 1d2b9c2e-4bb0-54b9-89be-cb0a09a73ad4))
+    (pin "1" (uuid e6c55db2-909b-5fd1-ac1d-6198b7851019))
+    (pin "2" (uuid f2f6a13b-db5c-57aa-bca0-9f933c239b67))
     (instances
       (project "gate"
         (path "/4360934b-fbbf-597f-97f6-64e85dd09632"
-          (reference "C1F") (unit 1)
+          (reference "C31") (unit 1)
         )
       )
     )

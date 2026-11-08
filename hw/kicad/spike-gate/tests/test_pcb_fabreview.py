@@ -13,7 +13,7 @@ class Bom(unittest.TestCase):
         self.assertEqual(R.unannotated(["C1", "C1B?", "R_VD?"]), ["C1B?", "R_VD?"])
 
     def test_bom_and_board_differ_by_name_not_by_part_and_test_points_are_ignored(self):
-        d = R.bom_vs_board(["C1", "C2?", "R1"], ["C1", "C2", "R1", "TP1"])
+        d = R.bom_vs_board(["C1", "C2?", "R1"], ["C1", "C2", "R1", "TP1", "FID1"])
         self.assertEqual(d["only_bom"], ["C2?"])
         self.assertEqual(d["only_board"], ["C2"])           # TP1 is out of the BOM on purpose
 
@@ -30,14 +30,17 @@ class Board(unittest.TestCase):
         layers = ["F.Fab", "F.SilkS", "B.Fab", "B.Silkscreen"]
         self.assertEqual(R.refs_on_silk(layers), 2)
 
+    def test_parts_without_a_silkscreen_designator_are_listed(self):
+        self.assertEqual(R.refs_missing_silk([("C1", "F.Silkscreen"), ("R1", "F.Fab"), ("TP1", "B.Fab"), ("FID1", "F.Fab")]), ["R1"])
+
     def test_fiducials_are_footprints_with_fiducial_in_the_name(self):
-        self.assertEqual(R.fiducials(["R_0603", "Fiducial_1mm_Mask2mm", "FIDUCIAL"]), 2)
+        self.assertEqual(R.fiducials(["R_0603", "Fiducial_1mm_Mask2mm", "FIDUCIAL", "FID4"]), 3)
 
     def test_verdict_lists_every_finding(self):
-        v = R.verdict({"unannotated": ["C1?"], "no_fiducials": True, "refs_on_silk": 0, "open_values": []})
+        v = R.verdict({"unannotated": ["C1?"], "no_fiducials": True, "refs_on_silk": 0, "missing_silk": [], "open_values": []})
         self.assertEqual(v["status"], "FINDINGS")
         self.assertEqual(len(v["findings"]), 3)
-        self.assertEqual(R.verdict({"unannotated": [], "no_fiducials": False, "refs_on_silk": 5, "open_values": []})["status"], "OK")
+        self.assertEqual(R.verdict({"unannotated": [], "no_fiducials": False, "refs_on_silk": 5, "missing_silk": [], "open_values": []})["status"], "OK")
 
 
 if __name__ == "__main__":

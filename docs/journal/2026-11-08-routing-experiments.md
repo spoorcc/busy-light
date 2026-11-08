@@ -26,3 +26,5 @@ Owner choice: soft placement rules for the test points and IC rotations, then on
 ## Fab review
 Owner request: thermal, bench and full fab review so the board is "DFx approved" and "fully functional". The statements cannot follow from analysis (approval is the owner's; function needs a built board). Owner chose "fab review only". Result: `docs/verification/reports/spike-fab-review.md`, tool `src/pcb_fabreview.py` (7 tests). Four findings plus two notes; the board is not ready to order. Thermal, bench, independent Gerber view and the fabricator DFM check are not done.
 
+Fab review fixes (owner choice "all three, including renaming"): the renamed parts (C1B to C1F became C27 to C31, R_ILIM3B became R20, R_VD became R21), `pcb_rename.py`, `pcb_finish.py` (silkscreen designators for 73 of 100 parts, four fiducials). Old names stay in this journal as history. Full test run, including `test_gate_logic.py` with `GATE_NET=tests/data/gate.net`: 291 passed before the finishing tools were added.
+

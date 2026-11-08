@@ -18,7 +18,7 @@ def unannotated(refs: list[str]) -> list[str]:
 
 
 def bom_vs_board(bom_refs: list[str], board_refs: list[str]) -> dict:
-    board = [r for r in board_refs if not r.startswith("TP")]           # test points are out of the BOM on purpose
+    board = [r for r in board_refs if not r.startswith(("TP", "FID"))]   # test points and fiducials are out of the BOM on purpose
     return {"only_bom": sorted(set(bom_refs) - set(board)), "only_board": sorted(set(board) - set(bom_refs))}
 
 
@@ -34,8 +34,13 @@ def refs_on_silk(ref_layers: list[str]) -> int:
     return sum(1 for n in ref_layers if "silk" in n.lower())
 
 
+def refs_missing_silk(ref_layers: list[tuple[str, str]]) -> list[str]:
+    """References (not test points, not fiducials) whose text is not on a silkscreen layer."""
+    return [r for r, layer in ref_layers if not r.startswith(("TP", "FID")) and "silk" not in layer.lower()]
+
+
 def fiducials(fp_names: list[str]) -> int:
-    return sum(1 for n in fp_names if "fiducial" in n.lower())
+    return sum(1 for n in fp_names if "fiducial" in n.lower() or n.upper().startswith("FID"))
 
 
 def verdict(m: dict) -> dict:
@@ -46,6 +51,8 @@ def verdict(m: dict) -> dict:
         f.append("no fiducials on the board")
     if m["refs_on_silk"] == 0:
         f.append("no reference designators on the silkscreen")
+    elif m.get("missing_silk"):
+        f.append("%d parts without a silkscreen designator: %s" % (len(m["missing_silk"]), ", ".join(m["missing_silk"])))
     if m["open_values"]:
         f.append("parts with a tbd value: %s" % ", ".join(m["open_values"]))
     return {"status": "FINDINGS" if f else "OK", "findings": f}
@@ -61,7 +68,8 @@ def main(argv: list[str]) -> int:
     val = [(x.strip(), r["Value"]) for r in rows for x in r["Refs"].split(",")]
     m = {"unannotated": unannotated(bom_refs), "bom_vs_board": bom_vs_board(bom_refs, board_refs),
          "open_values": open_values(val), "refs_on_silk": refs_on_silk([f.Reference().GetLayerName() for f in fps]),
-         "fiducials": fiducials([str(f.GetFPID().GetLibItemName()) for f in fps]),
+         "missing_silk": refs_missing_silk([(f.GetReference(), f.Reference().GetLayerName()) for f in fps]),
+         "fiducials": fiducials([f.GetReference() if f.GetReference().startswith("FID") else str(f.GetFPID().GetLibItemName()) for f in fps]),
          "parts": len(fps), "bottom_side": sum(1 for f in fps if f.GetLayerName() == "B.Cu"),
          "has_mpn_field": "MPN" in rows[0]}
     m["no_fiducials"] = m["fiducials"] == 0
