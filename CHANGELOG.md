@@ -12,6 +12,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ### Added
 - Skill `pcb-route-and-gate` (order of work, gate and lessons for the spike board), reviewed by goldfish (RV-012).
+- Draft requirement HW-014 (bulk capacitance of the +5V rail, [10] to [100] uF effective) with TC-214, the analysis `analysis-5v-bulk-capacitance.md` and the script `hw/sim/scripts/bulk_cap_bounds.py` with tests (HW-004, HW-010).
+- Draft requirement HW-015 (capacitance on VBUS before the switch, 1.0 to 10.0 uF effective, USB 2.0 Device Capacitance ECN) with TC-215.
+- Goldfish review RV-013 of HW-014 and HW-015: rejected for In Review; the HW-014 lower bound is not sound as drafted.
+- HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
 - Strict waiver limits of the spike profile `stitched-4l` lowered to the observed counts (owner decision 2026-11-08): `net_conflict` 0, `footprint_symbol_mismatch` 2 (C3, C4 only), `courtyards_overlap` 14 (U9 only); test added (DEV-002, DEV-004).
