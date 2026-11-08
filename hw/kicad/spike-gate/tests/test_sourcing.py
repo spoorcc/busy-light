@@ -54,10 +54,15 @@ class SchematicFieldsTest(unittest.TestCase):
         self.assertTrue(f["MPN"].effects.hide)
 
     def test_unlisted_part_has_empty_mpn_and_is_reported(self):
-        f = self.fields("R1")
+        f = self.fields("C2")           # waits for the DC-bias analysis (HW-014), so no MPN yet
         self.assertEqual(f["MPN"].value, "")
         row = {k: v.value for k, v in f.items()}
-        self.assertEqual(pcb_fabreview.missing_mpn([("R1", row)]), ["R1"])
+        self.assertEqual(pcb_fabreview.missing_mpn([("C2", row)]), ["C2"])
+
+    def test_passive_carries_fields(self):
+        self.assertEqual(self.fields("R1")["MPN"].value, "0603WAF1003T5E")
+        self.assertEqual(self.fields("R_ILIM1")["MPN"].value, "TD03G4702BT")
+        self.assertEqual(self.fields("U9")["MPN"].value, "ESP32-C3-MINI-1-N4")
 
     def test_power_symbols_have_no_fields(self):
         for s in self.sch.schematicSymbols:

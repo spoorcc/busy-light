@@ -3,7 +3,7 @@
 State: branch `fix/spike-fab-review-findings`, three commits on top of main (BOM sourcing fields, 13 MPN groups, capacitor values and spare C32). Not pushed, no PR. Source of the list: `docs/verification/reports/spike-fab-review.md` and its updates of this day.
 
 ## Fab review findings still open
-- [ ] **MPNs, 60 references.** Missing: resistors and capacitors (JLCPCB basic-library parts with LCSC numbers; owner choice of manufacturer needed), TVS1 and TVS2 (no part chosen), J1 (the GCT USB4085-GF-A in the listings is through-hole; the footprint is edge mount: find the edge-mount variant), U9 (flash variant -N4 or -H4 undecided).
+- [ ] **MPNs, 7 references left** (passives and U9 done, see the fab-review update). Missing: C2, C3, C5, C6 (after the DC-bias analysis), TVS1 and TVS2 (no part chosen), J1 (the GCT USB4085-GF-A in the listings is through-hole; the footprint is edge mount: find the edge-mount variant).
 - [ ] **Check the 13 looked-up MPNs against datasheets or the shop at order time.** Distributor listings only. TUSB321RWBR is marked not recommended for new designs at LCSC; WS2812B-2020 is 2.2 x 2 mm at LCSC against 2.0 x 2.0 mm in the footprint; TL3342 force variant is an assumption.
 - [ ] **27 parts without a silkscreen designator** (smaller text, other places, or a documented waiver; C32 is one of them).
 - [ ] Fiducials: 4 on the board, usual count is 3 per side; JLCPCB's own rules not checked.

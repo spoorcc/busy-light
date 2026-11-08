@@ -113,6 +113,77 @@ SOURCING.update(
     }
 )
 
+# Passives, owner choice 2026-11-08: JLCPCB basic-library parts (Uni-Royal thick film, Samsung/Murata MLCC);
+# 0.1% resistors are not in the basic library (FH/Yageo thin film). Web lookups of 2026-11-08, LCSC/JLCPCB
+# listing pages only, no datasheet opened. Not listed: C2, C3, C5, C6 (the real parts wait for the DC-bias
+# and effective-capacitance analysis of HW-014/HW-015) and C4/C32 (DNP spares).
+_LU = "LCSC/JLCPCB listing, web lookup 2026-11-08; JLCPCB basic part; "
+
+
+def _uni(mpn: str, lcsc: str, note: str = "") -> dict[str, str]:
+    return {"MPN": mpn, "Manufacturer": "UNI-ROYAL", "LCSC": lcsc, "Evidence": _LU + "0603 1% 100 mW" + note}
+
+
+SOURCING.update(
+    {
+        "10k": _uni("0603WAF1002T5E", "C25804"),
+        "100k": _uni("0603WAF1003T5E", "C25803"),
+        "1k": _uni("0603WAF1001T5E", "C21190"),
+        "330": _uni("0603WAF3300T5E", "C23138"),
+        "470": _uni("0603WAF4700T5E", "C23179"),
+        "150k": _uni("0603WAF1503T5E", "C22807", "; LCSC product page not seen, number from the JLCPCB page"),
+        "887k": _uni("0603WAF8873T5E", "C23259", "; listing showed 0 stock, check at order time"),
+        "301 0.1%": {
+            "MPN": "TD03G3010BT",
+            "Manufacturer": "FH (Guangdong Fenghua)",
+            "LCSC": "C666860",
+            "Evidence": "LCSC listing, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm, extended part",
+        },
+        "47.0k 0.1%": {
+            "MPN": "TD03G4702BT",
+            "Manufacturer": "FH (Guangdong Fenghua)",
+            "LCSC": "C667109",
+            "Evidence": "JLCPCB listing, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm, extended part",
+        },
+        "56.2k 0.1%": {
+            "MPN": "TD03G5622BT",
+            "Manufacturer": "FH (Guangdong Fenghua)",
+            "LCSC": "C667119",
+            "Evidence": "LCSC datasheet file name and listing text, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm",
+        },
+        "27.4k 0.1%": {
+            "MPN": "RT0603BRE0727K4L",
+            "Manufacturer": "Yageo",
+            "LCSC": "",
+            "Evidence": "DigiKey listing, web lookup 2026-11-08 (thin film 0603 0.1%); no LCSC number seen",
+        },
+        "100n": {
+            "MPN": "CL10B104KB8NNNC",
+            "Manufacturer": "Samsung Electro-Mechanics",
+            "LCSC": "C1591",
+            "Evidence": _LU + "0603 100 nF 50 V X7R 10%",
+        },
+        "1u": {
+            "MPN": "CL10A105KB8NNNC",
+            "Manufacturer": "Samsung Electro-Mechanics",
+            "LCSC": "C15849",
+            "Evidence": _LU + "0603 1 uF 50 V X5R 10%; DC-bias derating not analysed",
+        },
+        "100n C0G 5% 50V": {
+            "MPN": "GRM31C5C1H104JA01L",
+            "Manufacturer": "Murata",
+            "LCSC": "C97946",
+            "Evidence": "LCSC listing, web lookup 2026-11-08; 1206 100 nF 50 V C0G 5%",
+        },
+        "ESP32-C3-MINI-1": {
+            "MPN": "ESP32-C3-MINI-1-N4",
+            "Manufacturer": "Espressif",
+            "LCSC": "C2838502",
+            "Evidence": "owner choice of the N4 flash variant 2026-11-08; LCSC/JLCPCB listing (extended part)",
+        },
+    }
+)
+
 FIELDS = ("MPN", "Manufacturer", "LCSC")
 
 
