@@ -157,7 +157,14 @@ NET_WEIGHT = {"VBUS_IC": 3.0, "/ILIM_STEP2_EN": 4.0, "/ILIM_STEP3_EN": 4.0, "/SU
 # Pin ties: a bypass capacitor sits at the supply pin of its part. Added to the annealer as two-pin pseudo-nets
 # (not on the board): name -> ((ref, pad), (ref, pad), weight). Owner decision 2026-11-05 (a): 0.1 uF on the TMUX1101 VDD pin.
 PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
-            "tie:C25-U15": (("C25", "1"), ("U15", "5"), 4.0)}
+            "tie:C25-U15": (("C25", "1"), ("U15", "5"), 4.0),
+            # Current paths (power check, pcb_power_check.py): the 1.5 A VBUS_IC path and the 0.5 A +3V3 path stay short.
+            # Soft ties only: the annealer pulls the ends together, no seed is rejected. Added 2026-11-08 after the ring4
+            # batch (+3V3 drop 56.6 mV against the 50 mV analyst target).
+            "tie:J1A4-U7": (("J1", "A4"), ("U7", "1"), 1.5),
+            "tie:J1B9-U7": (("J1", "B9"), ("U7", "1"), 1.5),
+            "tie:C2-U7": (("C2", "1"), ("U7", "1"), 1.5),
+            "tie:U8-U9": (("U8", "5"), ("U9", "3"), 3.0)}
 
 
 # ---- post-route clean-up helpers (pure functions; used by pcb_dsn.py import and pcb_stitch.py; tested in test_pcb_rules)

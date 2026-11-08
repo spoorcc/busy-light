@@ -5,7 +5,7 @@
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
 #   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
-# Env: OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
+# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
 #      FREEROUTING_JAR  path of freerouting-2.5.0.jar (v2.5.0, sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7, a pinned release downloaded
 #      from the official GitHub releases; not part of the repository). Without it the board is built and checked
 #      unrouted. PCB_PYTHON (default python3) must have KiCad's pcbnew module (KiCad 10). FR_PASSES (default 60).
@@ -51,6 +51,13 @@ if [ -n "$FREEROUTING_JAR" ]; then
   PLACED_SHA=$(sha256sum "$A/busy_light_spike.kicad_pcb" | cut -d' ' -f1)
   T0=$(date +%s)
   BASE="$A/busy_light_spike.kicad_pcb"
+  if [ "${RING:-1}" = 1 ]; then       # the LED ring cells are generated and locked, not routed (src/pcb_ring.py)
+    "$PY" "$HERE/src/pcb_ring.py" "$BASE" "$A/ring.kicad_pcb" 2>&1 | filter || echo "ring cells: some links failed"
+    for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/ring.$e"; done
+    "$PY" "$HERE/src/pcb_dsn.py" lock "$A/ring.kicad_pcb" "$A/ring_locked.kicad_pcb" 2>&1 | filter
+    for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/ring_locked.$e"; done
+    BASE="$A/ring_locked.kicad_pcb"
+  fi
   if [ "${KEYFIRST:-0}" = 1 ]; then
     # stage 1: only the nets of pcb_rules.ROUTE_FIRST are routed (the other pads are obstacles); the tracks are then locked
     "$PY" "$HERE/src/pcb_dsn.py" export "$BASE" "$A/s1.dsn" "$PLANES" keyonly 2>&1 | filter

@@ -371,15 +371,26 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         c = fps[cref]
         c.SetPosition(vec(0, 0))
         orient(c, rot, "B")
-        # keep the cap pad axis tangential: try the rotation and its quarter turn
-        for tr in (rot, (rot + 90) % 360):
+        # the cap pad axis stays tangential and the +5V pad of the cap sits under the +5V pad of the LED (same for GND):
+        # the four rotations are tried, the tangential ones are ranked by the distance of the equal-net pads
+        tang = (math.cos(math.radians(az)), -math.sin(math.radians(az)))   # radial in KiCad axes
+        best = None
+        for tr in (rot, (rot + 180) % 360, (rot + 90) % 360, (rot + 270) % 360):
             c.SetOrientationDegrees(tr)
-            pp = [q.GetPosition() for q in c.Pads()]
-            tang = (math.cos(math.radians(az)), -math.sin(math.radians(az)))   # radial in KiCad axes
-            vx, vy = pcbnew.ToMM(pp[0].x - pp[1].x), pcbnew.ToMM(pp[0].y - pp[1].y)
+            c.SetPosition(vec(0, 0))
+            pp = {q.GetNumber(): q.GetPosition() for q in c.Pads()}
+            vx, vy = pcbnew.ToMM(pp["1"].x - pp["2"].x), pcbnew.ToMM(pp["1"].y - pp["2"].y)
             n = math.hypot(vx, vy) or 1.0
-            if abs((vx * tang[0] + vy * tang[1]) / n) < 0.3:          # pad axis mostly tangential
-                break
+            if abs((vx * tang[0] + vy * tang[1]) / n) >= 0.3:          # pad axis not tangential
+                continue
+            # LED pads in the same frame: pad 4 is +5V and pad 2 is GND (KiCad symbol LED:WS2812B-2020); the LED sits at the origin here
+            lp = {q.GetNumber(): q.GetPosition() for q in d.Pads()}
+            lx = {k: (pcbnew.ToMM(v.x - d.GetPosition().x), pcbnew.ToMM(v.y - d.GetPosition().y)) for k, v in lp.items()}
+            cx = {k: (pcbnew.ToMM(v.x), pcbnew.ToMM(v.y)) for k, v in pp.items()}
+            cost = math.hypot(lx["4"][0] - cx["1"][0], lx["4"][1] - cx["1"][1]) + math.hypot(lx["2"][0] - cx["2"][0], lx["2"][1] - cx["2"][1])
+            if best is None or cost < best[0] - 1e-9:
+                best = (cost, tr)
+        c.SetOrientationDegrees(best[1] if best else rot)
         centre_at(c, cx_, cy_, 0.0)
         note_fixed(cref, "B")
 

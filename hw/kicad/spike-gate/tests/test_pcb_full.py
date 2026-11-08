@@ -45,10 +45,12 @@ class PlacementWeights(unittest.TestCase):
 
     def test_rule_tables(self):
         self.assertGreater(pcb_rules.NET_WEIGHT["/ILIM_STEP3_EN"], 1.0)
-        self.assertEqual(set(pcb_rules.PIN_TIES),
-                         {"tie:C24-U14", "tie:C25-U15"})
-        for a, b, w in pcb_rules.PIN_TIES.values():
-            self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
+        bypass = {"tie:C24-U14", "tie:C25-U15"}
+        paths = {"tie:J1A4-U7", "tie:J1B9-U7", "tie:C2-U7", "tie:U8-U9"}      # current paths of the power check
+        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | paths)
+        for name, (a, b, w) in pcb_rules.PIN_TIES.items():
+            if name in bypass:
+                self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
             self.assertGreater(w, 1.0)
 
     def test_weight_scales_the_wire_length_cost(self):

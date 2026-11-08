@@ -10,11 +10,13 @@ Usage: python3 pcb_dsn.py export <in.kicad_pcb> <out.dsn> [planes: B (default) |
        python3 pcb_dsn.py unlock <in.kicad_pcb> <out.kicad_pcb>
        python3 pcb_dsn.py import <in.kicad_pcb> <in.ses> <out.kicad_pcb>
 """
+import os
 import sys
 
 import pcbnew
 
 import pcb_full as P
+import pcb_ring
 import pcb_rules
 
 if __name__ == "__main__":
@@ -35,6 +37,13 @@ if __name__ == "__main__":
                     net = pad.GetNetname()
                     if not pcb_rules.is_key_net(net) or not pcb_rules.is_main_path_pad(net, f.GetReference(), pad.GetNumber()):
                         pad.SetNetCode(0)
+        if os.environ.get("RING", "1") == "1":             # the ring cells reach +5V through the In2 plane: the router leaves those pads alone
+            ring = {r for d, c in pcb_ring.cells() for r in (d, c)}
+            for f in b.GetFootprints():
+                if f.GetReference() in ring:
+                    for pad in f.Pads():
+                        if pad.GetNetname() == "+5V":
+                            pad.SetNetCode(0)
         ok = pcbnew.ExportSpecctraDSN(b, sys.argv[3])
         print("export", "ok" if ok else "FAILED", sys.argv[3])
         sys.exit(0 if ok else 1)

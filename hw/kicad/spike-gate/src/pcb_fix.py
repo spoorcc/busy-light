@@ -68,6 +68,8 @@ def parse_item(desc):
 
 
 class Fixer:
+    only = None        # when set, the layers (names) every route may use, whatever the net
+
     def __init__(self, board, tab_r):
         self.b = board
         self.tab_r = tab_r
@@ -191,7 +193,7 @@ class Fixer:
             hard_t = ndimage.binary_dilation(self.hard[L], structure=disc(width / 2 + sight)) if self.hard[L].any() else self.hard[L]
             hard_v = ndimage.binary_dilation(self.hard[L], structure=disc(R.VIA_DIA / 2 + sight)) if self.hard[L].any() else self.hard[L]
             ok[L] = (dist >= clr + width / 2) & inside_t & ~hard_t
-            if L not in R.layers_allowed(net, LAYERS):          # plane layers are closed to the outer-only nets
+            if L not in (self.only or R.layers_allowed(net, LAYERS)):          # plane layers are closed to the outer-only nets
                 ok[L] = np.zeros_like(ok[L])
             vo = (dist >= clr + R.VIA_DIA / 2) & inside_v & ~hard_v
             via_ok = vo if via_ok is None else (via_ok & vo)
@@ -409,7 +411,7 @@ def ripup_clearance(src, drc, dst):
     return removed
 
 
-RIPUP_KINDS = ("clearance", "copper_edge_clearance", "hole_clearance", "track_not_centered_on_via")
+RIPUP_KINDS = ("clearance", "copper_edge_clearance", "hole_clearance", "track_not_centered_on_via", "connection_width")
 _KEEP = []     # removed items stay referenced (the Python wrapper would free them twice)
 
 
@@ -548,6 +550,68 @@ def count(drc_path, kinds):
     return sum(1 for v in d.get("violations", []) if v["type"] in kinds) + (len(d["unconnected_items"]) if "unconnected_items" in kinds else 0)
 
 
+def snap_to_vias(board, tol=0.06):
+    """Move a track end that lies within `tol` of a via of the same net onto the via centre (grid rounding of the router).
+    Returns the count of moved ends."""
+    tr = board.Tracks()
+    items = [tr[i] for i in range(tr.size())]
+    vias = [(it.GetNetname(), it.GetPosition()) for it in items if it.GetClass() == "PCB_VIA"]
+    moved = 0
+    for t in items:
+        if t.GetClass() != "PCB_TRACK":
+            continue
+        for get, put in ((t.GetStart, t.SetStart), (t.GetEnd, t.SetEnd)):
+            e = get()
+            for net, pos in vias:
+                d = math.hypot(mmf(e.x - pos.x), mmf(e.y - pos.y))
+                if net == t.GetNetname() and 1e-4 < d <= tol:
+                    put(pos)
+                    moved += 1
+                    break
+    return moved
+
+
+def last_pass(folder, cur, aux, drc):
+    """One more pass on the last board: remove stubs, dangling
+    vias, and tracks with a free end that are short (under 0.2 mm) or on a plane net (the plane carries the net). Kept only
+    when the DRC findings of the kinds below did not rise. Returns the stem of the board to use."""
+    kinds = ("unconnected_items", "track_dangling", "via_dangling") + RIPUP_KINDS
+    js = "%s/drc_%s.json" % (folder, cur)
+    if not count(js, ("track_dangling", "via_dangling", "track_not_centered_on_via")):
+        return cur
+    board = pcbnew.LoadBoard("%s/%s.kicad_pcb" % (folder, cur))
+    rep = json.load(open(js, encoding="utf-8"))
+    n = prune_stubs(board)
+    import pcb_stitch
+    n += pcb_stitch.remove_dangling_vias(board, rep)
+    for v in rep["violations"]:
+        if v["type"] != "track_dangling":
+            continue
+        for it in v["items"]:
+            k = parse_item(it["description"])
+            if not k or k[0] != "track":
+                continue
+            tr = board.Tracks()
+            for t in [tr[i] for i in range(tr.size())]:
+                if t.GetClass() != "PCB_TRACK" or t.GetNetname() != k[1] or board.GetLayerName(t.GetLayer()) != k[2]:
+                    continue
+                ends = [(mmf(t.GetStart().x), mmf(t.GetStart().y)), (mmf(t.GetEnd().x), mmf(t.GetEnd().y))]
+                if any(math.hypot(e[0] - it["pos"]["x"], e[1] - it["pos"]["y"]) < 0.05 for e in ends) and (
+                        k[1] in R.PLANE_NETS or mmf(t.GetLength()) < 0.2):
+                    _KEEP.append(t)
+                    board.Remove(t)
+                    n += 1
+                    break
+    if not n:
+        return cur
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    pcbnew.SaveBoard("%s/fixp.kicad_pcb" % folder, board)
+    P.normalise_uuids("%s/fixp.kicad_pcb" % folder)
+    aux("fixp")
+    drc("%s/fixp.kicad_pcb" % folder, "%s/drc_fixp.json" % folder)
+    return "fixp" if count("%s/drc_fixp.json" % folder, kinds) <= count(js, kinds) else cur
+
+
 def auto(folder, stem="stitched", profile="stitched-4l", rounds=5):
     """Rounds of clean-up in `folder` starting from <stem>.kicad_pcb and <stem> DRC json: remove the track runs at clearance
     findings, route the unconnected pairs, check again. Writes fix<N>.kicad_pcb (+ project files, drc_fix<N>.json) and
@@ -581,6 +645,7 @@ def auto(folder, stem="stitched", profile="stitched-4l", rounds=5):
         aux(name)
         drc("%s/%s.kicad_pcb" % (folder, name), "%s/drc_%s.json" % (folder, name))
         cur = name
+    cur = last_pass(folder, cur, aux, drc)
     print(json.dumps({"cleanup_final_board": cur}))
     return cur
 
