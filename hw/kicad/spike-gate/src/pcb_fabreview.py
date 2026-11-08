@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Assembly and documentation checks of a spike board (HW-010): what the DRC and pcb_fabcheck.py do not cover.
 
-Usage: python3 pcb_fabreview.py <board.kicad_pcb> <bom.csv>      (bom.csv from `kicad-cli sch export bom`; needs pcbnew)
+Usage: python3 pcb_fabreview.py <board.kicad_pcb> <bom.csv>      (bom.csv from `kicad-cli sch export bom --exclude-dnp --ref-range-delimiter ""`; needs pcbnew)
 Checks: unannotated references in the BOM, BOM against the board, parts with a tbd value, reference designators on the
 silkscreen, fiducials. Prints JSON; exit 0 when there are no findings, 1 otherwise. It does not check part numbers or
 availability (it only checks that every part has an MPN) and it does not replace a fabricator's review.
@@ -66,7 +66,7 @@ def main(argv: list[str]) -> int:
     import pcbnew  # noqa: PLC0415
     b = pcbnew.LoadBoard(argv[1])
     fps = b.GetFootprints()
-    board_refs = [f.GetReference() for f in fps]
+    board_refs = [f.GetReference() for f in fps if not f.IsDNP()]      # the BOM is exported with --exclude-dnp
     rows = list(csv.DictReader(open(argv[2], encoding="utf-8")))
     bom_refs = [x.strip() for r in rows for x in r["Refs"].split(",")]
     val = [(x.strip(), r["Value"]) for r in rows for x in r["Refs"].split(",")]
@@ -74,7 +74,7 @@ def main(argv: list[str]) -> int:
          "open_values": open_values(val), "refs_on_silk": refs_on_silk([f.Reference().GetLayerName() for f in fps]),
          "missing_silk": refs_missing_silk([(f.GetReference(), f.Reference().GetLayerName()) for f in fps]),
          "fiducials": fiducials([f.GetReference() if f.GetReference().startswith("FID") else str(f.GetFPID().GetLibItemName()) for f in fps]),
-         "parts": len(fps), "bottom_side": sum(1 for f in fps if f.GetLayerName() == "B.Cu"),
+         "dnp": sorted(f.GetReference() for f in fps if f.IsDNP()), "parts": len(fps), "bottom_side": sum(1 for f in fps if f.GetLayerName() == "B.Cu"),
          "has_mpn_field": "MPN" in rows[0],
          "missing_mpn": missing_mpn([(x.strip(), r) for r in rows for x in r["Refs"].split(",")])}
     m["no_fiducials"] = m["fiducials"] == 0

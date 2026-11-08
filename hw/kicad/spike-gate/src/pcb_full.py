@@ -50,8 +50,6 @@ STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 # ref -> footprint (lib:name) used instead of the schematic's footprint field
 FOOTPRINT_OVERRIDE = {
     "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
-    "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
-    "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
 
 # ----------------------------------------------------------------------------- netlist parsing

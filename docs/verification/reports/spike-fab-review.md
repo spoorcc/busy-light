@@ -55,3 +55,6 @@ Points for the owner:
 - D1 to D16 WS2812B-2020: LCSC lists 2.2 x 2 mm, the footprint is 2.0 x 2.0 mm; check the manufacturer drawing.
 - SW1 TL3342F160QG: the force variant is an assumption.
 - TVS1, TVS2 (no part chosen), C2 to C6 (tbd), all resistors and capacitors (no manufacturer chosen): left empty.
+
+## Update 2026-11-08 (finding 4, tbd values)
+Values set by owner decision (`proposal-tbd-capacitor-values.md`): no tbd value is left (`open_values` empty). Finding 4 is closed for the values; the capacitors have no MPN yet. C4 and C32 are do-not-populate spares and are out of the BOM (`--exclude-dnp`); `pcb_fabreview.py` now takes the DNP footprints out of the BOM comparison and lists them. Parts without an MPN: **60 references** (61 before; C4 left the BOM). Designators missing on the silkscreen: 27 (C32 added). Also corrected: the sourcing fields from the finding-5 update were not on the board footprints, so the strict DRC of the stored board had 100 `footprint_symbol_field_mismatch` warnings after that change (CI would have failed; my check at the time ran ERC only). Fixed in the same change as the capacitor values.

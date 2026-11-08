@@ -41,6 +41,7 @@ BUSX_FULL = g(gx(L.BUSX))   # x of the ILIM bus (grid-snapped, as the parts are)
 # ------------------------------------------------------------------ part table
 R = ("Device", "R", "Resistor_SMD:R_0603_1608Metric")
 C = ("Device", "C", "Capacitor_SMD:C_0603_1608Metric")
+C0805 = ("Device", "C", "Capacitor_SMD:C_0805_2012Metric")
 C1206 = ("Device", "C", "Capacitor_SMD:C_1206_3216Metric")
 TVS = ("Device", "D_TVS", "Diode_SMD:D_SOD-323")
 G04 = ("74xGxx", "74LVC1G04", "Package_TO_SOT_SMD:SOT-23-5")
@@ -74,15 +75,16 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "C28": (*C1206, "100n C0G 5% 50V"), "C29": (*C1206, "100n C0G 5% 50V"),
     "C30": (*C1206, "100n C0G 5% 50V"), "C31": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
-    "C2": (*C, "1u tbd"), "C3": (*C, "10u tbd"), "R8": (*R, "100k"),
+    "C2": (*C, "4.7u"), "C3": (*C0805, "10u"), "R8": (*R, "100k"),
     "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
-    "C5": (*C, "tbd"), "C6": (*C, "tbd"),
+    "C5": (*C, "2.2u"), "C6": (*C, "10u"),
     "U9": (None, None, "CUSTOM:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),    # no such footprint in the KiCad libraries; pcb_full.derive_u9_footprint writes it
     "R9": (*R, "10k"), "C7": (*C, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
     "U10": (*G08, "74LVC1G08"), "U11": (*AHCT125, "74AHCT1G125"),
-    "R10": (*R, "330"), "R11": (*R, "10k"), "C4": (*C, "bulk tbd"),
+    "R10": (*R, "330"), "R11": (*R, "10k"), "C4": (*C1206, "DNP spare"), "C32": (*C1206, "DNP spare"),   # HW-016: two spare 1206 on +5V
+   
     # supply-pin protection (HW-010 amendment, owner 2026-11-07): series resistor, 100 nF and 5.1 V zener per 6 V pin
     "R_SU1": (*R, "470"), "R_SU14": (*R, "1k"), "R_SU15": (*R, "1k"),
     "C26": (*C, "100n"),
@@ -185,7 +187,7 @@ PLACE = {
     "R13": (148.0, 186.19, 0), "TVS2": (148.0, 193.81, 90), "R12": (158.0, 190.0, 90),
     "SW1": (174.0, 190.0, 0),
     "U10": (158.0, 232.0, 0), "U11": (158.0, 266.0, 0), "R11": (138.0, 269.81, 0),
-    "R10": (203.0, 190.0, 90), "C4": (206.0, 205.0, 0),
+    "R10": (203.0, 190.0, 90), "C4": (206.0, 205.0, 0), "C32": (218.0, 205.0, 0),
     "R_SU1": (290.0, 143.0, 90), "C26": (306.0, 149.0, 0), "DZ1": (316.0, 149.0, 270),
     "R_SU14": (330.0, 143.0, 90), "DZ14": (346.0, 149.0, 270),
     "R_SU15": (356.0, 143.0, 90), "DZ15": (372.0, 149.0, 270),
@@ -202,6 +204,7 @@ TEXT = {
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
     "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
 }
+DNP = {"C4", "C32"}
 HIDE_VALUE = {f"D{i}" for i in range(1, 17)} | {f"C{7 + i}" for i in range(1, 17)}
 for i in range(1, 17):
     TEXT[f"D{i}"] = (2.54, -10.5, "left")
@@ -259,6 +262,8 @@ class Full(L.Sheet):
             for p in self.syms[-1].properties:
                 if p.key in ("Reference", "Value"):
                     p.position.angle = (-rot) % 360
+        if ref in DNP:                  # HW-016: spare footprints, not fitted
+            self.syms[-1].dnp = True
         sym = self.syms[-1]             # hidden BOM fields from the sourcing table (empty when the part has no recorded source)
         sym.properties.extend(w.prop(k, v, sym.position.X, sym.position.Y, 4 + n, True)
                               for n, (k, v) in enumerate(sourcing_fields(PARTS[ref][3]).items()))
@@ -781,6 +786,8 @@ def _build():
     # bulk capacitor on 5 V
     s.pw("+5V", ("C4", "1"))
     s.pw("GND", ("C4", "2"))
+    s.pw("+5V", ("C32", "1"))
+    s.pw("GND", ("C32", "2"))
 
     sch = s.finish()
     sch.titleBlock = TitleBlock(

@@ -156,7 +156,7 @@ class Board(unittest.TestCase):
     def test_substitutions_are_the_documented_ones(self):
         # the remaining substitutions: bulk and input capacitor sizes (values still open); U1, U8, U9 and the LEDs
         # use their own footprints (schematic field, generated library) since 2026-11-07
-        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE), ["C3", "C4", "U1"])
+        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE), ["U1"])
         for ref in pcb_full.FOOTPRINT_OVERRIDE:
             self.assertIn(ref, self.comps)
 

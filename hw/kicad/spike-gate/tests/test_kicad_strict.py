@@ -142,14 +142,13 @@ class RefAllowList(unittest.TestCase):
 
     def test_stitched_limits_are_the_observed_counts(self):
         """Owner decision 2026-11-08: the strict limits of stitched-4l follow ring7 (RV-013 session): no net conflicts,
-        only C3 and C4 as footprint mismatches, at most 14 antenna overlaps on U9."""
+        no footprint mismatches (C3 and C4 now match their symbols, 2026-11-08), at most 14 antenna overlaps on U9."""
         import json
 
         sa = json.loads(K.ALLOW_FILE.read_text())["drc"]["stitched-4l"]["strict_allow"]
         self.assertEqual(sa["net_conflict"]["max"], 0)
         self.assertNotIn("refs", sa["net_conflict"])
-        self.assertEqual(sa["footprint_symbol_mismatch"]["max"], 2)
-        self.assertEqual(sorted(sa["footprint_symbol_mismatch"]["refs"]), ["C3", "C4"])
+        self.assertNotIn("footprint_symbol_mismatch", sa)
         self.assertEqual(sa["courtyards_overlap"]["max"], 14)
         self.assertEqual(sa["courtyards_overlap"]["refs_any"], ["U9"])
         self.assertEqual(sa["items_not_allowed"]["max"], 1)

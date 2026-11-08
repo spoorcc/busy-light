@@ -14,7 +14,7 @@ shopt -s nullglob globstar
 sch=(hw/kicad/**/*.kicad_sch); pcb=(hw/kicad/**/*.kicad_pcb)
 ((${#sch[@]} + ${#pcb[@]})) || { echo "hw: NOT RUN - no .kicad_sch or .kicad_pcb file in hw/kicad"; exit 0; }
 # The generated spike board (hw/kicad/spike-gate/board) has known, waived findings: the antenna keep-out overlaps (DEV-004,
-# ADR-0003) and the C3/C4 footprint mismatch (HW-014 Draft). Its checks go through the strict wrapper, which fails on every
+# ADR-0003). Its checks go through the strict wrapper, which fails on every
 # finding outside the waiver list (hw/kicad/spike-gate/known-open-violations.json). Every other file keeps the raw check.
 STRICT=hw/kicad/spike-gate/src/kicad_strict.py
 is_spike_board() { [[ "$1" == hw/kicad/spike-gate/board/* ]]; }
