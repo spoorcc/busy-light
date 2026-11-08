@@ -674,6 +674,7 @@ def write_project(path, name):
             # checks KiCad ignores by default; the strict gate counts ignored checks, so they are on (2026-11-07)
             "rule_severities": {k: "warning" for k in DRC_ON}}},
         "meta": {"filename": name + ".kicad_pro", "version": 3},
+        "erc": {"rule_severities": {k: "warning" for k in lib_tables.ERC_ON}},
         "net_settings": {"classes": classes, "meta": {"version": 3}, "net_colors": None,
                          "netclass_assignments": None, "netclass_patterns": patterns},
     }

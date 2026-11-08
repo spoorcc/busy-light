@@ -348,6 +348,19 @@ def test_project_switches_on_default_ignored_drc_checks(tmp_path):
     assert set(sev) == set(pcb_full.DRC_ON) and set(sev.values()) == {"warning"}
 
 
+def test_project_switches_on_default_ignored_erc_checks(tmp_path):
+    """The strict ERC counts every ignored check, so the board project of a stored board must switch them on."""
+    import json
+
+    import lib_tables
+    import pcb_full
+
+    pro = tmp_path / "x.kicad_pro"
+    pcb_full.write_project(str(pro), "x")
+    sev = json.loads(pro.read_text())["erc"]["rule_severities"]
+    assert set(sev) == set(lib_tables.ERC_ON) and set(sev.values()) == {"warning"}
+
+
 def test_u9_footprint_is_the_datasheet_land_pattern(tmp_path):
     """ESP32-C3-MINI-1 datasheet v2.2 figure 11-1: 48 pads 0.8 x 0.4, 4 corner pads 0.7, 3 x 3 ground pads 1.45;
     pad rows 11.9 mm apart (x) and 9.9 mm apart (y)."""

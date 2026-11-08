@@ -1,4 +1,4 @@
-"""Tests for bulk_cap_bounds.py (HW-014 draft). The bound arithmetic only; the assumptions are checked on the bench."""
+"""Tests for bulk_cap_bounds.py (HW-014 draft): the bound arithmetic only, not the assumptions."""
 
 import sys
 from pathlib import Path
@@ -7,6 +7,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 import bulk_cap_bounds as b  # noqa: E402
+
+PROPOSED_UPPER_BOUND = 100e-6  # F, the bracket of the analysis
 
 
 def test_ios_min_matches_the_datasheet_table_point():
@@ -28,7 +30,8 @@ def test_time_in_limit_is_the_inverse_of_c_max():
 
 
 def test_more_3v3_capacitance_or_start_load_lowers_the_maximum():
-    assert b.c_max(c_3v3=22e-6) < 100e-6           # RV-013 finding 8: 22 uF on 3V3 breaks the [100] uF bracket
+    # RV-013 finding 8: 22 uF on 3V3 breaks the [100] uF bracket
+    assert b.c_max(c_3v3=22e-6) < PROPOSED_UPPER_BOUND
     assert b.c_max(i_start=0.2) < b.c_max(i_start=0.1)
 
 
@@ -41,7 +44,7 @@ def test_no_budget_raises():
 
 def test_ldo_input_minimum():
     assert b.ldo_input_ok(1e-6, 0.6e-6)
-    assert not b.ldo_input_ok(1e-6, 0.47e-6)        # must be above 0.47 uF
+    assert not b.ldo_input_ok(1e-6, 0.47e-6)  # must be above 0.47 uF
     assert not b.ldo_input_ok(0.47e-6, 0.47e-6)
 
 
