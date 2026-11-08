@@ -22,6 +22,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Risk assessment:** the parts are not the real land patterns; no claim on the parts is made. Foreign refs fail the check, so a real mismatch on another part is not hidden. Evidence: `tests/test_kicad_strict.py` (T14 class), placed DRC run of the spike branch.
 - **Scope & duration:** spike only, until the schematic footprints and the real parts are aligned (HW-012 follow-up)
 - **Update 2026-11-08:** the schematic now names the real footprints for U8 (TLV75733P SOT-23-5), U9 (CUSTOM:ESP32-C3-MINI-1, datasheet figure 11-1), U1 (TI drawing RWB0012A) and the LEDs (2020 package). Left as stand-ins: C3 (0805) and C4 (1206), whose values are open, and the test points and mounting holes. `footprint_symbol_mismatch` fell from 26 to 8 on the best run; the waiver list in `known-open-violations.json` has not been shortened yet. The owner agreed to shrink this deviation (2026-11-08, in the session).
+- **Update 2026-11-08 (evening):** U1 and U9 carry the datasheet pad numbers and the test points are out of the BOM in the schematic too; `net_conflict` fell to 0 and `footprint_symbol_mismatch` to 2 (C3, C4) on the best ring7 run. Owner decision of the same day: profile `stitched-4l` now allows `net_conflict` 0 and `footprint_symbol_mismatch` 2 (refs C3 and C4 only). The older profiles `placed-4l` and `routed-4l` are not changed.
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
 ### DEV-003 No project library table and unexplained ignored checks (lib_footprint_issues, ignored_checks)
@@ -37,7 +38,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 ### DEV-004 Antenna keep-out overlap of the module courtyard (courtyards_overlap, items_not_allowed on U9)
 
 - **Rule / requirement deviated from:** HW-005 (antenna keep-out, Draft); Espressif antenna placement guidance; plan 06 amendment A-1
-- **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow`, classes `courtyards_overlap` (max 16) and `items_not_allowed` (max 1), only findings that include U9
+- **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow`, classes `courtyards_overlap` (max 14 since the owner decision of 2026-11-08; was 16) and `items_not_allowed` (max 1), only findings that include U9
 - **Justification:** the library courtyard of ESP32-C6-MINI-1 is the antenna keep-out; the mech design puts ring LEDs and other parts inside it. The courtyard is not shrunk.
 - **Risk assessment:** the antenna environment is not acceptable as it stands; no statement on antenna performance is made. Open items for the owner: board cutout, separate antenna board, U.FL variant or module at the edge (mech or HW-005 decision).
 - **Scope & duration:** spike only, until the owner decides the antenna arrangement.
