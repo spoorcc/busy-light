@@ -125,3 +125,57 @@ class RouteOneConnection(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class SnapToVias(unittest.TestCase):
+    """Regression (ring12 run 8): two +5V track ends 0.009 and 0.05 mm beside a via made the gate fail with
+    track_not_centered_on_via; snap_to_vias existed but nothing called it."""
+
+    def board(self):
+        b = pcbnew.BOARD()
+        net = pcbnew.NETINFO_ITEM(b, "N")
+        b.Add(net)
+        via = pcbnew.PCB_VIA(b)
+        via.SetPosition(pcb_full.vec(59.25, 34.148913))
+        via.SetNet(net)
+        b.Add(via)
+        for (x0, y0, x1, y1) in ((59.2431, 34.1547, 59.2, 34.148913), (59.2, 34.148913, 58.7, 34.148913)):
+            t = pcbnew.PCB_TRACK(b)
+            t.SetStart(pcb_full.vec(x0, y0))
+            t.SetEnd(pcb_full.vec(x1, y1))
+            t.SetLayer(pcbnew.B_Cu)
+            t.SetWidth(pcb_full.mm(0.1))
+            t.SetNet(net)
+            b.Add(t)
+        return b
+
+    def tracks(self, b):
+        tr = b.Tracks()
+        return [tr[i] for i in range(tr.size()) if tr[i].GetClass() == "PCB_TRACK"]
+
+    def test_ends_next_to_a_via_move_onto_its_centre_and_a_zero_length_stub_goes(self):
+        b = self.board()
+        pcb_fix.snap_to_vias(b)
+        left = self.tracks(b)
+        self.assertEqual(len(left), 1)                            # the 0.04 mm stub became zero length and was removed
+        t = left[0]
+        self.assertAlmostEqual(pcbnew.ToMM(t.GetStart().x), 59.25, places=3)
+        self.assertAlmostEqual(pcbnew.ToMM(t.GetStart().y), 34.148913, places=3)
+        self.assertAlmostEqual(pcbnew.ToMM(t.GetEnd().x), 58.7, places=3)
+
+    def test_a_track_end_of_another_net_is_left_alone(self):
+        b = self.board()
+        other = pcbnew.NETINFO_ITEM(b, "M")
+        b.Add(other)
+        for t in self.tracks(b):
+            t.SetNet(other)
+        pcb_fix.snap_to_vias(b)
+        self.assertEqual(len(self.tracks(b)), 2)
+
+    def test_only_ends_near_the_given_points_move(self):
+        b = self.board()
+        pcb_fix.snap_to_vias(b, near=[(10.0, 10.0)])                  # a finding elsewhere: nothing here may move
+        self.assertEqual(len(self.tracks(b)), 2)
+        pcb_fix.snap_to_vias(b, near=[(59.22, 34.15)])
+        self.assertEqual(len(self.tracks(b)), 1)

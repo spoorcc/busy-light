@@ -550,9 +550,10 @@ def count(drc_path, kinds):
     return sum(1 for v in d.get("violations", []) if v["type"] in kinds) + (len(d["unconnected_items"]) if "unconnected_items" in kinds else 0)
 
 
-def snap_to_vias(board, tol=0.06):
+def snap_to_vias(board, tol=0.06, near=None):
     """Move a track end that lies within `tol` of a via of the same net onto the via centre (grid rounding of the router).
-    Returns the count of moved ends."""
+    With `near` (points in mm) only ends within 0.2 mm of a point move: the DRC finding sites, because a snap elsewhere can
+    break a clearance (ring12 run 8: 0.093 against 0.100 mm). A track that has no length after the move is removed. Returns the count of moved ends and removed tracks."""
     tr = board.Tracks()
     items = [tr[i] for i in range(tr.size())]
     vias = [(it.GetNetname(), it.GetPosition()) for it in items if it.GetClass() == "PCB_VIA"]
@@ -564,10 +565,17 @@ def snap_to_vias(board, tol=0.06):
             e = get()
             for net, pos in vias:
                 d = math.hypot(mmf(e.x - pos.x), mmf(e.y - pos.y))
-                if net == t.GetNetname() and 1e-4 < d <= tol:
+                if net == t.GetNetname() and 1e-4 < d <= tol and (
+                        near is None or any(math.hypot(mmf(e.x) - q[0], mmf(e.y) - q[1]) <= 0.2 for q in near)):
                     put(pos)
                     moved += 1
                     break
+    for t in items:
+        if t.GetClass() == "PCB_TRACK" and t.GetStart() == t.GetEnd() and (
+                near is None or any(math.hypot(mmf(t.GetStart().x) - q[0], mmf(t.GetStart().y) - q[1]) <= 0.2 for q in near)):
+            _KEEP.append(t)
+            board.Remove(t)
+            moved += 1
     return moved
 
 
@@ -581,7 +589,10 @@ def last_pass(folder, cur, aux, drc):
         return cur
     board = pcbnew.LoadBoard("%s/%s.kicad_pcb" % (folder, cur))
     rep = json.load(open(js, encoding="utf-8"))
-    n = prune_stubs(board)
+    sites = [(i["pos"]["x"], i["pos"]["y"]) for v in rep["violations"] if v["type"] == "track_not_centered_on_via"
+             for i in v["items"]]
+    n = snap_to_vias(board, near=sites)            # ring12 run 8: ends 0.01 to 0.05 mm beside a via made track_not_centered_on_via
+    n += prune_stubs(board)
     import pcb_stitch
     n += pcb_stitch.remove_dangling_vias(board, rep)
     for v in rep["violations"]:
