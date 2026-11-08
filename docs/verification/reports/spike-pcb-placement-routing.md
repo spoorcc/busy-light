@@ -381,3 +381,34 @@ What it is: a read-only script that compares the board with the JLCPCB multilaye
 Notes: (1) All 131 vias are below the recommended ring of 0.20 mm; they sit exactly at the absolute minimum, with no margin. (2) The track minimum has 11 % margin (0.10 against 0.09 mm). (3) Track and space and the copper to edge distance are not recomputed: the strict gate holds 0.1 mm clearance and 0.3 mm edge, both above the fabricator minimums. (4) The first version of the hole check treated the 2.1 mm slots of the USB-C shell as circles and reported four false failures; slots are now modelled as capsules (test first). (5) The pad-to-pad rule was shown to detect: at a limit of 0.5 mm it reports 155 pairs.
 
 Not checked: Gerber and drill export and a viewer check, silkscreen against pads on the fabricator side, solder-mask bridges and slivers, paste, panelisation, assembly (DFA: courtyards, orientation, polarity, fiducials), impedance, stack-up. The fine profile that every gate-clean board used is an experiment: ADR-0020 is **Proposed**, the owner has not decided, and the risk register entry for yield at 0.1 mm lines is not written. This check therefore does not support the statement "DFx approved" or "fabrication ready".
+
+## Update 2026-11-08 (ring15): test points pulled softly into a row (HW-010)
+
+Basis as in ring14: 12 runs, `SPIKE_PROFILE=fine`, `SPIKE_ALLOW_KNOWN_OPEN=0`, `full8` netlist, Freerouting 2.5.0, `PLACE_GRID=1.0`, `PLACE_ANT_KEEPOUT=1`, `PLACE_BLOCKS=3`, `PLACE_ORIENT=1.5`, `SEED_OFFSET=300`. One change against ring14: `PLACE_ROWS=0.5` (ring13 used 3 together with strict ICs and gave no fully routed run). Strict ICs stay off.
+
+| Batch | Change | Runs with 0 open and 0 strict FAIL | Best run |
+|---|---|---|---|
+| ring15 | `PLACE_ROWS=0.5`, new seeds | **3 (runs 1, 2, 5)** | run 1 |
+
+Picker table (unconnected / strict FAIL; tidy = sharp corners, off-45 mm, vias, track mm): run 1: 0 / 0, (12, 18.5, 133, 1330.1); run 2: 0 / 0, (19, 11.0, 126, 1364.5); run 5: 0 / 0, (16, 11.3, 135, 1411.2). The other nine runs have 1 to 8 unconnected nets or 1 to 3 strict FAIL.
+
+Power check of the three gate-clean boards (`pcb_power_check.py`; drops at 1.5 A VBUS_IC, 1.0 A +5V, 0.5 A +3V3; target 50 mV is an analyst assumption):
+
+| Board | VBUS_IC | +5V | +3V3 |
+|---|---|---|---|
+| ring15 run 1 (picker's best) | 50.4 mV, over target | **no path found (infinite)**; the +5V plane is in 2 pieces | 34.3 mV |
+| ring15 run 2 | 42.5 mV | 19.0 mV | 6.3 mV |
+| ring15 run 5 | 41.9 mV | 17.2 mV | 24.2 mV |
+| ring14 run 9 | 13.5 mV | 18.0 mV | 22.7 mV |
+
+The picker ranks by gate and tidiness only, so it chose run 1. The power check shows run 1 is not usable as the best board (the checker finds no copper path on +5V although the DRC reports 0 unconnected; the cause was not investigated). Run 5 (next candidate) was checked in full: strict gate pass (courtyards_overlap 10), fab-minimum check PASS, power check pass; sharp corners 16, vias 135, track 1411 mm, passives in rows 0.951, like parts on one axis 0.929, block member 8.18 mm. In its bottom render the six test points are not in a row, so `PLACE_ROWS=0.5` did not do its job.
+
+Against ring14 run 9 (13.5 mV on VBUS_IC, 14 sharp corners, 131 vias, 1370 mm, rows 0.951, like parts 0.875, block member 7.47 mm), run 5 is better only on like parts on one axis. **Ring15 produced no better board; ring14 run 9 stays the stored result.** Tooling change made afterwards: `pcb_pick.py` now ranks power-check failures (`power_fails_from`, 2 tests) after the gate and before tidiness. Re-picking the 12 ring15 runs gives run 5 (run 1 has 2 power FAIL); the pick is still below ring14 run 9 on the numbers above.
+
+Limits: one batch, so three of 12 is a rough number, not a rate. The effect of `PLACE_ROWS=0.5` cannot be separated from seed luck. ADR-0020 is Proposed and the fab numbers are JLCPCB only. Not run: full fab review (Gerber, silkscreen, solder mask, assembly), RF, thermal, bench; no statement "DFx approved" or "fully functional" is made.
+
+The 15 errors of `tests/test_gate_logic.py` are by design: the tests read a netlist named by the environment variable `GATE_NET` (see its docstring) and are not run without it. They are not a defect of the placer or router.
+
+
+## Stored result (2026-11-08)
+The board is stored in `hw/kicad/spike-gate/board/` (ring14 run 9; provenance and checks in its README). The README images (`docs/verification/reports/images/spike-*.png`) are re-rendered from it with `render_readme_images.sh`. The strict gate was re-run on the stored copy: 11 tolerated findings, none else.

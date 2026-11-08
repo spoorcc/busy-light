@@ -19,3 +19,6 @@ Open: fab DFM check on ring14 run 9; second ring14 batch for a pass rate; test p
 
 Fab check (owner choice "A then c"): `src/pcb_fabcheck.py` compares ring14 run 9 with the JLCPCB minimums of ADR-0020: all seven checks pass, the via ring is exactly at the absolute minimum (131 vias below the recommended 0.20 mm). Partial and single-fabricator: ADR-0020 stays Proposed, so the fine profile of every gate-clean board is not a decided rule.
 
+## Ring15
+
+Owner choice: soft placement rules for the test points and IC rotations, then one more batch (answer "Yes"). Batch ring15 (ring12 settings, `PLACE_ROWS=0.5`, `SEED_OFFSET=300`): 3 of 12 runs pass the strict gate (1, 2, 5). The picker chose run 1, but the power check found no +5V path on it and 50.4 mV on VBUS_IC. Run 5 passes all checks but is not better than ring14 run 9 (its test points are not in a row; VBUS_IC 41.9 mV against 13.5 mV). Decision (assistant, from the numbers): keep ring14 run 9 as the stored result. Follow-up: put the power check into the picker. The `test_gate_logic.py` errors need `GATE_NET` (by design). Owner request "store the board, update the README images": board stored in `hw/kicad/spike-gate/board/`, images re-rendered, README caption and status updated. Not done: push, PR.

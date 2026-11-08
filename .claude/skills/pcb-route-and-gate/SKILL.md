@@ -73,6 +73,15 @@ weights cut them more but no run passed the gate. Values and results: report sec
 fab rules and the rule "signals stay off the ground plane" are ADR-0020 (Proposed); the report has the experiment and
 its limits. Treat these as starting points. Tie keys: `PIN_TIES` (`tie:J1A4-U7` and the others), not `NET_WEIGHT`.
 
+## Placer options and checks (all off by default; one change per batch)
+Env knobs of `run_best.sh`: `PLACE_GRID` (mm grid), `PLACE_ANT_KEEPOUT=1`, `PLACE_BLOCKS` (pull of the 7 functional blocks in
+`pcb_rules.BLOCKS`), `PLACE_ORIENT` (like parts on one axis; twins in `pcb_rules.TWINS`), `PLACE_ROWS` (test-point row),
+`PLACE_STRICT=1` (ICs match rotation and side), `SEED_OFFSET`. Used so far: grid 1.0, keep-out 1, blocks 3, orient 1.5,
+rows 0.5 (ring15: 3 of 12 gate-clean, no better board)
+The picker ranks: unconnected, strict FAIL, hard, power-check FAIL (nets over 50 mV or without a path), then tidiness. `PLACE_STRICT=1` and rows 3 gave no fully routed run (ring13): do not repeat.
+Fab minimum: `python3 src/pcb_fabcheck.py <pcb>` (exit 0 pass, 1 fail, 2 not run; JLCPCB numbers of ADR-0020, which is
+Proposed). Tidiness: `python3 src/pcb_quality.py <pcb>`. Tests: `GATE_NET` is needed for `tests/test_gate_logic.py` only.
+
 ## Reporting and approvals
 - Report counts exactly as the logs show them. List what was not run (antenna/RF, thermal, fab DFM check, other fabs).
 - Owner decisions (deviations, ADR acceptance, waivers) are the user's. Never set `Approved` or `Accepted` yourself;
