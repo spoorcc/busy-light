@@ -192,7 +192,8 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 SA_ITERS = 160000
-SA_SEEDS = tuple(range(1, 17))
+_SEED0 = int(os.environ.get("PLACE_SEED_START", "1"))    # run_best.sh gives every run its own placement seeds
+SA_SEEDS = tuple(range(_SEED0, _SEED0 + 16))
 
 
 def K(mx, my):
