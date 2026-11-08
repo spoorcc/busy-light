@@ -49,6 +49,10 @@ def main(argv: list[str]) -> int:
         shutil.copy2(f, dst / f.name)
     for f in (best / "a").glob("drc_final.json"):
         shutil.copy2(f, dst / f.name)
+    for f in (best / "a").glob("*-lib-table"):                      # fp-lib-table, sym-lib-table: the board needs them to find its libraries
+        shutil.copy2(f, dst / f.name)
+    for d in (best / "a").glob("*.pretty"):
+        shutil.copytree(d, dst / d.name)
     (dst / "chosen_run.txt").write_text(best.name + "\n", encoding="utf-8")
     s = dict(rows)[best]
     print("best:", best.name, "->", dst)

@@ -35,6 +35,22 @@ HOLE_TO_HOLE = 0.4
 EDGE_CLEARANCE = 0.3        # copper to board edge
 NET_TRACK = {"/CC1": 0.15, "/CC2": 0.15}   # nets at the 0.4 mm pitch pads of U1 use the minimum width
 
+import os as _os
+# EXPERIMENT (2026-11-08, not a decision; ADR draft pending the owner): SPIKE_PROFILE=fine uses 0.1 mm track and clearance and
+# 0.5/0.2 mm vias. Basis: JLCPCB capability page, multilayer column, read 2026-11-08 (https://jlcpcb.com/capabilities/pcb-capabilities):
+# track and space 0.09 mm (1 oz), via hole 0.15 mm and via diameter 0.25 mm minimum, annular ring recommended 0.20 and
+# absolute minimum 0.15 mm (the ring here is (0.5 - 0.2) / 2 = 0.15, the absolute minimum), via hole to hole 0.2 mm, pad hole to
+# pad hole 0.45 mm, pad to track 0.1 mm, SMD pad to pad 0.15 mm, copper to routed edge 0.2 mm. Hole clearance, hole to hole and
+# edge keep their stricter spike values. 0.1 mm track is 11 % above the fab minimum, a thin margin. No other fabricator was checked.
+# Below the FLOOR values on purpose; test_pcb_rules checks the default profile only.
+FINE = _os.environ.get("SPIKE_PROFILE", "") == "fine"
+if FINE:
+    CLEARANCE = TRACK = MIN_TRACK = 0.1
+    VIA_DIA, VIA_DRILL, MIN_VIA_DIA, MIN_THROUGH_HOLE, ANNULAR = 0.5, 0.2, 0.5, 0.2, 0.15
+    NET_TRACK = {"/CC1": 0.1, "/CC2": 0.1}
+# Signals on In1 (the GND plane): off by default since 2026-11-08; SPIKE_IN1_SIGNALS=1 allows them again (experiment).
+IN1_SIGNALS = _os.environ.get("SPIKE_IN1_SIGNALS", "0") == "1"
+
 # Stitcher (pcb_stitch.py): margin added to the base clearance, margin to the board edge, width of the stitch track.
 STITCH_MARGIN = 0.06
 STITCH_EDGE_MARGIN = 0.6
@@ -212,12 +228,20 @@ def joins_nothing(x, y, track_ends, pad_boxes, tol=0.01):
     return len(layers) <= 1 and not on_pad
 
 
-# Nets kept on the outer layers: their tracks on In1 (GND plane) or In2 (+5V plane) would cut the plane and the return path
-# (2026-11-07). The router gets a `use_layer` rule for them; the clean-up router obeys the same list.
+# Layer use (2026-11-07/08): In1 is the GND plane and In2 the +5V plane. VBUS_IC and +3V3 stay on the outer layers; every
+# other net except GND keeps off In1, so that signal tracks do not cut the ground plane into islands (a ground via on an
+# island is not connected; seen on run 5 of 2026-11-08). The router gets a `use_layer` rule per class; the clean-up router
+# obeys the same function.
 OUTER_ONLY = ("VBUS_IC", "+3V3")
 OUTER_LAYERS = ("F.Cu", "B.Cu")
+NOT_IN1_LAYERS = ("F.Cu", "In2.Cu", "B.Cu")
+GROUND_NET = "GND"
 
 
 def layers_allowed(net: str, layers):
-    """The layers a track of `net` may use: all of them, or the outer ones for the nets of OUTER_ONLY."""
-    return [L for L in layers if L in OUTER_LAYERS] if net in OUTER_ONLY else list(layers)
+    """The layers a track of `net` may use: all for GND, the outer ones for OUTER_ONLY, all but In1 for the rest."""
+    if net in OUTER_ONLY:
+        return [L for L in layers if L in OUTER_LAYERS]
+    if net == GROUND_NET:
+        return list(layers)
+    return list(layers) if IN1_SIGNALS else [L for L in layers if L in NOT_IN1_LAYERS]

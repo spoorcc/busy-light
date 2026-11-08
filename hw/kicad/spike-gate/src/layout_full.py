@@ -54,7 +54,7 @@ LED_DOUT, LED_VSS, LED_DIN, LED_VDD = "1", "2", "3", "4"
 LED = ("LED", "WS2812B-2020", "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")   # 2020 package per ADR-0004; the part number is still open
 
 PARTS = {  # ref: (lib, part, footprint, value)
-    "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "Connector_USB:USB_C_Receptacle_GCT_USB4085", "USB-C receptacle"),
+    "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge", "USB-C receptacle"),
     "TVS1": (*TVS, "TVS"), "U6": ("Power_Protection", "USBLC6-2P6", "Package_TO_SOT_SMD:SOT-666", "USBLC6-2P6"),
     "U1": (None, None, "CUSTOM:X2QFN-12_RWB", "TUSB321"),   # generated footprint, no X2QFN footprint in the KiCad libraries
     "R_VD": (*R, "887k"), "R1": (*R, "100k"),

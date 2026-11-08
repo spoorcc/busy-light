@@ -5,7 +5,7 @@
 Usage: python3 pcb_dsn.py export <in.kicad_pcb> <out.dsn> [planes: B (default) | F | FB | none | inner] [keyonly]
          keyonly: only the nets of pcb_rules.ROUTE_FIRST stay nets in the DSN; the other pads become obstacles (stage 1)
        python3 pcb_dsn.py branchwidth <in.dsn> <out.dsn>   set the track width of the VBUS_IC class to BRANCH_WIDTH (stage 2)
-       python3 pcb_dsn.py outer <in.dsn> <out.dsn>         add (use_layer F.Cu B.Cu) to the classes of pcb_rules.OUTER_ONLY
+       python3 pcb_dsn.py outer <in.dsn> <out.dsn>         add use_layer rules: outer layers for pcb_rules.OUTER_ONLY, no In1 for the other nets except GND
        python3 pcb_dsn.py lock <in.kicad_pcb> <out.kicad_pcb>    lock every track and via (stage 2 keeps them)
        python3 pcb_dsn.py unlock <in.kicad_pcb> <out.kicad_pcb>
        python3 pcb_dsn.py import <in.kicad_pcb> <in.ses> <out.kicad_pcb>
@@ -53,18 +53,22 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "outer":
         txt = open(sys.argv[2], encoding="utf-8").read()
         done = []
-        for net in pcb_rules.OUTER_ONLY:
-            name = pcb_rules.net_class_name(net)
+        # class name -> layers; kicad_default holds GND and the signals (GND tracks on In1 are not needed: the plane is there)
+        rules = {pcb_rules.net_class_name(n): pcb_rules.OUTER_LAYERS for n in pcb_rules.OUTER_ONLY}
+        if not pcb_rules.IN1_SIGNALS:
+            rules[pcb_rules.net_class_name("+5V")] = pcb_rules.NOT_IN1_LAYERS
+            rules["kicad_default"] = pcb_rules.NOT_IN1_LAYERS
+        for name, lay in rules.items():
             key = "(class %s " % name
             if key not in txt:
                 continue
             i = txt.index(key)
             k = txt.index("(circuit", i) + len("(circuit")
-            txt = txt[:k] + "\n        (use_layer %s)" % " ".join(pcb_rules.OUTER_LAYERS) + txt[k:]
+            txt = txt[:k] + "\n        (use_layer %s)" % " ".join(lay) + txt[k:]
             done.append(name)
-        assert done, "no class of an outer-only net in the DSN"
+        assert done, "no class of a restricted net in the DSN"
         open(sys.argv[3], "w", encoding="utf-8").write(txt)
-        print("outer layers only for classes", ",".join(done))
+        print("layer rules for classes", ",".join(done))
         sys.exit(0)
     if len(sys.argv) >= 4 and sys.argv[1] in ("lock", "unlock"):
         b = pcbnew.LoadBoard(sys.argv[2])

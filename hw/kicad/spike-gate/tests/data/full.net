@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/683979ca-d42a-4ed0-84bc-41f5a1683390/scratchpad/full6/full.kicad_sch")
-		(date "2026-11-07T23:42:55")
+		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/683979ca-d42a-4ed0-84bc-41f5a1683390/scratchpad/full7/full.kicad_sch")
+		(date "2026-11-08T08:37:15")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -2862,10 +2862,10 @@
 		(comp
 			(ref "J1")
 			(value "USB-C receptacle")
-			(footprint "Connector_USB:USB_C_Receptacle_GCT_USB4085")
+			(footprint "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge")
 			(fields
 				(field
-					(name "Footprint") "Connector_USB:USB_C_Receptacle_GCT_USB4085")
+					(name "Footprint") "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge")
 				(field
 					(name "Datasheet")
 				)

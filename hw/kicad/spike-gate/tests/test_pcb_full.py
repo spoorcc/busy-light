@@ -321,3 +321,14 @@ def test_u1_footprint_is_the_ti_drawing():
     assert pads["7"][:2] == (0.65, 0.2) and pads["8"][:2] == (0.65, -0.2)
     assert pads["9"][:2] == (0.6, -0.75) and pads["12"][:2] == (-0.6, -0.75)
     assert all((w, h) == (0.2, 0.5) for n, (x, y, w, h) in pads.items() if n in "3456" or n in ("9", "10", "11", "12"))
+
+
+def test_j1_footprint_has_no_silk_at_the_board_edge():
+    """The three silk lines of the connector front are dropped (silk_edge_clearance); the rest of the stock footprint stays."""
+    import custom_fp
+
+    t = Path("/usr/share/kicad/footprints/Connector_USB.pretty/USB_C_Receptacle_GCT_USB4085.kicad_mod").read_text()
+    u = custom_fp.j1_mod(t)
+    assert t.count("(fp_line") - u.count("(fp_line") == 3
+    assert u.count("(pad ") == t.count("(pad ") and u.count("(") == u.count(")")
+    assert '"%s"' % custom_fp.J1_NAME in u and '"%s"' % custom_fp.J1_STOCK not in u

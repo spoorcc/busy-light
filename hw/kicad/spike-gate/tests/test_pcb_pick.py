@@ -42,6 +42,12 @@ class Pick(unittest.TestCase):
             self.assertEqual(K.main(["x", t] + [str(r) for r in runs]), 0)
             self.assertEqual(Path(t, "best", "chosen_run.txt").read_text().strip(), "r2")
             self.assertTrue(Path(t, "best", "final.kicad_pcb").exists())
+            Path(runs[1], "a", "CUSTOM.pretty").mkdir()
+            Path(runs[1], "a", "CUSTOM.pretty", "x.kicad_mod").write_text("x")
+            Path(runs[1], "a", "fp-lib-table").write_text("x")
+            K.main(["x", t] + [str(r) for r in runs])
+            self.assertTrue(Path(t, "best", "CUSTOM.pretty", "x.kicad_mod").exists())
+            self.assertTrue(Path(t, "best", "fp-lib-table").exists())
 
     def test_main_fails_when_every_run_has_open_items(self):
         with tempfile.TemporaryDirectory() as t:

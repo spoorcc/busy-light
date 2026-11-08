@@ -3,7 +3,7 @@
 
 Usage: python3 pcb_power_check.py <board.kicad_pcb> [out.json]
 Method: per net, the copper of the net (tracks, pads, vias, zone fills) is rasterised at 0.1 mm per layer and turned
-into a resistor network (sheet resistance of copper 0.5 mOhm/square at 35 um outer, 1.0 mOhm/square at 17.5 um inner;
+into a resistor network (sheet resistance of copper 0.5 mOhm/square at 35 um outer, 1.13 mOhm/square at 15.2 um inner;
 via barrel 1 mOhm); the effective resistance between the source pads and the load pads follows from one sparse solve.
 The drop is R x the stated current. The currents and the 50 mV target are the analyst's assumptions, not requirements.
 Plane cut: the number of separate pieces and the share of the board area removed from the In1 (GND) and In2 (+5V) fills.
@@ -23,7 +23,7 @@ from scipy.sparse.linalg import spsolve
 
 RES = 0.1
 RS_OUTER = 0.0005        # ohm per square, 35 um copper (rho 1.72e-8 ohm m)
-RS_INNER = 0.001         # 17.5 um (half ounce inner layers assumed; the stack-up is not fixed yet)
+RS_INNER = 0.00113       # 15.2 um inner copper (0.5 oz): JLCPCB stack-ups JLC04161H-7628 and -3313, read 2026-11-08; rho 1.72e-8 ohm m
 R_VIA = 0.001
 TARGET_V = 0.050
 # net: (source (ref, pad or None for all pads of the ref), load (ref, pad), current A, basis)

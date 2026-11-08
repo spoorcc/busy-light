@@ -376,7 +376,9 @@ class OuterOnly(unittest.TestCase):
         L = ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"]
         self.assertEqual(R.layers_allowed("VBUS_IC", L), ["F.Cu", "B.Cu"])
         self.assertEqual(R.layers_allowed("+3V3", L), ["F.Cu", "B.Cu"])
-        self.assertEqual(R.layers_allowed("/ILIM", L), L)
+        self.assertEqual(R.layers_allowed("/ILIM", L), ["F.Cu", "In2.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("+5V", L), ["F.Cu", "In2.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("GND", L), L)
 
     def test_dsn_outer_rule(self):
         import subprocess
@@ -384,7 +386,7 @@ class OuterOnly(unittest.TestCase):
         import tempfile
         from pathlib import Path
 
-        dsn = ("(pcb x (network (class kicad_default /A) (class PWR_VBUS_IC VBUS_IC\\n      (circuit\\n        (use_via V)\\n      )"
+        dsn = ("(pcb x (network (class kicad_default /A (circuit (use_via V))) (class PWR_VBUS_IC VBUS_IC\\n      (circuit\\n        (use_via V)\\n      )"
                "\\n      (rule (width 600))) (class PWR_3V3 +3V3 (circuit (use_via V)) (rule (width 300)))))")
         with tempfile.TemporaryDirectory() as t:
             a, b = Path(t, "a.dsn"), Path(t, "b.dsn")
@@ -393,4 +395,30 @@ class OuterOnly(unittest.TestCase):
                            check=True, capture_output=True)
             out = b.read_text()
         self.assertEqual(out.count("(use_layer F.Cu B.Cu)"), 2)
-        self.assertLess(out.index("PWR_VBUS_IC"), out.index("use_layer"))
+        self.assertEqual(out.count("(use_layer F.Cu In2.Cu B.Cu)"), 1)
+        self.assertLess(out.index("kicad_default"), out.index("use_layer F.Cu In2.Cu B.Cu"))
+        self.assertLess(out.index("use_layer F.Cu In2.Cu B.Cu"), out.index("PWR_VBUS_IC"))   # the default class got the In2 rule
+
+
+class FineProfile(unittest.TestCase):
+    """SPIKE_PROFILE=fine stays inside the JLCPCB multilayer minimums (capability page read 2026-11-08) and is off by default."""
+
+    def values(self, env):
+        import os
+        e = dict(os.environ, **env)
+        e.pop("SPIKE_PROFILE", None) if not env else None
+        out = subprocess.run([sys.executable, "-c", "import json, pcb_rules as R; print(json.dumps([R.CLEARANCE, R.MIN_TRACK, R.VIA_DIA, R.VIA_DRILL, R.ANNULAR]))"],
+                             cwd=str(Path(__file__).resolve().parent.parent / "src"), env=e, capture_output=True, text=True, check=True)
+        return json.loads(out.stdout)
+
+    def test_default_is_the_spike_profile(self):
+        self.assertEqual(self.values({}), [0.15, 0.15, 0.6, 0.3, 0.1])
+
+    def test_fine_is_inside_the_fab_minimums(self):
+        clr, trk, via, drill, ring = self.values({"SPIKE_PROFILE": "fine"})
+        self.assertGreaterEqual(clr, 0.09)                      # track and space 0.09 mm
+        self.assertGreaterEqual(trk, 0.09)
+        self.assertGreaterEqual(drill, 0.15)                    # via hole
+        self.assertGreaterEqual(via, 0.25)                      # via diameter
+        self.assertGreaterEqual((via - drill) / 2 + 1e-9, 0.15)  # annular ring absolute minimum
+        self.assertGreaterEqual(ring, 0.15)
