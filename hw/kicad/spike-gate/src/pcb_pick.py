@@ -3,7 +3,7 @@
 
 Usage: python3 pcb_pick.py <out dir> <run dir> [<run dir> ...]
 Each run dir holds a/final.kicad_pcb and a/drc_final.json (written by run_pcb.sh). The score of a run is
-(unconnected items, FAIL lines of the strict gate, hard findings); the lowest wins, the first listed run on a tie. The files of the
+(unconnected items, FAIL lines of the strict gate, hard findings, then the tidiness key of pcb_quality.py); the lowest wins, the first listed run on a tie. The files of the
 winner are copied to <out dir>/best/ and a table of all runs is printed. Exit 0 when the winner has no unconnected item
 and no hard finding, else 1.
 """
@@ -33,23 +33,35 @@ def strict_fails(board: Path, profile: str = "stitched-4l") -> int:
     return sum(1 for ln in (out.stdout + out.stderr).splitlines() if ln.lstrip().startswith("FAIL"))
 
 
-def pick(runs: list[Path], gate=None) -> tuple[Path | None, list[tuple[Path, tuple[int, int, int] | None]]]:
+def pick(runs: list[Path], gate=None, tidy=None) -> tuple[Path | None, list[tuple[Path, tuple[int, int, int] | None]]]:
     rows = []
     for r in runs:
         f = r / "a" / "drc_final.json"
         sc = score(json.loads(f.read_text(encoding="utf-8"))) if f.exists() and (r / "a" / "final.kicad_pcb").exists() else None
         if sc is not None and gate is not None:                  # the strict gate decides between runs with the same open items
             sc = (sc[0], gate(r / "a" / "final.kicad_pcb"), sc[1])
+        if sc is not None and tidy is not None:                  # tidiness (pcb_quality.rank_key) breaks the remaining ties
+            sc = sc + tuple(tidy(r / "a" / "final.kicad_pcb"))
         rows.append((r, sc))
     ok = [(s, i) for i, (_, s) in enumerate(rows) if s is not None]
     return (rows[min(ok)[1]][0] if ok else None), rows
 
 
+def tidiness(board: Path) -> tuple:
+    """Tie-break key of one board (pcb_quality.rank_key); needs pcbnew, so it is only used from main()."""
+    try:
+        import pcb_quality
+        return pcb_quality.rank_key(pcb_quality.board_metrics(str(board)))
+    except Exception as e:                                       # unreadable board: rank it last among equals, say so
+        print("tidiness not measured for %s: %s" % (board, str(e)[:80]), file=sys.stderr)
+        return (float("inf"),) * 4
+
+
 def main(argv: list[str]) -> int:
     out, runs = Path(argv[1]), [Path(a) for a in argv[2:]]
-    best, rows = pick(runs, gate=strict_fails)
+    best, rows = pick(runs, gate=strict_fails, tidy=tidiness)
     for r, s in rows:
-        print("%-40s %s" % (r.name, "no result" if s is None else "unconnected %d, strict FAIL %d, hard %d" % s))
+        print("%-40s %s" % (r.name, "no result" if s is None else "unconnected %d, strict FAIL %d, hard %d" % s[:3] + (", tidy %s" % (s[3:],) if len(s) > 3 else "")))
     if best is None:
         print("no run finished")
         return 1

@@ -24,6 +24,15 @@ def make(tmp, name, report):
     return a.parent
 
 
+class Tidy(unittest.TestCase):
+    def test_tidiness_breaks_ties_after_the_gate_but_never_overrides_it(self):
+        with tempfile.TemporaryDirectory() as t:
+            runs = [make(t, "r1", drc(0)), make(t, "r2", drc(0)), make(t, "r3", drc(1))]
+            key = {"r1": (5, 0, 90, 900.0), "r2": (1, 0, 99, 950.0), "r3": (0, 0, 1, 1.0)}
+            best, _ = K.pick(runs, gate=lambda b: 0, tidy=lambda b: key[b.parent.parent.name])
+            self.assertEqual(best.name, "r2")               # r3 is tidiest but has an open item
+
+
 class Pick(unittest.TestCase):
     def test_score_counts_kinds(self):
         self.assertEqual(K.score(drc(2, clearance=1, courtyards_overlap=14, track_dangling=3)), (2, 1, 3))
