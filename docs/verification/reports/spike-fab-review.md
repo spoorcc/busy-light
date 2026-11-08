@@ -44,3 +44,14 @@ Name map for the older documents: C1B to C1F = C27 to C31, R_ILIM3B = R20, R_VD 
 
 ## Update 2026-11-08 (finding 5, BOM sourcing fields)
 `src/sourcing.py` maps a part value to `MPN`, `Manufacturer` and `LCSC`; `layout_full.py` writes them as hidden symbol fields, and the stored schematic was regenerated (ERC 0 findings; the only difference to the old file is the added fields). Only TMUX1101DCKR (U14, U15) has a recorded source (owner decision 2026-11-05, datasheet SCDS410D). `pcb_fabreview.py` now reports parts without an MPN: **92 of the BOM references** (BOM exported with `--ref-range-delimiter ""` so that ranges such as C8-C26 are not counted as one). Finding 5 is therefore half closed: the field exists and is checked; the numbers are not filled in. Filling them needs a datasheet or shop check per part (HW-008, spike 7.4) and was not done; no number was taken from memory. Tests: `tests/test_sourcing.py` (5), `tests/test_pcb_fabreview.py` (+1). Existing defect found, not fixed: a second `layout_full.build()` in one process draws extra symbols (253 then 295), so the new test builds in a fresh process.
+
+## Update 2026-11-08 (MPNs from web lookups)
+Owner choice "ICs and specific parts". MPNs and, where seen, LCSC numbers were looked up on the web for 13 more part groups (U1 to U8, U10, U11, U13, D1 to D16, DZ1/DZ14/DZ15, SW1) and stored with their evidence in `src/sourcing.py`. The evidence is mostly distributor listings (DigiKey, LCSC, RS); TI package addenda for TPS3840DL40DBVR and TPS2553DBVR; the ST product page for USBLC6-2P6. No manufacturer ordering table was opened and no datasheet PDF was read for these numbers, so they are lookups, not verified sourcing. Parts without an MPN: **61 references** (92 before).
+
+Points for the owner:
+- U9 ESP32-C3-MINI-1: the flash variant (-N4 or -H4) is not decided anywhere in the repo; left empty.
+- J1: the GCT USB4085-GF-A in the listings is a through-hole right-angle part, while the footprint is `USB4085_edge`; the edge-mount variant is not identified; left empty.
+- U1 TUSB321RWBR: LCSC marks it not recommended for new designs.
+- D1 to D16 WS2812B-2020: LCSC lists 2.2 x 2 mm, the footprint is 2.0 x 2.0 mm; check the manufacturer drawing.
+- SW1 TL3342F160QG: the force variant is an assumption.
+- TVS1, TVS2 (no part chosen), C2 to C6 (tbd), all resistors and capacitors (no manufacturer chosen): left empty.

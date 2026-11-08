@@ -20,6 +20,11 @@ class SourcingTableTest(unittest.TestCase):
             self.assertTrue(e.get("MPN"), value)
             self.assertTrue(e.get("Evidence"), value)
 
+    def test_lcsc_numbers_have_the_shop_format(self):
+        for value, e in sourcing.SOURCING.items():
+            if e.get("LCSC"):
+                self.assertRegex(e["LCSC"], r"^C\d{3,9}$", value)
+
     def test_unknown_part_gets_empty_fields(self):
         empty = {"MPN": "", "Manufacturer": "", "LCSC": ""}
         self.assertEqual(sourcing.sourcing_fields("no such part"), empty)
