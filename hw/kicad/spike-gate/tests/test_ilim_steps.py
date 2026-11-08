@@ -120,10 +120,10 @@ class TmuxCandidate(unittest.TestCase):
 class Generator(unittest.TestCase):
     def test_generator_values_are_the_checked_set(self):
         P = layout_full.PARTS
-        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R_ILIM3B"][-1]),
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R20"][-1]),
                          ("47.0k 0.1%", "56.2k 0.1%", "27.4k 0.1%", "301 0.1%"))
         r1, r2 = ohms(P["R_ILIM1"][-1]) / 1e3, ohms(P["R_ILIM2"][-1]) / 1e3
-        r3 = (ohms(P["R_ILIM3"][-1]) + ohms(P["R_ILIM3B"][-1])) / 1e3
+        r3 = (ohms(P["R_ILIM3"][-1]) + ohms(P["R20"][-1])) / 1e3
         self.assertEqual((r1, r2), il.candidate_c()[:2])
         self.assertAlmostEqual(r3, il.candidate_c()[2], places=6)
         mg = il.margins(r1, r2, r3, il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)

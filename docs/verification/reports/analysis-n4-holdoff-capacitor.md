@@ -108,7 +108,7 @@ Tolerance as given, temperature 30 ppm/degC x 100 K (25 to 125 degC) = 0.30 %; t
 ### 8.3 Recommended set (a proposal; the owner decides)
 
 **C1a = GRM31C5C1E474JE01L (470 nF, 25 V) in parallel with C1b = GRM31C5C1H154JE02L (150 nF, 50 V), both 1206 footprints**, 620 nF, tD 210.0 to 571.6 ms (margin 10.0 ms low, 28.4 ms high). Fewest parts, one family, both on LCSC and JLCPCB (Extended, so an extended-part fee applies). Fallback if one is out of stock: 330 + 150 + 150 nF (needs the 330 nF part on LCSC/JLCPCB, not found) or the 4-part sets.
-Generator instruction (not applied here): replace C1 by two parts in parallel on the CT net, `C1` 470n and `C1B` 150n, `C0G 5% 25V` / `C0G 5% 50V`, footprint 1206 (`C_1206_3216Metric`), LCSC C6049896 and C6261878.
+Generator instruction (not applied here): replace C1 by two parts in parallel on the CT net, `C1` 470n and `C27` 150n, `C0G 5% 25V` / `C0G 5% 50V`, footprint 1206 (`C_1206_3216Metric`), LCSC C6049896 and C6261878.
 
 ### 8.4 Stock and price (search summaries and page reads; volatile)
 

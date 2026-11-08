@@ -110,7 +110,7 @@ claims:
     typ: 887
     max: 920
     unit: kohm
-    notes: The design value R_VD is 887k; the tolerance of the part must keep it inside 855 to 920 kohm.
+    notes: The design value R21 is 887k; the tolerance of the part must keep it inside 855 to 920 kohm.
     source: {page: 6, locator: Section 6.5, quote: "RVBUS External resistor between VBUS and VBUS_DET pin 855 887 920 KΩ"}
   - id: TUSB321.rvbus_pd
     parameter: Internal pulldown resistance for VBUS_DET

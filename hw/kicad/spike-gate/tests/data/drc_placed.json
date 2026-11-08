@@ -50,7 +50,7 @@
             "description": "Capacitor_SMD:C_1206_3216Metric doesn't match footprint given by symbol (Capacitor_SMD:C_0603_1608Metric)",
             "items": [
                 {
-                    "description": "Footprint C1B",
+                    "description": "Footprint C27",
                     "pos": {
                         "x": 42.721519,
                         "y": 52.030298
@@ -245,7 +245,7 @@
             "description": "No corresponding pin found in schematic",
             "items": [
                 {
-                    "description": "Pad 5 [Net-(R_VD-Pad2)] of U1 on F.Cu",
+                    "description": "Pad 5 [Net-(R21-Pad2)] of U1 on F.Cu",
                     "pos": {
                         "x": 54.902599,
                         "y": 38.396173
@@ -347,7 +347,7 @@
             "type": "net_conflict"
         },
         {
-            "description": "No pad found for pin VBUS_DET (Net-(R_VD-Pad2)) in schematic",
+            "description": "No pad found for pin VBUS_DET (Net-(R21-Pad2)) in schematic",
             "items": [
                 {
                     "description": "Footprint U1",
@@ -2513,7 +2513,7 @@
                     "uuid": "9c168009-3909-55b3-8926-eafd9e12e611"
                 },
                 {
-                    "description": "Pad 2 [GND] of C1B on B.Cu",
+                    "description": "Pad 2 [GND] of C27 on B.Cu",
                     "pos": {
                         "x": 44.196519,
                         "y": 52.030298
@@ -2988,7 +2988,7 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 2 [GND] of C1B on B.Cu",
+                    "description": "Pad 2 [GND] of C27 on B.Cu",
                     "pos": {
                         "x": 44.196519,
                         "y": 52.030298
@@ -3793,7 +3793,7 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 5 [Net-(R_VD-Pad2)] of U1 on F.Cu",
+                    "description": "Pad 5 [Net-(R21-Pad2)] of U1 on F.Cu",
                     "pos": {
                         "x": 54.902599,
                         "y": 38.396173
@@ -3801,7 +3801,7 @@
                     "uuid": "83d2bc48-24b7-5129-bf5b-a757011308cf"
                 },
                 {
-                    "description": "Pad 2 [Net-(R_VD-Pad2)] of R_VD on B.Cu",
+                    "description": "Pad 2 [Net-(R21-Pad2)] of R21 on B.Cu",
                     "pos": {
                         "x": 54.908413,
                         "y": 40.02242
@@ -4115,7 +4115,7 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 1 [VBUS_IC] of R_VD on B.Cu",
+                    "description": "Pad 1 [VBUS_IC] of R21 on B.Cu",
                     "pos": {
                         "x": 54.908413,
                         "y": 38.37242
@@ -4146,7 +4146,7 @@
                     "uuid": "b8bfaec7-e178-57d5-a703-f30c8ba17cad"
                 },
                 {
-                    "description": "Pad 1 [VBUS_IC] of R_VD on B.Cu",
+                    "description": "Pad 1 [VBUS_IC] of R21 on B.Cu",
                     "pos": {
                         "x": 54.908413,
                         "y": 38.37242
@@ -5311,7 +5311,7 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 1 [/SUP_CT] of C1B on B.Cu",
+                    "description": "Pad 1 [/SUP_CT] of C27 on B.Cu",
                     "pos": {
                         "x": 41.246519,
                         "y": 52.030298
@@ -10339,7 +10339,7 @@
             "description": "The current configuration does not include the footprint library 'Resistor_SMD'",
             "items": [
                 {
-                    "description": "Footprint R_VD",
+                    "description": "Footprint R21",
                     "pos": {
                         "x": 54.908413,
                         "y": 39.19742
@@ -10759,7 +10759,7 @@
             "description": "The current configuration does not include the footprint library 'Capacitor_SMD'",
             "items": [
                 {
-                    "description": "Footprint C1B",
+                    "description": "Footprint C27",
                     "pos": {
                         "x": 42.721519,
                         "y": 52.030298

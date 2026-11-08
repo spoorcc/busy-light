@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/b69520cb-3f58-4588-89c0-3c47f4c9a35d/scratchpad/f/full.kicad_sch")
-		(date "2026-11-07T11:07:31")
+		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/683979ca-d42a-4ed0-84bc-41f5a1683390/scratchpad/full8/full.kicad_sch")
+		(date "2026-11-08T13:38:46")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -109,7 +109,7 @@
 			)
 		)
 		(comp
-			(ref "C1B")
+			(ref "C27")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -163,7 +163,7 @@
 			)
 		)
 		(comp
-			(ref "C1C")
+			(ref "C28")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -217,7 +217,7 @@
 			)
 		)
 		(comp
-			(ref "C1D")
+			(ref "C29")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -271,7 +271,7 @@
 			)
 		)
 		(comp
-			(ref "C1E")
+			(ref "C30")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -325,7 +325,7 @@
 			)
 		)
 		(comp
-			(ref "C1F")
+			(ref "C31")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -1675,12 +1675,12 @@
 			)
 		)
 		(comp
-			(ref "D1")
-			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(ref "C26")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1689,9 +1689,9 @@
 				)
 			)
 			(libsource
-				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
 			)
 			(property
 				(name "Sheetname")
@@ -1703,11 +1703,65 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "cap capacitor")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "424b6e67-24a9-5d8f-99bf-940f409f7519")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D1")
+			(value "WS2812B")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+			(fields
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "LED")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RGB LED NeoPixel Nano addressable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -1719,16 +1773,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -1737,10 +1791,10 @@
 		(comp
 			(ref "D2")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -1750,8 +1804,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -1763,11 +1817,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -1779,16 +1833,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -1797,10 +1851,10 @@
 		(comp
 			(ref "D3")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -1810,8 +1864,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -1823,11 +1877,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -1839,16 +1893,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -1857,10 +1911,10 @@
 		(comp
 			(ref "D4")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -1870,8 +1924,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -1883,11 +1937,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -1899,16 +1953,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -1917,10 +1971,10 @@
 		(comp
 			(ref "D5")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -1930,8 +1984,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -1943,11 +1997,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -1959,16 +2013,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -1977,10 +2031,10 @@
 		(comp
 			(ref "D6")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -1990,8 +2044,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2003,11 +2057,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2019,16 +2073,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2037,10 +2091,10 @@
 		(comp
 			(ref "D7")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2050,8 +2104,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2063,11 +2117,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2079,16 +2133,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2097,10 +2151,10 @@
 		(comp
 			(ref "D8")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2110,8 +2164,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2123,11 +2177,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2139,16 +2193,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2157,10 +2211,10 @@
 		(comp
 			(ref "D9")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2170,8 +2224,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2183,11 +2237,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2199,16 +2253,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2217,10 +2271,10 @@
 		(comp
 			(ref "D10")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2230,8 +2284,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2243,11 +2297,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2259,16 +2313,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2277,10 +2331,10 @@
 		(comp
 			(ref "D11")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2290,8 +2344,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2303,11 +2357,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2319,16 +2373,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2337,10 +2391,10 @@
 		(comp
 			(ref "D12")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2350,8 +2404,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2363,11 +2417,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2379,16 +2433,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2397,10 +2451,10 @@
 		(comp
 			(ref "D13")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2410,8 +2464,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2423,11 +2477,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2439,16 +2493,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2457,10 +2511,10 @@
 		(comp
 			(ref "D14")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2470,8 +2524,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2483,11 +2537,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2499,16 +2553,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2517,10 +2571,10 @@
 		(comp
 			(ref "D15")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2530,8 +2584,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2543,11 +2597,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2559,16 +2613,16 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
+							(num "4")
+						)
+						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2577,10 +2631,10 @@
 		(comp
 			(ref "D16")
 			(value "WS2812B")
-			(footprint "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 			(fields
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -2590,8 +2644,8 @@
 			)
 			(libsource
 				(lib "LED")
-				(part "WS2812B")
-				(description "RGB LED with integrated controller")
+				(part "WS2812B-2020")
+				(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
 			)
 			(property
 				(name "Sheetname")
@@ -2603,11 +2657,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RGB LED NeoPixel addressable")
+				(value "RGB LED NeoPixel Nano addressable")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(value "LED*WS2812*-2020_PLCC4*")
 			)
 			(sheetpath
 				(names "/")
@@ -2619,16 +2673,187 @@
 					(name "A")
 					(pins
 						(pin
+							(num "3")
+						)
+						(pin
 							(num "4")
+						)
+						(pin
+							(num "2")
 						)
 						(pin
 							(num "1")
 						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "DZ1")
+			(value "BZX84C5V1")
+			(footprint "Package_TO_SOT_SMD:SOT-23")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Diode")
+				(part "BZX84Cxx")
+				(description "300mW Zener Diode, SOT-23")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "zener diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "cd5e871f-0b97-5d2b-a205-83bfc068e676")
+			(units
+				(unit
+					(name "A")
+					(pins
 						(pin
 							(num "3")
 						)
 						(pin
 							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "DZ14")
+			(value "BZX84C5V1")
+			(footprint "Package_TO_SOT_SMD:SOT-23")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Diode")
+				(part "BZX84Cxx")
+				(description "300mW Zener Diode, SOT-23")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "zener diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b002aa6a-1164-5732-bf6e-3fdf246587dd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "DZ15")
+			(value "BZX84C5V1")
+			(footprint "Package_TO_SOT_SMD:SOT-23")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Diode")
+				(part "BZX84Cxx")
+				(description "300mW Zener Diode, SOT-23")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "zener diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "825ac55e-68a0-5a60-aa5f-bc02489158bc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -2637,10 +2862,10 @@
 		(comp
 			(ref "J1")
 			(value "USB-C receptacle")
-			(footprint "Connector_USB:USB_C_Receptacle_GCT_USB4085")
+			(footprint "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge")
 			(fields
 				(field
-					(name "Footprint") "Connector_USB:USB_C_Receptacle_GCT_USB4085")
+					(name "Footprint") "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge")
 				(field
 					(name "Datasheet")
 				)
@@ -3868,7 +4093,7 @@
 			)
 		)
 		(comp
-			(ref "R_ILIM3B")
+			(ref "R20")
 			(value "301 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
@@ -3922,7 +4147,169 @@
 			)
 		)
 		(comp
-			(ref "R_VD")
+			(ref "R_SU1")
+			(value "470")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "86ea975e-960f-5ab0-a1d9-aa2a0bedd6b4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R_SU14")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2552bb8d-fd0d-5d1c-918f-b722fcaa66c2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R_SU15")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f7ce2727-6e2f-5de4-9ba4-a25bf3c12383")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R21")
 			(value "887k")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
@@ -4053,6 +4440,9 @@
 				(value "full.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -4102,6 +4492,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -4155,6 +4548,9 @@
 				(value "full.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -4204,6 +4600,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -4257,6 +4656,9 @@
 				(value "full.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -4306,6 +4708,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -4476,22 +4881,22 @@
 					(name "A")
 					(pins
 						(pin
-							(num "CC1")
+							(num "1")
 						)
 						(pin
-							(num "CC2")
+							(num "2")
 						)
 						(pin
-							(num "VDD")
+							(num "12")
 						)
 						(pin
-							(num "GND")
+							(num "10")
 						)
 						(pin
-							(num "VBUS_DET")
+							(num "5")
 						)
 						(pin
-							(num "PORT")
+							(num "4")
 						)
 						(pin
 							(num "7")
@@ -4891,11 +5296,11 @@
 		)
 		(comp
 			(ref "U8")
-			(value "REG_3V3")
+			(value "TLV75733PDBV")
+			(footprint "Package_TO_SOT_SMD:SOT-23-5")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
 				(field
 					(name "Datasheet")
 				)
@@ -4905,7 +5310,7 @@
 			)
 			(libsource
 				(lib "busylight_gate")
-				(part "REG_3V3_PLACEHOLDER")
+				(part "TLV75733P_DBV")
 				(description "")
 			)
 			(property
@@ -4926,13 +5331,19 @@
 					(name "A")
 					(pins
 						(pin
-							(num "IN")
+							(num "1")
 						)
 						(pin
-							(num "GND")
+							(num "3")
 						)
 						(pin
-							(num "OUT")
+							(num "2")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
 						)
 					)
 				)
@@ -4941,10 +5352,10 @@
 		(comp
 			(ref "U9")
 			(value "ESP32-C3-MINI-1")
+			(footprint "CUSTOM:ESP32-C3-MINI-1")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "CUSTOM:ESP32-C3-MINI-1")
 				(field
 					(name "Datasheet")
 				)
@@ -4975,58 +5386,121 @@
 					(name "A")
 					(pins
 						(pin
-							(num "GPIO18")
+							(num "26")
 						)
 						(pin
-							(num "GPIO19")
+							(num "27")
 						)
 						(pin
-							(num "GPIO21")
+							(num "31")
 						)
 						(pin
-							(num "GPIO20")
+							(num "30")
 						)
 						(pin
-							(num "EN")
+							(num "8")
 						)
 						(pin
-							(num "GPIO9")
+							(num "23")
 						)
 						(pin
-							(num "GPIO2")
+							(num "5")
 						)
 						(pin
-							(num "GPIO8")
+							(num "22")
 						)
 						(pin
-							(num "3V3")
+							(num "3")
 						)
 						(pin
-							(num "GND")
+							(num "45")
 						)
 						(pin
-							(num "GPIO0")
+							(num "40")
 						)
 						(pin
-							(num "GPIO1")
+							(num "41")
 						)
 						(pin
-							(num "GPIO3")
+							(num "42")
 						)
 						(pin
-							(num "GPIO10")
+							(num "43")
 						)
 						(pin
-							(num "GPIO4")
+							(num "44")
 						)
 						(pin
-							(num "GPIO5")
+							(num "53")
 						)
 						(pin
-							(num "GPIO6")
+							(num "46")
 						)
 						(pin
-							(num "GPIO7")
+							(num "47")
+						)
+						(pin
+							(num "48")
+						)
+						(pin
+							(num "49")
+						)
+						(pin
+							(num "50")
+						)
+						(pin
+							(num "51")
+						)
+						(pin
+							(num "52")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "39")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "21")
 						)
 					)
 				)
@@ -5034,7 +5508,7 @@
 		)
 		(comp
 			(ref "U10")
-			(value "74LVC1G125")
+			(value "74LVC1G08")
 			(footprint "Package_TO_SOT_SMD:SOT-23-5")
 			(fields
 				(field
@@ -5048,8 +5522,8 @@
 			)
 			(libsource
 				(lib "74xGxx")
-				(part "74LVC1G125")
-				(description "Single Buffer Gate Tri-State, Low-Voltage CMOS")
+				(part "74LVC1G08")
+				(description "Single AND Gate, Low-Voltage CMOS")
 			)
 			(property
 				(name "Sheetname")
@@ -5061,7 +5535,7 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "Single Gate Buff Tri-State LVC CMOS")
+				(value "Single Gate AND LVC CMOS")
 			)
 			(property
 				(name "ki_fp_filters")
@@ -5077,6 +5551,9 @@
 					(name "A")
 					(pins
 						(pin
+							(num "1")
+						)
+						(pin
 							(num "2")
 						)
 						(pin
@@ -5084,9 +5561,6 @@
 						)
 						(pin
 							(num "3")
-						)
-						(pin
-							(num "1")
 						)
 						(pin
 							(num "4")
@@ -5491,6 +5965,58 @@
 		)
 		(libpart
 			(lib "74xGxx")
+			(part "74LVC1G08")
+			(description "Single AND Gate, Low-Voltage CMOS")
+			(docs "https://www.ti.com/lit/ds/symlink/sn74lvc1g08.pdf")
+			(footprints
+				(fp "SOT?23*")
+				(fp "Texas?R-PDSO-G5?DCK*")
+				(fp "Texas?R-PDSO-N5?DRL*")
+				(fp "Texas?X2SON*0.8x0.8mm*P0.48mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "74LVC1G08")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74lvc1g08.pdf")
+				(field
+					(name "Description") "Single AND Gate, Low-Voltage CMOS")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "")
+					(type "output")
+				)
+				(pin
+					(num "5")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "74xGxx")
 			(part "74LVC1G11")
 			(description "Single AND 3-Input Gate, Low-Voltage CMOS")
 			(docs "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf")
@@ -5541,58 +6067,6 @@
 					(num "6")
 					(name "")
 					(type "input")
-				)
-			)
-		)
-		(libpart
-			(lib "74xGxx")
-			(part "74LVC1G125")
-			(description "Single Buffer Gate Tri-State, Low-Voltage CMOS")
-			(docs "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf")
-			(footprints
-				(fp "SOT?23*")
-				(fp "Texas?R-PDSO-G5?DCK*")
-				(fp "Texas?R-PDSO-N5?DRL*")
-				(fp "Texas?X2SON*0.8x0.8mm*P0.48mm*")
-			)
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "74LVC1G125")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf")
-				(field
-					(name "Description") "Single Buffer Gate Tri-State, Low-Voltage CMOS")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "")
-					(type "input")
-				)
-				(pin
-					(num "2")
-					(name "")
-					(type "input")
-				)
-				(pin
-					(num "3")
-					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "4")
-					(name "")
-					(type "tri_state")
-				)
-				(pin
-					(num "5")
-					(name "VCC")
-					(type "power_in")
 				)
 			)
 		)
@@ -5841,45 +6315,83 @@
 			)
 		)
 		(libpart
-			(lib "LED")
-			(part "WS2812B")
-			(description "RGB LED with integrated controller")
-			(docs "https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf")
+			(lib "Diode")
+			(part "BZX84Cxx")
+			(description "300mW Zener Diode, SOT-23")
+			(docs "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bzx84c2v4.pdf")
 			(footprints
-				(fp "LED*WS2812*PLCC*5.0x5.0mm*P3.2mm*")
+				(fp "SOT?23*")
 			)
 			(fields
 				(field
 					(name "Reference") "D")
 				(field
-					(name "Value") "WS2812B")
+					(name "Value") "BZX84Cxx")
 				(field
-					(name "Footprint") "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
 				(field
-					(name "Datasheet") "https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf")
+					(name "Datasheet") "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bzx84c2v4.pdf")
 				(field
-					(name "Description") "RGB LED with integrated controller")
+					(name "Description") "300mW Zener Diode, SOT-23")
 			)
 			(pins
 				(pin
 					(num "1")
-					(name "VDD")
-					(type "power_in")
+					(name "A")
+					(type "passive")
 				)
 				(pin
 					(num "2")
+					(name "NC")
+					(type "no_connect")
+				)
+				(pin
+					(num "3")
+					(name "K")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "LED")
+			(part "WS2812B-2020")
+			(description "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			(docs "https://cdn-shop.adafruit.com/product-files/4684/4684_WS2812B-2020_V1.3_EN.pdf")
+			(footprints
+				(fp "LED*WS2812*-2020_PLCC4*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "WS2812B-2020")
+				(field
+					(name "Footprint") "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+				(field
+					(name "Datasheet") "https://cdn-shop.adafruit.com/product-files/4684/4684_WS2812B-2020_V1.3_EN.pdf")
+				(field
+					(name "Description") "RGB LED with integrated controller, 2.0 x 2.0 mm, 12 mA")
+			)
+			(pins
+				(pin
+					(num "1")
 					(name "DOUT")
 					(type "output")
 				)
 				(pin
-					(num "3")
+					(num "2")
 					(name "VSS")
 					(type "power_in")
 				)
 				(pin
-					(num "4")
+					(num "3")
 					(name "DIN")
 					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "VDD")
+					(type "power_in")
 				)
 			)
 		)
@@ -5987,8 +6499,28 @@
 			)
 			(pins
 				(pin
+					(num "1")
+					(name "CC1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "CC2")
+					(type "passive")
+				)
+				(pin
 					(num "3")
 					(name "CURRENT_MODE")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "PORT")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "VBUS_DET")
 					(type "passive")
 				)
 				(pin
@@ -6012,37 +6544,17 @@
 					(type "open_collector")
 				)
 				(pin
+					(num "10")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
 					(num "11")
 					(name "DIR")
 					(type "open_collector")
 				)
 				(pin
-					(num "CC1")
-					(name "CC1")
-					(type "passive")
-				)
-				(pin
-					(num "CC2")
-					(name "CC2")
-					(type "passive")
-				)
-				(pin
-					(num "GND")
-					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "PORT")
-					(name "PORT")
-					(type "passive")
-				)
-				(pin
-					(num "VBUS_DET")
-					(name "VBUS_DET")
-					(type "passive")
-				)
-				(pin
-					(num "VDD")
+					(num "12")
 					(name "VDD")
 					(type "power_in")
 				)
@@ -6068,129 +6580,198 @@
 			)
 			(pins
 				(pin
-					(num "3V3")
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "3")
 					(name "3V3")
 					(type "power_in")
 				)
 				(pin
-					(num "EN")
-					(name "EN")
-					(type "input")
-				)
-				(pin
-					(num "GND")
-					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "GPIO0")
-					(name "GPIO0")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO1")
-					(name "GPIO1")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO2")
+					(num "5")
 					(name "GPIO2_(strap)")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO3")
+					(num "6")
 					(name "GPIO3")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO4")
-					(name "GPIO4")
+					(num "8")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "11")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "GPIO0")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO5")
-					(name "GPIO5")
+					(num "13")
+					(name "GPIO1")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO6")
-					(name "GPIO6")
-					(type "bidirectional")
+					(num "14")
+					(name "GND")
+					(type "passive")
 				)
 				(pin
-					(num "GPIO7")
-					(name "GPIO7")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO8")
-					(name "GPIO8_(strap)")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO9")
-					(name "GPIO9_(boot)")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO10")
+					(num "16")
 					(name "GPIO10")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO18")
+					(num "18")
+					(name "GPIO4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "19")
+					(name "GPIO5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "20")
+					(name "GPIO6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "21")
+					(name "GPIO7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "22")
+					(name "GPIO8_(strap)")
+					(type "bidirectional")
+				)
+				(pin
+					(num "23")
+					(name "GPIO9_(boot)")
+					(type "bidirectional")
+				)
+				(pin
+					(num "26")
 					(name "GPIO18_USB_D-")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO19")
+					(num "27")
 					(name "GPIO19_USB_D+")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO20")
+					(num "30")
 					(name "GPIO20_U0RXD")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO21")
+					(num "31")
 					(name "GPIO21_U0TXD")
 					(type "bidirectional")
 				)
-			)
-		)
-		(libpart
-			(lib "busylight_gate")
-			(part "REG_3V3_PLACEHOLDER")
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "REG_3V3_PLACEHOLDER")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(pins
 				(pin
-					(num "GND")
+					(num "36")
 					(name "GND")
-					(type "power_in")
+					(type "passive")
 				)
 				(pin
-					(num "IN")
-					(name "IN")
-					(type "power_in")
+					(num "37")
+					(name "GND")
+					(type "passive")
 				)
 				(pin
-					(num "OUT")
-					(name "OUT")
+					(num "38")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "39")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "40")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "41")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "42")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "43")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "44")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "45")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "46")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "47")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "48")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "49")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "50")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "51")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "52")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "53")
+					(name "GND")
 					(type "passive")
 				)
 			)
@@ -6237,6 +6818,52 @@
 				(pin
 					(num "5")
 					(name "CT")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "busylight_gate")
+			(part "TLV75733P_DBV")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TLV75733P_DBV")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "IN")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "NC")
+					(type "no_connect")
+				)
+				(pin
+					(num "5")
+					(name "OUT")
 					(type "passive")
 				)
 			)
@@ -6353,6 +6980,10 @@
 			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
 		)
 		(library
+			(logical "Diode")
+			(uri "${KICAD10_SYMBOL_DIR}/Diode.kicad_sym")
+		)
+		(library
 			(logical "LED")
 			(uri "${KICAD10_SYMBOL_DIR}/LED.kicad_sym")
 		)
@@ -6442,14 +7073,14 @@
 			)
 			(node
 				(ref "U8")
-				(pin "OUT")
-				(pinfunction "OUT_OUT")
+				(pin "5")
+				(pinfunction "OUT_5")
 				(pintype "passive")
 			)
 			(node
 				(ref "U9")
-				(pin "3V3")
-				(pinfunction "3V3_3V3")
+				(pin "3")
+				(pinfunction "3V3_3")
 				(pintype "power_in")
 			)
 		)
@@ -6554,98 +7185,98 @@
 			)
 			(node
 				(ref "D1")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D10")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D11")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D12")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D13")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D14")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D15")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D16")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D2")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D3")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D4")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D5")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D6")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D7")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D8")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D9")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "4")
+				(pinfunction "VDD_4")
 				(pintype "power_in")
 			)
 			(node
@@ -6668,9 +7299,15 @@
 			)
 			(node
 				(ref "U8")
-				(pin "IN")
-				(pinfunction "IN_IN")
+				(pin "1")
+				(pinfunction "IN_1")
 				(pintype "power_in")
+			)
+			(node
+				(ref "U8")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
 			)
 		)
 		(net
@@ -6695,8 +7332,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO5")
-				(pinfunction "GPIO5_GPIO5")
+				(pin "19")
+				(pinfunction "GPIO5_19")
 				(pintype "bidirectional")
 			)
 		)
@@ -6712,8 +7349,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "CC1")
-				(pinfunction "CC1_CC1")
+				(pin "1")
+				(pinfunction "CC1_1")
 				(pintype "passive")
 			)
 		)
@@ -6729,8 +7366,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "CC2")
-				(pinfunction "CC2_CC2")
+				(pin "2")
+				(pinfunction "CC2_2")
 				(pintype "passive")
 			)
 		)
@@ -6750,8 +7387,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO0")
-				(pinfunction "GPIO0_GPIO0")
+				(pin "12")
+				(pinfunction "GPIO0_12")
 				(pintype "bidirectional")
 			)
 		)
@@ -6806,20 +7443,35 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "U10")
+				(pin "1")
+				(pintype "input")
+			)
+			(node
 				(ref "U7")
 				(pin "4")
 				(pinfunction "FAULT_4")
 				(pintype "open_collector")
 			)
+		)
+		(net
+			(code "10")
+			(name "/GATE_OK_RB")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "4")
+				(pintype "output")
+			)
 			(node
 				(ref "U9")
-				(pin "GPIO4")
-				(pinfunction "GPIO4_GPIO4")
+				(pin "20")
+				(pinfunction "GPIO6_20")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "10")
+			(code "11")
 			(name "/HOLD_OK")
 			(class "Default")
 			(node
@@ -6847,22 +7499,6 @@
 				(pin "1")
 				(pinfunction "RESET_1")
 				(pintype "open_collector")
-			)
-		)
-		(net
-			(code "11")
-			(name "/HOLD_OK_RB")
-			(class "Default")
-			(node
-				(ref "U10")
-				(pin "4")
-				(pintype "tri_state")
-			)
-			(node
-				(ref "U9")
-				(pin "GPIO6")
-				(pinfunction "GPIO6_GPIO6")
-				(pintype "bidirectional")
 			)
 		)
 		(net
@@ -6995,8 +7631,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO7")
-				(pinfunction "GPIO7_GPIO7")
+				(pin "21")
+				(pinfunction "GPIO7_21")
 				(pintype "bidirectional")
 			)
 		)
@@ -7006,14 +7642,14 @@
 			(class "Default")
 			(node
 				(ref "D8")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
 				(ref "D9")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
@@ -7033,8 +7669,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO3")
-				(pinfunction "GPIO3_GPIO3")
+				(pin "6")
+				(pinfunction "GPIO3_6")
 				(pintype "bidirectional")
 			)
 		)
@@ -7054,8 +7690,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO10")
-				(pinfunction "GPIO10_GPIO10")
+				(pin "16")
+				(pinfunction "GPIO10_16")
 				(pintype "bidirectional")
 			)
 		)
@@ -7069,27 +7705,27 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C1B")
+				(ref "C27")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1C")
+				(ref "C28")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1D")
+				(ref "C29")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1E")
+				(ref "C30")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1F")
+				(ref "C31")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -7112,8 +7748,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO18")
-				(pinfunction "GPIO18_USB_D-_GPIO18")
+				(pin "26")
+				(pinfunction "GPIO18_USB_D-_26")
 				(pintype "bidirectional")
 			)
 		)
@@ -7129,13 +7765,94 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO19")
-				(pinfunction "GPIO19_USB_D+_GPIO19")
+				(pin "27")
+				(pinfunction "GPIO19_USB_D+_27")
 				(pintype "bidirectional")
 			)
 		)
 		(net
 			(code "23")
+			(name "/VDD_U1")
+			(class "Default")
+			(node
+				(ref "C26")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "DZ1")
+				(pin "3")
+				(pinfunction "K_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R_SU1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "12")
+				(pinfunction "VDD_12")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "24")
+			(name "/VDD_U14")
+			(class "Default")
+			(node
+				(ref "C24")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "DZ14")
+				(pin "3")
+				(pinfunction "K_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R_SU14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "5")
+				(pinfunction "VDD_5")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "25")
+			(name "/VDD_U15")
+			(class "Default")
+			(node
+				(ref "C25")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "DZ15")
+				(pin "3")
+				(pinfunction "K_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R_SU15")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "5")
+				(pinfunction "VDD_5")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "26")
 			(name "GND")
 			(class "Default")
 			(node
@@ -7194,27 +7911,27 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C1B")
+				(ref "C27")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1C")
+				(ref "C28")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1D")
+				(ref "C29")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1E")
+				(ref "C30")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1F")
+				(ref "C31")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -7250,6 +7967,11 @@
 			)
 			(node
 				(ref "C25")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C26")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -7290,99 +8012,117 @@
 			)
 			(node
 				(ref "D1")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D10")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D11")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D12")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D13")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D14")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D15")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D16")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D2")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D3")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D4")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D5")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D6")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D7")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D8")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
 			)
 			(node
 				(ref "D9")
-				(pin "3")
-				(pinfunction "VSS_3")
+				(pin "2")
+				(pinfunction "VSS_2")
 				(pintype "power_in")
+			)
+			(node
+				(ref "DZ1")
+				(pin "1")
+				(pinfunction "A_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "DZ14")
+				(pin "1")
+				(pinfunction "A_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "DZ15")
+				(pin "1")
+				(pinfunction "A_1")
+				(pintype "passive")
 			)
 			(node
 				(ref "J1")
@@ -7480,20 +8220,15 @@
 			)
 			(node
 				(ref "U1")
-				(pin "GND")
-				(pinfunction "GND_GND")
+				(pin "10")
+				(pinfunction "GND_10")
 				(pintype "power_in")
 			)
 			(node
 				(ref "U1")
-				(pin "PORT")
-				(pinfunction "PORT_PORT")
+				(pin "4")
+				(pinfunction "PORT_4")
 				(pintype "passive")
-			)
-			(node
-				(ref "U10")
-				(pin "1")
-				(pintype "input")
 			)
 			(node
 				(ref "U10")
@@ -7580,52 +8315,151 @@
 			)
 			(node
 				(ref "U8")
-				(pin "GND")
-				(pinfunction "GND_GND")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U9")
-				(pin "GND")
-				(pinfunction "GND_GND")
-				(pintype "power_in")
-			)
-		)
-		(net
-			(code "24")
-			(name "Net-(C7-Pad1)")
-			(class "Default")
-			(node
-				(ref "C7")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R9")
 				(pin "2")
-				(pintype "passive")
+				(pinfunction "GND_2")
+				(pintype "power_in")
 			)
 			(node
-				(ref "TP5")
+				(ref "U9")
 				(pin "1")
-				(pinfunction "1_1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U9")
+				(pin "11")
+				(pinfunction "GND_11")
 				(pintype "passive")
 			)
 			(node
 				(ref "U9")
-				(pin "EN")
-				(pinfunction "EN_EN")
-				(pintype "input")
+				(pin "14")
+				(pinfunction "GND_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "36")
+				(pinfunction "GND_36")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "37")
+				(pinfunction "GND_37")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "38")
+				(pinfunction "GND_38")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "39")
+				(pinfunction "GND_39")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "40")
+				(pinfunction "GND_40")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "41")
+				(pinfunction "GND_41")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "42")
+				(pinfunction "GND_42")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "43")
+				(pinfunction "GND_43")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "44")
+				(pinfunction "GND_44")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "45")
+				(pinfunction "GND_45")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "46")
+				(pinfunction "GND_46")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "47")
+				(pinfunction "GND_47")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "48")
+				(pinfunction "GND_48")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "49")
+				(pinfunction "GND_49")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "50")
+				(pinfunction "GND_50")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "51")
+				(pinfunction "GND_51")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "52")
+				(pinfunction "GND_52")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "53")
+				(pinfunction "GND_53")
+				(pintype "passive")
 			)
 		)
 		(net
-			(code "25")
+			(code "27")
 			(name "Net-(D1-DIN)")
 			(class "Default")
 			(node
 				(ref "D1")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 			(node
@@ -7635,245 +8469,245 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "28")
 			(name "Net-(D1-DOUT)")
 			(class "Default")
 			(node
 				(ref "D1")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
 				(ref "D2")
-				(pin "4")
-				(pinfunction "DIN_4")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "27")
-			(name "Net-(D2-DOUT)")
-			(class "Default")
-			(node
-				(ref "D2")
-				(pin "2")
-				(pinfunction "DOUT_2")
-				(pintype "output")
-			)
-			(node
-				(ref "D3")
-				(pin "4")
-				(pinfunction "DIN_4")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "28")
-			(name "Net-(D3-DOUT)")
-			(class "Default")
-			(node
-				(ref "D3")
-				(pin "2")
-				(pinfunction "DOUT_2")
-				(pintype "output")
-			)
-			(node
-				(ref "D4")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "29")
-			(name "Net-(D4-DOUT)")
+			(name "Net-(D2-DOUT)")
 			(class "Default")
 			(node
-				(ref "D4")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D2")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D5")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D3")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "30")
-			(name "Net-(D5-DOUT)")
+			(name "Net-(D3-DOUT)")
 			(class "Default")
 			(node
-				(ref "D5")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D3")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D6")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D4")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "31")
-			(name "Net-(D6-DOUT)")
+			(name "Net-(D4-DOUT)")
 			(class "Default")
 			(node
-				(ref "D6")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D4")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D7")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D5")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "32")
-			(name "Net-(D7-DOUT)")
+			(name "Net-(D5-DOUT)")
 			(class "Default")
 			(node
-				(ref "D7")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D5")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D8")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D6")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "33")
-			(name "Net-(D10-DIN)")
+			(name "Net-(D6-DOUT)")
 			(class "Default")
 			(node
-				(ref "D10")
-				(pin "4")
-				(pinfunction "DIN_4")
-				(pintype "input")
+				(ref "D6")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
 			)
 			(node
-				(ref "D9")
-				(pin "2")
-				(pinfunction "DOUT_2")
-				(pintype "output")
+				(ref "D7")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
 			)
 		)
 		(net
 			(code "34")
-			(name "Net-(D10-DOUT)")
+			(name "Net-(D7-DOUT)")
 			(class "Default")
 			(node
-				(ref "D10")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D7")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D11")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D8")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "35")
-			(name "Net-(D11-DOUT)")
+			(name "Net-(D10-DIN)")
 			(class "Default")
 			(node
-				(ref "D11")
-				(pin "2")
-				(pinfunction "DOUT_2")
-				(pintype "output")
+				(ref "D10")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
 			)
 			(node
-				(ref "D12")
-				(pin "4")
-				(pinfunction "DIN_4")
-				(pintype "input")
+				(ref "D9")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
 			)
 		)
 		(net
 			(code "36")
-			(name "Net-(D12-DOUT)")
+			(name "Net-(D10-DOUT)")
 			(class "Default")
 			(node
-				(ref "D12")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D10")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D13")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D11")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "37")
-			(name "Net-(D13-DOUT)")
+			(name "Net-(D11-DOUT)")
 			(class "Default")
 			(node
-				(ref "D13")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D11")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D14")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D12")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "38")
-			(name "Net-(D14-DOUT)")
+			(name "Net-(D12-DOUT)")
 			(class "Default")
 			(node
-				(ref "D14")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D12")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D15")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D13")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "39")
-			(name "Net-(D15-DOUT)")
+			(name "Net-(D13-DOUT)")
 			(class "Default")
 			(node
-				(ref "D15")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(ref "D13")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output")
 			)
 			(node
-				(ref "D16")
-				(pin "4")
-				(pinfunction "DIN_4")
+				(ref "D14")
+				(pin "3")
+				(pinfunction "DIN_3")
 				(pintype "input")
 			)
 		)
 		(net
 			(code "40")
+			(name "Net-(D14-DOUT)")
+			(class "Default")
+			(node
+				(ref "D14")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D15")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "41")
+			(name "Net-(D15-DOUT)")
+			(class "Default")
+			(node
+				(ref "D15")
+				(pin "1")
+				(pinfunction "DOUT_1")
+				(pintype "output")
+			)
+			(node
+				(ref "D16")
+				(pin "3")
+				(pinfunction "DIN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "42")
 			(name "Net-(J1-D+-PadA6)")
 			(class "Default")
 			(node
@@ -7896,7 +8730,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "43")
 			(name "Net-(J1-D--PadA7)")
 			(class "Default")
 			(node
@@ -7919,7 +8753,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "44")
 			(name "Net-(R12-Pad2)")
 			(class "Default")
 			(node
@@ -7935,7 +8769,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "45")
 			(name "Net-(R_ILIM3-Pad1)")
 			(class "Default")
 			(node
@@ -7944,29 +8778,56 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R_ILIM3B")
+				(ref "R20")
 				(pin "2")
 				(pintype "passive")
 			)
 		)
 		(net
-			(code "44")
-			(name "Net-(R_VD-Pad2)")
+			(code "46")
+			(name "Net-(U1-VBUS_DET)")
 			(class "Default")
 			(node
-				(ref "R_VD")
+				(ref "R21")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
 				(ref "U1")
-				(pin "VBUS_DET")
-				(pinfunction "VBUS_DET_VBUS_DET")
+				(pin "5")
+				(pinfunction "VBUS_DET_5")
 				(pintype "passive")
 			)
 		)
 		(net
-			(code "45")
+			(code "47")
+			(name "Net-(U9-EN)")
+			(class "Default")
+			(node
+				(ref "C7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R9")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP5")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "8")
+				(pinfunction "EN_8")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "48")
 			(name "Net-(U9-GPIO2_(strap))")
 			(class "Default")
 			(node
@@ -7976,13 +8837,13 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO2")
-				(pinfunction "GPIO2_(strap)_GPIO2")
+				(pin "5")
+				(pinfunction "GPIO2_(strap)_5")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "46")
+			(code "49")
 			(name "Net-(U9-GPIO8_(strap))")
 			(class "Default")
 			(node
@@ -7992,13 +8853,13 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO8")
-				(pinfunction "GPIO8_(strap)_GPIO8")
+				(pin "22")
+				(pinfunction "GPIO8_(strap)_22")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "47")
+			(code "50")
 			(name "Net-(U9-GPIO9_(boot))")
 			(class "Default")
 			(node
@@ -8009,13 +8870,13 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO9")
-				(pinfunction "GPIO9_(boot)_GPIO9")
+				(pin "23")
+				(pinfunction "GPIO9_(boot)_23")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "48")
+			(code "51")
 			(name "Net-(U9-GPIO20_U0RXD)")
 			(class "Default")
 			(node
@@ -8025,13 +8886,13 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO20")
-				(pinfunction "GPIO20_U0RXD_GPIO20")
+				(pin "30")
+				(pinfunction "GPIO20_U0RXD_30")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "49")
+			(code "52")
 			(name "Net-(U9-GPIO21_U0TXD)")
 			(class "Default")
 			(node
@@ -8041,13 +8902,13 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO21")
-				(pinfunction "GPIO21_U0TXD_GPIO21")
+				(pin "31")
+				(pinfunction "GPIO21_U0TXD_31")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "50")
+			(code "53")
 			(name "Net-(U14-D)")
 			(class "Default")
 			(node
@@ -8063,11 +8924,11 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "54")
 			(name "Net-(U15-D)")
 			(class "Default")
 			(node
-				(ref "R_ILIM3B")
+				(ref "R20")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8079,21 +8940,11 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "55")
 			(name "VBUS_IC")
 			(class "Default")
 			(node
 				(ref "C2")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C24")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C25")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8132,7 +8983,22 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R_VD")
+				(ref "R_SU1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R_SU14")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R_SU15")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R21")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8141,24 +9007,6 @@
 				(pin "1")
 				(pinfunction "A1_1")
 				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "VDD")
-				(pinfunction "VDD_VDD")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U14")
-				(pin "5")
-				(pinfunction "VDD_5")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U15")
-				(pin "5")
-				(pinfunction "VDD_5")
-				(pintype "power_in")
 			)
 			(node
 				(ref "U5")
@@ -8186,18 +9034,51 @@
 			)
 		)
 		(net
-			(code "53")
-			(name "unconnected-(D16-DOUT-Pad2)")
+			(code "56")
+			(name "unconnected-(D16-DOUT-Pad1)")
 			(class "Default")
 			(node
 				(ref "D16")
-				(pin "2")
-				(pinfunction "DOUT_2")
+				(pin "1")
+				(pinfunction "DOUT_1")
 				(pintype "output+no_connect")
 			)
 		)
 		(net
-			(code "54")
+			(code "57")
+			(name "unconnected-(DZ1-NC-Pad2)")
+			(class "Default")
+			(node
+				(ref "DZ1")
+				(pin "2")
+				(pinfunction "NC_2")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "58")
+			(name "unconnected-(DZ14-NC-Pad2)")
+			(class "Default")
+			(node
+				(ref "DZ14")
+				(pin "2")
+				(pinfunction "NC_2")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "59")
+			(name "unconnected-(DZ15-NC-Pad2)")
+			(class "Default")
+			(node
+				(ref "DZ15")
+				(pin "2")
+				(pinfunction "NC_2")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "60")
 			(name "unconnected-(J1-SBU1-PadA8)")
 			(class "Default")
 			(node
@@ -8208,7 +9089,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "61")
 			(name "unconnected-(J1-SBU2-PadB8)")
 			(class "Default")
 			(node
@@ -8219,7 +9100,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "62")
 			(name "unconnected-(U1-CURRENT_MODE-Pad3)")
 			(class "Default")
 			(node
@@ -8230,7 +9111,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "63")
 			(name "unconnected-(U1-DIR-Pad11)")
 			(class "Default")
 			(node
@@ -8241,7 +9122,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "64")
 			(name "unconnected-(U1-ID-Pad9)")
 			(class "Default")
 			(node
@@ -8252,7 +9133,7 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "65")
 			(name "unconnected-(U1-OUT2_N-Pad8)")
 			(class "Default")
 			(node
@@ -8263,7 +9144,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "66")
 			(name "unconnected-(U1-VCONN_FAULT-Pad6)")
 			(class "Default")
 			(node
@@ -8274,7 +9155,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "67")
 			(name "unconnected-(U2-NC-Pad1)")
 			(class "Default")
 			(node
@@ -8285,7 +9166,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "68")
 			(name "unconnected-(U5-MR-Pad4)")
 			(class "Default")
 			(node
@@ -8296,13 +9177,35 @@
 			)
 		)
 		(net
-			(code "63")
-			(name "unconnected-(U9-PadGPIO1)")
+			(code "69")
+			(name "unconnected-(U8-NC-Pad4)")
+			(class "Default")
+			(node
+				(ref "U8")
+				(pin "4")
+				(pinfunction "NC_4")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "70")
+			(name "unconnected-(U9-GPIO1-Pad13)")
 			(class "Default")
 			(node
 				(ref "U9")
-				(pin "GPIO1")
-				(pinfunction "GPIO1_GPIO1")
+				(pin "13")
+				(pinfunction "GPIO1_13")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "71")
+			(name "unconnected-(U9-GPIO4-Pad18)")
+			(class "Default")
+			(node
+				(ref "U9")
+				(pin "18")
+				(pinfunction "GPIO4_18")
 				(pintype "bidirectional+no_connect")
 			)
 		)

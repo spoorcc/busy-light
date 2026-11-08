@@ -5,17 +5,17 @@ Traces: HW-010, SW-009, ADR-0016, ADR-0010, ADR-0012 (Proposed), RISK-027, RISK-
 Inputs: `owner-decisions-2026-11-05.md`, `analysis-ilim-switch-replacement.md` (with addendum), `stock-check-ilim-holdoff.md` (with addendum 2).
 All numbers below are the output of the scripts and tests named in section 5, as observed on 2026-11-05. Nothing was built, measured on the bench or simulated in SPICE.
 
-**Amendment 2026-11-06 (owner decision, after the owner was told that 56.9 k and 27.7 k at 0.1 % 0603 have no confirmed LCSC or JLCPCB source):** the ILIM resistors are now one 56.9 k part (R_ILIM2) and one 27.7 k part (R_ILIM3), both 0.1 % 0603; R_ILIM1 stays 47.0 k. R_ILIM3B (301 ohm) and the net `ILIM_D_U15_MID` are removed; the net count is 53 and the component count 92. **These two values are unsourced at 0.1 % 0603: no stock or order evidence exists for them.** The text below is updated to the new values; the section 5 results of 2026-11-05 are replaced by those of 2026-11-06 (section 5.1). Sections 1 to 4 otherwise record the first implementation.
+**Amendment 2026-11-06 (owner decision, after the owner was told that 56.9 k and 27.7 k at 0.1 % 0603 have no confirmed LCSC or JLCPCB source):** the ILIM resistors are now one 56.9 k part (R_ILIM2) and one 27.7 k part (R_ILIM3), both 0.1 % 0603; R_ILIM1 stays 47.0 k. R20 (301 ohm) and the net `ILIM_D_U15_MID` are removed; the net count is 53 and the component count 92. **These two values are unsourced at 0.1 % 0603: no stock or order evidence exists for them.** The text below is updated to the new values; the section 5 results of 2026-11-05 are replaced by those of 2026-11-06 (section 5.1). Sections 1 to 4 otherwise record the first implementation.
 
 ## 1. Decisions implemented
 | Decision | Implemented in | Result |
 |---|---|---|
 | (a) TMUX1101DCKR (LCSC C2673506, SC70-5) replaces the 2N7002 Q2 and Q3 | `gen_gate.py`, `layout_sch.py`, `layout_full.py` | U14 (step 2) and U15 (step 3). Pins: 1 D, 2 S, 3 GND, 4 SEL, 5 VDD (SCDS410D table 5-1, read from the stored datasheet). SEL high = on (table 8-1). VDD on 3V3 with C24 or C25 (100 nF). SEL is driven by the existing gate output (`ILIM_STEP2_EN`, `ILIM_STEP3_EN`). R18 and R19 (100 kohm) pull SEL to GND. R2 and R3 (10 kohm) and the readback R14 and R15 stay. Pins S and GND go to GND. The D pin goes to the ILIM resistor. |
 | (a) exclusive steps | unchanged | U13 still takes `ILIM_STEP3_EN` (now the SEL net of U15). Truth-table tests unchanged and green. |
-| (b) ILIM resistors, 0.1 %, 0603 | `layout_full.py` PARTS, `gen_gate.py` | R_ILIM1 47.0 k, R_ILIM2 56.9 k, R_ILIM3 27.7 k (amended 2026-11-06; first implementation was 56.2 k and 27.4 k + 301 ohm in series with the extra part R_ILIM3B and the net `ILIM_D_U15_MID`, now removed). Both values unsourced at 0.1 % 0603. |
-| (c) hold-off capacitors | same | C1 220 nF, C1B 220 nF, C1C 100 nF, C1D 68 nF, all C0G 5 % 50 V, footprint 1206. The schematic now carries the 1206 footprint. The `FOOTPRINT_OVERRIDE` entries for C1 and C1B in `pcb_full.py` are removed. |
+| (b) ILIM resistors, 0.1 %, 0603 | `layout_full.py` PARTS, `gen_gate.py` | R_ILIM1 47.0 k, R_ILIM2 56.9 k, R_ILIM3 27.7 k (amended 2026-11-06; first implementation was 56.2 k and 27.4 k + 301 ohm in series with the extra part R20 and the net `ILIM_D_U15_MID`, now removed). Both values unsourced at 0.1 % 0603. |
+| (c) hold-off capacitors | same | C1 220 nF, C27 220 nF, C28 100 nF, C29 68 nF, all C0G 5 % 50 V, footprint 1206. The schematic now carries the 1206 footprint. The `FOOTPRINT_OVERRIDE` entries for C1 and C27 in `pcb_full.py` are removed. |
 
-Reference designators U14, U15, R18, R19, C24, C25, C1C, C1D were unused before this change (checked in `layout_full.py`). Q2 and Q3 no longer exist.
+Reference designators U14, U15, R18, R19, C24, C25, C28, C29 were unused before this change (checked in `layout_full.py`). Q2 and Q3 no longer exist.
 
 Choices of the implementer, not of the owner:
 - The 100 kohm pull-downs R18 and R19 are separate parts, as the owner decision says, although R2 and R3 already pull the same net to GND. The two pull-downs on one net give 9.09 kohm.
@@ -27,7 +27,7 @@ With the new netlist the annealer put R3 18.8 mm from the step 3 switch. The old
 - `pcb_place.py`: optional weights per net (default 1, so other nets behave as before).
 - `pcb_rules.py`: `NET_WEIGHT` for `/ILIM_STEP2_EN`, `/ILIM_STEP3_EN`, `/SUP_CT`, `/ILIM`, and `PIN_TIES` for the bypass capacitors C24 and C25 at pin 5 of U14 and U15.
 - `pcb_full.py`: passes the weights; the ties are pseudo-nets in the annealer only, not on the board.
-- Test `test_gate_layout_rules` now also asks R18, R19, C24, C25 within 6 mm of their switch and C1C, C1D within 14 mm of U5 (C1 within 8 mm and C1B within 12 mm were already tested). Two new tests cover the weights.
+- Test `test_gate_layout_rules` now also asks R18, R19, C24, C25 within 6 mm of their switch and C28, C29 within 14 mm of U5 (C1 within 8 mm and C27 within 12 mm were already tested). Two new tests cover the weights.
 
 ## 3. Analysis re-run
 ### 3.1 ILIM step windows (`sim/ilim_steps.py`, new `candidate_c`)
@@ -46,7 +46,7 @@ Resistors 47.0 k, 56.9 k, 27.7 k, all 0.1 % (amended 2026-11-06; each step is on
 - Exit status of the script: 0 (the script prints "candidate C meets all four HW-010 numbers with the TMUX1101 limits: True").
 
 ### 3.2 Hold-off window (`sim/holdoff_cap.py`)
-Set 220 + 220 + 100 + 68 nF (608 nF), 5 % per part, C0G 0 +/- 30 ppm/degC over -55 to 125 degC: tD 205.9 to 560.6 ms (window 200 to 600 ms), "in window". With the earlier 0.6 % temperature allowance: 205.2 to 562.2 ms. Margin to the limits: 5.9 ms to 200 ms and 39.4 ms to 600 ms. The old 470 + 150 nF set gave 210.0 to 571.6 ms. The 68 nF part named in the model is C3216C0G1H683JT000N; its stock figure (2,000, one source) comes from the stock report and was not re-checked. DC bias, ageing and leakage are taken as 0, as before. A new test reads C1, C1B, C1C, C1D from the netlist and checks the set against the window.
+Set 220 + 220 + 100 + 68 nF (608 nF), 5 % per part, C0G 0 +/- 30 ppm/degC over -55 to 125 degC: tD 205.9 to 560.6 ms (window 200 to 600 ms), "in window". With the earlier 0.6 % temperature allowance: 205.2 to 562.2 ms. Margin to the limits: 5.9 ms to 200 ms and 39.4 ms to 600 ms. The old 470 + 150 nF set gave 210.0 to 571.6 ms. The 68 nF part named in the model is C3216C0G1H683JT000N; its stock figure (2,000, one source) comes from the stock report and was not re-checked. DC bias, ageing and leakage are taken as 0, as before. A new test reads C1, C27, C28, C29 from the netlist and checks the set against the window.
 
 ### 3.3 Readback divider with the pull-downs (`sim/readback_margin.py`)
 The net `ILIM_STEPn_EN` now has R2 (10 kohm) in parallel with R18 (100 kohm): 9.09 kohm. The readback resistor is 100 kohm. Open gate output, worst-case supply 3.6 V:
@@ -72,13 +72,13 @@ The net `ILIM_STEPn_EN` now has R2 (10 kohm) in parallel with R18 (100 kohm): 9.
 - Not run: Freerouting (no jar set, so the board was built and checked unrouted), SPICE, bench, regulatory check (a passive part swap and one analog switch are not expected to add a regulatory effect; not assessed), ERC with warnings (only the error severity is used by the scripts).
 
 ## 5. Evidence (commands and observed results)
-### 5.1 Amendment of 2026-11-06 (56.9 k and 27.7 k, R_ILIM3B removed)
+### 5.1 Amendment of 2026-11-06 (56.9 k and 27.7 k, R20 removed)
 Python: `/home/ben/Programming/busy-light/.venv/bin/python`.
 - Tests first (red): after changing the tests to the new values and before changing the generators, 7 tests failed: `test_step_3_resistor_is_a_single_part`, `test_generator_values_are_the_checked_set`, `test_candidate_values`, `test_ilim_resistor_values`, `test_tmux1101_ilim_switches`, `test_board_matches_netlist`, `test_netlist_facts` (`Ran 173 tests`, `FAILED (failures=7)`). The step window assertions of `test_windows_of_the_three_steps` were set to the new windows after the script run (they were not run red).
 - After the change: `cd hw/kicad/spike-gate; PYTHONPATH=src:tests GATE_NET=tests/data/gate.net <venv python> -m unittest discover -s tests`: `Ran 173 tests`, `OK`.
 - `sh run_full.sh <venv python> <out>`: `ERC errors: 0; intent nets: 53; drawn nets: 53; only in intent: 0; only in drawing: 0`. The script then **exits 1** at the strict ERC step: `footprint_link_issues: 95 > allowed 89`, `lib_symbol_issues: 240 > allowed 226` (known-open caps, see plan 06 A-9; the counts are one lower than before this change: 96 and 241). Because the script stops there, its determinism step did not run; it was run by hand: a second `layout_full.py` output compared with `cmp` to the first is identical.
 - `sh run_layout.sh <venv python> <out>`: `ERC errors: 0 []; parity differences: 0`, then **exits 1** at the strict ERC step: `footprint_link_issues: 27 > allowed 21`, `lib_symbol_issues: 60 > allowed 46` (same known-open caps; the determinism step did not run in this script and was not run by hand).
-- Fixtures `tests/data/gate.net` and `tests/data/full.net` were regenerated from these runs; neither contains R_ILIM3B.
+- Fixtures `tests/data/gate.net` and `tests/data/full.net` were regenerated from these runs; neither contains R20.
 - `python3 -I sim/ilim_steps.py` exit 0. Candidate C (TMUX1101 limits, 0.1 %): step 1 504.2 to 616.6 mA; step 2 929.6 to 1085.9 mA; step 3 1381.2 to 1566.7 mA; both on 1812.0 to 2014.0 mA. Margins: s1_min 4.2, s1_max 6.4, s3_min 15.2, s3_max 10.3 mA. Step 2 margin to the proposed 850 to 1150 mA window: 79.6 mA low side, 64.1 mA high side. Script line: `candidate C meets all four HW-010 numbers with the TMUX1101 limits: True`.
 - Not run in this amendment: Freerouting, `run_pcb.sh`, `run_gate.sh`, `holdoff_cap.py`, `readback_margin.py` (not affected by the resistor values; not re-run), SPICE, bench, stock check. The 2026-11-05 results below are the first implementation and are not repeated for the new values.
 
@@ -93,4 +93,4 @@ Python: `/home/ben/Programming/busy-light/.venv/bin/python` (has kiutils, skidl 
 - `sh run_pcb.sh <full out> <pcb out>` (system python3, no Freerouting): `placement build: identical`; KiCad DRC of the placed board: 95 schematic parity issues, all of the kind seen before (box symbols with named pins have no pad, substituted footprints); none names U14 or U15. The DRC list also has 93 `lib_footprint_issues`, 46 `silk_edge_clearance`, 43 `courtyards_overlap`, 43 `silk_overlap`; these were not compared with the run before the change. Placement: overlap 0.0 mm2, `largest_dim_mm` 59.79 (the earlier mech conflict, MECH-001 58 mm, is unchanged in kind).
 - `python3 -I sim/ilim_steps.py` exit 0; `python3 -I sim/holdoff_cap.py`; `python3 -I sim/readback_margin.py`: numbers in section 3.
 - The legacy path `run_gate.sh` (SKiDL schematic writer with its own router) was started and had not finished after about 3 minutes in its first generation attempt. It was stopped. **Not run to completion; no result.** The own-writer path (`run_layout.sh`, `run_full.sh`) is the one used for the checks above. Whether the old path was this slow before the change was not measured.
-- Visual check: the changed area of the full sheet was exported to SVG and looked at once (one text overlap between R_ILIM3B and R_ILIM3 was fixed by moving the text). Not a review.
+- Visual check: the changed area of the full sheet was exported to SVG and looked at once (one text overlap between R20 and R_ILIM3 was fixed by moving the text). Not a review.

@@ -21,10 +21,8 @@ import pcb_full as P
 def expected_pad_nets(comps, nets):
     exp = {}
     for n, nodes in nets.items():
-        for ref, pin in nodes:
-            m = P.PADMAP.get(ref, {}).get(pin, pin)
-            for pn in (m if isinstance(m, tuple) else (m,)):
-                exp[(ref, pn)] = P.short_net(n)
+        for ref, pin in nodes:          # schematic pin numbers are the pad numbers (layout_full.PAD)
+            exp[(ref, pin)] = P.short_net(n)
     return exp
 
 

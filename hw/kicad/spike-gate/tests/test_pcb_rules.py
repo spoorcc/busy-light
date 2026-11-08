@@ -88,7 +88,103 @@ class RunMeta(unittest.TestCase):
             pcb_replay.write_meta("/nonexistent/x.json", **fields)
 
 
+class CleanUpHelpers(unittest.TestCase):
+    def test_clamp_track_width(self):
+        self.assertEqual(R.clamp_track_width(0.10), R.MIN_TRACK)
+        self.assertEqual(R.clamp_track_width(0.12), R.MIN_TRACK)
+        self.assertEqual(R.clamp_track_width(0.30), 0.30)
+
+    def test_default_track_is_not_below_minimum(self):
+        self.assertGreaterEqual(R.TRACK, R.MIN_TRACK)
+
+    def test_hole_gap_ok_needs_hole_edge_distance(self):
+        vias = [(0.0, 0.0, R.VIA_DIA, "GND")]
+        need = R.VIA_DRILL + R.HOLE_TO_HOLE          # drill 0.3 each: centre distance 0.7 mm
+        self.assertFalse(R.hole_gap_ok(need - 0.01, 0.0, vias))
+        self.assertTrue(R.hole_gap_ok(need, 0.0, vias))
+        self.assertTrue(R.hole_gap_ok(5.0, 5.0, vias))
+        self.assertTrue(R.hole_gap_ok(0.0, 0.0, []))
+
+    def test_hole_gap_ignores_nets(self):
+        vias = [(0.0, 0.0, R.VIA_DIA, "+3V3")]
+        self.assertFalse(R.hole_gap_ok(0.3, 0.0, vias))
+
+    def test_dangling_via_positions_reads_only_vias(self):
+        drc = {"violations": [
+            {"type": "via_dangling", "items": [{"description": "Via [GND] on F.Cu - B.Cu", "pos": {"x": 1.0, "y": 2.0}}]},
+            {"type": "via_dangling", "items": [{"description": "Track [GND]", "pos": {"x": 9.0, "y": 9.0}}]},
+            {"type": "clearance", "items": [{"description": "Via [GND]", "pos": {"x": 7.0, "y": 7.0}}]}]}
+        self.assertEqual(R.dangling_via_positions(drc), [(1.0, 2.0)])
+        self.assertEqual(R.dangling_via_positions({}), [])
+
+    def test_reuse_targets_nearest_first_same_net_only(self):
+        vias = [(3.0, 0.0, 0.6, "GND"), (1.0, 0.0, 0.6, "GND"), (0.5, 0.0, 0.6, "+5V"), (9.0, 0.0, 0.6, "GND")]
+        got = R.reuse_targets(0.0, 0.0, vias, "GND", 3.2)
+        self.assertEqual([v[0] for v in got], [1.0, 3.0])
+        self.assertEqual(R.reuse_targets(0.0, 0.0, vias, "GND", 0.5), [])
+
+
+class ViaRemoval(unittest.TestCase):
+    def test_joins_nothing_only_when_no_second_layer_is_needed(self):
+        ends = [(1.0, 1.0, "F.Cu"), (5.0, 5.0, "F.Cu"), (5.0, 5.0, "B.Cu"), (7.0, 7.0, "F.Cu"), (7.0, 7.0, "F.Cu")]
+        self.assertTrue(R.joins_nothing(9.0, 9.0, ends, []))            # no track end
+        self.assertTrue(R.joins_nothing(1.0, 1.0, ends, []))            # one track end
+        self.assertTrue(R.joins_nothing(7.0, 7.0, ends, []))            # two ends on one layer touch each other
+        self.assertFalse(R.joins_nothing(5.0, 5.0, ends, []))           # a layer change
+        self.assertFalse(R.joins_nothing(9.0, 9.0, [], [(8.0, 8.0, 10.0, 10.0)]))   # a pad is there
+
+
+class MainPathSplit(unittest.TestCase):
+    def test_main_path_pads(self):
+        self.assertTrue(R.is_main_path_pad("VBUS_IC", "J1", "A4"))
+        self.assertTrue(R.is_main_path_pad("VBUS_IC", "U7", "1"))
+        self.assertFalse(R.is_main_path_pad("VBUS_IC", "U7", "3"))        # enable pin: microamps
+        self.assertFalse(R.is_main_path_pad("VBUS_IC", "R1", "1"))
+        self.assertTrue(R.is_main_path_pad("GND", "R1", "2"))             # other nets are not split
+
+    def test_branch_width_is_a_legal_narrow_track(self):
+        self.assertGreaterEqual(R.BRANCH_WIDTH, R.MIN_TRACK)
+        self.assertLess(R.BRANCH_WIDTH, R.NET_WIDTH["VBUS_IC"])
+
+    def test_main_path_pins_exist_in_the_main_net_table(self):
+        self.assertEqual(R.MAIN_PATH_NET, "VBUS_IC")
+        self.assertIn("J1", R.MAIN_PATH_PADS)
+
+
+class RouteFirst(unittest.TestCase):
+    def test_key_nets_are_exact_names_and_not_plane_nets(self):
+        self.assertTrue(R.is_key_net("VBUS_IC"))
+        self.assertFalse(R.is_key_net("GND"))
+        self.assertFalse(R.is_key_net("+5V"))
+        self.assertFalse(R.is_key_net("vbus_ic"))
+        self.assertTrue(set(R.ROUTE_FIRST).isdisjoint(R.PLANE_NETS))
+
+    def test_vbus_path_width_covers_the_top_current_step(self):
+        self.assertGreaterEqual(R.NET_WIDTH["VBUS_IC"], R.ipc2221_width_mm(R.I_TOP_STEP_MAX_A) - 0.01)
+
+    def test_3v3_width_covers_the_regulator_rating(self):
+        self.assertGreaterEqual(R.NET_WIDTH["+3V3"], R.ipc2221_width_mm(1.0) - 0.01)     # TLV757P: 1 A
+
+    def test_vbus_path_has_a_placement_weight(self):
+        self.assertGreater(R.NET_WEIGHT["VBUS_IC"], 1.0)
+
+
 class Dru(unittest.TestCase):
+    def test_silk_waiver_names_only_the_listed_footprints(self):
+        with tempfile.TemporaryDirectory() as t:
+            p = Path(t) / "x.kicad_dru"
+            R.write_dru(str(p), 4, silk_waiver=True)
+            text = p.read_text()
+            q = Path(t) / "y.kicad_dru"
+            R.write_dru(str(q), 4, silk_waiver=False)
+            self.assertNotIn("severity ignore", q.read_text())          # default: no waiver (DEV-006 not approved)
+        self.assertIn('(rule "spike_silk_waiver"', text)
+        self.assertIn("(severity ignore)", text)
+        for ref in R.SILK_WAIVER_REFS:
+            self.assertIn("memberOfFootprint('%s')" % ref, text)
+        self.assertEqual(text.count("(severity ignore)"), 2)      # silk clearance and the J1 silk edge rule only
+        self.assertNotIn("(severity ignore)\n\t(condition \"A.Layer == 'F.Cu'", text)
+
     def test_write_dru_is_deterministic_and_complete(self):
         with tempfile.TemporaryDirectory() as t:
             a, b = Path(t) / "a.kicad_dru", Path(t) / "b.kicad_dru"
@@ -273,3 +369,56 @@ class DruCanary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OuterOnly(unittest.TestCase):
+    def test_layers_allowed(self):
+        L = ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"]
+        self.assertEqual(R.layers_allowed("VBUS_IC", L), ["F.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("+3V3", L), ["F.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("/ILIM", L), ["F.Cu", "In2.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("+5V", L), ["F.Cu", "In2.Cu", "B.Cu"])
+        self.assertEqual(R.layers_allowed("GND", L), L)
+
+    def test_dsn_outer_rule(self):
+        import subprocess
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        dsn = ("(pcb x (network (class kicad_default /A (circuit (use_via V))) (class PWR_VBUS_IC VBUS_IC\\n      (circuit\\n        (use_via V)\\n      )"
+               "\\n      (rule (width 600))) (class PWR_3V3 +3V3 (circuit (use_via V)) (rule (width 300)))))")
+        with tempfile.TemporaryDirectory() as t:
+            a, b = Path(t, "a.dsn"), Path(t, "b.dsn")
+            a.write_text(dsn)
+            subprocess.run([sys.executable, str(Path(__file__).resolve().parent.parent / "src" / "pcb_dsn.py"), "outer", str(a), str(b)],
+                           check=True, capture_output=True)
+            out = b.read_text()
+        self.assertEqual(out.count("(use_layer F.Cu B.Cu)"), 2)
+        self.assertEqual(out.count("(use_layer F.Cu In2.Cu B.Cu)"), 1)
+        self.assertLess(out.index("kicad_default"), out.index("use_layer F.Cu In2.Cu B.Cu"))
+        self.assertLess(out.index("use_layer F.Cu In2.Cu B.Cu"), out.index("PWR_VBUS_IC"))   # the default class got the In2 rule
+
+
+class FineProfile(unittest.TestCase):
+    """SPIKE_PROFILE=fine stays inside the JLCPCB multilayer minimums (capability page read 2026-11-08) and is off by default."""
+
+    def values(self, env):
+        import os
+        e = dict(os.environ, **env)
+        e.pop("SPIKE_PROFILE", None) if not env else None
+        out = subprocess.run([sys.executable, "-c", "import json, pcb_rules as R; print(json.dumps([R.CLEARANCE, R.MIN_TRACK, R.VIA_DIA, R.VIA_DRILL, R.ANNULAR]))"],
+                             cwd=str(Path(__file__).resolve().parent.parent / "src"), env=e, capture_output=True, text=True, check=True)
+        return json.loads(out.stdout)
+
+    def test_default_is_the_spike_profile(self):
+        self.assertEqual(self.values({}), [0.15, 0.15, 0.6, 0.3, 0.1])
+
+    def test_fine_is_inside_the_fab_minimums(self):
+        clr, trk, via, drill, ring = self.values({"SPIKE_PROFILE": "fine"})
+        self.assertGreaterEqual(clr, 0.09)                      # track and space 0.09 mm
+        self.assertGreaterEqual(trk, 0.09)
+        self.assertGreaterEqual(drill, 0.15)                    # via hole
+        self.assertGreaterEqual(via, 0.25)                      # via diameter
+        self.assertGreaterEqual((via - drill) / 2 + 1e-9, 0.15)  # annular ring absolute minimum
+        self.assertGreaterEqual(ring, 0.15)

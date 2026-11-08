@@ -43,11 +43,11 @@ class HoldoffCap(unittest.TestCase):
         self.assertTrue(hc.fits(p))
 
     def test_netlist_set_is_the_selected_set(self):
-        """The hold-off capacitors in the netlist (C1, C1B, C1C, C1D) are the set the window was computed for."""
+        """The hold-off capacitors in the netlist (C1, C27, C28, C29) are the set the window was computed for."""
         net = Path(os.environ.get("GATE_NET", HERE / "data" / "gate.net"))
         txt = net.read_text()
         vals = {}
-        for ref in ("C1", "C1B", "C1C", "C1D", "C1E", "C1F"):
+        for ref in ("C1", "C27", "C28", "C29", "C30", "C31"):
             blk = txt[txt.index('(ref "%s")' % ref):][:400]
             m = re.search(r'\(value "(\d+)n C0G 5% (\d+)V"\)', blk)
             self.assertIsNotNone(m, ref)
@@ -56,7 +56,7 @@ class HoldoffCap(unittest.TestCase):
         self.assertEqual(sorted(round(v * 1e9) for v in vals.values()), [100] * 6)
         parts = [(c, .05, ref) for ref, c in vals.items()]
         self.assertTrue(hc.fits(parts))
-        self.assertNotIn('(ref "C1B")\n      (value "150n', txt)
+        self.assertNotIn('(ref "C27")\n      (value "150n', txt)
 
 
 if __name__ == "__main__":

@@ -181,3 +181,234 @@ Choose the layer count (the evidence is in 10.5 and 10.6) and whether ADR-0012 c
 - Observed: unplaced-board DRC (4 layers, no router): only `unconnected_items` above the waiver (266 > 241). Routed: Freerouting started with 266 unrouted connections and finished with 48 unrouted and 0 violations in 221 s; M1 (routed board, plane nets excluded) 3 unrouted. Stitched: 247 DRC findings = 46 violations + 86 unconnected items on 4 nets (/CC1, /GATE_OK_RB, GND, one 887 k net) + 110 schematic-parity warnings (84 net_conflict, 26 footprint_symbol_mismatch, the known placeholder and stand-in cases).
 - The strict waiver check **fails**: 86 unconnected items, 6 track_width errors, 9 via_dangling warnings and 1 hole_to_hole warning are not on the waiver list. This is worse than the earlier run on unconnected items and has not been analysed. Routing is not deterministic.
 - Not done: the net fixture `tests/data/full.net` and the committed DRC fixtures are not refreshed; no manufacturing check; the new parts are not placed with intent (the annealer did it).
+
+## Update 2026-11-07: strict-gate fixes after the AND-gate rerun (HW-010, DEV-006)
+- Causes found: Freerouting 2.5.0 writes 0.10 and 0.12 mm wires at tight pads (the SES file has them), so `track_width` failed; it also leaves vias with copper on one layer (`via_dangling`); the stitcher checked every pad against all layers and in sorted order, so a pad never joined a via that its neighbour got later; the stitcher did not check hole-to-hole distance between vias of the same net.
+- Changes: default track 0.15 mm (the 0.2 mm default made the router squeeze); dangling vias removed before stitching; stitcher retries in passes and joins existing ground vias with a track on the pad's layer only; via search keeps 0.7 mm centre distance to every via; silk of U9, U2, U4, TVS2 and J1 ignored by a named `.kicad_dru` rule (DEV-006, proposed).
+- Observed (run on the full flow, 4 layers, planes `none`, Freerouting 522 s, 34 unrouted in its log; one run, not deterministic): stitched board strict check: `clearance`, `track_width`, `via_dangling`, `hole_to_hole`, `isolated_copper`, silk classes and `lib_footprint_mismatch` all 0; still failing: `unconnected_items` 50 (21 ground pads of the module U9 inside the antenna keep-out, 7 small ground pads, the rest on signal nets the router left open) and `track_dangling` 2 (ends of the open signal nets).
+- A via in a U9 ground pad inside the keep-out was tried; it gave 18 `items_not_allowed` and dangling vias (the inner plane has the cut-out), so it was reverted.
+- Not run: a second router run; the committed DRC fixtures are not refreshed.
+
+## Update 2026-11-07 (later): antenna strip corrected, slot added (HW-005, ADR-0003, DEV-004)
+- Cause of the 21 module ground pads in the strip: the strip was 5.4 mm and the pad area was centred in the module body. The ESP32-C3-MINI-1 datasheet v2.2 (fig 11-1, section 3.1) puts the antenna area beyond the pad rows: 16.6 - 11.2 - 0.8 = 4.6 mm, and the pad area is not centred. The board also uses the ESP32-C6-MINI-1 footprint as a stand-in for the C3 (pad rows 9.8 mm apart, as in the C3 figure; other dimensions not compared).
+- Changes: `MOD_ANT_L` 4.6 mm; U9 placed so that its pad area starts at the end of the strip (moved 1.6 mm toward +X); a 1.0 mm slot in Edge.Cuts 1.5 mm beyond the antenna end (owner idea, vendor guide 1.4.7 advises cutting the board around the antenna), with a copper keep-out of 0.5 mm round it because the router does not see Edge.Cuts slots (first run without it: 22 `copper_edge_clearance`); tests for the strip length, the pad position and the slot (pure and pcbnew).
+- Observed (one run, Freerouting 177 s, 20 unrouted in its log): stitched board strict check: 0 unconnected ground items, 0 copper-edge, 0 silk, 0 `via_dangling`, 0 `track_width`, 0 `hole_to_hole`; still failing: `unconnected_items` 30 (14 on VBUS_IC, 14 on +3V3, 1 /ILIM_STEP2_EN, 1 /CC_OK_NOT_S3), `clearance` 2 (an In2 track at 0.114 and 0.121 mm from a SUP_CT via), `track_dangling` 1.
+- Not done: the slot is not in the housing or the mechanical model (the housing has no part under it; posts and hooks are at 30, 150 and 270 degrees); no RF check that the slot helps; the real C3 footprint (pad sizes) is not drawn; fabricator slot rules not checked (1.0 mm router bit assumed). The STEP model is saved in the datasheet folder; the Autodesk footprint source link of the datasheet returns 404.
+
+## Update 2026-11-07 (last): placement and routing experiments (HW-010, ADR-0012)
+All runs: same netlist, 4 layers, Freerouting 2.5.0, KiCad 10.0.6, strict check of the stitched board (`stitched-4l`). Numbers are from single runs.
+
+| Run | Change | Unconnected items | Other strict findings |
+|---|---|---|---|
+| A | antenna strip 4.6 mm, slot, slot keep-out | 30 | 2 clearance, 1 dangling track |
+| B | threads 1, 2, 4 and passes 25 to 150 | 30 each (identical) | same; the router is deterministic here, its settings are exhausted |
+| C | +3V3 width 0.4 to 0.3 mm (1.0 A by IPC-2221, TLV757P rating) | 23 | 0 clearance, 5 dangling tracks |
+| D | C plus VBUS_IC placement weight 3.0 and `R_MOVE` 16.6 to 17.3 mm (owner choice: loosen the ring) | **14, all VBUS_IC** | 1 clearance, 1 dangling track |
+| E | D with VBUS_IC routed first and locked (`KEYFIRST=1`) | 8 (2 GND, 5 USB data, 1 UART RX) | 4 clearance, 3 dangling tracks |
+| F | E with the four USB data nets also first | 12 | 11 clearance |
+| (earlier) | all 17 key nets first and locked, before the placement change | 56 | 2 `items_not_allowed` |
+
+- Reading: placement was the lever (D); routing order is not: locking the first stage's tracks pushes the failure to other nets (E, F). Neither D nor E is clean.
+- The 14 items of D are the pads of VBUS_IC (R_SU1, R_SU14, R_SU15, R_VD, R1, R6, C2, TVS1, U5, U6, U7 and the J1 pins), a net of 10 or more pins that is routed at 0.6 mm everywhere, although only the path J1 to U6 carries the 1.5 A; the branches (supply-pin resistors, divider, TMUX supply) carry microamps. A router class cannot give one net two widths.
+- Options that need a decision (not made): (a) a VBUS_IC copper pour on one layer near the connector; (b) a schematic change that names the low-current branches as a separate net behind the main path; (c) narrower tracks on the branches by a post-route step that is not yet written.
+- Not done: no commit; the committed DRC fixtures and the README images are not refreshed; no electrical or RF check of the result.
+
+## Update 2026-11-07 (main path split): VBUS_IC routed in two classes (HW-010, ADR-0012)
+- Idea: only the path connector J1, TPS2553 input (U7 pin 1), C2 and TVS1 carries the switch current (up to 1.577 A, 0.6 mm by IPC-2221). The other pins of VBUS_IC (supervisor, ESD part, dividers, supply-pin resistors, enable) draw microamps. `run_pcb.sh` with `KEYFIRST=1` routes the main path alone at 0.6 mm (stage 1), locks it, then routes everything else with the VBUS_IC class at `BRANCH_WIDTH` 0.2 mm (stage 2); the branches join the locked main path. No schematic change. Code: `pcb_rules.MAIN_PATH_PADS`, `is_main_path_pad`, `pcb_dsn.py keyonly` and `branchwidth`.
+- Observed, one run each (4 layers, planes `inner`, Freerouting 2.5.0; the router is not deterministic with 4 threads):
+
+| Run | Setting | Unconnected | Clearance | Dangling |
+|---|---|---|---|---|
+| pl4 | planes `none` | 2 | 1 | 0 |
+| pl5 | planes `inner` | **3** | **0** | **0** |
+| pl6 | `inner`, In1 and In2 as power layers in the DSN | 22 | 3 | 0 |
+| pl7 | as pl5 (same settings), after changing the via removal | 7 | 5 | 1 |
+
+  pl5 and pl7 have the same settings; the difference is router variance, not a design change. The best run is not a result that can be repeated on demand.
+- Reading: the split removes the VBUS_IC problem (stage 1 routes all main-path nets without an open item; the 14 open VBUS_IC items of the single-pass run are gone). What is left is 2 to 12 mixed findings that change from run to run: ground stubs, /ILIM_STEP2_EN, a few clearance findings at U9 and a via. Marking In1 and In2 as power layers (so that signals stay off the planes) leaves the board unroutable (pl6): this stack needs signals on the inner layers, and the router puts some VBUS_IC and signal tracks on In1 and In2, which cuts the GND plane in places. That is a layout weakness, not checked electrically.
+- Via removal: a via that the DRC calls dangling is removed only when no pad is there and its track ends lie on one layer (`pcb_rules.joins_nothing`); the earlier version could remove a layer change.
+- Not done: no run is clean; no repeatable result; a post-route cleanup of the leftovers (a small maze router, or hand-placed copper by script) is the next step; the README images and the DRC fixtures are not refreshed; no commit.
+
+## Update 2026-11-07 (clean-up): post-route grid router `pcb_fix.py` (HW-010, ADR-0012)
+- Method: after Freerouting and the stitcher, `run_pcb.sh` (`CLEANUP=1`, default) calls `src/pcb_fix.py auto`: up to 3 rounds of (1) remove the track run (up to junctions, vias and pads) at each `clearance` finding, (2) connect every `unconnected_items` pair with a deterministic A* grid router (0.05 mm grid, four layers, through vias; obstacles are the copper of other nets, the board edge, the slot, rule areas and the hole-to-hole distance, grown by the clearance plus half the track width plus 0.06 mm), (3) rip up and reroute a net from its pads when a pair still fails (also with the nearest blocking nets; all or nothing), (4) remove free-ended track pieces and dangling vias, (5) check with the strict DRC. The result is `final.kicad_pcb`. The router is checked only by the KiCad DRC.
+- Observed (run pl8: `KEYFIRST=1`, planes `inner`, Freerouting 2.5.0, KiCad 10.0.6; the clean-up itself has no random part): stitched board 5 unconnected items and 135 findings; after the clean-up **1 unconnected item** (/ILIM, U7 pin 5 on the back to R_ILIM3 on the front) and in the strict check only the tolerated known classes: `courtyards_overlap` 14 and `items_not_allowed` 1 (both U9, DEV-004), `footprint_symbol_mismatch`, `net_conflict`, `ignored_checks`. Clearance, track width, hole-to-hole, copper-to-edge, silk (DEV-006), dangling vias and dangling tracks: 0.
+- Rerun of the clean-up alone on the same stitched board of pl8: rounds gave 2, 8, 1, 1 open items (the second figure is after the ripup step, before routing).
+- Open: the /ILIM connection (pin 5 of the TPS2553 sits in a crowded spot on the back); Freerouting's own output varies from run to run, so the stitched input differs between runs (pl5 to pl8: 3 to 7 open items); the clean-up has been run on pl7 and pl8 only. The inner layers still carry some signal and VBUS_IC tracks (cuts in the GND plane, not checked electrically). Stand-in footprints, antenna arrangement (DEV-004), electrical and RF checks: not done.
+- Tests: `tests/test_pcb_fix.py` (6: description parsing, track runs, counts, a real route round a foreign pad on a small board with the clearance checked, a blocked board gives no path); 87 tests pass in the pcb, mech-outline, placement and run-script files.
+
+## Update 2026-11-07: ignored checks switched on, six repeat runs
+
+- Change: the generated project files now switch on the checks KiCad ignores by default. ERC: `single_global_label`, `four_way_junction`, `simulation_model_issue`, `footprint_filter` (`lib_tables.ERC_ON`). DRC: `missing_courtyard`, `track_not_centered_on_via`, `tuning_profile_track_geometries`, `footprint_filters_mismatch`, `footprint_type_mismatch` (`pcb_full.DRC_ON`). The ignored-check maxima in `known-open-violations.json` are 0 now.
+- ERC (`run_full.sh`, `SPIKE_ALLOW_KNOWN_OPEN=0`): 0 findings, drawn nets equal intent nets (55), output identical on a second run.
+- Six full flows in parallel (`KEYFIRST=1`, planes `inner`, 4 threads each, runs q1 to q6): open items after the clean-up 2, 1, 3, 1, 0, 0. Runs q5 and q6 have 0 open items, no clearance, track-width, dangling-via, hole or edge finding, strict DRC (`SPIKE_ALLOW_KNOWN_OPEN=0`) shows only the tolerated items: courtyards_overlap 14 and items_not_allowed 1 (U9, DEV-004), footprint_symbol_mismatch 26, net_conflict 84, and the new `footprint_filters_mismatch` 16 (the LED stand-ins D1 to D16, DEV-002, added to the waiver list). So 2 of 6 runs end complete; the flow is not deterministic (Freerouting).
+- Local fix of /ILIM by rip-up of neighbouring ground and +5V stubs failed on the pl8 board: the VBUS_IC main path on In1 and the TPS2553 pin pattern block every layer. Not pursued; repeated runs were the cheaper way.
+- Not run: schematic-to-board parity beyond the DRC parity items, electrical checks of the plane cuts by VBUS_IC tracks on In1/In2, RF check. Tests: 96 passed in pcb_full, pcb_fix, pcb_rules, lib_tables, mech_outline, pcb_place; `test_gate_logic.py` errors without a checkout change (missing dependency, not analysed).
+
+## Update 2026-11-08: real footprints, best-of-N, power check
+
+- Footprints (from the datasheets, tests in `tests/test_pcb_full.py`): U9 is `CUSTOM:ESP32-C3-MINI-1`, the library C6-MINI-1 pads without zone and 3D model; the numbers equal datasheet v2.2 figure 11-1 (48 pads 0.8 x 0.4, four 0.7 corner pads, 3 x 3 grid of 1.45 mm ground pads, rows 11.9 and 9.9 mm). U1 land pattern redrawn from TI drawing RWB0012A (read as an image); **the earlier provisional pattern was wrong** (pad sizes and rows). U8 is TLV75733PDBV in SOT-23-5 (ADR-0019), EN tied to IN, pin 4 marked no-connect. The LEDs use the KiCad symbol `LED:WS2812B-2020` with the 2020 footprint (ADR-0004; the part number is still open). **Finding:** the 2020 symbol numbers its pins 1 DOUT, 2 VSS, 3 DIN, 4 VDD; the earlier board paired the 5050 symbol numbers (1 VDD, 2 DOUT, 3 VSS, 4 DIN) with the 2020 footprint, which would have wired the LEDs wrong. Still stand-ins: C3 (0805) and C4 (1206), values open; test points and mounting holes.
+- ERC: 0 findings. `footprint_symbol_mismatch` fell from 26 to 8.
+- Routing (`run_best.sh`, 6 parallel runs, `KEYFIRST=1`): with VBUS_IC and +3V3 kept off the inner layers (`OUTER_ONLY=1`, a `use_layer` rule in the DSN, honoured by `pcb_fix.py`) the best run has 4 open items; with the inner layers allowed (`OUTER_ONLY=0`) the best run has 1 open item (U9 GPIO8 to R17) and the others 4 to 9. So the plane protection costs routability on this placement.
+- Best run (inner allowed) under strict DRC: 1 unconnected item, 1 `connection_width` (a 0.14 mm ground stitch track), 1 `silk_overlap` (U6, DZ15), `lib_footprint_issues` 100 (limit 93); the rest tolerated as before. **It does not pass the strict gate.**
+- Power check (`src/pcb_power_check.py`, 0.1 mm raster, copper 35 um outer and 17.5 um inner assumed; currents are the analyst's assumptions, the 50 mV target is not a requirement): on that board VBUS_IC J1 to U7 85 mV at 1.5 A (57 mOhm), +3V3 53 mV at 0.5 A (106 mOhm), +5V 24 mV at 1.0 A. Both VBUS_IC and +3V3 miss 50 mV. The GND plane (In1) has 5 pieces with 36.5 % removed and carries 285 mm of signal track; the +5V plane (In2) has 2 pieces, 38 % removed, 299 mm of signal track. Run q5 (old footprints, same method) had VBUS_IC at 47 mV. The solver result for a net with no joined path is reported as `inf`/null; copper thickness, current crowding and temperature are not modelled.
+- Not run: the flow on a placement tuned for the real footprints; antenna or RF checks; fabricator rules; thermal.
+- Owner decisions 2026-11-08 (session): VBUS_IC and +3V3 stay off the plane layers (`OUTER_ONLY=1`, default); DEV-006 silk waiver declined, so it is off by default now (`SPIKE_SILK_WAIVER=1` for comparison) and the silk findings count again; DEV-004 stays open; DEV-002 shrunk and the ignored-check part of DEV-003 closed (texts in `docs/standards/deviations.md`). Consequence: the board needs a placement made for the real footprints before it routes complete with the plane rule on (best run with the rule: 4 open items).
+
+## Update 2026-11-08 (later): re-placement for the real footprints
+
+- Method: `run_best.sh` with 8 runs; run i uses the placement seeds 16(i-1)+1 to 16i (`PLACE_SEED_START`), plane rule on (`OUTER_ONLY=1`), `KEYFIRST=1`, real footprints. Open items after the clean-up per run: 6, 13, 7, 5, **1**, 12, 17, 26 (the last two also have 1 hard finding). Earlier batch with the old placement and the same rule: best 4.
+- Best run (run 5): 1 open item, a pair of GND copper clusters at about (38.4, 30.3) mm (R2 pin 2 side on F.Cu and U4 pin 2 side on B.Cu); both clusters have ground vias, so the likely cause is a split In1 ground plane there (not confirmed; the plane has 4 pieces). Findings: courtyards_overlap 15 (limit 16), items_not_allowed 1 (U9), silk_edge_clearance 2 (J1; the silk waiver is off). It does not pass the strict gate.
+- Power check on that board: VBUS_IC 34.5 mOhm, 51.8 mV at 1.5 A (target 50 mV, an analyst value, narrowly missed); +3V3 26.4 mV at 0.5 A; +5V 23.5 mV at 1.0 A. In1 (GND): 4 pieces, 26.6 % removed, 316 mm of signal track still on it; In2 (+5V): 1 piece, 31 % removed, 293 mm of signal track. The plane rule moves VBUS_IC and +3V3 only; the signal nets still use In1 and In2.
+- Not done: close the last open item; keep the signals off In1; fix the J1 silk at the board edge; analyse `lib_footprint_issues`.
+
+## Update 2026-11-08 (night): fine rules, ground plane kept solid, fabricator facts
+
+- Fabricator facts (JLCPCB, read 2026-11-08, only this fabricator): capability page, multilayer column: track and space 0.09 mm (1 oz), via hole minimum 0.15 mm, via diameter minimum 0.25 mm, annular ring recommended 0.20 and absolute minimum 0.15 mm, via hole to hole 0.2 mm, pad hole to pad hole 0.45 mm, pad to track 0.1 mm, SMD pad to pad 0.15 mm, copper to routed edge 0.2 mm. Stack-ups JLC04161H-7628 and -3313: outer copper 35 um, inner copper 15.2 um (0.5 oz). My first experiment profile (via 0.45 / 0.2, ring 0.125) was under the absolute ring minimum; it was stopped and rerun with 0.5 / 0.2 (ring 0.15). The power check now uses the 15.2 um inner copper.
+- Rules in the code: `SPIKE_PROFILE=fine` (0.1 mm track and clearance, vias 0.5 / 0.2), `SPIKE_IN1_SIGNALS` (0 default: In1 carries GND only; the router gets `use_layer` rules for every class), `OUTER_ONLY` (VBUS_IC, +3V3 outer layers). The J1 footprint is a project copy without the three silk lines at the board edge (`CUSTOM:USB_C_Receptacle_GCT_USB4085_edge`).
+- Experiment (4 runs each, placement seeds 1 to 64, `run_best.sh`, `KEYFIRST=1`, new footprints): signals allowed on In1 (`exA`): open items after the clean-up 0, 2, 1, 1. Signals off In1 (`exB`): 0, 4, 0, 2. Earlier, spike rules: best 1 (In1 allowed) and 6 (In1 closed).
+- Best run `exB` run 3 under the strict gate (`SPIKE_PROFILE=fine`, `SPIKE_ALLOW_KNOWN_OPEN=0`, board in its run folder with its libraries): 0 unconnected, no clearance, width, edge, hole or silk finding; tolerated only: courtyards_overlap 14 and items_not_allowed 1 (U9, DEV-004), footprint_symbol_mismatch 8, net_conflict 77. ERC 0 findings. In1 (GND): 1 piece, 11.7 % removed, no signal track; In2 (+5V): 2 pieces, 29.7 % removed, 444 mm of signal track.
+- Power check on that board (15.2 um inner copper): VBUS_IC 39.6 mOhm, 59.3 mV at 1.5 A (above my 50 mV target, an analyst value; not a requirement), +3V3 24.2 mV at 0.5 A, +5V 11.8 mV at 1.0 A.
+- Not run: the batch with the annular ring raised to the recommended 0.20 mm; a fabricator DFM check; other fabricators; thermal; antenna and RF; a repeat of this result (2 of 4 runs complete on exB, not a guarantee); the VBUS_IC path is not yet widened or shortened.
+- Decision draft: `docs/decisions/ADR-0020-pcb-fab-rules-and-inner-layer-use.md` (Proposed).
+
+## Update 2026-11-08 (late): generated LED ring cells, pin swap check
+
+- Ring cells (`src/pcb_ring.py`, tests `tests/test_pcb_ring.py`, 4 tests): the 16 LEDs on the top layer and their bypass capacitors on the bottom layer form one cell each; the capacitor is turned so its +5V pad lies under the LED +5V pad (14 of 16 cells within 1 mm; D2 and D13 are shifted by the placement). Per cell: +5V and GND, LED pad to via to capacitor pad (grid router of `pcb_fix.py`, outer layers only, 0.25 mm stubs; the vias meet the In2 and In1 planes), and the data link DOUT to the next DIN (15 links, 0.1 or 0.15 mm). All 47 links complete on the placed board; no clearance, hole, edge or width finding in the test. The ring is locked before the autorouter runs; the router does not see the +5V pads of the ring (`RING=1`, default; the DSN export blanks them).
+- Effect (12 and 8 run batches, fine rules, signals off In1): complete runs 2 of 8 (first batch) and 3 of 8 (second batch); the strict gate leaves one or two small findings on each complete run (dangling track, off-centre track end on a via, silk). VBUS_IC drops 37.8 mV at 1.5 A on the best run of the first batch (was 59 mV without the ring cells) and 44.8 mV on the best of the second; +5V plane in 1 piece, 18.7 to 28 % removed; GND plane 1 piece, 11.5 % removed, no signal track.
+- Pin swaps: the module pads of the eight movable GPIOs (GPIO0, 3, 4, 5, 6, 7, 10; GPIO1 and 4 are reserved for the sensor) were tested over all assignments on the placed board, wire length (half perimeter) 77.4 mm now, best 75.2 mm: a 3 % gain. The pin map is written into HW-010 and the ADRs. Not changed.
+- Picker: `pcb_pick.py` ranks runs by open items, then by the FAIL lines of the strict gate; `run_best.sh` copies the libraries with the best board.
+- Not run: a batch that finishes with the strict gate clean (running when this was written); fabricator DFM check; antenna and RF checks; thermal check.
+
+## Update 2026-11-08 (end of day): 12 runs with the ring cells and the strict-gate picker
+
+- `run_best.sh`, 12 runs, fine rules, ring cells, signals off In1: open items after the clean-up 2, 8, **0**, 3, **0**, **0**, 3, 7, 1, 1, 4, **0**; strict FAIL lines per run 4, 3, 1, 2, 2, 3, 3 ...; 4 of 12 runs have no open item.
+- Best run (run 3): 0 open items; one strict FAIL left: `connection_width` 1 (a ground neck under 0.1 mm); everything else tolerated (courtyards_overlap 14, items_not_allowed 1 on U9, footprint_symbol_mismatch 8, net_conflict 77). VBUS_IC 37.8 mOhm, 56.6 mV at 1.5 A on this run (the best runs of the other batches gave 37.8 and 44.8 mV; the value varies from run to run), +3V3 35.6 mV at 0.5 A, +5V 9.7 mV at 1.0 A. GND plane 1 piece, 11.7 % removed, no signal track; +5V plane 1 piece, 26 % removed.
+- After the batch: `connection_width` was added to the findings the clean-up removes and routes again (`pcb_fix.RIPUP_KINDS`); not rerun. So no run passes the whole strict gate yet; the nearest has one warning.
+- Not run: the batch with that change; the VBUS_IC path is not yet fixed by constraint (drop varies 38 to 59 mV against my 50 mV target); fabricator DFM check; antenna and RF; thermal.
+
+## Update 2026-11-08 (late): `connection_width` clean-up and power-path ties (HW-010)
+
+Fine rules, ring cells, 12 runs per batch, same inputs (`full7`). Evidence: `ring4.log`, `ring5.log` in the session scratchpad (not committed).
+
+| Batch | Change | Runs with 0 open items | Runs with 0 strict findings | Best run | Drops VBUS_IC / +5V / +3V3 (mV) |
+|---|---|---|---|---|---|
+| ring4 | `connection_width` added to the rip-up kinds | 4 of 12 (runs 3, 5, 6, 9) | 1 (run 3) | run 3: gate clean (waived items only) | 38.8 / 8.9 / 56.6 |
+| ring5 | plus soft placement ties J1 A4, J1 B9, C2.1 to U7.1 (weight 3) and U8.5 to U9.3 (weight 6) | 1 of 12 (run 4) | 0 | run 4: 0 open, 3 strict warnings (`silk_over_copper` 1, `track_dangling` 1, `track_not_centered_on_via` 1) | 9.5 / 13.0 / 18.1 |
+
+Reading: the ties cut every drop by a factor of 2 to 3 (the +3V3 drop falls from 56.6 to 18.1 mV, below the 50 mV analyst target), but routing completion got worse in this batch (12 runs only; Freerouting is not deterministic, so the difference may be partly chance). The 50 mV target is an analyst assumption, not a requirement. The ring5 best run is not gate-clean; the ring4 best run is, but its +3V3 drop is above the target. Not run: lower tie weights, more runs.
+
+### ring6: tie weights halved (VBUS_IC ties 1.5, +3V3 tie 3.0)
+
+12 runs, same inputs. Evidence: `ring6.log` (session scratchpad, not committed).
+
+| Runs with 0 open items | Runs with 0 strict findings and 0 hard findings | Best run | Drops VBUS_IC / +5V / +3V3 (mV) | GND plane | +5V plane |
+|---|---|---|---|---|---|
+| 4 of 12 (runs 3, 4, 5, 6) | 2 (runs 4 and 6) | run 4 | 16.5 / 19.9 / 41.5 | 1 piece, 11.8 % removed | 1 piece, 22.4 % removed |
+
+Reading: the halved ties keep routing completion at the ring4 level and still bring all three drops under the 50 mV analyst target (an assumption, not a requirement). This is the chosen setting. One batch only; Freerouting is not deterministic. Not run: antenna/RF, thermal, fab DFM check of the result.
+
+## Update 2026-11-08 (evening): datasheet pad numbers on U1 and U9, test points out of the BOM (HW-010)
+
+Change: the box symbols of U1 (TUSB321) and U9 (ESP32-C3-MINI-1) carry the pad numbers of the datasheets (`layout_full.PAD`; TI SLLSEO6C section 5; Espressif datasheet v2.2 table 3-1, the nine centre pads are pin 49). The name-to-pad table `pcb_full.PADMAP`, which only the board side used, is deleted, so the DRC schematic parity check now covers both parts. The test point symbols are out of the BOM, like their footprints. ERC 0 findings, intent and drawing 55 nets each, two builds identical (`full8`). Tests: `test_layout_full.py` 30 pass (new: datasheet pad numbers, 22 GND pads on GND, test points out of the BOM); `test_pcb_full.py`, `test_kicad_strict.py`, `test_pcb_ring.py`, `test_lib_tables.py` 63 pass. The fixture `tests/data/full.net` is the new netlist.
+
+### ring7: 12 runs, fine rules, ring cells, ring6 tie weights, input `full8`
+
+Evidence: `ring7.log` (session scratchpad, not committed); `git status` at the start in `ring7.gitstatus` (the four changed files of this update).
+
+| Runs with 0 open items | Runs with 0 strict findings and 0 hard findings | Best run | Drops VBUS_IC / +5V / +3V3 (mV) | GND plane | +5V plane |
+|---|---|---|---|---|---|
+| 2 of 12 (runs 1, 3) | 0 | run 1 | 30.4 / 9.3 / 24.3 | 1 piece, 11.5 % removed | 1 piece, 20.1 % removed |
+
+Best run, strict gate (`stitched-4l`): 16 findings, against 98 in ring6 run 4. `net_conflict` 0 (was 77), `footprint_symbol_mismatch` 2 (was 8: only C3 and C4 left, sizes not designed, HW-014 Draft), `courtyards_overlap` 12 and `items_not_allowed` 1 (all on U9, antenna, DEV-004, ADR-0003), and one strict FAIL: `silk_over_copper` 1 (silk outline of U9 over pad 4 of U3, a part the placer put in the module area).
+
+Reading: the pin numbers removed every `net_conflict`. No run of this batch passes the strict gate (ring6 had 2 of 12). The changed netlist changes the placement input, so this batch is a new random draw; one batch each cannot show whether the change made routing worse. Not run: a second batch; fabricator DFM check; antenna and RF; thermal.
+
+## Update 2026-11-08 (ring8 to ring10): tidiness score, placement grid, antenna keep-out
+
+Aim (owner request): a board that looks hand-made. Basis: HW-010 (Approved, spike board); no new requirement. All batches: 12 runs, `SPIKE_PROFILE=fine`, `SPIKE_ALLOW_KNOWN_OPEN=0`, `full8` netlist, Freerouting 2.5.0, tree not clean (new files `src/pcb_quality.py`, `tests/test_pcb_quality.py`; see below). One change per batch. Freerouting is not deterministic: one batch is one batch.
+
+New tools: `src/pcb_quality.py` (vias, track length, off-45 length, sharp corners, LED ring spread, share of passives in rows, share of parts on 90 degrees, distance of a passive to its partner) is the tie-break of `pcb_pick.py` after the gate score; `run_best.sh` takes `SEED_OFFSET`; `pcb_place.py` takes `PLACE_GRID` (mm, default 0 = off); `pcb_full.py` takes `PLACE_ANT_KEEPOUT=1` (no movable part in the vendor keep-out of `mech_outline.vendor_keepout_rect`, 15 mm beyond the module end).
+
+| Batch | Change against ring7 | Runs with 0 open items | Runs with 0 strict FAIL and 0 open | Rows (mean of 12) | Best run |
+|---|---|---|---|---|---|
+| ring7 | none (reference) | 2 | 0 | 33 % | run 1 |
+| ring8 (3 x 12) | new seeds, tidiness tie-break | 11 of 36 | 0 | not measured | 1 FAIL at best |
+| ring9 g05 | `PLACE_GRID=0.5` | 2 | 0 | 79 % | run 8: 2 FAIL |
+| ring9 g10 | `PLACE_GRID=1.0` | 5 | 0 | 95 % | run 4: 1 FAIL (courtyards 15 > 14); parts left of the module, in the antenna keep-out |
+| ring10 | grid 1.0 and `PLACE_ANT_KEEPOUT=1` | 1 | **1 (run 3)** | 95 % | run 3 |
+
+ring10 run 3, strict gate `stitched-4l`: 0 open items, 0 FAIL, 0 hard findings. Tolerated classes: courtyards_overlap 9 (max 14, U9 antenna, DEV-004), items_not_allowed 1 (DEV-004), footprint_symbol_mismatch 2 (C3, C4, HW-014 Draft). Power check: drops 42.6 / 18.7 / 27.8 mV (ring7 best: 30.4 / 9.3 / 24.3), all within the 50 mV analyst target (an assumption, not a requirement); GND plane 1 piece, 12.2 % removed; +5V plane 1 piece, 20.9 % removed. Tidiness: 149 vias, 1536 mm track, 21 sharp corners, 14.4 mm off-45 (about 123 segments, mostly 0.1 mm jogs at pads of the rotated ring LEDs), passive to partner 5.0 mm (ring7: 3.4).
+
+Reading: the grid made the passives line up (33 % to 95 %); the keep-out removed the parts from the antenna zone. One gate-clean run of 12 is a single result, not a rate. The run is worse than ring7 run 1 in vias (149 against 124), track length and decoupling distance. Not attributed: the grid and the keep-out were not tested apart in the final batch. Test of the keep-out: `AntennaKeepout` in `tests/test_pcb_full.py` passes; it was not shown to fail without the rule.
+
+Not run: a second ring10 batch, decoupling ties for C5/C6 at U8, grouped placement of the USB/power/CC blocks, fab DFM check, RF, thermal, bench. The 13 antenna findings stay per ADR-0003 and DEV-004 until spike 7.2.
+
+## Update 2026-11-08 (ring11 to ring14): regulator ties, functional blocks, orientation, clean-up fix
+
+Aim and basis as in the ring8 to ring10 section (owner request: a board that looks hand-made; HW-010 Approved; no new requirement). All batches: 12 runs, `SPIKE_PROFILE=fine`, `SPIKE_ALLOW_KNOWN_OPEN=0`, `full8` netlist, Freerouting 2.5.0, grid 1.0 and antenna keep-out unless stated. Evidence: `ring11.log` to `ring14.log` in the session scratchpad (not committed).
+
+| Batch | Change against the previous one | Runs with 0 open items | Runs with 0 open and 0 strict FAIL | Best run |
+|---|---|---|---|---|
+| ring11 | pin ties C5-U8 and C6-U8 (`PIN_TIES`) | 1 | 0 | run 10: 2 FAIL (track_dangling 2, track_not_centered_on_via 3) |
+| ring12 | `PLACE_BLOCKS=3` (7 functional blocks, `pcb_rules.BLOCKS`) and `PLACE_ORIENT=1.5` (like parts on one axis, switch circuits as twins) | 4 | 0 | run 8: 1 FAIL (track_not_centered_on_via 2) |
+| ring13 | ring12 plus `PLACE_STRICT=1` (ICs match in rotation and side) and `PLACE_ROWS=3` (test points in a row) | 0 | 0 | run 8: 1 open, 2 FAIL |
+| ring14 | ring12 settings, strict and rows off, `SEED_OFFSET=200`, clean-up fix in the pipeline | 3 (runs 4, 8, 9) | **2 (runs 4, 9)** | run 9 |
+
+Clean-up fix (`pcb_fix.snap_to_vias`, called by `last_pass`): the function existed but nothing called it. Track ends 0.009 and 0.05 mm beside a via made the gate fail with `track_not_centered_on_via`. The call moves such ends onto the via centre and removes a track that ends up with no length. It acts only at the sites the gate reported: a first version that snapped everywhere broke a clearance (0.093 against 0.100 mm). Regression tests: `tests/test_pcb_fix.py::SnapToVias`. Applied by hand to a copy of ring12 run 8 (gate clean), then run inside the pipeline in ring13 and ring14.
+
+ring14 run 9 (best), strict gate `stitched-4l`: 0 open items, 0 FAIL, 0 hard findings. Tolerated classes: courtyards_overlap 8 (max 14, U9 antenna, DEV-004), items_not_allowed 1 (DEV-004), footprint_symbol_mismatch 2 (C3, C4, HW-014 Draft). Power check (`pcb_power_check.py`; the 50 mV target is an analyst assumption, not a requirement): +3V3 22.7 mV, +5V 18.0 mV, VBUS_IC 13.5 mV. Planes: GND 1 piece, 11.7 % removed; +5V 1 piece, 21.5 % removed. Layout numbers: 131 vias, 1370 mm track, 14 sharp corners, 95 % of passives in rows, 87.5 % of like parts on one axis, passive to partner 3.8 mm, block member to anchor 7.5 mm. ring14 run 4 also has 0 FAIL but one path drops 58.0 mV (over the 50 mV assumption); it is not chosen.
+
+Visual review of run 9 (3D render, `kicad-cli pcb render`; the render shows the copper only faintly): the LED ring is even and the antenna slot is clear. Flaws a reviewer can name: the six test points are spread over the lower half instead of one row; the ICs point in mixed directions; the 1206 bulk capacitors stand alone; the blocks are looser than in ring12 run 8.
+
+Reading: ring12 gave the most open-item-free runs, but none passed the gate until the clean-up fix. With the fix, ring14 (same settings, new seeds) gave 2 gate-clean runs of 12. That is a single batch, so the pass rate is not known beyond "above 0 of 12". The strict-IC and test-point-row rules (ring13) did not help: 0 of 12 route fully; they are left off by default. The ties of ring11 changed the partner distance by about 0.2 mm, within the noise of one batch.
+
+Not run: a second ring14 batch, fab DFM check (a partial check against fabricator minimums is in the next section), RF, thermal, bench. No statement "DFx approved" or "fully functional" is made. The 13 antenna findings stay per ADR-0003 and DEV-004 until spike 7.2. Schematic simplification (one resistor for the ILIM pair, fewer supervisor timing capacitors) is a separate revision: it needs a requirement and an ADR (owner decision 2026-11-08).
+
+### Fabricator-minimum check of ring14 run 9 (`src/pcb_fabcheck.py`, tests `tests/test_pcb_fabcheck.py`, 8 pass)
+
+What it is: a read-only script that compares the board with the JLCPCB multilayer minimums recorded in ADR-0020 and `pcb_rules.py` (capability page read 2026-11-08, not read again). It is not a fabricator review: no fabricator saw the files and no other fabricator was checked.
+
+| Check | Limit (JLCPCB) | Board (run 9) | Result |
+|---|---|---|---|
+| Track width | 0.09 mm | 0.10 mm minimum | pass |
+| Via diameter | 0.25 mm | 0.50 mm | pass |
+| Via drill | 0.15 mm | 0.20 mm | pass |
+| Annular ring | 0.15 mm absolute minimum | 0.15 mm (all 131 vias) | pass at the minimum |
+| Via hole to via hole | 0.2 mm | no pair below | pass |
+| Pad hole to pad hole (slots as capsules) | 0.45 mm | no pair below | pass |
+| SMD pad to pad (KiCad DRC rule, 0.15 mm) | 0.15 mm | 0 violations | pass |
+
+Notes: (1) All 131 vias are below the recommended ring of 0.20 mm; they sit exactly at the absolute minimum, with no margin. (2) The track minimum has 11 % margin (0.10 against 0.09 mm). (3) Track and space and the copper to edge distance are not recomputed: the strict gate holds 0.1 mm clearance and 0.3 mm edge, both above the fabricator minimums. (4) The first version of the hole check treated the 2.1 mm slots of the USB-C shell as circles and reported four false failures; slots are now modelled as capsules (test first). (5) The pad-to-pad rule was shown to detect: at a limit of 0.5 mm it reports 155 pairs.
+
+Not checked: Gerber and drill export and a viewer check, silkscreen against pads on the fabricator side, solder-mask bridges and slivers, paste, panelisation, assembly (DFA: courtyards, orientation, polarity, fiducials), impedance, stack-up. The fine profile that every gate-clean board used is an experiment: ADR-0020 is **Proposed**, the owner has not decided, and the risk register entry for yield at 0.1 mm lines is not written. This check therefore does not support the statement "DFx approved" or "fabrication ready".
+
+## Update 2026-11-08 (ring15): test points pulled softly into a row (HW-010)
+
+Basis as in ring14: 12 runs, `SPIKE_PROFILE=fine`, `SPIKE_ALLOW_KNOWN_OPEN=0`, `full8` netlist, Freerouting 2.5.0, `PLACE_GRID=1.0`, `PLACE_ANT_KEEPOUT=1`, `PLACE_BLOCKS=3`, `PLACE_ORIENT=1.5`, `SEED_OFFSET=300`. One change against ring14: `PLACE_ROWS=0.5` (ring13 used 3 together with strict ICs and gave no fully routed run). Strict ICs stay off.
+
+| Batch | Change | Runs with 0 open and 0 strict FAIL | Best run |
+|---|---|---|---|
+| ring15 | `PLACE_ROWS=0.5`, new seeds | **3 (runs 1, 2, 5)** | run 1 |
+
+Picker table (unconnected / strict FAIL; tidy = sharp corners, off-45 mm, vias, track mm): run 1: 0 / 0, (12, 18.5, 133, 1330.1); run 2: 0 / 0, (19, 11.0, 126, 1364.5); run 5: 0 / 0, (16, 11.3, 135, 1411.2). The other nine runs have 1 to 8 unconnected nets or 1 to 3 strict FAIL.
+
+Power check of the three gate-clean boards (`pcb_power_check.py`; drops at 1.5 A VBUS_IC, 1.0 A +5V, 0.5 A +3V3; target 50 mV is an analyst assumption):
+
+| Board | VBUS_IC | +5V | +3V3 |
+|---|---|---|---|
+| ring15 run 1 (picker's best) | 50.4 mV, over target | **no path found (infinite)**; the +5V plane is in 2 pieces | 34.3 mV |
+| ring15 run 2 | 42.5 mV | 19.0 mV | 6.3 mV |
+| ring15 run 5 | 41.9 mV | 17.2 mV | 24.2 mV |
+| ring14 run 9 | 13.5 mV | 18.0 mV | 22.7 mV |
+
+The picker ranks by gate and tidiness only, so it chose run 1. The power check shows run 1 is not usable as the best board (the checker finds no copper path on +5V although the DRC reports 0 unconnected; the cause was not investigated). Run 5 (next candidate) was checked in full: strict gate pass (courtyards_overlap 10), fab-minimum check PASS, power check pass; sharp corners 16, vias 135, track 1411 mm, passives in rows 0.951, like parts on one axis 0.929, block member 8.18 mm. In its bottom render the six test points are not in a row, so `PLACE_ROWS=0.5` did not do its job.
+
+Against ring14 run 9 (13.5 mV on VBUS_IC, 14 sharp corners, 131 vias, 1370 mm, rows 0.951, like parts 0.875, block member 7.47 mm), run 5 is better only on like parts on one axis. **Ring15 produced no better board; ring14 run 9 stays the stored result.** Tooling change made afterwards: `pcb_pick.py` now ranks power-check failures (`power_fails_from`, 2 tests) after the gate and before tidiness. Re-picking the 12 ring15 runs gives run 5 (run 1 has 2 power FAIL); the pick is still below ring14 run 9 on the numbers above.
+
+Limits: one batch, so three of 12 is a rough number, not a rate. The effect of `PLACE_ROWS=0.5` cannot be separated from seed luck. ADR-0020 is Proposed and the fab numbers are JLCPCB only. Not run: full fab review (Gerber, silkscreen, solder mask, assembly), RF, thermal, bench; no statement "DFx approved" or "fully functional" is made.
+
+The 15 errors of `tests/test_gate_logic.py` are by design: the tests read a netlist named by the environment variable `GATE_NET` (see its docstring) and are not run without it. They are not a defect of the placer or router.
+
+
+## Stored result (2026-11-08)
+The board is stored in `hw/kicad/spike-gate/board/` (ring14 run 9; provenance and checks in its README). The README images (`docs/verification/reports/images/spike-*.png`) are re-rendered from it with `render_readme_images.sh`. The strict gate was re-run on the stored copy: 11 tolerated findings, none else.

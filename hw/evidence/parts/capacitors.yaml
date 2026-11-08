@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-# Evidence placeholder for all capacitors (C1, C1B, C2 to C23). Design values come from the netlist; no capacitor datasheet is in the folder.
+# Evidence placeholder for all capacitors (C1, C27, C2 to C23). Design values come from the netlist; no capacitor datasheet is in the folder.
 schema_version: 1
 part:
   key: CAPACITORS
   mpn: family (0603 capacitors, parts not chosen)
   manufacturer: not chosen
-  description: 0603 capacitors; C0G for C1 and C1B
+  description: 0603 capacitors; C0G for C1 and C27
   selection: family
   package:
     code: '0603'
@@ -13,7 +13,7 @@ part:
     pin_count: 2
   used_in:
   - C1
-  - C1B
+  - C27
   - C2
   - C3
   - C4
@@ -51,7 +51,7 @@ claims:
   notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact). Sets the TPS3840
     hold-off delay together with RCT.
 - id: CAPACITORS.c1b_tolerance
-  parameter: 'C1B 150n C0G 5 percent 50 V: capacitance tolerance and drift'
+  parameter: 'C27 150n C0G 5 percent 50 V: capacitance tolerance and drift'
   category: electrical
   status: source-missing
   notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).
@@ -61,7 +61,7 @@ claims:
   status: source-missing
   notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).
 - id: CAPACITORS.c0g_package
-  parameter: 'C1 and C1B are 1206 in the spike gate and 0603 in the full-board netlist: availability of 470n and 150n C0G in 0603'
+  parameter: 'C1 and C27 are 1206 in the spike gate and 0603 in the full-board netlist: availability of 470n and 150n C0G in 0603'
   category: other
   status: source-missing
   notes: No capacitor datasheet is in the datasheets folder (the Murata GRM31C5C1E474JE01 and GRM31C5C1H154JE02 downloads failed, see the datasheets README). The design value is taken from the netlist (not a datasheet fact).

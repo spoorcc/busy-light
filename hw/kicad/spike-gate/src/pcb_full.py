@@ -50,23 +50,8 @@ STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 # ref -> footprint (lib:name) used instead of the schematic's footprint field
 FOOTPRINT_OVERRIDE = {
     "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
-    "U8": "Package_TO_SOT_SMD:SOT-223-3_TabPin2",     # schematic field empty (REG_3V3 placeholder)
-    "U9": "CUSTOM:ESP32-C6-MINI-1_NO_KEEPOUT",        # ESP32-C3-MINI-1 not in the libraries; ESP32-C6-MINI-1 (same 13.2x16.6 module family) without its keep-out zone
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
-}
-# plan 06 D1: smaller LED so the ring routes; the schematic still names the 5 x 5 part (stand-in, vendor drawing unchecked)
-LED_2020 = "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm"
-FOOTPRINT_OVERRIDE.update({"D%d" % i: LED_2020 for i in range(1, 17)})
-# schematic pin name -> pad number, where the schematic box symbol uses names (datasheet pin tables)
-PADMAP = {
-    "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},   # TUSB321 SLLSEZ? pin table
-    "U8": {"GND": "1", "OUT": "2", "IN": "3"},                                                  # PROVISIONAL (AMS1117-style)
-    "U9": {"GPIO0": "12", "GPIO1": "13", "GPIO2": "5", "GPIO3": "6", "GPIO4": "18", "GPIO5": "19",
-           "GPIO6": "20", "GPIO7": "21", "GPIO8": "22", "GPIO9": "23", "GPIO10": "16",
-           "GPIO18": "26", "GPIO19": "27", "GPIO20": "30", "GPIO21": "31", "3V3": "3", "EN": "8",
-           "GND": ("1", "2", "11", "14", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46",
-                   "47", "48", "49", "50", "51", "52", "53")},   # ESP32-C3-MINI-1 datasheet v2.2 table 3-1
 }
 
 # ----------------------------------------------------------------------------- netlist parsing
@@ -129,17 +114,25 @@ def id_counter(ref, num):
     return _SEEN[k]
 
 
+U9_NAME = "ESP32-C3-MINI-1"
+
+
 def derive_u9_footprint(outdir):
-    """Write CUSTOM.pretty/ESP32-C6-MINI-1_NO_KEEPOUT: the stock RF_Module footprint without its own keep-out zone
-    (the board has its own rule areas). A named project footprint instead of a silent change of the stock one, so
-    that the board footprint equals its library copy (no lib_footprint_mismatch)."""
+    """Write CUSTOM.pretty/ESP32-C3-MINI-1 from the stock RF_Module footprint ESP32-C6-MINI-1 without its own keep-out
+    zone (the board has its own rule areas) and without its 3D model reference. KiCad has no C3-MINI-1 footprint. The
+    land pattern of both modules is the one of datasheet figure 11-1 (ESP32-C3-MINI-1 datasheet v2.2: 48 pads 0.8 x 0.4,
+    four 0.7 mm corner pads, 3 x 3 grid of 1.45 mm ground pads); tests/test_pcb_full.py compares the numbers. A named
+    project footprint instead of a silent change of the stock one (no lib_footprint_mismatch)."""
     fp = _IO.FootprintLoad(FP_ROOT + "RF_Module.pretty", "ESP32-C6-MINI-1")
     for z in list(fp.Zones()):
         fp.Remove(z)
-    fp.SetFPID(pcbnew.LIB_ID("", "ESP32-C6-MINI-1_NO_KEEPOUT"))
+    fp.SetFPID(pcbnew.LIB_ID("", U9_NAME))
+    fp.SetLibDescription("ESP32-C3-MINI-1 module, land pattern of datasheet v2.2 figure 11-1 (derived from the KiCad ESP32-C6-MINI-1 footprint, same pads)")
+    fp.Models().clear()
     pretty = os.path.join(outdir, custom_fp.NICK + ".pretty")
+    os.makedirs(pretty, exist_ok=True)
     _IO.FootprintSave(pretty, fp)
-    mod = os.path.join(pretty, "ESP32-C6-MINI-1_NO_KEEPOUT.kicad_mod")
+    mod = os.path.join(pretty, U9_NAME + ".kicad_mod")
     normalise_uuids(mod)
 
 
@@ -184,13 +177,45 @@ MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the c
 # ADR-0016 proximity rules (centre distance, mm); the placer rejects a seed that breaks one, the test checks the board
 LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R19", "U15", 6.0),
                 ("C24", "U14", 6.0), ("C25", "U15", 6.0),         # bypass capacitor at the switch supply pin
-                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0), ("R_ILIM3B", "U7", 15.0),
-                ("C1", "U5", 8.0), ("C1B", "U5", 12.0), ("C1C", "U5", 14.0), ("C1D", "U5", 14.0),
-                ("C1E", "U5", 14.0), ("C1F", "U5", 14.0))
+                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0), ("R20", "U7", 15.0),
+                ("C1", "U5", 8.0), ("C27", "U5", 12.0), ("C28", "U5", 14.0), ("C29", "U5", 14.0),
+                ("C30", "U5", 14.0), ("C31", "U5", 14.0))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
-R_MOVE = 16.6                 # movable parts stay inside this radius (the LED ring pads start at about 17.8)
+R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 SA_ITERS = 160000
-SA_SEEDS = tuple(range(1, 17))
+STRICT_ICS = os.environ.get("PLACE_STRICT", "0") == "1"      # ring13: ICs of one kind match in rotation and side (no gain, off)
+_SEED0 = int(os.environ.get("PLACE_SEED_START", "1"))    # run_best.sh gives every run its own placement seeds
+SA_SEEDS = tuple(range(_SEED0, _SEED0 + 16))
+
+
+def part_families(comps, fixed=()):
+    """Movable parts of one kind (same reference letters and footprint) that should share one orientation (ring12).
+    comps: {ref: (value, footprint, ...)}. Returns a sorted list of ref tuples with two or more members."""
+    kinds = {}
+    for ref, c in comps.items():
+        if ref in fixed or ref.startswith("TP"):
+            continue
+        kinds.setdefault((re.match("[A-Z]+", ref).group(0), c[1]), []).append(ref)
+    return sorted(tuple(sorted(v)) for v in kinds.values() if len(v) >= 2)
+
+
+def ic_families(comps, fixed=()):
+    """Families of ICs (reference letter U) that share a footprint: they must point the same way (ring13)."""
+    return [f for f in part_families(comps, fixed) if f[0].startswith("U")]
+
+
+def orientation_families(comps, fixed=(), strict_ics=False):
+    """(soft families, strict families). ICs are strict only when strict_ics (env PLACE_STRICT=1, ring13: no gain, off)."""
+    fams = part_families(comps, fixed)
+    if not strict_ics:
+        return fams, []
+    return [f for f in fams if not f[0].startswith("U")], ic_families(comps, fixed)
+
+
+def test_point_row(comps, fixed=()):
+    """The movable test points (TP...) as one row to line up (ring13); empty when there are fewer than two."""
+    tps = tuple(sorted(r for r in comps if r.startswith("TP") and r not in fixed))
+    return [tps] if len(tps) >= 2 else []
 
 
 def K(mx, my):
@@ -305,10 +330,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 
     pad_net = {}
     for n, nodes in nets.items():
-        for ref, pin in nodes:
-            mp = PADMAP.get(ref, {}).get(pin, pin)
-            for pn in (mp if isinstance(mp, tuple) else (mp,)):
-                pad_net[(ref, pn)] = n
+        for ref, pin in nodes:          # schematic pin numbers are the pad numbers (layout_full.PAD)
+            pad_net[(ref, pin)] = n
 
     # ---- load all footprints
     fps = {}
@@ -368,15 +391,26 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         c = fps[cref]
         c.SetPosition(vec(0, 0))
         orient(c, rot, "B")
-        # keep the cap pad axis tangential: try the rotation and its quarter turn
-        for tr in (rot, (rot + 90) % 360):
+        # the cap pad axis stays tangential and the +5V pad of the cap sits under the +5V pad of the LED (same for GND):
+        # the four rotations are tried, the tangential ones are ranked by the distance of the equal-net pads
+        tang = (math.cos(math.radians(az)), -math.sin(math.radians(az)))   # radial in KiCad axes
+        best = None
+        for tr in (rot, (rot + 180) % 360, (rot + 90) % 360, (rot + 270) % 360):
             c.SetOrientationDegrees(tr)
-            pp = [q.GetPosition() for q in c.Pads()]
-            tang = (math.cos(math.radians(az)), -math.sin(math.radians(az)))   # radial in KiCad axes
-            vx, vy = pcbnew.ToMM(pp[0].x - pp[1].x), pcbnew.ToMM(pp[0].y - pp[1].y)
+            c.SetPosition(vec(0, 0))
+            pp = {q.GetNumber(): q.GetPosition() for q in c.Pads()}
+            vx, vy = pcbnew.ToMM(pp["1"].x - pp["2"].x), pcbnew.ToMM(pp["1"].y - pp["2"].y)
             n = math.hypot(vx, vy) or 1.0
-            if abs((vx * tang[0] + vy * tang[1]) / n) < 0.3:          # pad axis mostly tangential
-                break
+            if abs((vx * tang[0] + vy * tang[1]) / n) >= 0.3:          # pad axis not tangential
+                continue
+            # LED pads in the same frame: pad 4 is +5V and pad 2 is GND (KiCad symbol LED:WS2812B-2020); the LED sits at the origin here
+            lp = {q.GetNumber(): q.GetPosition() for q in d.Pads()}
+            lx = {k: (pcbnew.ToMM(v.x - d.GetPosition().x), pcbnew.ToMM(v.y - d.GetPosition().y)) for k, v in lp.items()}
+            cx = {k: (pcbnew.ToMM(v.x), pcbnew.ToMM(v.y)) for k, v in pp.items()}
+            cost = math.hypot(lx["4"][0] - cx["1"][0], lx["4"][1] - cx["1"][1]) + math.hypot(lx["2"][0] - cx["2"][0], lx["2"][1] - cx["2"][1])
+            if best is None or cost < best[0] - 1e-9:
+                best = (cost, tr)
+        c.SetOrientationDegrees(best[1] if best else rot)
         centre_at(c, cx_, cy_, 0.0)
         note_fixed(cref, "B")
 
@@ -412,14 +446,24 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     u9.SetPosition(vec(0, 0))
     orient(u9, MODULE_ROT, "F")
     mx0, my0, mx1, my1 = MO.module_rect()
-    mcx, mcy = K((mx0 + mx1) / 2, (my0 + my1) / 2)
+    ax0, ay0, ax1, ay1 = MO.antenna_strip()
+    # the pad area starts at the end of the antenna strip (datasheet fig 11-1: antenna area beyond the pad rows);
+    # the pad area is not centred in the module body, so the pads are centred on the strip end plus half their length
+    ex0, _, ex1, _ = pad_extent_mm(u9, 0.0)
+    mcx, mcy = K(ax1 + (ex1 - ex0) / 2, (my0 + my1) / 2)
     centre_at(u9, mcx, mcy, 0.0)
     note_fixed("U9", "F", 0.0)
-    ax0, ay0, ax1, ay1 = MO.antenna_strip()
     # module body as a top-side obstacle
     kx0, ky0 = K(mx0, my1)
     kx1, ky1 = K(mx1, my0)
     fixed_rects.append(("F", kx0 - CX - 0.3, ky0 - CY - 0.3, kx1 - CX + 0.3, ky1 - CY + 0.3))
+    if os.environ.get("PLACE_ANT_KEEPOUT", "0") == "1":
+        # vendor antenna keep-out (MO.vendor_keepout_rect, 15 mm beyond the module end): no movable part on either side
+        vx0, vy0, vx1, vy1 = MO.vendor_keepout_rect()
+        ax0_, ay0_ = K(vx0, vy1)
+        ax1_, ay1_ = K(vx1, vy0)
+        for side in ("F", "B"):
+            fixed_rects.append((side, ax0_ - CX, ay0_ - CY, ax1_ - CX, ay1_ - CY))
 
     # ---- button
     sw = fps["SW1"]
@@ -453,11 +497,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     for n, nodes in nets.items():
         if n == GND or n.startswith("unconnected-"):
             continue
-        lst = []
-        for ref, pin in nodes:
-            mp = PADMAP.get(ref, {}).get(pin, pin)
-            for pn in (mp if isinstance(mp, tuple) else (mp,)):
-                lst.append((ref, pn))
+        lst = list(nodes)
         if len(lst) >= 2:
             sa_nets[n] = lst
 
@@ -476,7 +516,12 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
                                           seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
-                                          accept=layout_rules_ok, weights=weights, rules=LAYOUT_RULES)
+                                          accept=layout_rules_ok, weights=weights, rules=LAYOUT_RULES,
+                                          blocks=[b for b in pcb_rules.BLOCKS if b[0] in comps and b[1] in comps],
+                                          families=orientation_families(comps, fixed, STRICT_ICS)[0],
+                                          strict_families=orientation_families(comps, fixed, STRICT_ICS)[1],
+                                          rows=test_point_row(comps, fixed),
+                                          twins=[t for t in pcb_rules.TWINS if t[0] in comps and t[1] in comps])
     for ref, (x, y, rot, side) in sorted(state.items()):
         fp = fps[ref]
         fp.SetPosition(vec(0, 0))
@@ -498,6 +543,17 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         s.SetLayer(pcbnew.Edge_Cuts)
         s.SetWidth(mm(0.1))
         s.SetUuid(det_uuid("edge:%d" % i))
+        board.Add(s)
+
+    # ---- slot between the antenna end and the LED ring (Edge.Cuts)
+    for i, seg in enumerate(MO.slot_segments()):
+        s = pcbnew.PCB_SHAPE(board)
+        s.SetShape(pcbnew.SHAPE_T_SEGMENT)
+        s.SetStart(vec(*K(*seg[1])))
+        s.SetEnd(vec(*K(*seg[2])))
+        s.SetLayer(pcbnew.Edge_Cuts)
+        s.SetWidth(mm(0.1))
+        s.SetUuid(det_uuid("edge:slot:%d" % i))
         board.Add(s)
 
     # ---- GND pours on both layers (the outline polygon; the fill keeps its own edge clearance)
@@ -533,6 +589,11 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     # ---- rule areas: antenna strip (no copper on either layer), hooks (top) and posts (bottom)
     ap = [K(ax0, ay0), K(ax1, ay0), K(ax1, ay1), K(ax0, ay1)]
     add_rule_area(board, "antenna_strip", (pcbnew.F_Cu, pcbnew.B_Cu) + ((pcbnew.In1_Cu, pcbnew.In2_Cu) if layers == 4 else ()), ap, footprints=False)   # U9 itself sits here
+    # keep-out around the slot: copper at least EDGE_CLEARANCE plus 0.2 mm from its edge (the router does not see Edge.Cuts slots)
+    sx0, sy0, sx1, sy1 = MO.slot_rect()
+    g = pcb_rules.EDGE_CLEARANCE + 0.2
+    add_rule_area(board, "slot_keepout", (pcbnew.F_Cu, pcbnew.B_Cu) + ((pcbnew.In1_Cu, pcbnew.In2_Cu) if layers == 4 else ()),
+                  [K(sx0 - g, sy0 - g), K(sx1 + g, sy0 - g), K(sx1 + g, sy1 + g), K(sx0 - g, sy1 + g)], footprints=False)
     for az, r0, r1, hw_ in MO.hook_keepouts():
         add_rule_area(board, "hook_%d" % az, (pcbnew.F_Cu,), corner_points(az, r0, r1, hw_),
                       tracks=False, vias=False, pours=False, footprints=True)
@@ -580,6 +641,10 @@ def normalise_uuids(path):
         f.write(text)
 
 
+DRC_ON = ("missing_courtyard", "track_not_centered_on_via", "tuning_profile_track_geometries",
+          "footprint_filters_mismatch", "footprint_type_mismatch")
+
+
 def write_project(path, name):
     """Design rules and net classes (spike values, provisional; numbers from pcb_rules.py). Written by script, never
     by hand. The .kicad_dru of the same stem is written next to it by pcb_rules.write_dru (see build)."""
@@ -605,8 +670,11 @@ def write_project(path, name):
             "min_copper_edge_clearance": R.EDGE_CLEARANCE,
             "min_hole_clearance": R.HOLE_CLEARANCE, "min_hole_to_hole": R.HOLE_TO_HOLE, "min_connection": 0.1,
             "min_silk_clearance": 0.0,
-            "min_text_height": 0.8, "min_text_thickness": 0.08, "min_resolved_spokes": 2}}},
+            "min_text_height": 0.8, "min_text_thickness": 0.08, "min_resolved_spokes": 2},
+            # checks KiCad ignores by default; the strict gate counts ignored checks, so they are on (2026-11-07)
+            "rule_severities": {k: "warning" for k in DRC_ON}}},
         "meta": {"filename": name + ".kicad_pro", "version": 3},
+        "erc": {"rule_severities": {k: "warning" for k in lib_tables.ERC_ON}},
         "net_settings": {"classes": classes, "meta": {"version": 3}, "net_colors": None,
                          "netclass_assignments": None, "netclass_patterns": patterns},
     }

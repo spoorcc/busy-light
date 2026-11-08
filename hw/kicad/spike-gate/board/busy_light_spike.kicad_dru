@@ -1,0 +1,14 @@
+(version 1)
+# written by pcb_rules.write_dru (spike, plan 06 G2); do not edit by hand; layers: 4
+(rule "spike_clearance"
+	(constraint clearance (min 0.1mm)))
+(rule "spike_track"
+	(constraint track_width (min 0.1mm)))
+(rule "spike_via"
+	(constraint via_diameter (min 0.5mm)))
+(rule "spike_annular"
+	(constraint annular_width (min 0.15mm)))
+(rule "spike_hole_to_hole"
+	(constraint hole_to_hole (min 0.4mm)))
+(rule "spike_edge"
+	(constraint edge_clearance (min 0.3mm)))

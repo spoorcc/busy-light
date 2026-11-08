@@ -50,7 +50,7 @@ Process rules: `docs/process/README.md`.
 ### HW-004 Power budget and supply margin
 
 - **Statement:** The 3.3 V supply shall provide at least [1.5] times the worst-case sum of the processor, radio and logic current, and the board shall not reset when the Wi-Fi transmit peak and the LED peak happen together.
-- **Rationale:** RISK-004: brown-out when peaks coincide. The USB budget is shared (ADR-0004).
+- **Rationale:** RISK-004: brown-out when peaks coincide. The USB budget is shared (ADR-0004). The bulk capacitance of the +5V rail is set by HW-014.
 - **Parent:** SYS-020, SYS-027
 - **Acceptance criteria:** The power-budget script in `hw/sim/` uses datasheet values and shows the margin. A bench test with the LEDs at the limited maximum and a continuous Wi-Fi transmit shows no reset in [10] min and a 3.3 V minimum above the processor's minimum supply.
 - **Verification method:** Analysis
@@ -212,3 +212,44 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** EN 62368-1 *(verify)*
 - **Priority:** Must
 - **Status:** Approved (owner, 2026-11-07; the bracketed figures stay open; the TC-213 procedure is to be written; the hung-firmware run is recorded, not required to pass)
+
+### HW-014 Capacitance of the +5V rail
+
+- **Statement:** The +5V rail (TPS2553 output) shall have at least the capacitance that the part makers require at its loads (today: 1 uF nominal and more than 0.47 uF effective at the TLV757P input, C5) and at most [100] uF effective at 0 V bias, counting every capacitor on +5V including unpopulated spare footprints if fitted, with the capacitor tolerance applied.
+- **Rationale:** HW-004 asks that the board does not reset when peaks coincide, but no requirement gave the +5V capacitance, and C3 and C4 have no value ("tbd"; `analysis-sw005-holdoff-timing.md` G10; ADR-0010 assumed 100 uF). Owner decision 2026-11-08 after RV-013: the lower bound is the part makers' minimum, not a derived value, because a derived value rested on assumptions that RV-013 found unsound (cable resistance, LED PWM edges, CC IC minimum 4.5 V); the prototype measurement decides whether more capacitance is fitted on the spare footprints of HW-016. The upper bound keeps the charge at plug-in, at the lowest step 1 limit (504 mA), inside half of the shortest TPS2553 FAULT deglitch (3 ms), so FAULT_N does not report a fault at every plug-in. Derivation and assumptions: `docs/verification/reports/analysis-5v-bulk-capacitance.md`. The upper bound waits for the USB-IF inrush test text and the surge decision S1/S2/S3 (RV-013 findings 5 and 9).
+- **Parent:** SYS-020 (derived with HW-004 and HW-010)
+- **Review:** RV-013 (2026-11-08) rejected the first draft; this is the redraft after the owner decision of the same day; not yet reviewed again.
+- **Acceptance criteria:** (1) Analysis: a table lists every capacitor on +5V with its part number and its effective capacitance at 0 V and at [5.5] V from the manufacturer DC-bias curve, with tolerance; the loads' minimums are met and the sum at 0 V is at most [100] uF; `hw/sim/scripts/bulk_cap_bounds.py` gives the upper bound for the chosen +3V3 capacitance and start load. (2) Bench, on a test build with the spare footprints populated to the upper bound: at the step 1 limit and a source at 4.75 V, 5.25 V and [5.5] V, [20] plug-ins each show FAULT_N (measured at U7) high from the time its pull-up rail is valid; the time in current limit is at most [1.5] ms. (3) Bench, characterisation (recorded, not pass or fail): VBUS_IC and +5V during LED full white and Wi-Fi transmit at step 3, with [3] sources and a [1] m and a [2] m cable, with and without the spare footprints populated; the owner decides the fit of the spare footprints from this record. (4) The inrush charge at plug-in is measured and compared with the USB-IF inrush test limit, which must be read before this requirement goes In Review.
+- **Verification method:** Analysis
+- **Verified by:** TC-214 (the bench parts (2) to (4) are tests inside TC-214)
+- **Category:** Reliability
+- **Regulatory:** none (the USB-IF inrush test is a USB conformance item, not an EU legal requirement)
+- **Priority:** Must
+- **Status:** Draft
+
+### HW-015 Capacitance on VBUS before the current-limit switch
+
+- **Statement:** The capacitance on VBUS_IC (between the USB-C VBUS pins and the TPS2553 input), shall be at least 1.0 uF at every VBUS voltage from 0 to 5.25 V counting only the capacitors on the net itself, and at most 10.0 uF at 0 V bias counting also those connected through a series resistor and the capacitance of the protection parts from their datasheets, with the capacitor tolerance and the operating temperature range applied.
+- **Rationale:** USB 2.0 section 7.2.4.1 and the Device Capacitance ECN (USB-IF package of 2024-06-04, table 7-7 entry CRPB) require 1.0 to 10.0 uF on the VBUS pin over 0 to 5.25 V, powered or unpowered: the upper value limits the inrush at attach (7.2.4.1); the lower value lets OTG devices and embedded hosts detect the attach (ECN summary). C2 is "1u tbd" in 0603; a nominal 1 uF ceramic is below 1.0 uF at 5 V bias, so the design probably fails the lower value today (`docs/verification/reports/analysis-5v-bulk-capacitance.md`, finding on C2). The capacitance behind the TPS2553 is not counted here. This is an open assumption (RV-013): USB 2.0 counts "capacitive effects visible through the regulator", and with the switch on the +5V capacitance is visible at the pin; the USB-IF inrush test procedure decides it and has not been read.
+- **Parent:** SYS-020
+- **Acceptance criteria:** (1) Analysis: a table lists every capacitor on VBUS_IC and on VDD_U1, VDD_U14 and VDD_U15 (C2, C24, C25, C26 today) with its part number and the effective capacitance read from the manufacturer DC-bias curve at 5.25 V and at 0 V, with tolerance and temperature; the sum at 5.25 V is at least 1.0 uF and the sum at 0 V is at most 10.0 uF. (2) Bench: on a build with U7 not fitted (so the switch cannot turn on), the capacitance at the VBUS pin, measured with an LCR meter at [120] Hz and at [0.5] V and 5.25 V DC bias, is between 1.0 and 10.0 uF; the zener current at 5.25 V is recorded because it loads the meter.
+- **Review:** RV-013 (2026-11-08): open points 9 to 12.
+- **Verification method:** Analysis
+- **Verified by:** TC-215
+- **Category:** Performance
+- **Regulatory:** none (USB 2.0 conformance, not an EU legal requirement)
+- **Priority:** Must
+- **Status:** Draft
+
+### HW-016 Spare capacitor footprints on the +5V rail of the prototype
+
+- **Statement:** The prototype board shall have [2] unpopulated capacitor footprints of [1206] size between +5V and GND within [5] mm of the TPS2553 output pin, so that the +5V capacitance can be raised up to the HW-014 upper bound without a new board.
+- **Rationale:** Owner decision 2026-11-08 (after RV-013): the +5V capacitance above the part makers' minimum is decided from prototype measurements (HW-014 criterion 3), not from a calculation. Spare footprints make that change a hand-fit of one or two parts. DFx: a first board keeps room for rework (testability first). A 1206 MLCC is at most about [2.5] mm high, which fits under the board (RV-013 finding 24, about 3 mm free).
+- **Parent:** SYS-020 (derived with HW-014)
+- **Acceptance criteria:** Inspection of the board file: the footprints exist on +5V and GND, are marked do-not-populate in the BOM, and their pad centres lie within [5] mm of U7 pin 6; the DRC passes with them. The HW-014 analysis counts them at the value that may be fitted.
+- **Verification method:** Inspection
+- **Verified by:** TC-216
+- **Category:** Testability
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft

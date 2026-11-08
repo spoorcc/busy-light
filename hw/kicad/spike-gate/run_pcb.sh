@@ -5,7 +5,8 @@
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
 #   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
-# Env: FREEROUTING_JAR  path of freerouting-2.5.0.jar (v2.5.0, sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7, a pinned release downloaded
+# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
+#      FREEROUTING_JAR  path of freerouting-2.5.0.jar (v2.5.0, sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7, a pinned release downloaded
 #      from the official GitHub releases; not part of the repository). Without it the board is built and checked
 #      unrouted. PCB_PYTHON (default python3) must have KiCad's pcbnew module (KiCad 10). FR_PASSES (default 60).
 # The outputs (.kicad_pcb, .kicad_pro, DSN, SES, reports) stay in <out dir> and are not committed.
@@ -48,12 +49,40 @@ STATUS=$PLACED_RC
 if [ -n "$FREEROUTING_JAR" ]; then
   A="$OUT/a"
   PLACED_SHA=$(sha256sum "$A/busy_light_spike.kicad_pcb" | cut -d' ' -f1)
-  "$PY" "$HERE/src/pcb_dsn.py" export "$A/busy_light_spike.kicad_pcb" "$A/b.dsn" "$PLANES" 2>&1 | filter
   T0=$(date +%s)
-  java -jar "$FREEROUTING_JAR" -de "$A/b.dsn" -do "$A/b.ses" -mp "${FR_PASSES:-60}" -mt 4 > "$A/freerouting.log" 2>&1
+  BASE="$A/busy_light_spike.kicad_pcb"
+  if [ "${RING:-1}" = 1 ]; then       # the LED ring cells are generated and locked, not routed (src/pcb_ring.py)
+    "$PY" "$HERE/src/pcb_ring.py" "$BASE" "$A/ring.kicad_pcb" 2>&1 | filter || echo "ring cells: some links failed"
+    for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/ring.$e"; done
+    "$PY" "$HERE/src/pcb_dsn.py" lock "$A/ring.kicad_pcb" "$A/ring_locked.kicad_pcb" 2>&1 | filter
+    for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/ring_locked.$e"; done
+    BASE="$A/ring_locked.kicad_pcb"
+  fi
+  if [ "${KEYFIRST:-0}" = 1 ]; then
+    # stage 1: only the nets of pcb_rules.ROUTE_FIRST are routed (the other pads are obstacles); the tracks are then locked
+    "$PY" "$HERE/src/pcb_dsn.py" export "$BASE" "$A/s1.dsn" "$PLANES" keyonly 2>&1 | filter
+    if [ "${OUTER_ONLY:-1}" = 1 ]; then "$PY" "$HERE/src/pcb_dsn.py" outer "$A/s1.dsn" "$A/s1o.dsn" 2>&1 | filter && mv "$A/s1o.dsn" "$A/s1.dsn"; fi
+    java -jar "$FREEROUTING_JAR" -de "$A/s1.dsn" -do "$A/s1.ses" -mp "${FR_PASSES:-60}" -mt "${FR_THREADS:-4}" > "$A/freerouting_s1.log" 2>&1
+    grep -E "Auto-routing stage completed" "$A/freerouting_s1.log" | tail -1 | cut -c1-300
+    "$PY" "$HERE/src/pcb_dsn.py" import "$BASE" "$A/s1.ses" "$A/stage1.kicad_pcb" 2>&1 | filter
+    "$PY" "$HERE/src/pcb_dsn.py" lock "$A/stage1.kicad_pcb" "$A/stage1_locked.kicad_pcb" 2>&1 | filter
+    \cp -f "$A/busy_light_spike.kicad_pro" "$A/stage1_locked.kicad_pro"
+    \cp -f "$A/busy_light_spike.kicad_dru" "$A/stage1_locked.kicad_dru"
+    BASE="$A/stage1_locked.kicad_pcb"
+  fi
+  # all remaining nets (stage 2, or the only stage with KEYFIRST=0); locked stage-1 tracks stay
+  "$PY" "$HERE/src/pcb_dsn.py" export "$BASE" "$A/b.dsn" "$PLANES" 2>&1 | filter
+  if [ "${OUTER_ONLY:-1}" = 1 ]; then      # VBUS_IC and +3V3 stay off the plane layers (pcb_rules.OUTER_ONLY)
+    "$PY" "$HERE/src/pcb_dsn.py" outer "$A/b.dsn" "$A/b3.dsn" 2>&1 | filter && mv "$A/b3.dsn" "$A/b.dsn"
+  fi
+  if [ "${KEYFIRST:-0}" = 1 ]; then       # stage 2: the branches of the main-path net take the narrow width (pcb_rules.BRANCH_WIDTH)
+    "$PY" "$HERE/src/pcb_dsn.py" branchwidth "$A/b.dsn" "$A/b2.dsn" 2>&1 | filter && mv "$A/b2.dsn" "$A/b.dsn"
+  fi
+  java -jar "$FREEROUTING_JAR" -de "$A/b.dsn" -do "$A/b.ses" -mp "${FR_PASSES:-60}" -mt "${FR_THREADS:-4}" > "$A/freerouting.log" 2>&1
   WALL=$(( $(date +%s) - T0 ))
   grep -E "Auto-routing stage completed" "$A/freerouting.log" | tail -1 | cut -c1-300
-  "$PY" "$HERE/src/pcb_dsn.py" import "$A/busy_light_spike.kicad_pcb" "$A/b.ses" "$A/routed.kicad_pcb" 2>&1 | filter
+  "$PY" "$HERE/src/pcb_dsn.py" import "$BASE" "$A/b.ses" "$A/routed_locked.kicad_pcb" 2>&1 | filter
+  "$PY" "$HERE/src/pcb_dsn.py" unlock "$A/routed_locked.kicad_pcb" "$A/routed.kicad_pcb" 2>&1 | filter
   \cp -f "$A/busy_light_spike.kicad_pro" "$A/routed.kicad_pro"
   \cp -f "$A/busy_light_spike.kicad_dru" "$A/routed.kicad_dru"
   \cp -f "$IN/full.kicad_sch" "$A/routed.kicad_sch"
@@ -79,5 +108,14 @@ PYEOF
   \cp -f "$A/busy_light_spike.placement.json" "$A/stitched.placement.json"
   "$PY" "$HERE/src/kicad_strict.py" drc "$A/stitched.kicad_pcb" "stitched-${LAYERS}l" --out "$A/drc_stitched.json" || STATUS=1
   echo "M2 unconnected (stitched board, all nets): $("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_stitched.json")"
+  if [ "${CLEANUP:-1}" = 1 ]; then
+    # post-route clean-up (src/pcb_fix.py): rip up track runs at clearance findings, route the leftover pairs with a grid router,
+    # check again; up to 3 rounds. The last board is `final.kicad_pcb`, its strict DRC decides the exit code.
+    FINAL=$("$PY" "$HERE/src/pcb_fix.py" auto "$A" 2>&1 | filter | sed -n 's/.*"cleanup_final_board": "\(.*\)".*/\1/p' | tail -1)
+    FINAL=${FINAL:-stitched}
+    for e in kicad_pcb kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/$FINAL.$e" "$A/final.$e"; done
+    "$PY" "$HERE/src/kicad_strict.py" drc "$A/final.kicad_pcb" "stitched-${LAYERS}l" --out "$A/drc_final.json" || STATUS=1
+    echo "M2 unconnected (final board after clean-up, from $FINAL): $("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")"
+  fi
 fi
 exit $STATUS

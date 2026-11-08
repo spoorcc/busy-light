@@ -194,6 +194,33 @@
 - **Automated:** TBD
 - **Evidence:** TBD
 
+### TC-214 Bulk capacitance of the +5V rail
+
+- **Verifies:** HW-014
+- **Level:** Analysis and prototype
+- **Procedure:** TBD (the four parts of the HW-014 acceptance criteria; the analysis part uses `hw/sim/scripts/bulk_cap_bounds.py`)
+- **Expected result / pass criteria:** see acceptance criteria of HW-014
+- **Automated:** partly (`hw/sim/scripts/test_bulk_cap_bounds.py` checks the bound arithmetic only)
+- **Evidence:** `docs/verification/reports/analysis-5v-bulk-capacitance.md` (bounds, draft); no bench data
+
+### TC-215 Capacitance on VBUS before the current-limit switch
+
+- **Verifies:** HW-015
+- **Level:** Analysis and prototype
+- **Procedure:** TBD (the two parts of the HW-015 acceptance criteria)
+- **Expected result / pass criteria:** see acceptance criteria of HW-015
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-216 Spare capacitor footprints on the +5V rail of the prototype
+
+- **Verifies:** HW-016
+- **Level:** Inspection
+- **Procedure:** TBD (board file inspection and DRC)
+- **Expected result / pass criteria:** see acceptance criteria of HW-016
+- **Automated:** no
+- **Evidence:** none yet
+
 ### TC-309 PCB retention and reopening
 
 - **Verifies:** MECH-009

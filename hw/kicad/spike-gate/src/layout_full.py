@@ -49,13 +49,15 @@ G08 = ("74xGxx", "74LVC1G08", "Package_TO_SOT_SMD:SOT-23-5")
 ZENER = ("Diode", "BZX84Cxx", "Package_TO_SOT_SMD:SOT-23")
 AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-23-5")
 TP = ("Connector", "TestPoint", "TestPoint:TestPoint_Pad_D1.5mm")
-LED = ("LED", "WS2812B", "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+# pin numbers of the KiCad symbol LED:WS2812B-2020 (the 5050 symbol has other numbers: 1 VDD, 2 DOUT, 3 VSS, 4 DIN)
+LED_DOUT, LED_VSS, LED_DIN, LED_VDD = "1", "2", "3", "4"
+LED = ("LED", "WS2812B-2020", "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")   # 2020 package per ADR-0004; the part number is still open
 
 PARTS = {  # ref: (lib, part, footprint, value)
-    "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "Connector_USB:USB_C_Receptacle_GCT_USB4085", "USB-C receptacle"),
+    "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge", "USB-C receptacle"),
     "TVS1": (*TVS, "TVS"), "U6": ("Power_Protection", "USBLC6-2P6", "Package_TO_SOT_SMD:SOT-666", "USBLC6-2P6"),
     "U1": (None, None, "CUSTOM:X2QFN-12_RWB", "TUSB321"),   # generated footprint, no X2QFN footprint in the KiCad libraries
-    "R_VD": (*R, "887k"), "R1": (*R, "100k"),
+    "R21": (*R, "887k"), "R1": (*R, "100k"),
     "U2": (*G04, "74LVC1G04"),
     "U13": (*G02, "74LVC1G02"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
@@ -64,17 +66,17 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
     # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
-    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R_ILIM3B": (*R, "301 0.1%"),
+    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R20": (*R, "301 0.1%"),
     "R_ILIM1": (*R, "47.0k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
-    "R6": (*R, "150k"), "C1": (*C1206, "100n C0G 5% 50V"), "C1B": (*C1206, "100n C0G 5% 50V"),
-    "C1C": (*C1206, "100n C0G 5% 50V"), "C1D": (*C1206, "100n C0G 5% 50V"),
-    "C1E": (*C1206, "100n C0G 5% 50V"), "C1F": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
+    "R6": (*R, "150k"), "C1": (*C1206, "100n C0G 5% 50V"), "C27": (*C1206, "100n C0G 5% 50V"),
+    "C28": (*C1206, "100n C0G 5% 50V"), "C29": (*C1206, "100n C0G 5% 50V"),
+    "C30": (*C1206, "100n C0G 5% 50V"), "C31": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
     "C2": (*C, "1u tbd"), "C3": (*C, "10u tbd"), "R8": (*R, "100k"),
-    "U8": (None, None, "", "REG_3V3"),
+    "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
     "C5": (*C, "tbd"), "C6": (*C, "tbd"),
-    "U9": (None, None, "", "ESP32-C3-MINI-1"),    # no ESP32-C3-MINI-1 footprint in the KiCad libraries; pcb_full places a stand-in
+    "U9": (None, None, "CUSTOM:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),    # no such footprint in the KiCad libraries; pcb_full.derive_u9_footprint writes it
     "R9": (*R, "10k"), "C7": (*C, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
@@ -96,24 +98,54 @@ PARTS["R14"] = (*R, "100k")
 PARTS["R15"] = (*R, "100k")
 
 S = L.SIZE
+# Pad numbers of the pins that the layout code names (the box symbols carry these numbers, so the schematic and the
+# board use the same pad numbers and the DRC schematic parity check covers U1 and U9). Sources, read 2026-11-08 from the
+# local datasheet folder (not committed, ADR-0015 item 8):
+#   U1 TUSB321 RWB package: TI SLLSEO6C (revised August 2018), section 5 Pin Functions.
+#   U9 ESP32-C3-MINI-1: Espressif datasheet v2.2, table 3-1 (page 11); the nine centre pads are all pin 49 (figure 3-1).
+U9_GND = ("1", "2", "11", "14") + tuple(str(n) for n in range(36, 54))
+PAD = {
+    "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},
+    "U9": {"GPIO0": "12", "GPIO1": "13", "GPIO2": "5", "GPIO3": "6", "GPIO4": "18", "GPIO5": "19",
+           "GPIO6": "20", "GPIO7": "21", "GPIO8": "22", "GPIO9": "23", "GPIO10": "16",
+           "GPIO18": "26", "GPIO19": "27", "GPIO20": "30", "GPIO21": "31", "3V3": "3", "EN": "8", "GND": U9_GND},
+}
+
+
+def pads(ref, pin):
+    """Pad numbers (tuple) of a pin given by name or number."""
+    p = PAD.get(ref, {}).get(str(pin), str(pin))
+    return p if isinstance(p, tuple) else (p,)
+
+
+def _numbered(ref, pins):
+    """Box pins with the datasheet pad number; a multi-pad pin (GND) becomes stacked pins, extra ones passive."""
+    out = []
+    for num, name, side, off, etype in pins:
+        for k, p in enumerate(pads(ref, num)):
+            out.append((p, name, side, off, etype if k == 0 else "passive"))
+    return out
+
+
 BOXES = {
-    "U1": L.box_symbol("CC_IC_TUSB321", [
+    "U1": L.box_symbol("CC_IC_TUSB321", _numbered("U1", [
         ("VDD", "VDD", "top", -2.54, "power_in"), ("VBUS_DET", "VBUS_DET", "top", 2.54, "passive"),
         ("GND", "GND", "bottom", -2.54, "power_in"), ("PORT", "PORT", "bottom", 2.54, "passive"),
         ("CC1", "CC1", "left", 2.54, "passive"), ("CC2", "CC2", "left", 0, "passive"),
         ("7", "OUT1_N", "right", 5.08, "open_collector"), ("8", "OUT2_N", "right", 0, "open_collector"),
         ("3", "CURRENT_MODE", "right", -5.08, "passive"), ("6", "VCONN_FAULT", "right", -7.62, "open_collector"),
-        ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")], half_h=15.24),
+        ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")]), half_h=15.24),
     "U5": L.SUPERVISOR,
     "U14": L.TMUX1101, "U15": L.TMUX1101,
     "U7": L.box_symbol("TPS2553_BOX", [
         ("1", "IN", "top", -2.54, "power_in"), ("3", "EN", "top", 2.54, "input"),
         ("2", "GND", "bottom", 0, "power_in"), ("5", "ILIM", "left", 5.08, "passive"),
         ("6", "OUT", "right", 2.54, "passive"), ("4", "FAULT", "right", -2.54, "open_collector")]),
-    "U8": L.box_symbol("REG_3V3_PLACEHOLDER", [
-        ("IN", "IN", "left", 0, "power_in"), ("OUT", "OUT", "right", 0, "passive"),
-        ("GND", "GND", "bottom", 0, "power_in")], hide_numbers=True),
-    "U9": L.box_symbol("ESP32_C3_MINI_1", [
+    "U8": L.box_symbol("TLV75733P_DBV", [
+        ("1", "IN", "left", 0, "power_in"), ("3", "EN", "left", -2.54, "input"),
+        ("5", "OUT", "right", 0, "passive"), ("4", "NC", "right", -2.54, "no_connect"),
+        ("2", "GND", "bottom", 0, "power_in")]),
+    "U9": L.box_symbol("ESP32_C3_MINI_1", _numbered("U9", [
         ("3V3", "3V3", "top", 0, "power_in"), ("GND", "GND", "bottom", 0, "power_in"),
         ("GPIO18", "GPIO18 USB_D-", "left", 27.94, "bidirectional"),
         ("GPIO19", "GPIO19 USB_D+", "left", 22.86, "bidirectional"),
@@ -125,26 +157,26 @@ BOXES = {
         ("GPIO0", "GPIO0", "right", 17.78, "bidirectional"), ("GPIO1", "GPIO1", "right", 12.7, "bidirectional"),
         ("GPIO3", "GPIO3", "right", 7.62, "bidirectional"), ("GPIO10", "GPIO10", "right", 2.54, "bidirectional"),
         ("GPIO4", "GPIO4", "right", -2.54, "bidirectional"), ("GPIO5", "GPIO5", "right", -7.62, "bidirectional"),
-        ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")],
+        ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")]),
         half_w=22.86, half_h=33.02, hide_numbers=True),
 }
-BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "REG_3V3_PLACEHOLDER",
+BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
            "U9": "ESP32_C3_MINI_1"}
 
 LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
 PLACE = {
     "J1": (30, 78.74, 0), "TVS1": (57.15, 63.5, 0), "U6": (68, 118, 0),
-    "U1": (gx(50.8), 71.12, 0), "R_VD": (gx(50.8) + 2.54, 49.53, 0), "R1": (gx(76.2), 62.23, 0),
+    "U1": (gx(50.8), 71.12, 0), "R21": (gx(50.8) + 2.54, 49.53, 0), "R1": (gx(76.2), 62.23, 0),
     "U2": (gx(104.14), 66.04, 0), "U13": (gx(121.92), 40.64, 0),
     "U3": (gx(162.56), 50.8, 0), "R4": (gx(137.16), 59.69, 0), "R2": (gx(198.12), 54.61, 0),
     "U14": (gx(223.52), 50.8, 0), "R18": (gx(208.28), 54.61, 0), "C24": (gx(228.6), 38.1, 0),
     "R_ILIM2": (gx(250.19), 50.8, 90),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
     "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
-    "R_ILIM3B": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
-    "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C1B": (gx(86.36), 146.05, 0),
-    "C1C": (gx(93.98), 146.05, 0), "C1D": (gx(101.6), 146.05, 0), "C1E": (gx(109.22), 146.05, 0),
-    "C1F": (gx(116.84), 146.05, 0),
+    "R20": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
+    "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C27": (gx(86.36), 146.05, 0),
+    "C28": (gx(93.98), 146.05, 0), "C29": (gx(101.6), 146.05, 0), "C30": (gx(109.22), 146.05, 0),
+    "C31": (gx(116.84), 146.05, 0),
     "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
     "C3": (350.5, 24.0, 0), "R8": (364.0, 36.83, 0),
     "U8": (335.0, 100.0, 0), "C5": (317.0, 103.81, 0), "C6": (353.0, 103.81, 0),
@@ -164,7 +196,7 @@ TEXT = {
     "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
     "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
-    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R_ILIM3B": (-2.54, 2.54, "left"),
+    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R20": (-2.54, 2.54, "left"),
     "R_ILIM1": (-2.54, -1.27, "right"),
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
     "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
@@ -193,7 +225,12 @@ class Full(L.Sheet):
 
     # ---- intent
     def bind(self, net, ref, pin):
-        self.intent.setdefault(net, set()).add((ref, str(pin)))
+        for p in pads(ref, pin):
+            self.intent.setdefault(net, set()).add((ref, p))
+
+    def pin(self, ref, pin):
+        """Pin position by pad number or, for U1 and U9, by pin name (stacked pads share the first one's position)."""
+        return super().pin(ref, pads(ref, pin)[0])
 
     def at(self, a):
         return self.pin(*a) if isinstance(a[0], str) else (g(a[0]), g(a[1]))
@@ -221,6 +258,8 @@ class Full(L.Sheet):
             for p in self.syms[-1].properties:
                 if p.key in ("Reference", "Value"):
                     p.position.angle = (-rot) % 360
+        if ref.startswith("TP"):        # bare test pads: the footprint is excluded from the BOM, so is the symbol
+            self.syms[-1].inBom = False
         if ref in HIDE_VALUE:
             for p in self.syms[-1].properties:
                 if p.key == "Value":
@@ -393,8 +432,8 @@ def _build():
     s.pw("GND", ("U1", "PORT"), True)
     for pin in ("3", "6", "9", "11"):  # CURRENT_MODE, VCONN_FAULT, ID, DIR: DFP/VCONN/orientation features, unused (UFP)
         s.nc(P("U1", pin))
-    s.ends("VBUS_DET_N", ("R_VD", "2"), ("U1", "VBUS_DET"))
-    s.pw("VBUS_IC", ("R_VD", "1"))
+    s.ends("VBUS_DET_N", ("R21", "2"), ("U1", "VBUS_DET"))
+    s.pw("VBUS_IC", ("R21", "1"))
     o1 = P("U1", "7")
     s.ends("CC_OUT1_N", ("U1", "7"), ("U2", "2"))
     s.label("CC_OUT1_N", *P("U2", "2"), 180)   # the same net also feeds U13 (exclusive steps)
@@ -455,7 +494,7 @@ def _build():
         s.pw("GND", (sw, "3"), True)
         s.wire(P(sw, 2), P(sw, 3))
     # step 2: switch - 56.2 k - ILIM; step 3: switch - 301 ohm - 27.4 k - ILIM (decision (b))
-    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3B", "R_ILIM3"), "ILIM_D_U15")):
+    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R20", "R_ILIM3"), "ILIM_D_U15")):
         prev, prev_pin = P(sw, 1), (sw, 1)
         for k, rl in enumerate(chain):
             (lo_pin, lo), (hi_pin, hi) = sorted((("1", P(rl, 1)), ("2", P(rl, 2))), key=lambda e: e[1][0])
@@ -501,14 +540,14 @@ def _build():
     s.bind("SUP_CT", "U5", 5)
     s.bind("SUP_CT", "C1", 1)
     s.wire(ct, P("C1", 1))
-    s.bind("SUP_CT", "C1B", 1)
-    for a_, b_ in (("C1", "C1B"), ("C1B", "C1C"), ("C1C", "C1D"), ("C1D", "C1E"), ("C1E", "C1F")):   # parallel C0G set, one rail wire
+    s.bind("SUP_CT", "C27", 1)
+    for a_, b_ in (("C1", "C27"), ("C27", "C28"), ("C28", "C29"), ("C29", "C30"), ("C30", "C31")):   # parallel C0G set, one rail wire
         s.bind("SUP_CT", b_, 1)
         s.wire(P(a_, 1), P(b_, 1))
-    for r_ in ("C1", "C1B", "C1C", "C1D", "C1E"):
+    for r_ in ("C1", "C27", "C28", "C29", "C30"):
         s.junction(*P(r_, 1))
     s.label("SUP_CT", gx(68.58), ct[1])
-    for r_ in ("C1", "C1B", "C1C", "C1D", "C1E", "C1F"):
+    for r_ in ("C1", "C27", "C28", "C29", "C30", "C31"):
         s.pw("GND", (r_, "2"), True)
 
     # ------------------------------------------------------------ TPS2553 and 5 V output
@@ -538,21 +577,27 @@ def _build():
     s.pw("+3V3", ("R8", "1"))
 
     # ------------------------------------------------------------ 3.3 V regulator
-    rin = P("U8", "IN")
-    s.bind("+5V", "U8", "IN")
+    rin = P("U8", "1")
+    s.bind("+5V", "U8", "1")
     s.wire((312.0, rin[1]), rin)
     s.pw("+5V", (312.0, rin[1]))
+    ren = P("U8", "3")                         # EN tied to IN (always on; TLV757P datasheet)
+    s.bind("+5V", "U8", "3")
+    s.wire(ren, (ren[0] - 3.81, ren[1]))
+    s.wire((ren[0] - 3.81, ren[1]), (ren[0] - 3.81, rin[1]))
+    s.junction(ren[0] - 3.81, rin[1])
+    s.nc(P("U8", "4"))
     s.bind("+5V", "C5", 1)
     s.junction(*P("C5", 1))
     s.pw("GND", ("C5", "2"), True)
-    rout = P("U8", "OUT")
-    s.bind("+3V3", "U8", "OUT")
+    rout = P("U8", "5")
+    s.bind("+3V3", "U8", "5")
     s.wire(rout, (362.0, rout[1]))
     s.pw("+3V3", (362.0, rout[1]))
     s.bind("+3V3", "C6", 1)
     s.junction(*P("C6", 1))
     s.pw("GND", ("C6", "2"), True)
-    s.pw("GND", ("U8", "GND"))
+    s.pw("GND", ("U8", "2"))
     for k, (net, ref, y) in enumerate((("+5V", "TP1", 112.0), ("+3V3", "TP2", 122.0), ("GND", "TP3", 132.0))):
         x = 372.0
         s.pw(net, (x, y), net != "GND" and False)
@@ -706,29 +751,29 @@ def _build():
     s.wire((r10l[0] - 2.5, r10l[1]), r10l)
     s.label("LED_BUF", r10l[0] - 2.5, r10l[1], 180)
     s.bind("LED_N0", "R10", 2)
-    s.bind("LED_N0", "D1", 4)
-    s.wire(P("R10", 2), P("D1", 4))
+    s.bind("LED_N0", "D1", LED_DIN)
+    s.wire(P("R10", 2), P("D1", LED_DIN))
     for i in range(1, 17):
         d, c = f"D{i}", f"C{7 + i}"
-        s.pw("+5V", (d, "1"), True)
-        s.pw("GND", (d, "3"), True)
+        s.pw("+5V", (d, LED_VDD), True)
+        s.pw("GND", (d, LED_VSS), True)
         s.pw("+5V", (c, "1"), True)
         s.pw("GND", (c, "2"), True)
         if i % 8:
             nxt = f"D{i + 1}"
             net = f"LED_N{i}"
-            s.bind(net, d, 2)
-            s.bind(net, nxt, 4)
-            s.wire(P(d, 2), P(nxt, 4))
-    dout = P("D8", 2)
-    s.bind("LED_ROW2", "D8", 2)
+            s.bind(net, d, LED_DOUT)
+            s.bind(net, nxt, LED_DIN)
+            s.wire(P(d, LED_DOUT), P(nxt, LED_DIN))
+    dout = P("D8", LED_DOUT)
+    s.bind("LED_ROW2", "D8", LED_DOUT)
     s.wire(dout, (dout[0] + 4.0, dout[1]))
     s.label("LED_ROW2", dout[0] + 4.0, dout[1])
-    din = P("D9", 4)
-    s.bind("LED_ROW2", "D9", 4)
+    din = P("D9", LED_DIN)
+    s.bind("LED_ROW2", "D9", LED_DIN)
     s.wire(din, (din[0] - 4.0, din[1]))
     s.label("LED_ROW2", din[0] - 4.0, din[1], 180)
-    s.nc(P("D16", 2))
+    s.nc(P("D16", LED_DOUT))
     # bulk capacitor on 5 V
     s.pw("+5V", ("C4", "1"))
     s.pw("GND", ("C4", "2"))

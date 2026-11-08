@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-# Evidence placeholder for all resistors (R1 to R17, R_VD, R_ILIM1 to R_ILIM3). Design values come from the netlist; no resistor datasheet is in the folder.
+# Evidence placeholder for all resistors (R1 to R17, R21, R_ILIM1 to R_ILIM3). Design values come from the netlist; no resistor datasheet is in the folder.
 schema_version: 1
 part:
   key: RESISTORS
@@ -29,7 +29,7 @@ part:
   - R15
   - R16
   - R17
-  - R_VD
+  - R21
   - R_ILIM1
   - R_ILIM2
   - R_ILIM3
@@ -58,7 +58,7 @@ claims:
   status: source-missing
   notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).
 - id: RESISTORS.vd_tolerance
-  parameter: 'Tolerance of R_VD (887k): design value; TUSB321 allows 855 to 920 kohm in total'
+  parameter: 'Tolerance of R21 (887k): design value; TUSB321 allows 855 to 920 kohm in total'
   category: electrical
   status: source-missing
   notes: No resistor datasheet is in the datasheets folder. The design value is taken from the netlist (not a datasheet fact).

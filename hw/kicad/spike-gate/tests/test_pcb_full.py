@@ -6,6 +6,7 @@ without it the board tests are skipped and only the pure-Python rule tests run.
 Run: cd hw/kicad/spike-gate && PYTHONPATH=src python3 -m unittest tests.test_pcb_full
 """
 import json
+import re
 import math
 import sys
 import tempfile
@@ -45,11 +46,64 @@ class PlacementWeights(unittest.TestCase):
 
     def test_rule_tables(self):
         self.assertGreater(pcb_rules.NET_WEIGHT["/ILIM_STEP3_EN"], 1.0)
-        self.assertEqual(set(pcb_rules.PIN_TIES),
-                         {"tie:C24-U14", "tie:C25-U15"})
-        for a, b, w in pcb_rules.PIN_TIES.values():
-            self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
+        bypass = {"tie:C24-U14", "tie:C25-U15"}
+        regulator = {"tie:C5-U8", "tie:C6-U8"}              # TLV757P: input capacitor at pin 1, output capacitor at pin 5
+        paths = {"tie:J1A4-U7", "tie:J1B9-U7", "tie:C2-U7", "tie:U8-U9"}      # current paths of the power check
+        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | regulator | paths)
+        for name, (a, b, w) in pcb_rules.PIN_TIES.items():
+            if name in bypass:
+                self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
+            if name in regulator:
+                self.assertEqual((a[0], b[0]), (name[4:6], "U8"))
+                self.assertIn(b[1], ("1", "5"))
             self.assertGreater(w, 1.0)
+
+    def test_blocks_and_twins_name_real_parts_of_the_same_kind(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        anchors = {a for a, _, _ in pcb_rules.BLOCKS}
+        self.assertTrue(anchors <= set(comps), anchors - set(comps))
+        for a, m, rad in pcb_rules.BLOCKS:
+            self.assertIn(m, comps, m)
+            self.assertGreater(rad, 0.0)
+            self.assertNotEqual(a, m)
+        self.assertEqual(len({(a, m) for a, m, _ in pcb_rules.BLOCKS}), len(pcb_rules.BLOCKS))     # no repeats
+        for a, b in pcb_rules.TWINS:
+            self.assertEqual(comps[a][1], comps[b][1], (a, b))       # same footprint
+
+    def test_families_group_movable_parts_by_kind(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        fams = pcb_full.part_families(comps, fixed={"U9", "J1", "SW1"})
+        flat = [r for f in fams for r in f]
+        self.assertEqual(len(flat), len(set(flat)))                  # a part is in one family only
+        self.assertFalse({"U9", "J1", "SW1"} & set(flat))
+        self.assertFalse([r for r in flat if r.startswith("TP")])
+        for f in fams:
+            self.assertGreaterEqual(len(f), 2)
+            self.assertEqual(len({(comps[r][1], re.match("[A-Z]+", r).group(0)) for r in f}), 1)
+
+    def test_ic_families_and_the_test_point_row(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        fixed = {"U9", "J1", "SW1"}
+        ics = pcb_full.ic_families(comps, fixed)
+        self.assertTrue(ics)
+        self.assertTrue(all(r.startswith("U") for f in ics for r in f))
+        self.assertIn(("U14", "U15"), [f for f in ics if "U14" in f and len(f) == 2] or [()])
+        self.assertTrue(all(len({comps[r][1] for r in f}) == 1 for f in ics))
+        row = pcb_full.test_point_row(comps, fixed)
+        self.assertEqual(len(row), 1)
+        self.assertEqual(len(row[0]), 6)                      # TP1 to TP6
+        self.assertEqual(pcb_full.test_point_row({"TP1": ("", "")}), [])
+
+    def test_strict_ic_rule_is_a_switch_and_ics_stay_in_the_soft_families_without_it(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        fixed = {"U9", "J1", "SW1"}
+        soft, strict = pcb_full.orientation_families(comps, fixed, strict_ics=False)
+        self.assertEqual(strict, [])
+        self.assertTrue(any(f[0].startswith("U") for f in soft))      # the ring12 setup
+        soft2, strict2 = pcb_full.orientation_families(comps, fixed, strict_ics=True)
+        self.assertTrue(strict2)
+        self.assertFalse(any(f[0].startswith("U") for f in soft2))
+        self.assertEqual(sorted(soft + strict), sorted(soft2 + strict2))      # same parts, other rule
 
     def test_weight_scales_the_wire_length_cost(self):
         import pcb_place
@@ -78,9 +132,9 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 93)
-        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 52)
-        for ref in ("U13", "C1B", "C1C", "C1D", "C1E", "C1F", "U14", "U15", "R_ILIM3B", "R18", "R19", "C24", "C25", "R3", "R15"):
+        self.assertEqual(len(self.comps), 100)
+        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 55)
+        for ref in ("U13", "C27", "C28", "C29", "C30", "C31", "U14", "U15", "R20", "R18", "R19", "C24", "C25", "R3", "R15"):
             self.assertIn(ref, self.comps)
         for ref in ("Q2", "Q3"):
             self.assertNotIn(ref, self.comps)
@@ -91,7 +145,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 52)
+        self.assertEqual(res["nets_named"], 55)
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")
@@ -100,9 +154,9 @@ class Board(unittest.TestCase):
                          Path(again).with_suffix(".kicad_pro").read_bytes())
 
     def test_substitutions_are_the_documented_ones(self):
-        # every substituted footprint is a provisional stand-in; the report lists the same refs
-        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE),
-                         sorted(["C3", "C4", "U1", "U8", "U9"] + ["D%d" % i for i in range(1, 17)]))
+        # the remaining substitutions: bulk and input capacitor sizes (values still open); U1, U8, U9 and the LEDs
+        # use their own footprints (schematic field, generated library) since 2026-11-07
+        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE), ["C3", "C4", "U1"])
         for ref in pcb_full.FOOTPRINT_OVERRIDE:
             self.assertIn(ref, self.comps)
 
@@ -205,10 +259,31 @@ class Board(unittest.TestCase):
                 y0, y1 = (pcb_full.CY - pcbnew.ToMM(v) for v in (bb.GetBottom(), bb.GetY()))
                 self.assertFalse(x1 > ax0 and x0 < ax1 and y1 > ay0 and y0 < ay1, "%s pad %s" % (ref, p.GetNumber()))
 
+    def test_module_pads_start_outside_the_antenna_strip(self):
+        """The module pad rows (36 to 48 side) lie at or beyond the strip end: no module pad inside the strip."""
+        ax0, ay0, ax1, ay1 = mech_outline.antenna_strip()
+        for p in self.fps["U9"].Pads():
+            bb = p.GetBoundingBox()
+            x0 = pcbnew.ToMM(bb.GetX()) - pcb_full.CX
+            self.assertGreaterEqual(x0, ax1 - 0.01, "U9 pad %s starts at %.2f, strip ends at %.2f" % (p.GetNumber(), x0, ax1))
+
+    def test_slot_is_cut_and_kept_clear(self):
+        sx0, sy0, sx1, sy1 = mech_outline.slot_rect()
+        self.assertLess(sx1, mech_outline.module_rect()[0])          # between the antenna end and the ring
+        self.assertGreater(sx0, -mech_outline.R_PCB)                  # inside the board
+        for ref, f in self.fps.items():
+            for p in f.Pads():
+                bb = p.GetBoundingBox()
+                x0, x1 = (pcbnew.ToMM(v) - pcb_full.CX for v in (bb.GetX(), bb.GetRight()))
+                y0, y1 = (pcb_full.CY - pcbnew.ToMM(v) for v in (bb.GetBottom(), bb.GetY()))
+                self.assertFalse(x1 > sx0 - 0.3 and x0 < sx1 + 0.3 and y1 > sy0 - 0.3 and y0 < sy1 + 0.3, "%s pad %s" % (ref, p.GetNumber()))
+
     def test_module_antenna_points_to_minus_x(self):
         u9 = self.fps["U9"]
         mx, _ = pcb_full.mech_of(pcbnew.ToMM(u9.GetPosition().x), pcbnew.ToMM(u9.GetPosition().y))
-        self.assertAlmostEqual(mx, 1.0, places=0)          # MOD_OFF
+        ax1 = mech_outline.antenna_strip()[2]
+        self.assertGreater(mx, ax1)                         # the pad area starts at the end of the antenna strip
+        self.assertLess(mx, ax1 + 7.0)
         self.assertEqual(round(u9.GetOrientationDegrees()) % 360, pcb_full.MODULE_ROT)
 
     def test_no_overlap_among_movable_parts(self):
@@ -260,3 +335,97 @@ class Stitch(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_project_switches_on_default_ignored_drc_checks(tmp_path):
+    import json
+
+    import pcb_full
+
+    pro = tmp_path / "x.kicad_pro"
+    pcb_full.write_project(str(pro), "x")
+    sev = json.loads(pro.read_text())["board"]["design_settings"]["rule_severities"]
+    assert set(sev) == set(pcb_full.DRC_ON) and set(sev.values()) == {"warning"}
+
+
+def test_project_switches_on_default_ignored_erc_checks(tmp_path):
+    """The strict ERC counts every ignored check, so the board project of a stored board must switch them on."""
+    import json
+
+    import lib_tables
+    import pcb_full
+
+    pro = tmp_path / "x.kicad_pro"
+    pcb_full.write_project(str(pro), "x")
+    sev = json.loads(pro.read_text())["erc"]["rule_severities"]
+    assert set(sev) == set(lib_tables.ERC_ON) and set(sev.values()) == {"warning"}
+
+
+def test_u9_footprint_is_the_datasheet_land_pattern(tmp_path):
+    """ESP32-C3-MINI-1 datasheet v2.2 figure 11-1: 48 pads 0.8 x 0.4, 4 corner pads 0.7, 3 x 3 ground pads 1.45;
+    pad rows 11.9 mm apart (x) and 9.9 mm apart (y)."""
+    import re
+
+    pcb_full.derive_u9_footprint(str(tmp_path))
+    text = (tmp_path / "CUSTOM.pretty" / "ESP32-C3-MINI-1.kicad_mod").read_text()
+    pads = re.findall(r'\(pad "(\w+)" \w+ \w+\s*\(at ([-\d.]+) ([-\d.]+)[^)]*\)\s*\(size ([\d.]+) ([\d.]+)\)', text)
+    sizes = sorted((float(p[3]), float(p[4])) for p in pads)
+    assert sizes.count((0.4, 0.8)) + sizes.count((0.8, 0.4)) == 48
+    assert sizes.count((0.7, 0.7)) == 4 and sizes.count((1.45, 1.45)) == 9
+    assert "(zone " not in text and "(model" not in text
+    corners = [(float(p[1]), float(p[2])) for p in pads if p[0] in ("50", "51", "52", "53")]
+    assert sorted({abs(x) for x, _ in corners}) == [5.95] and sorted({abs(y) for _, y in corners}) == [4.95]
+
+
+def test_u1_footprint_is_the_ti_drawing():
+    """TI RWB0012A example board layout: 0.7 x 0.2 side pads, 0.2 x 0.5 end pads, pitch 0.4, pad 1 top left."""
+    import custom_fp
+
+    pads = {n: (x, y, w, h) for n, x, y, w, h in custom_fp.pads()}
+    assert len(pads) == 12
+    assert pads["1"] == (-0.65, -0.2, 0.7, 0.2) and pads["2"] == (-0.65, 0.2, 0.7, 0.2)
+    assert pads["3"][:2] == (-0.6, 0.75) and pads["6"][:2] == (0.6, 0.75)
+    assert pads["7"][:2] == (0.65, 0.2) and pads["8"][:2] == (0.65, -0.2)
+    assert pads["9"][:2] == (0.6, -0.75) and pads["12"][:2] == (-0.6, -0.75)
+    assert all((w, h) == (0.2, 0.5) for n, (x, y, w, h) in pads.items() if n in "3456" or n in ("9", "10", "11", "12"))
+
+
+def test_j1_footprint_has_no_silk_at_the_board_edge():
+    """The three silk lines of the connector front are dropped (silk_edge_clearance); the rest of the stock footprint stays."""
+    import custom_fp
+
+    t = Path("/usr/share/kicad/footprints/Connector_USB.pretty/USB_C_Receptacle_GCT_USB4085.kicad_mod").read_text()
+    u = custom_fp.j1_mod(t)
+    assert t.count("(fp_line") - u.count("(fp_line") == 3
+    assert u.count("(pad ") == t.count("(pad ") and u.count("(") == u.count(")")
+    assert '"%s"' % custom_fp.J1_NAME in u and '"%s"' % custom_fp.J1_STOCK not in u
+
+
+@unittest.skipIf(pcbnew is None, "needs KiCad pcbnew")
+class AntennaKeepout(unittest.TestCase):
+    """PLACE_ANT_KEEPOUT=1: no movable part in the vendor keep-out (15 mm beyond the module end, module width)."""
+
+    def test_no_movable_part_in_the_vendor_keepout(self):
+        import os
+        old = os.environ.get("PLACE_ANT_KEEPOUT")
+        os.environ["PLACE_ANT_KEEPOUT"] = "1"
+        try:
+            with tempfile.TemporaryDirectory() as t:
+                board = pcbnew.LoadBoard(pcb_full.build(str(NETLIST), t + "/a"))
+        finally:
+            if old is None:
+                os.environ.pop("PLACE_ANT_KEEPOUT")
+            else:
+                os.environ["PLACE_ANT_KEEPOUT"] = old
+        fps = {f.GetReference(): f for f in board.GetFootprints()}
+        mb = fps["U9"].GetBoundingBox(False)
+        x0, x1 = mb.GetLeft() - 15_000_000, mb.GetLeft()
+        y0, y1 = mb.GetTop(), mb.GetBottom()
+        fixed = {"U9", "J1", "SW1"}
+        for ref, f in fps.items():
+            led = (ref[0] == "D" and ref[1:].isdigit()) or (ref[0] == "C" and ref[1:].isdigit() and 8 <= int(ref[1:]) <= 23)
+            if ref in fixed or led:
+                continue
+            b = f.GetBoundingBox(False)
+            inside = b.GetRight() > x0 and b.GetLeft() < x1 and b.GetBottom() > y0 and b.GetTop() < y1
+            self.assertFalse(inside, ref)

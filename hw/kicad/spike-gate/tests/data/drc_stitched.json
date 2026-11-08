@@ -4532,7 +4532,7 @@
             "description": "The current configuration does not include the footprint library 'Capacitor_SMD'",
             "items": [
                 {
-                    "description": "Footprint C1B",
+                    "description": "Footprint C27",
                     "pos": {
                         "x": 42.7215,
                         "y": 52.0303
@@ -4787,7 +4787,7 @@
             "description": "The current configuration does not include the footprint library 'Resistor_SMD'",
             "items": [
                 {
-                    "description": "Footprint R_VD",
+                    "description": "Footprint R21",
                     "pos": {
                         "x": 54.9084,
                         "y": 39.1974

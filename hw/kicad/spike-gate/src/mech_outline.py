@@ -45,7 +45,12 @@ MECH = {
     "MOD_L": (16.6, "script P['MOD_L']: ESP32-C3-MINI-1 length (datasheet value used by the script)"),
     "MOD_W": (13.2, "script P['MOD_W']"),
     "MOD_H": (2.4, "script P['MOD_H']"),
-    "MOD_ANT_L": (5.4, "script P['MOD_ANT_L']: antenna strip length (plan 05 says 4.6)"),
+    "MOD_ANT_L": (4.6, "ESP32-C3-MINI-1 datasheet v2.2 fig 11-1: 16.6 mm module - 11.2 mm pad area - 0.8 mm = 4.6 mm antenna area "
+                       "beyond the pad rows (earlier script value 5.4 put the pad row 36 to 48 inside the strip)"),
+    "SLOT_W": (1.0, "owner idea 2026-11-07: slot between the antenna end and the LED ring; vendor guide 1.4.7 says cut the "
+                    "base board around the antenna; width 1.0 mm = a 1.0 mm router bit (to be checked with the fabricator)"),
+    "SLOT_GAP": (1.5, "distance from the antenna end of the module to the slot (assumption of the spike)"),
+    "SLOT_OVER": (1.0, "slot extends this far past each long side of the module"),
     "MOD_OFF": (1.0, "script P['MOD_OFF']: module centre offset towards azimuth 0 (report 5)"),
     "MOD_ANT_AZ": (180.0, "script P['MOD_ANT_AZ']: antenna end points to -X"),
     "ANT_KEEPOUT": (15.0, "script P['ANT_KEEPOUT']: vendor recommendation, plan 05 section 4.6"),
@@ -155,8 +160,30 @@ def outline_segments(tab_r=None):
     return seg
 
 
+def slot_rect():
+    """Slot in the PCB beside the antenna end (x0, y0, x1, y1), mechanical mm: SLOT_GAP beyond the module end at -X."""
+    mx0, my0, _, my1 = module_rect()
+    xr = mx0 - m("SLOT_GAP")
+    return (xr - m("SLOT_W"), my0 - m("SLOT_OVER"), xr, my1 + m("SLOT_OVER"))
+
+
+def slot_segments():
+    """Edge.Cuts lines of the slot, as ('line', start, end) like outline_segments."""
+    x0, y0, x1, y1 = slot_rect()
+    c = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    return [("line", c[i], c[(i + 1) % 4]) for i in range(4)]
+
+
+def in_slot(x, y, margin=0.0):
+    """Point within `margin` of the slot (or inside it)."""
+    x0, y0, x1, y1 = slot_rect()
+    return x0 - margin < x < x1 + margin and y0 - margin < y < y1 + margin
+
+
 def inside_pcb(x, y, margin=0.0, tab_r=None):
-    """Point inside the PCB (circle or tab), at least `margin` from the edge (notch ignored, it is 1.5 mm)."""
+    """Point inside the PCB (circle or tab), at least `margin` from the edge and from the slot (notch ignored, it is 1.5 mm)."""
+    if in_slot(x, y, margin):
+        return False
     hw = m("V1_TAB_W") / 2.0
     if math.hypot(x, y) <= R_PCB - margin:
         return True
@@ -201,6 +228,9 @@ def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None):
     pts = [(x0, y0), (x0, y1), (x1, y0), (x1, y1)]
     ax0, ay0, ax1, ay1 = antenna_strip()
     if x1 > ax0 - 0.3 and x0 < ax1 + 0.3 and y1 > ay0 - 0.3 and y0 < ay1 + 0.3:
+        return False
+    sx0, sy0, sx1, sy1 = slot_rect()
+    if x1 > sx0 - 0.6 and x0 < sx1 + 0.6 and y1 > sy0 - 0.6 and y0 < sy1 + 0.6:       # slot and 0.6 mm to copper
         return False
     if side == "F":
         mx0, my0, mx1, my1 = module_rect()

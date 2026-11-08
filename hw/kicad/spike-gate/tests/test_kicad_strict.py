@@ -132,13 +132,27 @@ class RefAllowList(unittest.TestCase):
         import json
 
         data = json.loads(K.ALLOW_FILE.read_text())
-        want = ["U1", "U8", "U9", "C1", "C1B", "C3", "C4"] + ["D%d" % i for i in range(1, 17)] + ["TP*", "H*"]
+        want = ["U1", "U8", "U9", "C1", "C27", "C3", "C4"] + ["D%d" % i for i in range(1, 17)] + ["TP*", "H*"]   # the older profiles; stitched-4l has a shorter list
         # placed-4l: U1 now carries the generated footprint CUSTOM:X2QFN-12_RWB in the schematic too (plan 06 A-11),
         # so it is no longer a stand-in there; the routed profile is unchanged until a routed run is made
         for prof, drop in (("placed-4l", ["U1"]), ("routed-4l", [])):
             e = data["drc"][prof]["footprint_symbol_mismatch"]
             self.assertEqual(sorted(e["refs"]), sorted(r for r in want if r not in drop))
             self.assertRegex(e["dev"], r"^DEV-\d{3}$")
+
+    def test_stitched_limits_are_the_observed_counts(self):
+        """Owner decision 2026-11-08: the strict limits of stitched-4l follow ring7 (RV-013 session): no net conflicts,
+        only C3 and C4 as footprint mismatches, at most 14 antenna overlaps on U9."""
+        import json
+
+        sa = json.loads(K.ALLOW_FILE.read_text())["drc"]["stitched-4l"]["strict_allow"]
+        self.assertEqual(sa["net_conflict"]["max"], 0)
+        self.assertNotIn("refs", sa["net_conflict"])
+        self.assertEqual(sa["footprint_symbol_mismatch"]["max"], 2)
+        self.assertEqual(sorted(sa["footprint_symbol_mismatch"]["refs"]), ["C3", "C4"])
+        self.assertEqual(sa["courtyards_overlap"]["max"], 14)
+        self.assertEqual(sa["courtyards_overlap"]["refs_any"], ["U9"])
+        self.assertEqual(sa["items_not_allowed"]["max"], 1)
 
 
 if __name__ == "__main__":

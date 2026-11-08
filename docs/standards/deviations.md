@@ -17,10 +17,12 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 ### DEV-002 Stand-in footprints on the PCB spike (footprint_symbol_mismatch, net_conflict)
 
 - **Rule / requirement deviated from:** `docs/process/hw-generated-design-guardrails.md` (strict DRC with schematic parity); plan 06 section 1 item 4
-- **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profiles `placed-4l` and `routed-4l`, classes `footprint_symbol_mismatch` (max 29) and `net_conflict` (max 84), both limited to the refs U1, U8, U9, C1, C1B, C3, C4, D1 to D16, `TP*` and `H*` (checked by `kicad_strict.py`; any other ref fails)
-- **Justification:** the spike board uses stand-in land patterns (U1, U8, U9, C1, C1B, C3, C4), the 2020 LED stand-in for D1 to D16 (the schematic still names the 5 x 5 footprint), test points and mounting holes that exist only on the board. The schematic is not changed by plan 06.
+- **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profiles `placed-4l` and `routed-4l`, classes `footprint_symbol_mismatch` (max 29) and `net_conflict` (max 84), both limited to the refs U1, U8, U9, C1, C27, C3, C4, D1 to D16, `TP*` and `H*` (checked by `kicad_strict.py`; any other ref fails)
+- **Justification:** the spike board uses stand-in land patterns (U1, U8, U9, C1, C27, C3, C4), the 2020 LED stand-in for D1 to D16 (the schematic still names the 5 x 5 footprint), test points and mounting holes that exist only on the board. The schematic is not changed by plan 06.
 - **Risk assessment:** the parts are not the real land patterns; no claim on the parts is made. Foreign refs fail the check, so a real mismatch on another part is not hidden. Evidence: `tests/test_kicad_strict.py` (T14 class), placed DRC run of the spike branch.
 - **Scope & duration:** spike only, until the schematic footprints and the real parts are aligned (HW-012 follow-up)
+- **Update 2026-11-08:** the schematic now names the real footprints for U8 (TLV75733P SOT-23-5), U9 (CUSTOM:ESP32-C3-MINI-1, datasheet figure 11-1), U1 (TI drawing RWB0012A) and the LEDs (2020 package). Left as stand-ins: C3 (0805) and C4 (1206), whose values are open, and the test points and mounting holes. `footprint_symbol_mismatch` fell from 26 to 8 on the best run; the waiver list in `known-open-violations.json` has not been shortened yet. The owner agreed to shrink this deviation (2026-11-08, in the session).
+- **Update 2026-11-08 (evening):** U1 and U9 carry the datasheet pad numbers and the test points are out of the BOM in the schematic too; `net_conflict` fell to 0 and `footprint_symbol_mismatch` to 2 (C3, C4) on the best ring7 run. Owner decision of the same day: profile `stitched-4l` now allows `net_conflict` 0 and `footprint_symbol_mismatch` 2 (refs C3 and C4 only). The older profiles `placed-4l` and `routed-4l` are not changed.
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
 ### DEV-003 No project library table and unexplained ignored checks (lib_footprint_issues, ignored_checks)
@@ -29,16 +31,17 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow` (number only, no ref check)
 - **Justification:** the generated spike board uses system-library footprints by name without a project footprint library table (`lib_footprint_issues`), and the generated project file ignores some checks (`ignored_checks`, 5); the cause of the second is not explained yet (plan 06 G4).
 - **Risk assessment:** a real library problem on a part is hidden among the counted items; compensating measure: the count is capped at the observed value, so a rise fails.
+- **Update 2026-11-08:** the ignored checks are resolved: the generated project files switch the default-ignored ERC and DRC checks on and the ignored-check limits are 0 (the owner agreed to close this part, 2026-11-08). The `lib_footprint_issues` part stays open until a project library table exists (best run: 100 findings, limit 93, not yet analysed).
 - **Scope & duration:** spike only, until a project library table exists and the ignored checks are explained
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
 ### DEV-004 Antenna keep-out overlap of the module courtyard (courtyards_overlap, items_not_allowed on U9)
 
 - **Rule / requirement deviated from:** HW-005 (antenna keep-out, Draft); Espressif antenna placement guidance; plan 06 amendment A-1
-- **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow`, classes `courtyards_overlap` (max 16) and `items_not_allowed` (max 1), only findings that include U9
+- **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow`, classes `courtyards_overlap` (max 14 since the owner decision of 2026-11-08; was 16) and `items_not_allowed` (max 1), only findings that include U9
 - **Justification:** the library courtyard of ESP32-C6-MINI-1 is the antenna keep-out; the mech design puts ring LEDs and other parts inside it. The courtyard is not shrunk.
 - **Risk assessment:** the antenna environment is not acceptable as it stands; no statement on antenna performance is made. Open items for the owner: board cutout, separate antenna board, U.FL variant or module at the edge (mech or HW-005 decision).
-- **Scope & duration:** spike only, until the owner decides the antenna arrangement
+- **Scope & duration:** spike only, until the owner decides the antenna arrangement.
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
 ### DEV-005 ADR-0016 accepted before its own goldfish review
@@ -50,3 +53,13 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Risk assessment:** an unreviewed decision could carry errors into HW-010. The goldfish reviews RV-008 (after acceptance) and RV-010 (2026-11-06) found material points (truth table, hold-off margin, abs-max exceedance) that were then added as amendments and open actions, so the risk was real and is being closed by those records. Compensating measures: Amendment 2 was reviewed by RV-010 before the owner accepted it on 2026-11-07, and the HW-010 revision was approved by the owner on 2026-11-07 after that review; the readiness check of RV-010 stays NO-GO until its open actions are closed.
 - **Scope & duration:** one-off, closed when the open actions of RV-010 are closed, the readiness check answers GO, and the owner confirms the closure.
 - **Approved by / date:** the owner (Ben Spoor), 2026-11-07, in the session; recorded by the assistant
+
+### DEV-006 Silkscreen findings ignored for five spike footprints
+
+- **Status:** Proposed (the owner decides)
+- **Rule / requirement deviated from:** the silk checks of the strict PCB gate (plan 06 section 1 item 3: `silk_edge_clearance`, `silk_over_copper`, `silk_overlap` must be 0)
+- **Location:** `hw/kicad/spike-gate/src/pcb_rules.py` (`SILK_WAIVER_REFS`, rules `spike_silk_waiver` and `spike_silk_edge_waiver` in the written `.kicad_dru`); footprints U9, U2, U4, TVS2, J1
+- **Justification:** the outline of U9 (module) crosses parts placed inside its courtyard (see DEV-004); J1 silk lies at the board edge; U2, U4 and TVS2 silk touches neighbours. The silk of a prototype board does not change function; fabricators clip silk over pads. The footprints are not edited, so they still match the library.
+- **Risk assessment:** a real silk problem on these five parts is hidden. Compensating measure: the rule names the footprints and only silkscreen layers; copper clearance, edge clearance of copper and all other checks stay on. A production board needs the silk fixed instead.
+- **Scope & duration:** spike only, until the placement is decided by the owner
+- **Approved by / date:** proposed 2026-11-07; **not approved**: the owner declined it (2026-11-08, in the session). The waiver is off by default (`SPIKE_SILK_WAIVER=1` switches it on for comparison); the silk findings must be fixed by placement or footprint changes, still open.
