@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Spike board tooling: tidiness score `pcb_quality.py` (vias, off-45 length, sharp corners, rows, ring spread, passive distance) as tie-break of the run picker, placement grid `PLACE_GRID`, antenna keep-out `PLACE_ANT_KEEPOUT`, `SEED_OFFSET` for `run_best.sh`; batches ring8 to ring10 recorded (HW-010). One of 12 ring10 runs passes the strict gate. Batches ring11 to ring14: regulator pin ties, functional blocks and orientation costs in the placer (`PLACE_BLOCKS`, `PLACE_ORIENT`, off by default), and a clean-up fix (`snap_to_vias` is now called); two of 12 ring14 runs pass the strict gate. Fabricator-minimum check `pcb_fabcheck.py` (JLCPCB numbers of ADR-0020; run 9 passes, ring at the absolute minimum; partial, ADR-0020 still Proposed).
 - Skill `pcb-route-and-gate` (order of work, gate and lessons for the spike board), reviewed by goldfish (RV-012).
 - Draft requirement HW-014 (bulk capacitance of the +5V rail, [10] to [100] uF effective) with TC-214, the analysis `analysis-5v-bulk-capacitance.md` and the script `hw/sim/scripts/bulk_cap_bounds.py` with tests (HW-004, HW-010).
 - Draft requirement HW-015 (capacitance on VBUS before the switch, 1.0 to 10.0 uF effective, USB 2.0 Device Capacitance ECN) with TC-215.
