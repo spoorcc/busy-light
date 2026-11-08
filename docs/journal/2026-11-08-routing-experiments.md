@@ -22,3 +22,7 @@ Fab check (owner choice "A then c"): `src/pcb_fabcheck.py` compares ring14 run 9
 ## Ring15
 
 Owner choice: soft placement rules for the test points and IC rotations, then one more batch (answer "Yes"). Batch ring15 (ring12 settings, `PLACE_ROWS=0.5`, `SEED_OFFSET=300`): 3 of 12 runs pass the strict gate (1, 2, 5). The picker chose run 1, but the power check found no +5V path on it and 50.4 mV on VBUS_IC. Run 5 passes all checks but is not better than ring14 run 9 (its test points are not in a row; VBUS_IC 41.9 mV against 13.5 mV). Decision (assistant, from the numbers): keep ring14 run 9 as the stored result. Follow-up: put the power check into the picker. The `test_gate_logic.py` errors need `GATE_NET` (by design). Owner request "store the board, update the README images": board stored in `hw/kicad/spike-gate/board/`, images re-rendered, README caption and status updated. Not done: push, PR.
+
+## Fab review
+Owner request: thermal, bench and full fab review so the board is "DFx approved" and "fully functional". The statements cannot follow from analysis (approval is the owner's; function needs a built board). Owner chose "fab review only". Result: `docs/verification/reports/spike-fab-review.md`, tool `src/pcb_fabreview.py` (7 tests). Four findings plus two notes; the board is not ready to order. Thermal, bench, independent Gerber view and the fabricator DFM check are not done.
+
