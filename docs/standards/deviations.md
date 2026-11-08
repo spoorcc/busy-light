@@ -21,6 +21,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Justification:** the spike board uses stand-in land patterns (U1, U8, U9, C1, C1B, C3, C4), the 2020 LED stand-in for D1 to D16 (the schematic still names the 5 x 5 footprint), test points and mounting holes that exist only on the board. The schematic is not changed by plan 06.
 - **Risk assessment:** the parts are not the real land patterns; no claim on the parts is made. Foreign refs fail the check, so a real mismatch on another part is not hidden. Evidence: `tests/test_kicad_strict.py` (T14 class), placed DRC run of the spike branch.
 - **Scope & duration:** spike only, until the schematic footprints and the real parts are aligned (HW-012 follow-up)
+- **Update 2026-11-08:** the schematic now names the real footprints for U8 (TLV75733P SOT-23-5), U9 (CUSTOM:ESP32-C3-MINI-1, datasheet figure 11-1), U1 (TI drawing RWB0012A) and the LEDs (2020 package). Left as stand-ins: C3 (0805) and C4 (1206), whose values are open, and the test points and mounting holes. `footprint_symbol_mismatch` fell from 26 to 8 on the best run; the waiver list in `known-open-violations.json` has not been shortened yet. The owner agreed to shrink this deviation (2026-11-08, in the session).
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
 ### DEV-003 No project library table and unexplained ignored checks (lib_footprint_issues, ignored_checks)
@@ -29,6 +30,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow` (number only, no ref check)
 - **Justification:** the generated spike board uses system-library footprints by name without a project footprint library table (`lib_footprint_issues`), and the generated project file ignores some checks (`ignored_checks`, 5); the cause of the second is not explained yet (plan 06 G4).
 - **Risk assessment:** a real library problem on a part is hidden among the counted items; compensating measure: the count is capped at the observed value, so a rise fails.
+- **Update 2026-11-08:** the ignored checks are resolved: the generated project files switch the default-ignored ERC and DRC checks on and the ignored-check limits are 0 (the owner agreed to close this part, 2026-11-08). The `lib_footprint_issues` part stays open until a project library table exists (best run: 100 findings, limit 93, not yet analysed).
 - **Scope & duration:** spike only, until a project library table exists and the ignored checks are explained
 - **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
 
@@ -59,4 +61,4 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Justification:** the outline of U9 (module) crosses parts placed inside its courtyard (see DEV-004); J1 silk lies at the board edge; U2, U4 and TVS2 silk touches neighbours. The silk of a prototype board does not change function; fabricators clip silk over pads. The footprints are not edited, so they still match the library.
 - **Risk assessment:** a real silk problem on these five parts is hidden. Compensating measure: the rule names the footprints and only silkscreen layers; copper clearance, edge clearance of copper and all other checks stay on. A production board needs the silk fixed instead.
 - **Scope & duration:** spike only, until the placement is decided by the owner
-- **Approved by / date:** proposed 2026-11-07; not approved (owner approval pending)
+- **Approved by / date:** proposed 2026-11-07; **not approved**: the owner declined it (2026-11-08, in the session). The waiver is off by default (`SPIKE_SILK_WAIVER=1` switches it on for comparison); the silk findings must be fixed by placement or footprint changes, still open.
