@@ -6,6 +6,7 @@ without it the board tests are skipped and only the pure-Python rule tests run.
 Run: cd hw/kicad/spike-gate && PYTHONPATH=src python3 -m unittest tests.test_pcb_full
 """
 import json
+import re
 import math
 import sys
 import tempfile
@@ -46,12 +47,63 @@ class PlacementWeights(unittest.TestCase):
     def test_rule_tables(self):
         self.assertGreater(pcb_rules.NET_WEIGHT["/ILIM_STEP3_EN"], 1.0)
         bypass = {"tie:C24-U14", "tie:C25-U15"}
+        regulator = {"tie:C5-U8", "tie:C6-U8"}              # TLV757P: input capacitor at pin 1, output capacitor at pin 5
         paths = {"tie:J1A4-U7", "tie:J1B9-U7", "tie:C2-U7", "tie:U8-U9"}      # current paths of the power check
-        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | paths)
+        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | regulator | paths)
         for name, (a, b, w) in pcb_rules.PIN_TIES.items():
             if name in bypass:
                 self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
+            if name in regulator:
+                self.assertEqual((a[0], b[0]), (name[4:6], "U8"))
+                self.assertIn(b[1], ("1", "5"))
             self.assertGreater(w, 1.0)
+
+    def test_blocks_and_twins_name_real_parts_of_the_same_kind(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        anchors = {a for a, _, _ in pcb_rules.BLOCKS}
+        self.assertTrue(anchors <= set(comps), anchors - set(comps))
+        for a, m, rad in pcb_rules.BLOCKS:
+            self.assertIn(m, comps, m)
+            self.assertGreater(rad, 0.0)
+            self.assertNotEqual(a, m)
+        self.assertEqual(len({(a, m) for a, m, _ in pcb_rules.BLOCKS}), len(pcb_rules.BLOCKS))     # no repeats
+        for a, b in pcb_rules.TWINS:
+            self.assertEqual(comps[a][1], comps[b][1], (a, b))       # same footprint
+
+    def test_families_group_movable_parts_by_kind(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        fams = pcb_full.part_families(comps, fixed={"U9", "J1", "SW1"})
+        flat = [r for f in fams for r in f]
+        self.assertEqual(len(flat), len(set(flat)))                  # a part is in one family only
+        self.assertFalse({"U9", "J1", "SW1"} & set(flat))
+        self.assertFalse([r for r in flat if r.startswith("TP")])
+        for f in fams:
+            self.assertGreaterEqual(len(f), 2)
+            self.assertEqual(len({(comps[r][1], re.match("[A-Z]+", r).group(0)) for r in f}), 1)
+
+    def test_ic_families_and_the_test_point_row(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        fixed = {"U9", "J1", "SW1"}
+        ics = pcb_full.ic_families(comps, fixed)
+        self.assertTrue(ics)
+        self.assertTrue(all(r.startswith("U") for f in ics for r in f))
+        self.assertIn(("U14", "U15"), [f for f in ics if "U14" in f and len(f) == 2] or [()])
+        self.assertTrue(all(len({comps[r][1] for r in f}) == 1 for f in ics))
+        row = pcb_full.test_point_row(comps, fixed)
+        self.assertEqual(len(row), 1)
+        self.assertEqual(len(row[0]), 6)                      # TP1 to TP6
+        self.assertEqual(pcb_full.test_point_row({"TP1": ("", "")}), [])
+
+    def test_strict_ic_rule_is_a_switch_and_ics_stay_in_the_soft_families_without_it(self):
+        comps, _ = pcb_full.read_netlist(str(NETLIST))
+        fixed = {"U9", "J1", "SW1"}
+        soft, strict = pcb_full.orientation_families(comps, fixed, strict_ics=False)
+        self.assertEqual(strict, [])
+        self.assertTrue(any(f[0].startswith("U") for f in soft))      # the ring12 setup
+        soft2, strict2 = pcb_full.orientation_families(comps, fixed, strict_ics=True)
+        self.assertTrue(strict2)
+        self.assertFalse(any(f[0].startswith("U") for f in soft2))
+        self.assertEqual(sorted(soft + strict), sorted(soft2 + strict2))      # same parts, other rule
 
     def test_weight_scales_the_wire_length_cost(self):
         import pcb_place
@@ -334,3 +386,33 @@ def test_j1_footprint_has_no_silk_at_the_board_edge():
     assert t.count("(fp_line") - u.count("(fp_line") == 3
     assert u.count("(pad ") == t.count("(pad ") and u.count("(") == u.count(")")
     assert '"%s"' % custom_fp.J1_NAME in u and '"%s"' % custom_fp.J1_STOCK not in u
+
+
+@unittest.skipIf(pcbnew is None, "needs KiCad pcbnew")
+class AntennaKeepout(unittest.TestCase):
+    """PLACE_ANT_KEEPOUT=1: no movable part in the vendor keep-out (15 mm beyond the module end, module width)."""
+
+    def test_no_movable_part_in_the_vendor_keepout(self):
+        import os
+        old = os.environ.get("PLACE_ANT_KEEPOUT")
+        os.environ["PLACE_ANT_KEEPOUT"] = "1"
+        try:
+            with tempfile.TemporaryDirectory() as t:
+                board = pcbnew.LoadBoard(pcb_full.build(str(NETLIST), t + "/a"))
+        finally:
+            if old is None:
+                os.environ.pop("PLACE_ANT_KEEPOUT")
+            else:
+                os.environ["PLACE_ANT_KEEPOUT"] = old
+        fps = {f.GetReference(): f for f in board.GetFootprints()}
+        mb = fps["U9"].GetBoundingBox(False)
+        x0, x1 = mb.GetLeft() - 15_000_000, mb.GetLeft()
+        y0, y1 = mb.GetTop(), mb.GetBottom()
+        fixed = {"U9", "J1", "SW1"}
+        for ref, f in fps.items():
+            led = (ref[0] == "D" and ref[1:].isdigit()) or (ref[0] == "C" and ref[1:].isdigit() and 8 <= int(ref[1:]) <= 23)
+            if ref in fixed or led:
+                continue
+            b = f.GetBoundingBox(False)
+            inside = b.GetRight() > x0 and b.GetLeft() < x1 and b.GetBottom() > y0 and b.GetTop() < y1
+            self.assertFalse(inside, ref)

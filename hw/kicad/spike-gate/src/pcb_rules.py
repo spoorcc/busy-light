@@ -164,7 +164,26 @@ PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
             "tie:J1A4-U7": (("J1", "A4"), ("U7", "1"), 1.5),
             "tie:J1B9-U7": (("J1", "B9"), ("U7", "1"), 1.5),
             "tie:C2-U7": (("C2", "1"), ("U7", "1"), 1.5),
-            "tie:U8-U9": (("U8", "5"), ("U9", "3"), 3.0)}
+            "tie:U8-U9": (("U8", "5"), ("U9", "3"), 3.0),
+            # Regulator bypass (layout experiment 2026-11-08, ring11): input capacitor C5 at the +5V pin and output capacitor C6
+            # at the +3V3 pin of the TLV757P (U8 pins 1 and 5; the datasheet asks for the input capacitor close to the part).
+            "tie:C5-U8": (("C5", "1"), ("U8", "1"), 4.0),
+            "tie:C6-U8": (("C6", "1"), ("U8", "5"), 4.0)}
+
+# Functional blocks (layout experiment 2026-11-08, ring12): (anchor, member, radius mm). A member sits within the radius of the
+# anchor part, so each circuit reads as one group. The weight is PLACE_BLOCKS in pcb_place.py (0 = off). The radii are a first
+# guess from the part sizes, not a derived value.
+BLOCKS = tuple((anchor, m, rad) for anchor, rad, members in (
+    ("U8", 6.0, ("C3", "C4", "C5", "C6")),                                        # 5 V to 3.3 V regulator
+    ("U5", 10.0, ("C1", "C1B", "C1C", "C1D", "C1E", "C1F", "R6")),                # supervisor and its timing capacitors
+    ("U14", 7.0, ("C24", "DZ14", "R_SU14", "R2", "R18", "R14")),                  # current-limit step 2 switch
+    ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch
+    ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R_VD", "R1")),                           # USB-C CC detect
+    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R_ILIM3B")),   # VBUS switch, protection, ILIM resistors
+    ("U9", 12.0, ("R9", "C7", "R13", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts
+) for m in members)
+# Twins: the parts of the two identical switch circuits. They take the same rotation and side, so the circuits look alike.
+TWINS = (("U14", "U15"), ("C24", "C25"), ("DZ14", "DZ15"), ("R_SU14", "R_SU15"), ("R2", "R3"), ("R18", "R19"))
 
 
 # ---- post-route clean-up helpers (pure functions; used by pcb_dsn.py import and pcb_stitch.py; tested in test_pcb_rules)

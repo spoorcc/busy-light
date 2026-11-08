@@ -183,8 +183,39 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 SA_ITERS = 160000
+STRICT_ICS = os.environ.get("PLACE_STRICT", "0") == "1"      # ring13: ICs of one kind match in rotation and side (no gain, off)
 _SEED0 = int(os.environ.get("PLACE_SEED_START", "1"))    # run_best.sh gives every run its own placement seeds
 SA_SEEDS = tuple(range(_SEED0, _SEED0 + 16))
+
+
+def part_families(comps, fixed=()):
+    """Movable parts of one kind (same reference letters and footprint) that should share one orientation (ring12).
+    comps: {ref: (value, footprint, ...)}. Returns a sorted list of ref tuples with two or more members."""
+    kinds = {}
+    for ref, c in comps.items():
+        if ref in fixed or ref.startswith("TP"):
+            continue
+        kinds.setdefault((re.match("[A-Z]+", ref).group(0), c[1]), []).append(ref)
+    return sorted(tuple(sorted(v)) for v in kinds.values() if len(v) >= 2)
+
+
+def ic_families(comps, fixed=()):
+    """Families of ICs (reference letter U) that share a footprint: they must point the same way (ring13)."""
+    return [f for f in part_families(comps, fixed) if f[0].startswith("U")]
+
+
+def orientation_families(comps, fixed=(), strict_ics=False):
+    """(soft families, strict families). ICs are strict only when strict_ics (env PLACE_STRICT=1, ring13: no gain, off)."""
+    fams = part_families(comps, fixed)
+    if not strict_ics:
+        return fams, []
+    return [f for f in fams if not f[0].startswith("U")], ic_families(comps, fixed)
+
+
+def test_point_row(comps, fixed=()):
+    """The movable test points (TP...) as one row to line up (ring13); empty when there are fewer than two."""
+    tps = tuple(sorted(r for r in comps if r.startswith("TP") and r not in fixed))
+    return [tps] if len(tps) >= 2 else []
 
 
 def K(mx, my):
@@ -426,6 +457,13 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     kx0, ky0 = K(mx0, my1)
     kx1, ky1 = K(mx1, my0)
     fixed_rects.append(("F", kx0 - CX - 0.3, ky0 - CY - 0.3, kx1 - CX + 0.3, ky1 - CY + 0.3))
+    if os.environ.get("PLACE_ANT_KEEPOUT", "0") == "1":
+        # vendor antenna keep-out (MO.vendor_keepout_rect, 15 mm beyond the module end): no movable part on either side
+        vx0, vy0, vx1, vy1 = MO.vendor_keepout_rect()
+        ax0_, ay0_ = K(vx0, vy1)
+        ax1_, ay1_ = K(vx1, vy0)
+        for side in ("F", "B"):
+            fixed_rects.append((side, ax0_ - CX, ay0_ - CY, ax1_ - CX, ay1_ - CY))
 
     # ---- button
     sw = fps["SW1"]
@@ -478,7 +516,12 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
                                           seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
-                                          accept=layout_rules_ok, weights=weights, rules=LAYOUT_RULES)
+                                          accept=layout_rules_ok, weights=weights, rules=LAYOUT_RULES,
+                                          blocks=[b for b in pcb_rules.BLOCKS if b[0] in comps and b[1] in comps],
+                                          families=orientation_families(comps, fixed, STRICT_ICS)[0],
+                                          strict_families=orientation_families(comps, fixed, STRICT_ICS)[1],
+                                          rows=test_point_row(comps, fixed),
+                                          twins=[t for t in pcb_rules.TWINS if t[0] in comps and t[1] in comps])
     for ref, (x, y, rot, side) in sorted(state.items()):
         fp = fps[ref]
         fp.SetPosition(vec(0, 0))
