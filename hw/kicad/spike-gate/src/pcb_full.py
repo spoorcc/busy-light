@@ -53,15 +53,6 @@ FOOTPRINT_OVERRIDE = {
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
-# schematic pin name -> pad number, where the schematic box symbol uses names (datasheet pin tables)
-PADMAP = {
-    "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},   # TUSB321 SLLSEZ? pin table
-    "U9": {"GPIO0": "12", "GPIO1": "13", "GPIO2": "5", "GPIO3": "6", "GPIO4": "18", "GPIO5": "19",
-           "GPIO6": "20", "GPIO7": "21", "GPIO8": "22", "GPIO9": "23", "GPIO10": "16",
-           "GPIO18": "26", "GPIO19": "27", "GPIO20": "30", "GPIO21": "31", "3V3": "3", "EN": "8",
-           "GND": ("1", "2", "11", "14", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46",
-                   "47", "48", "49", "50", "51", "52", "53")},   # ESP32-C3-MINI-1 datasheet v2.2 table 3-1
-}
 
 # ----------------------------------------------------------------------------- netlist parsing
 def parse_sexpr(text):
@@ -308,10 +299,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 
     pad_net = {}
     for n, nodes in nets.items():
-        for ref, pin in nodes:
-            mp = PADMAP.get(ref, {}).get(pin, pin)
-            for pn in (mp if isinstance(mp, tuple) else (mp,)):
-                pad_net[(ref, pn)] = n
+        for ref, pin in nodes:          # schematic pin numbers are the pad numbers (layout_full.PAD)
+            pad_net[(ref, pin)] = n
 
     # ---- load all footprints
     fps = {}
@@ -470,11 +459,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     for n, nodes in nets.items():
         if n == GND or n.startswith("unconnected-"):
             continue
-        lst = []
-        for ref, pin in nodes:
-            mp = PADMAP.get(ref, {}).get(pin, pin)
-            for pn in (mp if isinstance(mp, tuple) else (mp,)):
-                lst.append((ref, pn))
+        lst = list(nodes)
         if len(lst) >= 2:
             sa_nets[n] = lst
 

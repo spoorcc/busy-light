@@ -306,3 +306,19 @@ Reading: the ties cut every drop by a factor of 2 to 3 (the +3V3 drop falls from
 | 4 of 12 (runs 3, 4, 5, 6) | 2 (runs 4 and 6) | run 4 | 16.5 / 19.9 / 41.5 | 1 piece, 11.8 % removed | 1 piece, 22.4 % removed |
 
 Reading: the halved ties keep routing completion at the ring4 level and still bring all three drops under the 50 mV analyst target (an assumption, not a requirement). This is the chosen setting. One batch only; Freerouting is not deterministic. Not run: antenna/RF, thermal, fab DFM check of the result.
+
+## Update 2026-11-08 (evening): datasheet pad numbers on U1 and U9, test points out of the BOM (HW-010)
+
+Change: the box symbols of U1 (TUSB321) and U9 (ESP32-C3-MINI-1) carry the pad numbers of the datasheets (`layout_full.PAD`; TI SLLSEO6C section 5; Espressif datasheet v2.2 table 3-1, the nine centre pads are pin 49). The name-to-pad table `pcb_full.PADMAP`, which only the board side used, is deleted, so the DRC schematic parity check now covers both parts. The test point symbols are out of the BOM, like their footprints. ERC 0 findings, intent and drawing 55 nets each, two builds identical (`full8`). Tests: `test_layout_full.py` 30 pass (new: datasheet pad numbers, 22 GND pads on GND, test points out of the BOM); `test_pcb_full.py`, `test_kicad_strict.py`, `test_pcb_ring.py`, `test_lib_tables.py` 63 pass. The fixture `tests/data/full.net` is the new netlist.
+
+### ring7: 12 runs, fine rules, ring cells, ring6 tie weights, input `full8`
+
+Evidence: `ring7.log` (session scratchpad, not committed); `git status` at the start in `ring7.gitstatus` (the four changed files of this update).
+
+| Runs with 0 open items | Runs with 0 strict findings and 0 hard findings | Best run | Drops VBUS_IC / +5V / +3V3 (mV) | GND plane | +5V plane |
+|---|---|---|---|---|---|
+| 2 of 12 (runs 1, 3) | 0 | run 1 | 30.4 / 9.3 / 24.3 | 1 piece, 11.5 % removed | 1 piece, 20.1 % removed |
+
+Best run, strict gate (`stitched-4l`): 16 findings, against 98 in ring6 run 4. `net_conflict` 0 (was 77), `footprint_symbol_mismatch` 2 (was 8: only C3 and C4 left, sizes not designed, HW-014 Draft), `courtyards_overlap` 12 and `items_not_allowed` 1 (all on U9, antenna, DEV-004, ADR-0003), and one strict FAIL: `silk_over_copper` 1 (silk outline of U9 over pad 4 of U3, a part the placer put in the module area).
+
+Reading: the pin numbers removed every `net_conflict`. No run of this batch passes the strict gate (ring6 had 2 of 12). The changed netlist changes the placement input, so this batch is a new random draw; one batch each cannot show whether the change made routing worse. Not run: a second batch; fabricator DFM check; antenna and RF; thermal.

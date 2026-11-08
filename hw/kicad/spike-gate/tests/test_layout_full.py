@@ -13,11 +13,32 @@ import layout_full  # noqa: E402
 L_DOUT, L_VSS, L_DIN, L_VDD = (layout_full.LED_DOUT, layout_full.LED_VSS, layout_full.LED_DIN, layout_full.LED_VDD)
 
 
+class PinNet(dict):
+    """Intent pin -> net, keyed by pad number; U1 and U9 pins may also be looked up by name (layout_full.PAD)."""
+
+    @staticmethod
+    def _k(k):
+        return (k[0], layout_full.pads(*k)[0])
+
+    def __getitem__(self, k):
+        return super().__getitem__(self._k(k))
+
+    def get(self, k, default=None):
+        return super().get(self._k(k), default)
+
+    def __contains__(self, k):
+        return super().__contains__(self._k(k))
+
+
+def pin_net_of(intent):
+    return PinNet({p: n for n, pins in intent.items() for p in pins})
+
+
 class FullBoard(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sch, cls.intent = layout_full.build()
-        cls.pin_net = {p: n for n, pins in cls.intent.items() for p in pins}
+        cls.pin_net = pin_net_of(cls.intent)
 
     def test_two_builds_are_identical(self):
         out = []
@@ -190,9 +211,42 @@ class FullBoard(unittest.TestCase):
         self.assertFalse({"UART_TX", "UART_RX"} & set(self.pin_net.values()))
 
     def test_every_gpio_in_use_is_listed(self):
-        used = {p[1] for p in self.pin_net if p[0] == "U9"} - {"3V3", "GND"}
-        self.assertEqual(used, {"GPIO0", "GPIO3", "GPIO10", "GPIO5", "GPIO6", "GPIO7",
-                                "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "GPIO2", "GPIO8", "EN"})
+        used = {p for r, p in dict.keys(self.pin_net) if r == "U9"} - set(layout_full.pads("U9", "GND")) - {"3"}
+        self.assertEqual(used, {layout_full.pads("U9", n)[0] for n in (
+            "GPIO0", "GPIO3", "GPIO10", "GPIO5", "GPIO6", "GPIO7",
+            "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO9", "GPIO2", "GPIO8", "EN")})
+
+    @staticmethod
+    def _symbol_pins(ref):
+        return {(pin.number, pin.name) for unit in layout_full.BOXES[ref].units for pin in unit.pins}
+
+    def test_cc_ic_pin_numbers_are_the_datasheet_pads(self):
+        """TUSB321 RWB, TI SLLSEO6C (Aug 2018) section 5 Pin Functions; schematic number = board pad number."""
+        self.assertEqual(self._symbol_pins("U1"), {
+            ("1", "CC1"), ("2", "CC2"), ("3", "CURRENT_MODE"), ("4", "PORT"), ("5", "VBUS_DET"),
+            ("6", "VCONN_FAULT"), ("7", "OUT1_N"), ("8", "OUT2_N"), ("9", "ID"), ("10", "GND"), ("11", "DIR"),
+            ("12", "VDD")})
+
+    def test_module_pin_numbers_are_the_datasheet_pads(self):
+        """ESP32-C3-MINI-1 datasheet v2.2 table 3-1 (p. 11): GND = 1, 2, 11, 14, 36 to 53 (49 = the 9 centre pads)."""
+        pins = self._symbol_pins("U9")
+        gnd = {n for n, name in pins if name == "GND"}
+        self.assertEqual(gnd, {"1", "2", "11", "14"} | {str(i) for i in range(36, 54)})
+        self.assertEqual({(n, name.split()[0]) for n, name in pins if name != "GND"}, {
+            ("3", "3V3"), ("5", "GPIO2"), ("6", "GPIO3"), ("8", "EN"), ("12", "GPIO0"), ("13", "GPIO1"),
+            ("16", "GPIO10"), ("18", "GPIO4"), ("19", "GPIO5"), ("20", "GPIO6"), ("21", "GPIO7"), ("22", "GPIO8"),
+            ("23", "GPIO9"), ("26", "GPIO18"), ("27", "GPIO19"), ("30", "GPIO20"), ("31", "GPIO21")})
+
+    def test_every_module_ground_pad_is_on_gnd(self):
+        for p in layout_full.pads("U9", "GND"):
+            self.assertEqual(dict.get(self.pin_net, ("U9", p)), "GND", p)
+
+    def test_test_points_are_not_in_the_bom(self):
+        """The TestPoint_Pad footprint is excluded from the BOM; the symbol must say the same (DRC parity)."""
+        tps = [y for y in self.sch.schematicSymbols
+               if any(p.key == "Reference" and p.value.startswith("TP") for p in y.properties)]
+        self.assertEqual(len(tps), 6)
+        self.assertTrue(all(y.inBom is False for y in tps))
 
     def test_test_points(self):
         nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 7)}
@@ -206,7 +260,7 @@ class SupplyPinProtection(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sch, cls.intent = layout_full.build()
-        cls.pin_net = {p: n for n, pins in cls.intent.items() for p in pins}
+        cls.pin_net = pin_net_of(cls.intent)
 
     def test_resistor_from_vbus_to_each_protected_pin(self):
         for r, node, ohm in (("R_SU1", "VDD_U1", "470"), ("R_SU14", "VDD_U14", "1k"), ("R_SU15", "VDD_U15", "1k")):
@@ -235,7 +289,7 @@ class GateOkReadback(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sch, cls.intent = layout_full.build()
-        cls.pin_net = {p: n for n, pins in cls.intent.items() for p in pins}
+        cls.pin_net = pin_net_of(cls.intent)
 
     def test_fault_n_reaches_the_and_gate_with_a_3v3_pull_up_and_not_the_mcu(self):
         self.assertEqual(self.pin_net[("U10", "1")], "FAULT_N")

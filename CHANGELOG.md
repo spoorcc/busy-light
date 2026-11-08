@@ -14,6 +14,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Skill `pcb-route-and-gate` (order of work, gate and lessons for the spike board), reviewed by goldfish (RV-012).
 
 ### Changed
+- Spike board: U1 and U9 schematic symbols carry the datasheet pad numbers (`layout_full.PAD`), `pcb_full.PADMAP` deleted, test points out of the BOM in the schematic; batch ring7 removes all 77 `net_conflict` findings (98 to 16 findings), no run passes the strict gate (HW-010, DEV-002).
 - README images and captions of the hardware spike regenerated from the best of 12 runs (HW-010).
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 

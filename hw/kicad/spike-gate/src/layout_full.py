@@ -98,14 +98,43 @@ PARTS["R14"] = (*R, "100k")
 PARTS["R15"] = (*R, "100k")
 
 S = L.SIZE
+# Pad numbers of the pins that the layout code names (the box symbols carry these numbers, so the schematic and the
+# board use the same pad numbers and the DRC schematic parity check covers U1 and U9). Sources, read 2026-11-08 from the
+# local datasheet folder (not committed, ADR-0015 item 8):
+#   U1 TUSB321 RWB package: TI SLLSEO6C (revised August 2018), section 5 Pin Functions.
+#   U9 ESP32-C3-MINI-1: Espressif datasheet v2.2, table 3-1 (page 11); the nine centre pads are all pin 49 (figure 3-1).
+U9_GND = ("1", "2", "11", "14") + tuple(str(n) for n in range(36, 54))
+PAD = {
+    "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},
+    "U9": {"GPIO0": "12", "GPIO1": "13", "GPIO2": "5", "GPIO3": "6", "GPIO4": "18", "GPIO5": "19",
+           "GPIO6": "20", "GPIO7": "21", "GPIO8": "22", "GPIO9": "23", "GPIO10": "16",
+           "GPIO18": "26", "GPIO19": "27", "GPIO20": "30", "GPIO21": "31", "3V3": "3", "EN": "8", "GND": U9_GND},
+}
+
+
+def pads(ref, pin):
+    """Pad numbers (tuple) of a pin given by name or number."""
+    p = PAD.get(ref, {}).get(str(pin), str(pin))
+    return p if isinstance(p, tuple) else (p,)
+
+
+def _numbered(ref, pins):
+    """Box pins with the datasheet pad number; a multi-pad pin (GND) becomes stacked pins, extra ones passive."""
+    out = []
+    for num, name, side, off, etype in pins:
+        for k, p in enumerate(pads(ref, num)):
+            out.append((p, name, side, off, etype if k == 0 else "passive"))
+    return out
+
+
 BOXES = {
-    "U1": L.box_symbol("CC_IC_TUSB321", [
+    "U1": L.box_symbol("CC_IC_TUSB321", _numbered("U1", [
         ("VDD", "VDD", "top", -2.54, "power_in"), ("VBUS_DET", "VBUS_DET", "top", 2.54, "passive"),
         ("GND", "GND", "bottom", -2.54, "power_in"), ("PORT", "PORT", "bottom", 2.54, "passive"),
         ("CC1", "CC1", "left", 2.54, "passive"), ("CC2", "CC2", "left", 0, "passive"),
         ("7", "OUT1_N", "right", 5.08, "open_collector"), ("8", "OUT2_N", "right", 0, "open_collector"),
         ("3", "CURRENT_MODE", "right", -5.08, "passive"), ("6", "VCONN_FAULT", "right", -7.62, "open_collector"),
-        ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")], half_h=15.24),
+        ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")]), half_h=15.24),
     "U5": L.SUPERVISOR,
     "U14": L.TMUX1101, "U15": L.TMUX1101,
     "U7": L.box_symbol("TPS2553_BOX", [
@@ -116,7 +145,7 @@ BOXES = {
         ("1", "IN", "left", 0, "power_in"), ("3", "EN", "left", -2.54, "input"),
         ("5", "OUT", "right", 0, "passive"), ("4", "NC", "right", -2.54, "no_connect"),
         ("2", "GND", "bottom", 0, "power_in")]),
-    "U9": L.box_symbol("ESP32_C3_MINI_1", [
+    "U9": L.box_symbol("ESP32_C3_MINI_1", _numbered("U9", [
         ("3V3", "3V3", "top", 0, "power_in"), ("GND", "GND", "bottom", 0, "power_in"),
         ("GPIO18", "GPIO18 USB_D-", "left", 27.94, "bidirectional"),
         ("GPIO19", "GPIO19 USB_D+", "left", 22.86, "bidirectional"),
@@ -128,7 +157,7 @@ BOXES = {
         ("GPIO0", "GPIO0", "right", 17.78, "bidirectional"), ("GPIO1", "GPIO1", "right", 12.7, "bidirectional"),
         ("GPIO3", "GPIO3", "right", 7.62, "bidirectional"), ("GPIO10", "GPIO10", "right", 2.54, "bidirectional"),
         ("GPIO4", "GPIO4", "right", -2.54, "bidirectional"), ("GPIO5", "GPIO5", "right", -7.62, "bidirectional"),
-        ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")],
+        ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")]),
         half_w=22.86, half_h=33.02, hide_numbers=True),
 }
 BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
@@ -196,7 +225,12 @@ class Full(L.Sheet):
 
     # ---- intent
     def bind(self, net, ref, pin):
-        self.intent.setdefault(net, set()).add((ref, str(pin)))
+        for p in pads(ref, pin):
+            self.intent.setdefault(net, set()).add((ref, p))
+
+    def pin(self, ref, pin):
+        """Pin position by pad number or, for U1 and U9, by pin name (stacked pads share the first one's position)."""
+        return super().pin(ref, pads(ref, pin)[0])
 
     def at(self, a):
         return self.pin(*a) if isinstance(a[0], str) else (g(a[0]), g(a[1]))
@@ -224,6 +258,8 @@ class Full(L.Sheet):
             for p in self.syms[-1].properties:
                 if p.key in ("Reference", "Value"):
                     p.position.angle = (-rot) % 360
+        if ref.startswith("TP"):        # bare test pads: the footprint is excluded from the BOM, so is the symbol
+            self.syms[-1].inBom = False
         if ref in HIDE_VALUE:
             for p in self.syms[-1].properties:
                 if p.key == "Value":

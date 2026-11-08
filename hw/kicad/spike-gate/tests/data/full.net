@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/683979ca-d42a-4ed0-84bc-41f5a1683390/scratchpad/full7/full.kicad_sch")
-		(date "2026-11-08T08:37:15")
+		(source "/tmp/claude-1000/-home-ben-Programming-busy-light/683979ca-d42a-4ed0-84bc-41f5a1683390/scratchpad/full8/full.kicad_sch")
+		(date "2026-11-08T13:38:46")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -4440,6 +4440,9 @@
 				(value "full.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -4489,6 +4492,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -4542,6 +4548,9 @@
 				(value "full.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -4591,6 +4600,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -4644,6 +4656,9 @@
 				(value "full.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -4693,6 +4708,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -4863,22 +4881,22 @@
 					(name "A")
 					(pins
 						(pin
-							(num "CC1")
+							(num "1")
 						)
 						(pin
-							(num "CC2")
+							(num "2")
 						)
 						(pin
-							(num "VDD")
+							(num "12")
 						)
 						(pin
-							(num "GND")
+							(num "10")
 						)
 						(pin
-							(num "VBUS_DET")
+							(num "5")
 						)
 						(pin
-							(num "PORT")
+							(num "4")
 						)
 						(pin
 							(num "7")
@@ -5368,58 +5386,121 @@
 					(name "A")
 					(pins
 						(pin
-							(num "GPIO18")
+							(num "26")
 						)
 						(pin
-							(num "GPIO19")
+							(num "27")
 						)
 						(pin
-							(num "GPIO21")
+							(num "31")
 						)
 						(pin
-							(num "GPIO20")
+							(num "30")
 						)
 						(pin
-							(num "EN")
+							(num "8")
 						)
 						(pin
-							(num "GPIO9")
+							(num "23")
 						)
 						(pin
-							(num "GPIO2")
+							(num "5")
 						)
 						(pin
-							(num "GPIO8")
+							(num "22")
 						)
 						(pin
-							(num "3V3")
+							(num "3")
 						)
 						(pin
-							(num "GND")
+							(num "45")
 						)
 						(pin
-							(num "GPIO0")
+							(num "40")
 						)
 						(pin
-							(num "GPIO1")
+							(num "41")
 						)
 						(pin
-							(num "GPIO3")
+							(num "42")
 						)
 						(pin
-							(num "GPIO10")
+							(num "43")
 						)
 						(pin
-							(num "GPIO4")
+							(num "44")
 						)
 						(pin
-							(num "GPIO5")
+							(num "53")
 						)
 						(pin
-							(num "GPIO6")
+							(num "46")
 						)
 						(pin
-							(num "GPIO7")
+							(num "47")
+						)
+						(pin
+							(num "48")
+						)
+						(pin
+							(num "49")
+						)
+						(pin
+							(num "50")
+						)
+						(pin
+							(num "51")
+						)
+						(pin
+							(num "52")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "39")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "21")
 						)
 					)
 				)
@@ -6418,8 +6499,28 @@
 			)
 			(pins
 				(pin
+					(num "1")
+					(name "CC1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "CC2")
+					(type "passive")
+				)
+				(pin
 					(num "3")
 					(name "CURRENT_MODE")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "PORT")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "VBUS_DET")
 					(type "passive")
 				)
 				(pin
@@ -6443,37 +6544,17 @@
 					(type "open_collector")
 				)
 				(pin
+					(num "10")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
 					(num "11")
 					(name "DIR")
 					(type "open_collector")
 				)
 				(pin
-					(num "CC1")
-					(name "CC1")
-					(type "passive")
-				)
-				(pin
-					(num "CC2")
-					(name "CC2")
-					(type "passive")
-				)
-				(pin
-					(num "GND")
-					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "PORT")
-					(name "PORT")
-					(type "passive")
-				)
-				(pin
-					(num "VBUS_DET")
-					(name "VBUS_DET")
-					(type "passive")
-				)
-				(pin
-					(num "VDD")
+					(num "12")
 					(name "VDD")
 					(type "power_in")
 				)
@@ -6499,94 +6580,199 @@
 			)
 			(pins
 				(pin
-					(num "3V3")
-					(name "3V3")
-					(type "power_in")
-				)
-				(pin
-					(num "EN")
-					(name "EN")
-					(type "input")
-				)
-				(pin
-					(num "GND")
+					(num "1")
 					(name "GND")
 					(type "power_in")
 				)
 				(pin
-					(num "GPIO0")
-					(name "GPIO0")
-					(type "bidirectional")
+					(num "2")
+					(name "GND")
+					(type "passive")
 				)
 				(pin
-					(num "GPIO1")
-					(name "GPIO1")
-					(type "bidirectional")
+					(num "3")
+					(name "3V3")
+					(type "power_in")
 				)
 				(pin
-					(num "GPIO2")
+					(num "5")
 					(name "GPIO2_(strap)")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO3")
+					(num "6")
 					(name "GPIO3")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO4")
-					(name "GPIO4")
+					(num "8")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "11")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "GPIO0")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO5")
-					(name "GPIO5")
+					(num "13")
+					(name "GPIO1")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO6")
-					(name "GPIO6")
-					(type "bidirectional")
+					(num "14")
+					(name "GND")
+					(type "passive")
 				)
 				(pin
-					(num "GPIO7")
-					(name "GPIO7")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO8")
-					(name "GPIO8_(strap)")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO9")
-					(name "GPIO9_(boot)")
-					(type "bidirectional")
-				)
-				(pin
-					(num "GPIO10")
+					(num "16")
 					(name "GPIO10")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO18")
+					(num "18")
+					(name "GPIO4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "19")
+					(name "GPIO5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "20")
+					(name "GPIO6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "21")
+					(name "GPIO7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "22")
+					(name "GPIO8_(strap)")
+					(type "bidirectional")
+				)
+				(pin
+					(num "23")
+					(name "GPIO9_(boot)")
+					(type "bidirectional")
+				)
+				(pin
+					(num "26")
 					(name "GPIO18_USB_D-")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO19")
+					(num "27")
 					(name "GPIO19_USB_D+")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO20")
+					(num "30")
 					(name "GPIO20_U0RXD")
 					(type "bidirectional")
 				)
 				(pin
-					(num "GPIO21")
+					(num "31")
 					(name "GPIO21_U0TXD")
 					(type "bidirectional")
+				)
+				(pin
+					(num "36")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "37")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "38")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "39")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "40")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "41")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "42")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "43")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "44")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "45")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "46")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "47")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "48")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "49")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "50")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "51")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "52")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "53")
+					(name "GND")
+					(type "passive")
 				)
 			)
 		)
@@ -6893,8 +7079,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "3V3")
-				(pinfunction "3V3_3V3")
+				(pin "3")
+				(pinfunction "3V3_3")
 				(pintype "power_in")
 			)
 		)
@@ -7146,8 +7332,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO5")
-				(pinfunction "GPIO5_GPIO5")
+				(pin "19")
+				(pinfunction "GPIO5_19")
 				(pintype "bidirectional")
 			)
 		)
@@ -7163,8 +7349,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "CC1")
-				(pinfunction "CC1_CC1")
+				(pin "1")
+				(pinfunction "CC1_1")
 				(pintype "passive")
 			)
 		)
@@ -7180,8 +7366,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "CC2")
-				(pinfunction "CC2_CC2")
+				(pin "2")
+				(pinfunction "CC2_2")
 				(pintype "passive")
 			)
 		)
@@ -7201,8 +7387,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO0")
-				(pinfunction "GPIO0_GPIO0")
+				(pin "12")
+				(pinfunction "GPIO0_12")
 				(pintype "bidirectional")
 			)
 		)
@@ -7279,8 +7465,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO6")
-				(pinfunction "GPIO6_GPIO6")
+				(pin "20")
+				(pinfunction "GPIO6_20")
 				(pintype "bidirectional")
 			)
 		)
@@ -7445,8 +7631,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO7")
-				(pinfunction "GPIO7_GPIO7")
+				(pin "21")
+				(pinfunction "GPIO7_21")
 				(pintype "bidirectional")
 			)
 		)
@@ -7483,8 +7669,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO3")
-				(pinfunction "GPIO3_GPIO3")
+				(pin "6")
+				(pinfunction "GPIO3_6")
 				(pintype "bidirectional")
 			)
 		)
@@ -7504,8 +7690,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO10")
-				(pinfunction "GPIO10_GPIO10")
+				(pin "16")
+				(pinfunction "GPIO10_16")
 				(pintype "bidirectional")
 			)
 		)
@@ -7562,8 +7748,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO18")
-				(pinfunction "GPIO18_USB_D-_GPIO18")
+				(pin "26")
+				(pinfunction "GPIO18_USB_D-_26")
 				(pintype "bidirectional")
 			)
 		)
@@ -7579,8 +7765,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO19")
-				(pinfunction "GPIO19_USB_D+_GPIO19")
+				(pin "27")
+				(pinfunction "GPIO19_USB_D+_27")
 				(pintype "bidirectional")
 			)
 		)
@@ -7606,8 +7792,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "VDD")
-				(pinfunction "VDD_VDD")
+				(pin "12")
+				(pinfunction "VDD_12")
 				(pintype "power_in")
 			)
 		)
@@ -8034,14 +8220,14 @@
 			)
 			(node
 				(ref "U1")
-				(pin "GND")
-				(pinfunction "GND_GND")
+				(pin "10")
+				(pinfunction "GND_10")
 				(pintype "power_in")
 			)
 			(node
 				(ref "U1")
-				(pin "PORT")
-				(pinfunction "PORT_PORT")
+				(pin "4")
+				(pinfunction "PORT_4")
 				(pintype "passive")
 			)
 			(node
@@ -8135,40 +8321,139 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GND")
-				(pinfunction "GND_GND")
+				(pin "1")
+				(pinfunction "GND_1")
 				(pintype "power_in")
 			)
-		)
-		(net
-			(code "27")
-			(name "Net-(C7-Pad1)")
-			(class "Default")
 			(node
-				(ref "C7")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R9")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "TP5")
-				(pin "1")
-				(pinfunction "1_1")
+				(ref "U9")
+				(pin "11")
+				(pinfunction "GND_11")
 				(pintype "passive")
 			)
 			(node
 				(ref "U9")
-				(pin "EN")
-				(pinfunction "EN_EN")
-				(pintype "input")
+				(pin "14")
+				(pinfunction "GND_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "36")
+				(pinfunction "GND_36")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "37")
+				(pinfunction "GND_37")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "38")
+				(pinfunction "GND_38")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "39")
+				(pinfunction "GND_39")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "40")
+				(pinfunction "GND_40")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "41")
+				(pinfunction "GND_41")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "42")
+				(pinfunction "GND_42")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "43")
+				(pinfunction "GND_43")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "44")
+				(pinfunction "GND_44")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "45")
+				(pinfunction "GND_45")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "46")
+				(pinfunction "GND_46")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "47")
+				(pinfunction "GND_47")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "48")
+				(pinfunction "GND_48")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "49")
+				(pinfunction "GND_49")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "50")
+				(pinfunction "GND_50")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "51")
+				(pinfunction "GND_51")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "52")
+				(pinfunction "GND_52")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "53")
+				(pinfunction "GND_53")
+				(pintype "passive")
 			)
 		)
 		(net
-			(code "28")
+			(code "27")
 			(name "Net-(D1-DIN)")
 			(class "Default")
 			(node
@@ -8184,7 +8469,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "28")
 			(name "Net-(D1-DOUT)")
 			(class "Default")
 			(node
@@ -8201,7 +8486,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "29")
 			(name "Net-(D2-DOUT)")
 			(class "Default")
 			(node
@@ -8218,7 +8503,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "30")
 			(name "Net-(D3-DOUT)")
 			(class "Default")
 			(node
@@ -8235,7 +8520,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "31")
 			(name "Net-(D4-DOUT)")
 			(class "Default")
 			(node
@@ -8252,7 +8537,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "32")
 			(name "Net-(D5-DOUT)")
 			(class "Default")
 			(node
@@ -8269,7 +8554,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "33")
 			(name "Net-(D6-DOUT)")
 			(class "Default")
 			(node
@@ -8286,7 +8571,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "34")
 			(name "Net-(D7-DOUT)")
 			(class "Default")
 			(node
@@ -8303,7 +8588,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "35")
 			(name "Net-(D10-DIN)")
 			(class "Default")
 			(node
@@ -8320,7 +8605,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "36")
 			(name "Net-(D10-DOUT)")
 			(class "Default")
 			(node
@@ -8337,7 +8622,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "37")
 			(name "Net-(D11-DOUT)")
 			(class "Default")
 			(node
@@ -8354,7 +8639,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "38")
 			(name "Net-(D12-DOUT)")
 			(class "Default")
 			(node
@@ -8371,7 +8656,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "39")
 			(name "Net-(D13-DOUT)")
 			(class "Default")
 			(node
@@ -8388,7 +8673,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "40")
 			(name "Net-(D14-DOUT)")
 			(class "Default")
 			(node
@@ -8405,7 +8690,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "41")
 			(name "Net-(D15-DOUT)")
 			(class "Default")
 			(node
@@ -8422,7 +8707,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "42")
 			(name "Net-(J1-D+-PadA6)")
 			(class "Default")
 			(node
@@ -8445,7 +8730,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "43")
 			(name "Net-(J1-D--PadA7)")
 			(class "Default")
 			(node
@@ -8468,7 +8753,7 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "44")
 			(name "Net-(R12-Pad2)")
 			(class "Default")
 			(node
@@ -8484,7 +8769,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "45")
 			(name "Net-(R_ILIM3-Pad1)")
 			(class "Default")
 			(node
@@ -8499,8 +8784,8 @@
 			)
 		)
 		(net
-			(code "47")
-			(name "Net-(R_VD-Pad2)")
+			(code "46")
+			(name "Net-(U1-VBUS_DET)")
 			(class "Default")
 			(node
 				(ref "R_VD")
@@ -8509,9 +8794,36 @@
 			)
 			(node
 				(ref "U1")
-				(pin "VBUS_DET")
-				(pinfunction "VBUS_DET_VBUS_DET")
+				(pin "5")
+				(pinfunction "VBUS_DET_5")
 				(pintype "passive")
+			)
+		)
+		(net
+			(code "47")
+			(name "Net-(U9-EN)")
+			(class "Default")
+			(node
+				(ref "C7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R9")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP5")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "8")
+				(pinfunction "EN_8")
+				(pintype "input")
 			)
 		)
 		(net
@@ -8525,8 +8837,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO2")
-				(pinfunction "GPIO2_(strap)_GPIO2")
+				(pin "5")
+				(pinfunction "GPIO2_(strap)_5")
 				(pintype "bidirectional")
 			)
 		)
@@ -8541,8 +8853,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO8")
-				(pinfunction "GPIO8_(strap)_GPIO8")
+				(pin "22")
+				(pinfunction "GPIO8_(strap)_22")
 				(pintype "bidirectional")
 			)
 		)
@@ -8558,8 +8870,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO9")
-				(pinfunction "GPIO9_(boot)_GPIO9")
+				(pin "23")
+				(pinfunction "GPIO9_(boot)_23")
 				(pintype "bidirectional")
 			)
 		)
@@ -8574,8 +8886,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO20")
-				(pinfunction "GPIO20_U0RXD_GPIO20")
+				(pin "30")
+				(pinfunction "GPIO20_U0RXD_30")
 				(pintype "bidirectional")
 			)
 		)
@@ -8590,8 +8902,8 @@
 			)
 			(node
 				(ref "U9")
-				(pin "GPIO21")
-				(pinfunction "GPIO21_U0TXD_GPIO21")
+				(pin "31")
+				(pinfunction "GPIO21_U0TXD_31")
 				(pintype "bidirectional")
 			)
 		)
@@ -8877,23 +9189,23 @@
 		)
 		(net
 			(code "70")
-			(name "unconnected-(U9-PadGPIO1)")
+			(name "unconnected-(U9-GPIO1-Pad13)")
 			(class "Default")
 			(node
 				(ref "U9")
-				(pin "GPIO1")
-				(pinfunction "GPIO1_GPIO1")
+				(pin "13")
+				(pinfunction "GPIO1_13")
 				(pintype "bidirectional+no_connect")
 			)
 		)
 		(net
 			(code "71")
-			(name "unconnected-(U9-PadGPIO4)")
+			(name "unconnected-(U9-GPIO4-Pad18)")
 			(class "Default")
 			(node
 				(ref "U9")
-				(pin "GPIO4")
-				(pinfunction "GPIO4_GPIO4")
+				(pin "18")
+				(pinfunction "GPIO4_18")
 				(pintype "bidirectional+no_connect")
 			)
 		)
