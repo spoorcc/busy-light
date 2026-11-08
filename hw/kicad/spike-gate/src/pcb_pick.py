@@ -3,7 +3,7 @@
 
 Usage: python3 pcb_pick.py <out dir> <run dir> [<run dir> ...]
 Each run dir holds a/final.kicad_pcb and a/drc_final.json (written by run_pcb.sh). The score of a run is
-(unconnected items, FAIL lines of the strict gate, hard findings, then the tidiness key of pcb_quality.py); the lowest wins, the first listed run on a tie. The files of the
+(unconnected items, FAIL lines of the strict gate, hard findings, power nets over target, then the tidiness key of pcb_quality.py); the lowest wins, the first listed run on a tie. The files of the
 winner are copied to <out dir>/best/ and a table of all runs is printed. Exit 0 when the winner has no unconnected item
 and no hard finding, else 1.
 """
@@ -33,13 +33,35 @@ def strict_fails(board: Path, profile: str = "stitched-4l") -> int:
     return sum(1 for ln in (out.stdout + out.stderr).splitlines() if ln.lstrip().startswith("FAIL"))
 
 
-def pick(runs: list[Path], gate=None, tidy=None) -> tuple[Path | None, list[tuple[Path, tuple[int, int, int] | None]]]:
+def power_fails_from(text: str) -> int:
+    """Number of power nets over their drop target in the output of pcb_power_check.py (an infinite drop counts); 99 when unreadable."""
+    try:
+        d = json.loads(text[text.index("{"):text.rindex("}") + 1])
+        return sum(1 for v in d["nets"].values() if not v["within_50mv"])
+    except (ValueError, KeyError, TypeError):
+        return 99
+
+
+def power_fails(board: Path) -> int:
+    """Power-check failures of one board (pcb_power_check.py); the picker found ring15 run 1 without a +5V path before this existed."""
+    import subprocess
+    out = subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "pcb_power_check.py"), str(board)],
+                         capture_output=True, text=True, check=False)
+    n = power_fails_from(out.stdout)
+    if n == 99:
+        print("power check not measured for %s" % board, file=sys.stderr)
+    return n
+
+
+def pick(runs: list[Path], gate=None, tidy=None, power=None) -> tuple[Path | None, list[tuple[Path, tuple[int, int, int] | None]]]:
     rows = []
     for r in runs:
         f = r / "a" / "drc_final.json"
         sc = score(json.loads(f.read_text(encoding="utf-8"))) if f.exists() and (r / "a" / "final.kicad_pcb").exists() else None
         if sc is not None and gate is not None:                  # the strict gate decides between runs with the same open items
             sc = (sc[0], gate(r / "a" / "final.kicad_pcb"), sc[1])
+        if sc is not None and power is not None:                 # a net over the drop target or without a path ranks after the gate
+            sc = sc + (power(r / "a" / "final.kicad_pcb"),)
         if sc is not None and tidy is not None:                  # tidiness (pcb_quality.rank_key) breaks the remaining ties
             sc = sc + tuple(tidy(r / "a" / "final.kicad_pcb"))
         rows.append((r, sc))
@@ -59,9 +81,9 @@ def tidiness(board: Path) -> tuple:
 
 def main(argv: list[str]) -> int:
     out, runs = Path(argv[1]), [Path(a) for a in argv[2:]]
-    best, rows = pick(runs, gate=strict_fails, tidy=tidiness)
+    best, rows = pick(runs, gate=strict_fails, tidy=tidiness, power=power_fails)
     for r, s in rows:
-        print("%-40s %s" % (r.name, "no result" if s is None else "unconnected %d, strict FAIL %d, hard %d" % s[:3] + (", tidy %s" % (s[3:],) if len(s) > 3 else "")))
+        print("%-40s %s" % (r.name, "no result" if s is None else "unconnected %d, strict FAIL %d, hard %d, power FAIL %d" % s[:4] + (", tidy %s" % (s[4:],) if len(s) > 4 else "")))
     if best is None:
         print("no run finished")
         return 1
