@@ -132,7 +132,7 @@ class RefAllowList(unittest.TestCase):
         import json
 
         data = json.loads(K.ALLOW_FILE.read_text())
-        want = ["U1", "U8", "U9", "C1", "C1B", "C3", "C4"] + ["D%d" % i for i in range(1, 17)] + ["TP*", "H*"]
+        want = ["U1", "U8", "U9", "C1", "C1B", "C3", "C4"] + ["D%d" % i for i in range(1, 17)] + ["TP*", "H*"]   # the older profiles; stitched-4l has a shorter list
         # placed-4l: U1 now carries the generated footprint CUSTOM:X2QFN-12_RWB in the schematic too (plan 06 A-11),
         # so it is no longer a stand-in there; the routed profile is unchanged until a routed run is made
         for prof, drop in (("placed-4l", ["U1"]), ("routed-4l", [])):

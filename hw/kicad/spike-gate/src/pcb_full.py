@@ -50,18 +50,12 @@ STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 # ref -> footprint (lib:name) used instead of the schematic's footprint field
 FOOTPRINT_OVERRIDE = {
     "U1": "CUSTOM:X2QFN-12_RWB",                      # Package_X2QFN does not exist in the system libraries
-    "U8": "Package_TO_SOT_SMD:SOT-223-3_TabPin2",     # schematic field empty (REG_3V3 placeholder)
-    "U9": "CUSTOM:ESP32-C6-MINI-1_NO_KEEPOUT",        # ESP32-C3-MINI-1 not in the libraries; ESP32-C6-MINI-1 (same 13.2x16.6 module family) without its keep-out zone
     "C3": "Capacitor_SMD:C_0805_2012Metric",          # 10 uF tbd
     "C4": "Capacitor_SMD:C_1206_3216Metric",          # bulk tbd
 }
-# plan 06 D1: smaller LED so the ring routes; the schematic still names the 5 x 5 part (stand-in, vendor drawing unchecked)
-LED_2020 = "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm"
-FOOTPRINT_OVERRIDE.update({"D%d" % i: LED_2020 for i in range(1, 17)})
 # schematic pin name -> pad number, where the schematic box symbol uses names (datasheet pin tables)
 PADMAP = {
     "U1": {"CC1": "1", "CC2": "2", "PORT": "4", "VBUS_DET": "5", "GND": "10", "VDD": "12"},   # TUSB321 SLLSEZ? pin table
-    "U8": {"GND": "1", "OUT": "2", "IN": "3"},                                                  # PROVISIONAL (AMS1117-style)
     "U9": {"GPIO0": "12", "GPIO1": "13", "GPIO2": "5", "GPIO3": "6", "GPIO4": "18", "GPIO5": "19",
            "GPIO6": "20", "GPIO7": "21", "GPIO8": "22", "GPIO9": "23", "GPIO10": "16",
            "GPIO18": "26", "GPIO19": "27", "GPIO20": "30", "GPIO21": "31", "3V3": "3", "EN": "8",
@@ -129,17 +123,25 @@ def id_counter(ref, num):
     return _SEEN[k]
 
 
+U9_NAME = "ESP32-C3-MINI-1"
+
+
 def derive_u9_footprint(outdir):
-    """Write CUSTOM.pretty/ESP32-C6-MINI-1_NO_KEEPOUT: the stock RF_Module footprint without its own keep-out zone
-    (the board has its own rule areas). A named project footprint instead of a silent change of the stock one, so
-    that the board footprint equals its library copy (no lib_footprint_mismatch)."""
+    """Write CUSTOM.pretty/ESP32-C3-MINI-1 from the stock RF_Module footprint ESP32-C6-MINI-1 without its own keep-out
+    zone (the board has its own rule areas) and without its 3D model reference. KiCad has no C3-MINI-1 footprint. The
+    land pattern of both modules is the one of datasheet figure 11-1 (ESP32-C3-MINI-1 datasheet v2.2: 48 pads 0.8 x 0.4,
+    four 0.7 mm corner pads, 3 x 3 grid of 1.45 mm ground pads); tests/test_pcb_full.py compares the numbers. A named
+    project footprint instead of a silent change of the stock one (no lib_footprint_mismatch)."""
     fp = _IO.FootprintLoad(FP_ROOT + "RF_Module.pretty", "ESP32-C6-MINI-1")
     for z in list(fp.Zones()):
         fp.Remove(z)
-    fp.SetFPID(pcbnew.LIB_ID("", "ESP32-C6-MINI-1_NO_KEEPOUT"))
+    fp.SetFPID(pcbnew.LIB_ID("", U9_NAME))
+    fp.SetLibDescription("ESP32-C3-MINI-1 module, land pattern of datasheet v2.2 figure 11-1 (derived from the KiCad ESP32-C6-MINI-1 footprint, same pads)")
+    fp.Models().clear()
     pretty = os.path.join(outdir, custom_fp.NICK + ".pretty")
+    os.makedirs(pretty, exist_ok=True)
     _IO.FootprintSave(pretty, fp)
-    mod = os.path.join(pretty, "ESP32-C6-MINI-1_NO_KEEPOUT.kicad_mod")
+    mod = os.path.join(pretty, U9_NAME + ".kicad_mod")
     normalise_uuids(mod)
 
 
@@ -599,6 +601,10 @@ def normalise_uuids(path):
         f.write(text)
 
 
+DRC_ON = ("missing_courtyard", "track_not_centered_on_via", "tuning_profile_track_geometries",
+          "footprint_filters_mismatch", "footprint_type_mismatch")
+
+
 def write_project(path, name):
     """Design rules and net classes (spike values, provisional; numbers from pcb_rules.py). Written by script, never
     by hand. The .kicad_dru of the same stem is written next to it by pcb_rules.write_dru (see build)."""
@@ -624,7 +630,9 @@ def write_project(path, name):
             "min_copper_edge_clearance": R.EDGE_CLEARANCE,
             "min_hole_clearance": R.HOLE_CLEARANCE, "min_hole_to_hole": R.HOLE_TO_HOLE, "min_connection": 0.1,
             "min_silk_clearance": 0.0,
-            "min_text_height": 0.8, "min_text_thickness": 0.08, "min_resolved_spokes": 2}}},
+            "min_text_height": 0.8, "min_text_thickness": 0.08, "min_resolved_spokes": 2},
+            # checks KiCad ignores by default; the strict gate counts ignored checks, so they are on (2026-11-07)
+            "rule_severities": {k: "warning" for k in DRC_ON}}},
         "meta": {"filename": name + ".kicad_pro", "version": 3},
         "net_settings": {"classes": classes, "meta": {"version": 3}, "net_colors": None,
                          "netclass_assignments": None, "netclass_patterns": patterns},

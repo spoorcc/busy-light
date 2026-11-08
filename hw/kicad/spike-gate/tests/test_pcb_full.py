@@ -78,8 +78,8 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 93)
-        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 52)
+        self.assertEqual(len(self.comps), 100)
+        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 55)
         for ref in ("U13", "C1B", "C1C", "C1D", "C1E", "C1F", "U14", "U15", "R_ILIM3B", "R18", "R19", "C24", "C25", "R3", "R15"):
             self.assertIn(ref, self.comps)
         for ref in ("Q2", "Q3"):
@@ -91,7 +91,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 52)
+        self.assertEqual(res["nets_named"], 55)
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")
@@ -100,9 +100,9 @@ class Board(unittest.TestCase):
                          Path(again).with_suffix(".kicad_pro").read_bytes())
 
     def test_substitutions_are_the_documented_ones(self):
-        # every substituted footprint is a provisional stand-in; the report lists the same refs
-        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE),
-                         sorted(["C3", "C4", "U1", "U8", "U9"] + ["D%d" % i for i in range(1, 17)]))
+        # the remaining substitutions: bulk and input capacitor sizes (values still open); U1, U8, U9 and the LEDs
+        # use their own footprints (schematic field, generated library) since 2026-11-07
+        self.assertEqual(sorted(pcb_full.FOOTPRINT_OVERRIDE), ["C3", "C4", "U1"])
         for ref in pcb_full.FOOTPRINT_OVERRIDE:
             self.assertIn(ref, self.comps)
 
@@ -281,3 +281,43 @@ class Stitch(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_project_switches_on_default_ignored_drc_checks(tmp_path):
+    import json
+
+    import pcb_full
+
+    pro = tmp_path / "x.kicad_pro"
+    pcb_full.write_project(str(pro), "x")
+    sev = json.loads(pro.read_text())["board"]["design_settings"]["rule_severities"]
+    assert set(sev) == set(pcb_full.DRC_ON) and set(sev.values()) == {"warning"}
+
+
+def test_u9_footprint_is_the_datasheet_land_pattern(tmp_path):
+    """ESP32-C3-MINI-1 datasheet v2.2 figure 11-1: 48 pads 0.8 x 0.4, 4 corner pads 0.7, 3 x 3 ground pads 1.45;
+    pad rows 11.9 mm apart (x) and 9.9 mm apart (y)."""
+    import re
+
+    pcb_full.derive_u9_footprint(str(tmp_path))
+    text = (tmp_path / "CUSTOM.pretty" / "ESP32-C3-MINI-1.kicad_mod").read_text()
+    pads = re.findall(r'\(pad "(\w+)" \w+ \w+\s*\(at ([-\d.]+) ([-\d.]+)[^)]*\)\s*\(size ([\d.]+) ([\d.]+)\)', text)
+    sizes = sorted((float(p[3]), float(p[4])) for p in pads)
+    assert sizes.count((0.4, 0.8)) + sizes.count((0.8, 0.4)) == 48
+    assert sizes.count((0.7, 0.7)) == 4 and sizes.count((1.45, 1.45)) == 9
+    assert "(zone " not in text and "(model" not in text
+    corners = [(float(p[1]), float(p[2])) for p in pads if p[0] in ("50", "51", "52", "53")]
+    assert sorted({abs(x) for x, _ in corners}) == [5.95] and sorted({abs(y) for _, y in corners}) == [4.95]
+
+
+def test_u1_footprint_is_the_ti_drawing():
+    """TI RWB0012A example board layout: 0.7 x 0.2 side pads, 0.2 x 0.5 end pads, pitch 0.4, pad 1 top left."""
+    import custom_fp
+
+    pads = {n: (x, y, w, h) for n, x, y, w, h in custom_fp.pads()}
+    assert len(pads) == 12
+    assert pads["1"] == (-0.65, -0.2, 0.7, 0.2) and pads["2"] == (-0.65, 0.2, 0.7, 0.2)
+    assert pads["3"][:2] == (-0.6, 0.75) and pads["6"][:2] == (0.6, 0.75)
+    assert pads["7"][:2] == (0.65, 0.2) and pads["8"][:2] == (0.65, -0.2)
+    assert pads["9"][:2] == (0.6, -0.75) and pads["12"][:2] == (-0.6, -0.75)
+    assert all((w, h) == (0.2, 0.5) for n, (x, y, w, h) in pads.items() if n in "3456" or n in ("9", "10", "11", "12"))

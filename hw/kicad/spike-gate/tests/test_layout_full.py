@@ -9,6 +9,10 @@ sys.path.insert(0, str(HERE.parent / "src"))
 import layout_full  # noqa: E402
 
 
+# pin numbers of the KiCad symbol LED:WS2812B-2020 (layout_full.LED_*)
+L_DOUT, L_VSS, L_DIN, L_VDD = (layout_full.LED_DOUT, layout_full.LED_VSS, layout_full.LED_DIN, layout_full.LED_VDD)
+
+
 class FullBoard(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -29,15 +33,15 @@ class FullBoard(unittest.TestCase):
         for i in range(1, 16):
             if i == 8:
                 continue
-            self.assertEqual(self.pin_net[(f"D{i}", "2")], self.pin_net[(f"D{i + 1}", "4")], f"D{i}")
-        self.assertEqual(self.pin_net[("D8", "2")], self.pin_net[("D9", "4")])   # row end to row start
-        self.assertEqual(self.pin_net[("R10", "2")], self.pin_net[("D1", "4")])
+            self.assertEqual(self.pin_net[(f"D{i}", L_DOUT)], self.pin_net[(f"D{i + 1}", L_DIN)], f"D{i}")
+        self.assertEqual(self.pin_net[("D8", L_DOUT)], self.pin_net[("D9", L_DIN)])   # row end to row start
+        self.assertEqual(self.pin_net[("R10", "2")], self.pin_net[("D1", L_DIN)])
         self.assertEqual(sum(1 for r in layout_full.PARTS if r.startswith("D") and r[1:].isdigit()), 16)
 
     def test_every_led_has_a_5v_capacitor(self):
         for i in range(1, 17):
-            self.assertEqual(self.pin_net[(f"D{i}", "1")], "+5V")
-            self.assertEqual(self.pin_net[(f"D{i}", "3")], "GND")
+            self.assertEqual(self.pin_net[(f"D{i}", L_VDD)], "+5V")
+            self.assertEqual(self.pin_net[(f"D{i}", L_VSS)], "GND")
             self.assertEqual(self.pin_net[(f"C{7 + i}", "1")], "+5V")
             self.assertEqual(self.pin_net[(f"C{7 + i}", "2")], "GND")
 
@@ -73,8 +77,8 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(self.pin_net[("U7", "1")], "VBUS_IC")
         self.assertEqual(self.pin_net[("U7", "3")], "VBUS_IC")
         self.assertEqual(self.pin_net[("U7", "6")], "+5V")
-        self.assertEqual(self.pin_net[("U8", "IN")], "+5V")
-        self.assertEqual(self.pin_net[("U8", "OUT")], "+3V3")
+        self.assertEqual(self.pin_net[("U8", "1")], "+5V")
+        self.assertEqual(self.pin_net[("U8", "5")], "+3V3")
         self.assertEqual(self.pin_net[("U7", "5")], "ILIM")
         for r in ("R_ILIM1", "R_ILIM2", "R_ILIM3"):
             self.assertIn(self.pin_net[(r, "1")] if r == "R_ILIM1" else self.pin_net[(r, "2")], ("ILIM",))

@@ -49,7 +49,9 @@ G08 = ("74xGxx", "74LVC1G08", "Package_TO_SOT_SMD:SOT-23-5")
 ZENER = ("Diode", "BZX84Cxx", "Package_TO_SOT_SMD:SOT-23")
 AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-23-5")
 TP = ("Connector", "TestPoint", "TestPoint:TestPoint_Pad_D1.5mm")
-LED = ("LED", "WS2812B", "LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm")
+# pin numbers of the KiCad symbol LED:WS2812B-2020 (the 5050 symbol has other numbers: 1 VDD, 2 DOUT, 3 VSS, 4 DIN)
+LED_DOUT, LED_VSS, LED_DIN, LED_VDD = "1", "2", "3", "4"
+LED = ("LED", "WS2812B-2020", "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")   # 2020 package per ADR-0004; the part number is still open
 
 PARTS = {  # ref: (lib, part, footprint, value)
     "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "Connector_USB:USB_C_Receptacle_GCT_USB4085", "USB-C receptacle"),
@@ -72,9 +74,9 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "C1E": (*C1206, "100n C0G 5% 50V"), "C1F": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
     "C2": (*C, "1u tbd"), "C3": (*C, "10u tbd"), "R8": (*R, "100k"),
-    "U8": (None, None, "", "REG_3V3"),
+    "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
     "C5": (*C, "tbd"), "C6": (*C, "tbd"),
-    "U9": (None, None, "", "ESP32-C3-MINI-1"),    # no ESP32-C3-MINI-1 footprint in the KiCad libraries; pcb_full places a stand-in
+    "U9": (None, None, "CUSTOM:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),    # no such footprint in the KiCad libraries; pcb_full.derive_u9_footprint writes it
     "R9": (*R, "10k"), "C7": (*C, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
@@ -110,9 +112,10 @@ BOXES = {
         ("1", "IN", "top", -2.54, "power_in"), ("3", "EN", "top", 2.54, "input"),
         ("2", "GND", "bottom", 0, "power_in"), ("5", "ILIM", "left", 5.08, "passive"),
         ("6", "OUT", "right", 2.54, "passive"), ("4", "FAULT", "right", -2.54, "open_collector")]),
-    "U8": L.box_symbol("REG_3V3_PLACEHOLDER", [
-        ("IN", "IN", "left", 0, "power_in"), ("OUT", "OUT", "right", 0, "passive"),
-        ("GND", "GND", "bottom", 0, "power_in")], hide_numbers=True),
+    "U8": L.box_symbol("TLV75733P_DBV", [
+        ("1", "IN", "left", 0, "power_in"), ("3", "EN", "left", -2.54, "input"),
+        ("5", "OUT", "right", 0, "passive"), ("4", "NC", "right", -2.54, "no_connect"),
+        ("2", "GND", "bottom", 0, "power_in")]),
     "U9": L.box_symbol("ESP32_C3_MINI_1", [
         ("3V3", "3V3", "top", 0, "power_in"), ("GND", "GND", "bottom", 0, "power_in"),
         ("GPIO18", "GPIO18 USB_D-", "left", 27.94, "bidirectional"),
@@ -128,7 +131,7 @@ BOXES = {
         ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")],
         half_w=22.86, half_h=33.02, hide_numbers=True),
 }
-BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "REG_3V3_PLACEHOLDER",
+BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
            "U9": "ESP32_C3_MINI_1"}
 
 LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
@@ -538,21 +541,27 @@ def _build():
     s.pw("+3V3", ("R8", "1"))
 
     # ------------------------------------------------------------ 3.3 V regulator
-    rin = P("U8", "IN")
-    s.bind("+5V", "U8", "IN")
+    rin = P("U8", "1")
+    s.bind("+5V", "U8", "1")
     s.wire((312.0, rin[1]), rin)
     s.pw("+5V", (312.0, rin[1]))
+    ren = P("U8", "3")                         # EN tied to IN (always on; TLV757P datasheet)
+    s.bind("+5V", "U8", "3")
+    s.wire(ren, (ren[0] - 3.81, ren[1]))
+    s.wire((ren[0] - 3.81, ren[1]), (ren[0] - 3.81, rin[1]))
+    s.junction(ren[0] - 3.81, rin[1])
+    s.nc(P("U8", "4"))
     s.bind("+5V", "C5", 1)
     s.junction(*P("C5", 1))
     s.pw("GND", ("C5", "2"), True)
-    rout = P("U8", "OUT")
-    s.bind("+3V3", "U8", "OUT")
+    rout = P("U8", "5")
+    s.bind("+3V3", "U8", "5")
     s.wire(rout, (362.0, rout[1]))
     s.pw("+3V3", (362.0, rout[1]))
     s.bind("+3V3", "C6", 1)
     s.junction(*P("C6", 1))
     s.pw("GND", ("C6", "2"), True)
-    s.pw("GND", ("U8", "GND"))
+    s.pw("GND", ("U8", "2"))
     for k, (net, ref, y) in enumerate((("+5V", "TP1", 112.0), ("+3V3", "TP2", 122.0), ("GND", "TP3", 132.0))):
         x = 372.0
         s.pw(net, (x, y), net != "GND" and False)
@@ -706,29 +715,29 @@ def _build():
     s.wire((r10l[0] - 2.5, r10l[1]), r10l)
     s.label("LED_BUF", r10l[0] - 2.5, r10l[1], 180)
     s.bind("LED_N0", "R10", 2)
-    s.bind("LED_N0", "D1", 4)
-    s.wire(P("R10", 2), P("D1", 4))
+    s.bind("LED_N0", "D1", LED_DIN)
+    s.wire(P("R10", 2), P("D1", LED_DIN))
     for i in range(1, 17):
         d, c = f"D{i}", f"C{7 + i}"
-        s.pw("+5V", (d, "1"), True)
-        s.pw("GND", (d, "3"), True)
+        s.pw("+5V", (d, LED_VDD), True)
+        s.pw("GND", (d, LED_VSS), True)
         s.pw("+5V", (c, "1"), True)
         s.pw("GND", (c, "2"), True)
         if i % 8:
             nxt = f"D{i + 1}"
             net = f"LED_N{i}"
-            s.bind(net, d, 2)
-            s.bind(net, nxt, 4)
-            s.wire(P(d, 2), P(nxt, 4))
-    dout = P("D8", 2)
-    s.bind("LED_ROW2", "D8", 2)
+            s.bind(net, d, LED_DOUT)
+            s.bind(net, nxt, LED_DIN)
+            s.wire(P(d, LED_DOUT), P(nxt, LED_DIN))
+    dout = P("D8", LED_DOUT)
+    s.bind("LED_ROW2", "D8", LED_DOUT)
     s.wire(dout, (dout[0] + 4.0, dout[1]))
     s.label("LED_ROW2", dout[0] + 4.0, dout[1])
-    din = P("D9", 4)
-    s.bind("LED_ROW2", "D9", 4)
+    din = P("D9", LED_DIN)
+    s.bind("LED_ROW2", "D9", LED_DIN)
     s.wire(din, (din[0] - 4.0, din[1]))
     s.label("LED_ROW2", din[0] - 4.0, din[1], 180)
-    s.nc(P("D16", 2))
+    s.nc(P("D16", LED_DOUT))
     # bulk capacitor on 5 V
     s.pw("+5V", ("C4", "1"))
     s.pw("GND", ("C4", "2"))
