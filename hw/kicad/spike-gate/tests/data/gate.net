@@ -139,7 +139,7 @@
       (component_classes)
       (tstamps "6d198e54-9037-5980-8e2f-df1178fa8682"))
     (comp
-      (ref "C1B")
+      (ref "C27")
       (value "100n C0G 5% 50V")
       (description "Unpolarized capacitor")
       (footprint "Capacitor_SMD:C_1206_3216Metric")
@@ -163,7 +163,7 @@
       (component_classes)
       (tstamps "4cd0baae-5637-5a3b-9841-cb9b46c46979"))
     (comp
-      (ref "C1C")
+      (ref "C28")
       (value "100n C0G 5% 50V")
       (description "Unpolarized capacitor")
       (footprint "Capacitor_SMD:C_1206_3216Metric")
@@ -187,7 +187,7 @@
       (component_classes)
       (tstamps "5cf75cbf-4713-54b7-b2d6-5a7d97c86e39"))
     (comp
-      (ref "C1D")
+      (ref "C29")
       (value "100n C0G 5% 50V")
       (description "Unpolarized capacitor")
       (footprint "Capacitor_SMD:C_1206_3216Metric")
@@ -211,7 +211,7 @@
       (component_classes)
       (tstamps "21f7d71d-7400-5ddd-8718-ec8c5aa660ce"))
     (comp
-      (ref "C1E")
+      (ref "C30")
       (value "100n C0G 5% 50V")
       (description "Unpolarized capacitor")
       (footprint "Capacitor_SMD:C_1206_3216Metric")
@@ -235,7 +235,7 @@
       (component_classes)
       (tstamps "80882648-ac8b-55e7-8c99-ad156e351f50"))
     (comp
-      (ref "C1F")
+      (ref "C31")
       (value "100n C0G 5% 50V")
       (description "Unpolarized capacitor")
       (footprint "Capacitor_SMD:C_1206_3216Metric")
@@ -547,7 +547,7 @@
       (component_classes)
       (tstamps "b61a4ef2-0916-5284-9ece-1bc90adf6e5b"))
     (comp
-      (ref "R_ILIM3B")
+      (ref "R20")
       (value "301 0.1%")
       (description "Resistor")
       (footprint "Resistor_SMD:R_0603_1608Metric")
@@ -860,23 +860,23 @@
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C1B")
+        (ref "C27")
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C1C")
+        (ref "C28")
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C1D")
+        (ref "C29")
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C1E")
+        (ref "C30")
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C1F")
+        (ref "C31")
         (pin "2")
         (pintype "PASSIVE"))
       (node
@@ -1044,7 +1044,7 @@
       (name "N$2")
       (class "Default")
       (node
-        (ref "R_ILIM3B")
+        (ref "R20")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -1060,7 +1060,7 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "R_ILIM3B")
+        (ref "R20")
         (pin "2")
         (pintype "PASSIVE")))
     (net
@@ -1096,23 +1096,23 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "C1B")
+        (ref "C27")
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "C1C")
+        (ref "C28")
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "C1D")
+        (ref "C29")
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "C1E")
+        (ref "C30")
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "C1F")
+        (ref "C31")
         (pin "1")
         (pintype "PASSIVE"))
       (node

@@ -177,9 +177,9 @@ MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the c
 # ADR-0016 proximity rules (centre distance, mm); the placer rejects a seed that breaks one, the test checks the board
 LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R19", "U15", 6.0),
                 ("C24", "U14", 6.0), ("C25", "U15", 6.0),         # bypass capacitor at the switch supply pin
-                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0), ("R_ILIM3B", "U7", 15.0),
-                ("C1", "U5", 8.0), ("C1B", "U5", 12.0), ("C1C", "U5", 14.0), ("C1D", "U5", 14.0),
-                ("C1E", "U5", 14.0), ("C1F", "U5", 14.0))
+                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0), ("R20", "U7", 15.0),
+                ("C1", "U5", 8.0), ("C27", "U5", 12.0), ("C28", "U5", 14.0), ("C29", "U5", 14.0),
+                ("C30", "U5", 14.0), ("C31", "U5", 14.0))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 SA_ITERS = 160000

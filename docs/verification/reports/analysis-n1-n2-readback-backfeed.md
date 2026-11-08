@@ -71,7 +71,7 @@ The numbers support the change. Implemented in `layout_full.py`: R2, R3 = 10 k; 
 
 ### 3.1 Loaded estimate of VBUS_IC (switch off, VBUS gone, 3V3 up)
 
-Source: V(3V3) - VF - I x Rpu, Rpu 1.1 k or 2.2 k (TRM, selectable; reset default of the selector not established). Loads on VBUS_IC while the switch is off: TUSB321 up to 100 uA (below its 4.5 V minimum: unspecified, 100 uA is a ceiling by assumption), R1 and R7 100 k pull-ups into outputs that may be low (2 x 27 uA at 2.7 V), R6 150 k (18 uA), R_VD 887 k (3 uA), TPS3840 and TPS2553 (off, <= 1 uA each). Sum about 0.18 mA.
+Source: V(3V3) - VF - I x Rpu, Rpu 1.1 k or 2.2 k (TRM, selectable; reset default of the selector not established). Loads on VBUS_IC while the switch is off: TUSB321 up to 100 uA (below its 4.5 V minimum: unspecified, 100 uA is a ceiling by assumption), R1 and R7 100 k pull-ups into outputs that may be low (2 x 27 uA at 2.7 V), R6 150 k (18 uA), R21 887 k (3 uA), TPS3840 and TPS2553 (off, <= 1 uA each). Sum about 0.18 mA.
 
 | Rpu | V(3V3) | VF | VBUS_IC (0.18 mA) |
 |---|---|---|---|

@@ -86,7 +86,7 @@ class FullBoard(unittest.TestCase):
         self.assertNotIn("R7", layout_full.PARTS)                  # OUT2 reading deleted (owner decision 2026-11-07)
         self.assertNotIn("U12", layout_full.PARTS)
         self.assertNotIn("CC_OK_3A", self.pin_net.values())
-        self.assertEqual(self.pin_net[("R_VD", "2")], self.pin_net[("U1", "VBUS_DET")])
+        self.assertEqual(self.pin_net[("R21", "2")], self.pin_net[("U1", "VBUS_DET")])
 
     def test_cc_ic_symbol_has_the_datasheet_pins(self):
         # TUSB321 datasheet SLLSEO6C section 4: 12 pins, no ADR pin; VCONN is a feature, not a pin.
@@ -175,14 +175,14 @@ class FullBoard(unittest.TestCase):
 
     def test_ilim_resistor_values(self):
         P = layout_full.PARTS
-        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R_ILIM3B"][-1]),
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R20"][-1]),
                          ("47.0k 0.1%", "56.2k 0.1%", "27.4k 0.1%", "301 0.1%"))   # E96, HW-010 revision
 
     def test_tmux1101_ilim_switches(self):
         """Owner decision 2026-11-05 (a). TMUX1101DCK (SCDS410D tab. 5-1): 1 D, 2 S, 3 GND, 4 SEL, 5 VDD."""
         pn, P = self.pin_net, layout_full.PARTS
         for sw, en, r_ilim, cap, rpd in (("U14", "ILIM_STEP2_EN", "R_ILIM2", "C24", "R18"),
-                                         ("U15", "ILIM_STEP3_EN", "R_ILIM3B", "C25", "R19")):
+                                         ("U15", "ILIM_STEP3_EN", "R20", "C25", "R19")):
             self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, f"VDD_{sw}"])   # VDD from VBUS_IC through R_SU14 / R_SU15
             self.assertEqual(pn[(sw, "1")], pn[(r_ilim, "1")])
             self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), (f"VDD_{sw}", "GND"))
@@ -193,13 +193,13 @@ class FullBoard(unittest.TestCase):
             self.assertEqual(P[sw][2], "Package_TO_SOT_SMD:SOT-353_SC-70-5")
         self.assertNotIn("Q2", P)
         self.assertNotIn("Q3", P)
-        self.assertEqual(pn[("R_ILIM3B", "2")], pn[("R_ILIM3", "1")])
+        self.assertEqual(pn[("R20", "2")], pn[("R_ILIM3", "1")])
         self.assertEqual(pn[("R_ILIM3", "2")], "ILIM")
 
     def test_holdoff_capacitor_set(self):
         """Owner decision 2026-11-06: six 100 nF C0G 5 % 1206 on SUP_CT (HW-010 revision)."""
         P = layout_full.PARTS
-        vals = {r: P[r][-1] for r in ("C1", "C1B", "C1C", "C1D", "C1E", "C1F")}
+        vals = {r: P[r][-1] for r in ("C1", "C27", "C28", "C29", "C30", "C31")}
         self.assertEqual(sorted(v.split()[0] for v in vals.values()), ["100n"] * 6)
         for r, v in vals.items():
             self.assertIn("C0G 5%", v)

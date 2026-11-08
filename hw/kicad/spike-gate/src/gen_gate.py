@@ -68,8 +68,8 @@ sup[4] += Net("SUP_MR_NC")
 sup[5] += ct           # delay capacitor
 # Hold-off capacitor set (owner decision 2026-11-06, HW-010 revision approved 2026-11-07): six 100 nF C0G 5 % 1206
 # in parallel (600 nF, window 203.2 to 553.2 ms, sim/holdoff_cap.py, hw/sim/scripts/amendment2_numbers.py).
-for _ref, _val in (("C1", "100n C0G 5% 50V"), ("C1B", "100n C0G 5% 50V"), ("C1C", "100n C0G 5% 50V"),
-                   ("C1D", "100n C0G 5% 50V"), ("C1E", "100n C0G 5% 50V"), ("C1F", "100n C0G 5% 50V")):
+for _ref, _val in (("C1", "100n C0G 5% 50V"), ("C27", "100n C0G 5% 50V"), ("C28", "100n C0G 5% 50V"),
+                   ("C29", "100n C0G 5% 50V"), ("C30", "100n C0G 5% 50V"), ("C31", "100n C0G 5% 50V")):
     _c = Part("Device", "C", ref=_ref, value=_val, footprint="Capacitor_SMD:C_1206_3216Metric")
     _c[1] += ct
     _c[2] += GND
@@ -121,7 +121,7 @@ for sw, en, rl, rl_val, cap, rpd in (("U14", en2, "R_ILIM2", "56.2k 0.1%", "C24"
     q[3] += GND
     q[5] += VBUS       # VDD from VBUS_IC (owner decision 2026-11-07, HW-010 revision; analysis-tmux1101-supply-from-vbus.md)
     if sw == "U15":    # series pair: switch - 301 ohm - 27.4 k - ILIM
-        rb = Part("Device", "R", ref="R_ILIM3B", value="301 0.1%", footprint="Resistor_SMD:R_0603_1608Metric")
+        rb = Part("Device", "R", ref="R20", value="301 0.1%", footprint="Resistor_SMD:R_0603_1608Metric")
         q[1] += rb[1]
         rb[2] += r[1]
     else:

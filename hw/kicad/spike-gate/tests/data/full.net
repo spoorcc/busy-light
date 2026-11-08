@@ -109,7 +109,7 @@
 			)
 		)
 		(comp
-			(ref "C1B")
+			(ref "C27")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -163,7 +163,7 @@
 			)
 		)
 		(comp
-			(ref "C1C")
+			(ref "C28")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -217,7 +217,7 @@
 			)
 		)
 		(comp
-			(ref "C1D")
+			(ref "C29")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -271,7 +271,7 @@
 			)
 		)
 		(comp
-			(ref "C1E")
+			(ref "C30")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -325,7 +325,7 @@
 			)
 		)
 		(comp
-			(ref "C1F")
+			(ref "C31")
 			(value "100n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
@@ -4093,7 +4093,7 @@
 			)
 		)
 		(comp
-			(ref "R_ILIM3B")
+			(ref "R20")
 			(value "301 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
@@ -4309,7 +4309,7 @@
 			)
 		)
 		(comp
-			(ref "R_VD")
+			(ref "R21")
 			(value "887k")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
@@ -7705,27 +7705,27 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C1B")
+				(ref "C27")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1C")
+				(ref "C28")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1D")
+				(ref "C29")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1E")
+				(ref "C30")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1F")
+				(ref "C31")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -7911,27 +7911,27 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C1B")
+				(ref "C27")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1C")
+				(ref "C28")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1D")
+				(ref "C29")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1E")
+				(ref "C30")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C1F")
+				(ref "C31")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -8778,7 +8778,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R_ILIM3B")
+				(ref "R20")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -8788,7 +8788,7 @@
 			(name "Net-(U1-VBUS_DET)")
 			(class "Default")
 			(node
-				(ref "R_VD")
+				(ref "R21")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -8928,7 +8928,7 @@
 			(name "Net-(U15-D)")
 			(class "Default")
 			(node
-				(ref "R_ILIM3B")
+				(ref "R20")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -8998,7 +8998,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R_VD")
+				(ref "R21")
 				(pin "1")
 				(pintype "passive")
 			)

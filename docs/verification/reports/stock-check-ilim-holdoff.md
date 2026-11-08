@@ -15,7 +15,7 @@ Closes two open items of `owner-decisions-2026-11-05.md` (decisions 1 and 6), pa
 | Ref | Value | Footprint |
 |---|---|---|
 | R_ILIM1 to R_ILIM3 | `PLACEHOLDER` (generator values stay `tbd`) | R_0603 |
-| C1 / C1B | 470n C0G 5 % 25 V / 150n C0G 5 % 50 V | C_1206 |
+| C1 / C27 | 470n C0G 5 % 25 V / 150n C0G 5 % 50 V | C_1206 |
 
 Note: `layout_full.py` and `analysis-n4-holdoff-capacitor.md` still mention a 620 nF placeholder. The generator draws 470n + 150n (= 620 nF). The planned set 220 + 220 + 150 + 33 nF (623 nF) is different from both.
 
@@ -53,7 +53,7 @@ Proposal for the owner (not a decision): if a JLCPCB/LCSC listing of 56.9 k and 
 | 470 nF C0G, 1206/1210 (current C1) | **No such part found.** 470 nF in 1206/1210 appears only as X7R (for example LCSC C309505). Not suitable (X7R is excluded by `analysis-n4-holdoff-capacitor.md`). | https://www.lcsc.com/product-detail/C309505.html |
 
 Conclusions:
-- The generator's 470n C0G part (C1) is probably not purchasable; the 150n C0G (C1B) is not confirmed at LCSC/JLCPCB. The existing generator set is therefore at risk of having no source. Not changed here.
+- The generator's 470n C0G part (C1) is probably not purchasable; the 150n C0G (C27) is not confirmed at LCSC/JLCPCB. The existing generator set is therefore at risk of having no source. Not changed here.
 - 220 nF and 33 nF C0G are confirmed listed at LCSC. 150 nF is the gap.
 - Substitute for the 150 nF part (derived, uses the formula of `analysis-n4-holdoff-capacitor.md` section 2: tD min = 357.6 kohm x C x (1 - 5.6 %); tD max = 875.6 kohm x C x (1 + 5.6 %)): 220 + 220 + 100 + 68 nF (608 nF) is in the existing candidate table (205 to 562 ms). Whether 100 nF and 68 nF C0G 1206 are in stock at LCSC was **not checked** (the earlier report saw only 68 nF 0603 listings). Another option from the same table: 6 x 100 nF.
 - Each extra part adds C0G tolerance and temperature terms that are already included at 5 % plus 0.6 %; parts from different makers have different temperature coefficients (not checked).
@@ -155,7 +155,7 @@ Findings:
   - **220 + 220 + 100 + 68 nF** (C464977 x2, C97946 or C170182, C361177): 205.9 to 560.6 ms, 4 parts, margin 5.9 ms to the 200 ms limit and 39.4 ms to 600 ms. Needs the 68 nF C3216C0G1H683JT000N (mirror stock 2,000, one source).
   - **6 x 100 nF** (one value, mirror stock 60,938 to 153,428): 203.2 to 553.2 ms, 6 parts, margin 3.2 ms and 46.8 ms. One part number, widest second source, but six pads and six placements.
 - The lower margin is small in both cases (3 to 6 ms, about 1.5 to 3 % of 200 ms). The calculation excludes DC bias, ageing and the tD(no cap) term; those are not checked. Margin to 600 ms is larger.
-- The 150 nF part of the current generator set (C1B) and the 470 nF part (C1) have no purchasable C0G source in 1206 or 1210 (section 5 and A2.2). The generator and PCB were not changed.
+- The 150 nF part of the current generator set (C27) and the 470 nF part (C1) have no purchasable C0G source in 1206 or 1210 (section 5 and A2.2). The generator and PCB were not changed.
 
 ### A2.6 Proposal for the owner (not a decision)
 

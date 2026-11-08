@@ -112,7 +112,7 @@ All images are generated from text sources or tool exports; none is hand-drawn. 
 | Schematic (spike), part 2: ESP32-C3 module, button, AND-gate fault readback, LED buffer, 16 LEDs |
 |---|
 | <a href="docs/verification/reports/images/spike-schematic-mcu-leds.png"><img src="docs/verification/reports/images/spike-schematic-mcu-leds.png" alt="Lower part of the spike schematic: ESP32-C3-MINI-1 module, button, the AND gate that combines HOLD_OK and FAULT_N, the LED data buffer and a chain of 16 LEDs in two rows of eight" width="900"></a> |
-| Two crops of one single-sheet schematic, exported with `kicad-cli`; click an image for full size. Some labels overlap (for example C1 and C1B) and part values are open (`tbd`). The schematic is a spike under ADR-0012 (Proposed), not reviewed and not approved. |
+| Two crops of one single-sheet schematic, exported with `kicad-cli`; click an image for full size. Some labels overlap (for example C1 and C27) and part values are open (`tbd`). The schematic is a spike under ADR-0012 (Proposed), not reviewed and not approved. |
 
 | Board, 4 layers, top view (3D render) | Board, all copper layers and silkscreen |
 |---|---|

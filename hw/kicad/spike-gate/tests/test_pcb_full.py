@@ -134,7 +134,7 @@ class Board(unittest.TestCase):
     def test_netlist_facts(self):
         self.assertEqual(len(self.comps), 100)
         self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 55)
-        for ref in ("U13", "C1B", "C1C", "C1D", "C1E", "C1F", "U14", "U15", "R_ILIM3B", "R18", "R19", "C24", "C25", "R3", "R15"):
+        for ref in ("U13", "C27", "C28", "C29", "C30", "C31", "U14", "U15", "R20", "R18", "R19", "C24", "C25", "R3", "R15"):
             self.assertIn(ref, self.comps)
         for ref in ("Q2", "Q3"):
             self.assertNotIn(ref, self.comps)

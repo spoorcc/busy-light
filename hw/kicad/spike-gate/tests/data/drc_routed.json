@@ -50,7 +50,7 @@
             "description": "Capacitor_SMD:C_1206_3216Metric doesn't match footprint given by symbol (Capacitor_SMD:C_0603_1608Metric)",
             "items": [
                 {
-                    "description": "Footprint C1B",
+                    "description": "Footprint C27",
                     "pos": {
                         "x": 42.7215,
                         "y": 52.0303
@@ -245,7 +245,7 @@
             "description": "No corresponding pin found in schematic",
             "items": [
                 {
-                    "description": "Pad 5 [Net-(R_VD-Pad2)] of U1 on F.Cu",
+                    "description": "Pad 5 [Net-(R21-Pad2)] of U1 on F.Cu",
                     "pos": {
                         "x": 54.9026,
                         "y": 38.3962
@@ -347,7 +347,7 @@
             "type": "net_conflict"
         },
         {
-            "description": "No pad found for pin VBUS_DET (Net-(R_VD-Pad2)) in schematic",
+            "description": "No pad found for pin VBUS_DET (Net-(R21-Pad2)) in schematic",
             "items": [
                 {
                     "description": "Footprint U1",
@@ -7760,7 +7760,7 @@
             "description": "The current configuration does not include the footprint library 'Resistor_SMD'",
             "items": [
                 {
-                    "description": "Footprint R_VD",
+                    "description": "Footprint R21",
                     "pos": {
                         "x": 54.9084,
                         "y": 39.1974
@@ -7805,7 +7805,7 @@
             "description": "The current configuration does not include the footprint library 'Capacitor_SMD'",
             "items": [
                 {
-                    "description": "Footprint C1B",
+                    "description": "Footprint C27",
                     "pos": {
                         "x": 42.7215,
                         "y": 52.0303
