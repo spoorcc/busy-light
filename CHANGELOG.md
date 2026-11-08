@@ -10,6 +10,13 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ## [Unreleased]
 
+### Added
+- Skill `pcb-route-and-gate` (order of work, gate and lessons for the spike board), reviewed by goldfish (RV-012).
+
+### Changed
+- README images and captions of the hardware spike regenerated from the best of 12 runs (HW-010).
+- Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
+
 ### Fixed
 - Hardware spike PCB gate: wires under 0.15 mm (default track now 0.15 mm), dangling vias (removed), hole-to-hole of stitch vias, silk findings (waiver DEV-006, declined by the owner 2026-11-08, off by default); the stitcher joins pads to existing ground vias, layer by layer, in retry passes; 6 new tests. Antenna strip set to the 4.6 mm of the ESP32-C3-MINI-1 datasheet and the module pad area placed outside it (the 21 unconnected module ground pads are gone); 1 mm slot beside the antenna end with a copper keep-out. Placement: VBUS_IC weight and movable-part radius 17.3 mm; +3V3 track 0.3 mm; optional two-pass routing (`KEYFIRST`, `FR_THREADS` in `run_pcb.sh`). VBUS_IC main path (J1, TPS2553 input, C2, TVS1) routed first at 0.6 mm and locked, branches at 0.2 mm (`KEYFIRST=1`); via removal keeps layer changes. Post-route clean-up `src/pcb_fix.py` (grid router for the leftover connections, rip-up of clearance findings, stub removal), 6 tests: on run pl8 the final board has 1 unconnected item (/ILIM) and only the tolerated known findings; the Freerouting step still varies between runs, so the board is not complete and the full flow is not proven repeatable (HW-010, HW-005, ADR-0003, ADR-0012).
 - Hardware spike gate: ERC and DRC project files switch on the default-ignored checks (ignored-check maxima now 0); ERC has 0 findings; six repeat routing runs gave 2 complete boards (0 open items) and 4 with 1 to 3 open items; the LED stand-in footprint-filter finding is waived under DEV-002 (HW-010, ADR-0012, DEV-002).
