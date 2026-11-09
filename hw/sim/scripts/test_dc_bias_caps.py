@@ -54,3 +54,15 @@ def test_populated_5v_sum_and_spare_headroom():
 
 def test_start_up_bound_is_above_the_populated_sum_plus_zero_spares():
     assert d.start_up_bound() > d.hw014_sum_at_0v()
+
+
+def test_100n_x7r_keeps_its_value_at_5v():
+    # 0.1 uF x 0.9983 x 0.765 = 76.4 nF
+    assert d.c_100n_low_5v() == pytest.approx(76.4e-9, rel=0.002)
+    assert d.RETENTION_100N > 0.99
+
+
+def test_spare_nominal_room_follows_the_headroom():
+    # 82.5 uF / 1.265 = 65.2 uF nominal for C4 and C32 together
+    assert d.spare_nominal_max_at_0v() == pytest.approx(65.2e-6, rel=0.005)
+    assert d.spare_nominal_max_at_0v() * d.HIGH == pytest.approx(d.spare_headroom())

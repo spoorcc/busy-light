@@ -8,6 +8,7 @@ DC Bias graph, "DC Bias, dC, 25degC, AC1Vrms, 1kHz"), read from the chart data o
   C3 CL21A106KAYNNNE at 5.48 V: dC -54.613 %                       -> 0.4539
   C5 CL10A225KO8NNNC at 5.48 V: dC -59.973 %                       -> 0.4003
   C6 CL10A106KP8NNNC at 3.34 V: dC -56.229 %                       -> 0.4377
+  100n CL10B104KB8NNN (X7R 50 V) at 5.61 V: 0.10187 uF of 0.10204 uF -> 0.9983 (at 5.12 V: 1.0016)
 The curves are typical values of the maker at 25 degC, not guaranteed limits. The retention is applied to
 the NOMINAL value, then the tolerance (-10 %) and the X5R temperature spread (-15 %, Samsung reference
 specification) are applied on top. This is conservative where the maker's 0 V reading is above nominal
@@ -37,6 +38,7 @@ CAPS = {
     "C6": ("+3V3", 10e-6, "CL10A106KP8NNNC", 3.3),
 }
 C_100N = 0.1e-6  # CL10B104KB8NNNC X7R, 50 V
+RETENTION_100N = 0.9983  # Samsung curve at 5.61 V (first point at or above 5.5 V), see the header
 N_LED_CAPS = 16  # C8 to C23 on +5V
 N_VBUS_BEHIND_R = 3  # C24, C25, C26 behind series resistors (HW-015 criterion 1)
 USB_MIN, USB_MAX = 1.0e-6, 10.0e-6  # HW-015
@@ -83,6 +85,17 @@ def spare_headroom() -> float:
     return HW014_MAX - hw014_sum_at_0v()
 
 
+def c_100n_low_5v() -> float:
+    """One 100 nF X7R capacitor at 5.5 V, bias, tolerance and temperature at the low end (X7R spread 15 %)."""
+    return c_low(C_100N, RETENTION_100N)
+
+
+def spare_nominal_max_at_0v() -> float:
+    """Largest total nominal value of the spares C4 and C32 that keeps the populated sum within HW014_MAX,
+    counting the spares at 0 V bias with the high factor (no bias loss)."""
+    return spare_headroom() / HIGH
+
+
 def start_up_bound() -> float:
     """HW-014 upper bound from bulk_cap_bounds with C6 at its high value (module not counted)."""
     return bcb.c_max(c_3v3=c_high(CAPS["C6"][1]))
@@ -99,6 +112,8 @@ def main() -> None:
           f"break-even retention {break_even(CAPS['C5'][1], LDO_EFFECTIVE_MIN):.2f}")
     print(f"HW-014 populated sum at 0 V: {hw014_sum_at_0v()*u:.1f} uF; room for spares {spare_headroom()*u:.1f} uF")
     print(f"HW-014 start-up bound with C6 high: {start_up_bound()*u:.1f} uF (module capacitance not counted)")
+    print(f"100 nF X7R at 5.5 V: {c_100n_low_5v()*u*1000:.1f} nF low case (retention {RETENTION_100N}); "
+          f"spares C4 + C32 together at most {spare_nominal_max_at_0v()*u:.0f} uF nominal")
     print(f"C3 effective at 5.5 V (not a requirement): {c_low(CAPS['C3'][1], RETENTION['C3'])*u:.2f} uF; "
           f"C6 effective at 3.3 V: {c_low(CAPS['C6'][1], RETENTION['C6'])*u:.2f} uF")
 
