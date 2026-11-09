@@ -96,6 +96,22 @@ def spare_nominal_max_at_0v() -> float:
     return spare_headroom() / HIGH
 
 
+# Protection parts on VBUS_IC, upper bounds in F (web search snippets of 2026-11-09, datasheet PDFs not opened):
+# BZX84-C5V1 (DZ1, DZ14, DZ15): 300 pF maximum in distributor listings, test condition not stated;
+# USBLC6-2P6 (U6): ST lists 3.5 pF maximum I/O to GND, no figure for the VBUS pin (assumed not above the I/O value
+# times 10: ASSUMPTION); TVS1: PESD5V0S1BA (owner choice 2026-11-09,
+# surge option S1), 45 pF maximum (datasheet text via search).
+PROTECTION = {"DZ1": 300e-12, "DZ14": 300e-12, "DZ15": 300e-12, "U6": 35e-12, "TVS1": 45e-12}
+
+
+def protection_total() -> float:
+    return sum(PROTECTION.values())
+
+
+def hw015_high_with_protection() -> float:
+    return hw015_high() + protection_total()
+
+
 def start_up_bound() -> float:
     """HW-014 upper bound from bulk_cap_bounds with C6 at its high value (module not counted)."""
     return bcb.c_max(c_3v3=c_high(CAPS["C6"][1]))
@@ -108,6 +124,8 @@ def main() -> None:
           f"break-even retention {break_even(CAPS['C2'][1], USB_MIN):.2f}")
     print(f"HW-015 VBUS_IC at 0 V: {hw015_high()*u:.2f} uF (need <= {USB_MAX*u:.1f}, protection parts not counted); "
           f"room {(USB_MAX - hw015_high())*u:.2f} uF")
+    print(f"HW-015 protection parts bound {protection_total()*1e9:.2f} nF; VBUS_IC at 0 V with them "
+          f"{hw015_high_with_protection()*u:.3f} uF (need <= {USB_MAX*u:.1f})")
     print(f"HW-014 C5 effective at 5.5 V: {hw014_ldo_input()*u:.2f} uF (need > {LDO_EFFECTIVE_MIN*u:.2f}); "
           f"break-even retention {break_even(CAPS['C5'][1], LDO_EFFECTIVE_MIN):.2f}")
     print(f"HW-014 populated sum at 0 V: {hw014_sum_at_0v()*u:.1f} uF; room for spares {spare_headroom()*u:.1f} uF")

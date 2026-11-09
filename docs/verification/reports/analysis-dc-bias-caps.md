@@ -1,7 +1,7 @@
 # Analysis: effective capacitance of C2, C3, C5, C6 under DC bias (HW-014, HW-015, HW-010)
 
 - **Date:** 2026-11-09. **Author:** assistant. **Status:** Draft analysis. Nothing Approved. Nothing measured on the bench.
-- **Script and tests:** `hw/sim/scripts/dc_bias_caps.py`, `hw/sim/scripts/test_dc_bias_caps.py` (11 tests pass; `test_bulk_cap_bounds.py` still passes, 20 in total).
+- **Script and tests:** `hw/sim/scripts/dc_bias_caps.py`, `hw/sim/scripts/test_dc_bias_caps.py` (12 tests pass; `test_bulk_cap_bounds.py` still passes, 21 in total).
 
 ## Data: Samsung curves read in the browser (update 2026-11-09)
 The first version of this analysis assumed a retention of 0.40 because no part-specific curve was at hand. The curves were then read from the Samsung Electro-Mechanics Component Library (`weblib.samsungsem.com/mlcc/mlcc-ec.do`, graph "DC Bias", condition 25 degC, AC 1 Vrms, 1 kHz) with Claude in Chrome: the page keeps the chart data points, which were read for each of the four parts (91 points from 0 V up). They are the maker's typical values, not guaranteed limits.
@@ -47,6 +47,6 @@ Reading: both lower bounds hold while the real retention stays above 0.28. The m
 - C6 is not checked against the output-capacitor rule of the TLV757P (datasheet not read in this analysis).
 - The 100 nF capacitors (X7R) are now covered (curve above). C3 and the 100 nF capacitors are still not counted towards the TLV757P input minimum (C5 alone is used).
 - Spares C4 and C32 (1206, do not populate, value text "DNP spare"): no part and no curve. Only the room is computed: together at most 65 uF nominal at 0 V keeps the populated sum within 100 uF (82.5 uF / 1.265). A real spare value needs its own curve, because a large 1206 X5R loses more than 50 % at 5 V.
-- Protection parts: USBLC6-2P6 (U6) and TVS1 are not read: datasheets not opened in this analysis, TVS1 has no part. The 3.7 uF room on VBUS_IC is unchanged and unchecked.
+- Protection parts (HW-015 criterion 1, upper bound only): BZX84-C5V1 zeners DZ1, DZ14, DZ15 at most 300 pF each (distributor listings, test condition not stated); USBLC6-2P6 (U6) 3.5 pF maximum I/O to GND (ST datasheet text via search), no figure for the VBUS pin, 35 pF assumed; TVS1 PESD5V0S1BA (owner choice 2026-11-09, S1) 45 pF maximum (datasheet text via search). Total 0.98 nF against 3.67 uF of room: the margin is more than 1000 times, so VBUS_IC at 0 V stays at 6.33 uF plus 0.002 uF, below 10 uF. Datasheet PDFs of U6 and the zener were not opened (fetch timed out or was refused), so `hw/evidence/` entries are not created. The zeners and U6 are not at the C2 bias point: the bias loss of any junction capacitance only lowers the 5.25 V low case, which the 1.0 uF minimum has 1.69 uF against (these parts add to it, never subtract).
 - The 25 V and 16 V ratings are chosen for low derating, not calculated against the surge decision S1 to S3 (RV-013).
 - Bias on C24 to C26 is taken as 0 V (the 0 V value is the high case).

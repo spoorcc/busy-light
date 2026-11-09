@@ -253,3 +253,17 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Draft
+
+### HW-017 Damping footprint in the VBUS path of the prototype
+
+- **Statement:** The prototype board shall have one series footprint of size [1206] in the VBUS path between the connector-side node (TVS1 and U6) and the input of the current-limit switch, fitted with a 0 ohm link, rated for at least [3] A, so that a ferrite bead or a resistor can be fitted to damp the hot-plug surge without a new board (ADR-0021, Proposed).
+- **Rationale:** Owner choice of surge option S1 on 2026-11-09 (RV-013 finding 9): the surge is measured on the prototype first. If the ring at plug-in exceeds the absolute maximum of the parts, a series element is the cheapest fix to try (option S3). Without a footprint every try needs a new board. DFx: testability first.
+- **Parent:** SYS-020 (derived with HW-010)
+- **Acceptance criteria:** Inspection of the board file: the footprint is in series in the VBUS path, TVS1 and U6 are on the connector side of it, and all other parts of VBUS_IC (C2, the supply-pin parts, U7 input) are on the switch side. The path is as wide as the VBUS path before it. The fitted 0 ohm link adds at most [10] mohm at 1.5 A (voltage drop in the power check of `hw/kicad/spike-gate` is within the HW-010 budget). DRC and ERC pass. With the link fitted, TC-210 results are unchanged. The BOM names the 0 ohm part with MPN.
+- **Verification method:** Inspection
+- **Verified by:** TC-217
+- **Category:** Testability
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft
+

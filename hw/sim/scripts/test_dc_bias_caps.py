@@ -66,3 +66,10 @@ def test_spare_nominal_room_follows_the_headroom():
     # 82.5 uF / 1.265 = 65.2 uF nominal for C4 and C32 together
     assert d.spare_nominal_max_at_0v() == pytest.approx(65.2e-6, rel=0.005)
     assert d.spare_nominal_max_at_0v() * d.HIGH == pytest.approx(d.spare_headroom())
+
+
+def test_protection_parts_fit_in_the_usb_maximum_with_three_orders_of_margin():
+    # 3 x 300 pF + 35 pF + 45 pF = 0.98 nF
+    assert d.protection_total() == pytest.approx(0.98e-9, rel=1e-6)
+    assert d.hw015_high_with_protection() < d.USB_MAX
+    assert (d.USB_MAX - d.hw015_high()) / d.protection_total() > 1000

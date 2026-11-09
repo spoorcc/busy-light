@@ -184,6 +184,18 @@ SOURCING.update(
     }
 )
 
+# TVS1: owner choice 2026-11-09, surge option S1 (measure the real hot-plug surge first, RV-013 finding 9): a plain
+# 5 V SOD-323 TVS on the spike. The clamp is 10 V at 1 A and 14 V at 12 A (datasheet text via web search), above the
+# 6 V and 7 V maximum of several parts; the surge measurement (TC-210 step 4) decides S2 or S3 for the next board.
+SOURCING["TVS"] = {
+    "MPN": "PESD5V0S1BA,115",
+    "Manufacturer": "Nexperia",
+    "LCSC": "C19224",
+    "Evidence": ("owner choice 2026-11-09 (surge option S1); LCSC/JLCPCB listing and datasheet text via web search "
+                 "2026-11-09: bidirectional 5 V stand-off, SOD-323, Cd 35 pF typ at 0 V, clamp 14 V max at 12 A; "
+                 "datasheet PDF not opened; does NOT keep the 6 V pins below 6 V on its own"),
+}
+
 _DCB = ("LCSC/JLCPCB listing, web lookup 2026-11-09; X5R +-10 %. DC-bias curve read from the "
         "Samsung Component Library 2026-11-09 and applied in hw/sim/scripts/dc_bias_caps.py")
 SOURCING.update(

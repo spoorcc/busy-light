@@ -500,3 +500,15 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Residual risk (after mitigation):** Not assessed. ILIM pin voltage, the 3V3 ramp (regulator not chosen) and the TMUX1101 behaviour are unknown; no bench record exists. The scores are the author's judgement
 - **Verified by:** TC-210
 - **Status:** Open
+
+### RISK-046 Hot-plug surge above the absolute maximum of parts on VBUS_IC and +5V on the prototype
+
+- **Hazard / failure mode:** The surge at a live plug-in exceeds 6 V at the TUSB321 and TMUX1101 supply pins and the TLV75733P input, 7 V at the TPS2553, or 5.3 V at the LED placeholder
+- **Cause:** A plain 5 V TVS clamps at 10 to 14 V at 1 A to 12 A; ringing of the cable inductance against the ceramics may overshoot the supply; the real surge is not known (ADR-0021, `analysis-vbus-5v-part-ratings.md`)
+- **Effect:** Damage or early failure of a part on the prototype; on a product, field failures and a safety and CRA/LVD question
+- **Severity (1-5):** 3  **Likelihood (1-5):** 4  **Initial risk:** 12
+- **Mitigated by:** TVS1 PESD5V0S1BA, series resistor and 5.1 V zener at the TUSB321 and TMUX1101 supply pins (HW-010 amendment), the damping footprint HW-017, lab supply and short cable for the first plug-ins, measurement in TC-217
+- **Residual risk (after mitigation):** Not assessed. TPS2553, regulator and LEDs have no local protection; no measurement exists. The scores are the author's judgement
+- **Verified by:** TC-217
+- **Status:** Open
+
