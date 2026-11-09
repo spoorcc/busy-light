@@ -9,11 +9,16 @@ DC Bias graph, "DC Bias, dC, 25degC, AC1Vrms, 1kHz"), read from the chart data o
   C5 CL10A225KO8NNNC at 5.48 V: dC -59.973 %                       -> 0.4003
   C6 CL10A106KP8NNNC at 3.34 V: dC -56.229 %                       -> 0.4377
   100n CL10B104KB8NNN (X7R 50 V) at 5.61 V: 0.10187 uF of 0.10204 uF -> 0.9983 (at 5.12 V: 1.0016)
-The curves are typical values of the maker at 25 degC, not guaranteed limits. The retention is applied to
-the NOMINAL value, then the tolerance (-10 %) and the X5R temperature spread (-15 %, Samsung reference
-specification) are applied on top. This is conservative where the maker's 0 V reading is above nominal
-(C5: 2.385 uF against 2.2 uF), and it counts the temperature spread twice in part (the curve is at 25 degC
-only; the spread is for the zero-bias value). The Samsung curve is the maker's data but is still not a
+The curves are typical values of the maker at 25 degC, not guaranteed limits. The retention is
+applied to
+the NOMINAL value, then the tolerance (-10 %) and the X5R temperature spread (-15 %, Samsung
+reference
+specification) are applied on top. This is conservative where the maker's 0 V reading is above
+nominal
+(C5: 2.385 uF against 2.2 uF), and it counts the temperature spread twice in part (the curve is at
+25 degC
+only; the spread is for the zero-bias value). The Samsung curve is the maker's data but is still
+not a
 guaranteed limit: the bench measurement (HW-014 / HW-015 criterion 2) stays open."""
 
 from __future__ import annotations
@@ -28,7 +33,12 @@ TOL = 0.10  # K grade
 TEMP = 0.15  # X5R and X7R spread
 LOW = (1 - TOL) * (1 - TEMP)  # worst case low
 HIGH = (1 + TOL) * (1 + TEMP)  # worst case high (taken at 0 V bias: no loss)
-RETENTION = {"C2": 0.4705, "C3": 0.4539, "C5": 0.4003, "C6": 0.4377}  # Samsung curves, see the header
+RETENTION = {
+    "C2": 0.4705,
+    "C3": 0.4539,
+    "C5": 0.4003,
+    "C6": 0.4377,
+}  # Samsung curves, see the header
 
 # ref: (net, nominal F, MPN, bias V at the check). Prices of detail: docs/verification/reports.
 CAPS = {
@@ -86,19 +96,23 @@ def spare_headroom() -> float:
 
 
 def c_100n_low_5v() -> float:
-    """One 100 nF X7R capacitor at 5.5 V, bias, tolerance and temperature at the low end (X7R spread 15 %)."""
+    """One 100 nF X7R capacitor at 5.5 V, bias, tolerance and temperature at the low end (X7R
+    spread 15 %)."""
     return c_low(C_100N, RETENTION_100N)
 
 
 def spare_nominal_max_at_0v() -> float:
-    """Largest total nominal value of the spares C4 and C32 that keeps the populated sum within HW014_MAX,
+    """Largest total nominal value of the spares C4 and C32 that keeps the populated sum
+    within HW014_MAX,
     counting the spares at 0 V bias with the high factor (no bias loss)."""
     return spare_headroom() / HIGH
 
 
-# Protection parts on VBUS_IC, upper bounds in F (web search snippets of 2026-11-09, datasheet PDFs not opened):
+# Protection parts on VBUS_IC, upper bounds in F (web search snippets of 2026-11-09, datasheet
+# PDFs not opened):
 # BZX84-C5V1 (DZ1, DZ14, DZ15): 300 pF maximum in distributor listings, test condition not stated;
-# USBLC6-2P6 (U6): ST lists 3.5 pF maximum I/O to GND, no figure for the VBUS pin (assumed not above the I/O value
+# USBLC6-2P6 (U6): ST lists 3.5 pF maximum I/O to GND, no figure for the VBUS pin (assumed not
+# above the I/O value
 # times 10: ASSUMPTION); TVS1: PESD5V0S1BA (owner choice 2026-11-09,
 # surge option S1), 45 pF maximum (datasheet text via search).
 PROTECTION = {"DZ1": 300e-12, "DZ14": 300e-12, "DZ15": 300e-12, "U6": 35e-12, "TVS1": 45e-12}
@@ -113,8 +127,10 @@ def hw015_high_with_protection() -> float:
 
 
 def u6_vbus_break_even() -> float:
-    """Capacitance of the USBLC6-2P6 VBUS pin that would use up the whole room on VBUS_IC at 0 V (HW-015).
-    The datasheet gives no VBUS-pin value (claim USBLC6-2P6.c_vbus is source-missing); this is the sensitivity."""
+    """Capacitance of the USBLC6-2P6 VBUS pin that would use up the whole room on VBUS_IC at 0
+    V (HW-015).
+    The datasheet gives no VBUS-pin value (claim USBLC6-2P6.c_vbus is source-missing); this is
+    the sensitivity."""
     return USB_MAX - hw015_high() - (protection_total() - PROTECTION["U6"])
 
 
@@ -124,24 +140,33 @@ def start_up_bound() -> float:
 
 
 def main() -> None:
-    u = 1e6
+    u = 1e6  # F to uF
+    c2, c5 = hw015_low() * u, hw014_ldo_input() * u
+    high = hw015_high() * u
     print(f"retention {RETENTION}; low factor {LOW:.3f}; high factor {HIGH:.3f}")
-    print(f"HW-015 C2 at 5.25 V: {hw015_low()*u:.2f} uF (need >= {USB_MIN*u:.1f}); "
-          f"break-even retention {break_even(CAPS['C2'][1], USB_MIN):.2f}")
-    print(f"HW-015 VBUS_IC at 0 V: {hw015_high()*u:.2f} uF (need <= {USB_MAX*u:.1f}, protection parts not counted); "
-          f"room {(USB_MAX - hw015_high())*u:.2f} uF")
-    print(f"HW-015 protection parts bound {protection_total()*1e9:.2f} nF; VBUS_IC at 0 V with them "
-          f"{hw015_high_with_protection()*u:.3f} uF (need <= {USB_MAX*u:.1f})")
-    print(f"HW-015 USBLC6-2P6 VBUS pin could be up to {u6_vbus_break_even()*u:.2f} uF before the 10 uF limit "
-          f"(assumed {PROTECTION['U6']*1e12:.0f} pF)")
-    print(f"HW-014 C5 effective at 5.5 V: {hw014_ldo_input()*u:.2f} uF (need > {LDO_EFFECTIVE_MIN*u:.2f}); "
-          f"break-even retention {break_even(CAPS['C5'][1], LDO_EFFECTIVE_MIN):.2f}")
-    print(f"HW-014 populated sum at 0 V: {hw014_sum_at_0v()*u:.1f} uF; room for spares {spare_headroom()*u:.1f} uF")
-    print(f"HW-014 start-up bound with C6 high: {start_up_bound()*u:.1f} uF (module capacitance not counted)")
-    print(f"100 nF X7R at 5.5 V: {c_100n_low_5v()*u*1000:.1f} nF low case (retention {RETENTION_100N}); "
-          f"spares C4 + C32 together at most {spare_nominal_max_at_0v()*u:.0f} uF nominal")
-    print(f"C3 effective at 5.5 V (not a requirement): {c_low(CAPS['C3'][1], RETENTION['C3'])*u:.2f} uF; "
-          f"C6 effective at 3.3 V: {c_low(CAPS['C6'][1], RETENTION['C6'])*u:.2f} uF")
+    print(f"HW-015 C2 at 5.25 V: {c2:.2f} uF (need >= {USB_MIN * u:.1f});")
+    print(f"  break-even retention {break_even(CAPS['C2'][1], USB_MIN):.2f}")
+    print(f"HW-015 VBUS_IC at 0 V: {high:.2f} uF (need <= {USB_MAX * u:.1f}),")
+    print("  protection parts not counted;")
+    print(f"  room {(USB_MAX - hw015_high()) * u:.2f} uF")
+    print(f"HW-015 protection parts bound {protection_total() * 1e9:.2f} nF;")
+    with_prot = hw015_high_with_protection() * u
+    print(f"  VBUS_IC at 0 V with them {with_prot:.3f} uF (need <= {USB_MAX * u:.1f})")
+    print(f"HW-015 USBLC6-2P6 VBUS pin could be up to {u6_vbus_break_even() * u:.2f} uF")
+    print(f"  before the 10 uF limit (assumed {PROTECTION['U6'] * 1e12:.0f} pF)")
+    print(f"HW-014 C5 effective at 5.5 V: {c5:.2f} uF (need > {LDO_EFFECTIVE_MIN * u:.2f});")
+    print(f"  break-even retention {break_even(CAPS['C5'][1], LDO_EFFECTIVE_MIN):.2f}")
+    print(f"HW-014 populated sum at 0 V: {hw014_sum_at_0v() * u:.1f} uF;")
+    print(f"  room for spares {spare_headroom() * u:.1f} uF")
+    print(f"HW-014 start-up bound with C6 high: {start_up_bound() * u:.1f} uF")
+    print("  (module capacitance not counted)")
+    low_nf = c_100n_low_5v() * u * 1000
+    print(f"100 nF X7R at 5.5 V: {low_nf:.1f} nF low case (retention {RETENTION_100N});")
+    print(f"  spares C4 + C32 together at most {spare_nominal_max_at_0v() * u:.0f} uF nominal")
+    c3 = c_low(CAPS["C3"][1], RETENTION["C3"]) * u
+    c6 = c_low(CAPS["C6"][1], RETENTION["C6"]) * u
+    print(f"C3 effective at 5.5 V (not a requirement): {c3:.2f} uF;")
+    print(f"  C6 effective at 3.3 V: {c6:.2f} uF")
 
 
 if __name__ == "__main__":

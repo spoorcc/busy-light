@@ -1,4 +1,4 @@
-"""Tests for dc_bias_caps.py: the arithmetic and the requirement checks, not the assumed retention."""
+"""Tests for dc_bias_caps.py: arithmetic and requirement checks, not the assumed retention."""
 
 import sys
 from pathlib import Path
@@ -8,10 +8,17 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 import dc_bias_caps as d  # noqa: E402
 
+MIN_PROTECTION_ROOM = 3e-6  # F left on VBUS_IC for protection parts
+MIN_X7R_RETENTION = 0.99  # the 100 nF X7R part keeps its value at 5 V
+ROOM_OVER_PROTECTION = 1000  # room divided by the protection-part capacitance
+VBUS_PIN_SENSITIVITY_FACTOR = (
+    1e4  # the U6 VBUS pin would have to be this many times the assumed value
+)
+
 
 def test_low_and_high_factors_by_hand():
-    assert d.LOW == pytest.approx(0.9 * 0.85)
-    assert d.HIGH == pytest.approx(1.1 * 1.15)
+    assert pytest.approx(0.9 * 0.85) == d.LOW
+    assert pytest.approx(1.1 * 1.15) == d.HIGH
 
 
 def test_c2_meets_the_usb_minimum_at_the_maker_retention():
@@ -33,7 +40,7 @@ def test_a_nominal_1uf_would_fail_the_usb_minimum():
 
 def test_vbus_sum_at_0v_is_inside_the_usb_maximum_with_room_for_protection_parts():
     assert d.hw015_high() == pytest.approx(6.33e-6, rel=0.005)
-    assert d.USB_MAX - d.hw015_high() > 3e-6
+    assert d.USB_MAX - d.hw015_high() > MIN_PROTECTION_ROOM
 
 
 def test_c5_meets_the_regulator_minimum_effective_value():
@@ -59,7 +66,7 @@ def test_start_up_bound_is_above_the_populated_sum_plus_zero_spares():
 def test_100n_x7r_keeps_its_value_at_5v():
     # 0.1 uF x 0.9983 x 0.765 = 76.4 nF
     assert d.c_100n_low_5v() == pytest.approx(76.4e-9, rel=0.002)
-    assert d.RETENTION_100N > 0.99
+    assert d.RETENTION_100N > MIN_X7R_RETENTION
 
 
 def test_spare_nominal_room_follows_the_headroom():
@@ -72,10 +79,10 @@ def test_protection_parts_fit_in_the_usb_maximum_with_three_orders_of_margin():
     # 3 x 300 pF + 35 pF + 45 pF = 0.98 nF
     assert d.protection_total() == pytest.approx(0.98e-9, rel=1e-6)
     assert d.hw015_high_with_protection() < d.USB_MAX
-    assert (d.USB_MAX - d.hw015_high()) / d.protection_total() > 1000
+    assert (d.USB_MAX - d.hw015_high()) / d.protection_total() > ROOM_OVER_PROTECTION
 
 
 def test_u6_vbus_pin_capacitance_would_need_to_be_microfarads_to_matter():
     # 10 uF - 6.33 uF - (0.98 nF - 35 pF) = 3.67 uF
     assert d.u6_vbus_break_even() == pytest.approx(3.67e-6, rel=0.005)
-    assert d.u6_vbus_break_even() / d.PROTECTION["U6"] > 1e4
+    assert d.u6_vbus_break_even() / d.PROTECTION["U6"] > VBUS_PIN_SENSITIVITY_FACTOR
