@@ -1,0 +1,131 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for TVS1 on VBUS_IC of the spike board: Nexperia PESD5V0S1BA,115 (owner choice 2026-11-09, surge option S1, ADR-0021 Proposed). See hw/evidence/README.md.
+# Source: Nexperia product data sheet of 26 April 2024, copy hosted by LCSC (the Nexperia server refused the download with HTTP 403). The values are those of a clamp that does NOT keep a 6 V pin below 6 V: see ADR-0021.
+schema_version: 1
+part:
+  key: PESD5V0S1BA
+  mpn: PESD5V0S1BA,115
+  manufacturer: Nexperia
+  description: Bidirectional ESD protection diode, 5 V stand-off, 130 W 8/20 us, SOD323
+  selection: chosen
+  package:
+    code: SOD-323
+    name: SOD323 (SC-76)
+    pin_count: 2
+  used_in:
+  - TVS1
+  schematic_symbol: Device:D_TVS
+documents:
+- id: pesd5v0s1ba-ds
+  title: PESD5V0S1BA Bidirectional ESD protection diode
+  doc_number: PESD5V0S1BA, Product data sheet, 26 April 2024
+  revision_date: April 2024
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/dd1aa251f61f8aba7aba621165608b08.pdf
+  file: pesd5v0s1ba-nexperia-2024-04-26.pdf
+  sha256: 6546e415b8885ea3790c91629034c6b4e5c6961d5fde734e55dfa479dd8dc49a
+  pages: 11
+  retrieved_on: '2026-11-09'
+  notes: Copy hosted by LCSC, found through the product page of C19224. Not compared with the file on the Nexperia server.
+defaults:
+  source_document: pesd5v0s1ba-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-09'
+  status: unverified
+  package: SOD-323
+claims:
+- id: PESD5V0S1BA.vrwm
+  parameter: Reverse stand-off voltage VRWM
+  category: electrical
+  condition:
+    temperature: {value: 25, unit: degC}
+  max: 5
+  unit: V
+  source: {page: 1, locator: Table 1 Quick reference data, quote: 'VRWM reverse standoff Tamb = 25 °C - - 5 V'}
+- id: PESD5V0S1BA.vbr
+  parameter: Breakdown voltage VBR
+  category: electrical
+  condition:
+    ir: {value: 1, unit: mA}
+    temperature: {value: 25, unit: degC}
+  min: 5.5
+  max: 9.5
+  unit: V
+  notes: The minimum of 5.5 V is the top of the USB VBUS tolerance. Leakage above the stand-off voltage of 5 V is not specified.
+  source: {page: 4, locator: Table 6 Characteristics, quote: 'VBR breakdown voltage IR = 1 mA; Tamb = 25 °C 5.5 - 9.5 V'}
+- id: PESD5V0S1BA.irm
+  parameter: Reverse leakage current IRM
+  category: electrical
+  condition:
+    vrwm: {value: 5, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 5
+  max: 100
+  unit: nA
+  source: {page: 4, locator: Table 6 Characteristics, quote: 'IRM reverse leakage current VRWM = 5 V; Tamb = 25 °C - 5 100 nA'}
+- id: PESD5V0S1BA.cd
+  parameter: Diode capacitance Cd
+  category: electrical
+  condition:
+    frequency: {value: 1, unit: MHz}
+    vr: {value: 0, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 35
+  max: 45
+  unit: pF
+  source: {page: 4, locator: Table 6 Characteristics, quote: 'Cd diode capacitance f = 1 MHz; VR = 0 V; Tamb = 25 °C - 35 45 pF'}
+- id: PESD5V0S1BA.vcl.ipp_1a
+  parameter: Clamping voltage VCL at IPP = 1 A, 8/20 us
+  category: electrical
+  condition:
+    ipp: {value: 1, unit: A}
+    pulse: 8/20 us
+    temperature: {value: 25, unit: degC}
+  max: 10
+  unit: V
+  source: {page: 4, locator: Table 6 Characteristics, quote: 'VCL clamping voltage IPP = 1 A; Tamb = 25 °C [1] [2] - - 10 V'}
+- id: PESD5V0S1BA.vcl.ippm_12a
+  parameter: Clamping voltage VCL at IPPM = 12 A, 8/20 us
+  category: electrical
+  condition:
+    ipp: {value: 12, unit: A}
+    pulse: 8/20 us
+    temperature: {value: 25, unit: degC}
+  max: 14
+  unit: V
+  notes: Both clamp values are above the 6 V of the TUSB321 and TMUX1101 supply pins and the 7 V of the TPS2553 (ADR-0021).
+  source: {page: 4, locator: Table 6 Characteristics, quote: 'IPPM = 12 A; Tamb = 25 °C [1] [2] - - 14 V'}
+- id: PESD5V0S1BA.rdiff
+  parameter: Differential resistance Rdiff
+  category: electrical
+  condition:
+    ir: {value: 1, unit: mA}
+    temperature: {value: 25, unit: degC}
+  max: 50
+  unit: ohm
+  source: {page: 4, locator: Table 6 Characteristics, quote: 'Rdiff differential resistance IR = 1 mA; Tamb = 25 °C - - 50 Ω'}
+- id: PESD5V0S1BA.pppm
+  parameter: Rated peak pulse power PPPM, 8/20 us
+  category: abs_max
+  max: 130
+  unit: W
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'PPPM rated peak pulse power tp = 8/20 µs [1] [2] - 130 W'}
+- id: PESD5V0S1BA.ippm
+  parameter: Rated peak pulse current IPPM, 8/20 us
+  category: abs_max
+  max: 12
+  unit: A
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'IPPM rated peak pulse current [1] [2] - 12 A'}
+- id: PESD5V0S1BA.tj
+  parameter: Junction temperature Tj
+  category: abs_max
+  max: 150
+  unit: degC
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'Tj junction temperature - 150 °C'}
+- id: PESD5V0S1BA.vesd_contact
+  parameter: Electrostatic discharge voltage, IEC 61000-4-2 contact discharge
+  category: abs_max
+  max: 30
+  unit: kV
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'VESD electrostatic discharge IEC 61000-4-2 (contact discharge) [2] [3] - 30 kV'}

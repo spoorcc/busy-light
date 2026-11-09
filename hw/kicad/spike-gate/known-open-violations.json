@@ -290,15 +290,6 @@
      "reason": "the generated project file now switches the default-ignored checks on (2026-11-07); none ignored",
      "dev": "DEV-003"
     },
-    "footprint_symbol_mismatch": {
-     "max": 2,
-     "reason": "C3 and C4: board footprint differs from the schematic field; sizes not designed (HW-014 Draft, RV-013); only these refs; observed 2 in ring7 on 2026-11-08; owner decision 2026-11-08 to lower the limit",
-     "dev": "DEV-002",
-     "refs": [
-      "C3",
-      "C4"
-     ]
-    },
     "net_conflict": {
      "max": 0,
      "reason": "must be 0: U1 and U9 carry the datasheet pad numbers (2026-11-08); owner decision 2026-11-08 to lower the limit to the observed count"

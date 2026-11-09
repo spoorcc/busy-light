@@ -42,6 +42,16 @@ class Board(unittest.TestCase):
         self.assertEqual(len(v["findings"]), 3)
         self.assertEqual(R.verdict({"unannotated": [], "no_fiducials": False, "refs_on_silk": 5, "missing_silk": [], "open_values": []})["status"], "OK")
 
+    def test_verdict_reports_parts_without_an_mpn(self):
+        base = {"unannotated": [], "no_fiducials": False, "refs_on_silk": 5, "missing_silk": [],
+                "open_values": [], "has_mpn_field": True}
+        v = R.verdict({**base, "missing_mpn": ["R1", "C2"]})
+        self.assertEqual(v["status"], "FINDINGS")
+        self.assertIn("2 parts without an MPN: R1, C2", v["findings"])
+        self.assertEqual(R.verdict({**base, "missing_mpn": []})["status"], "OK")
+        no_field = R.verdict({**base, "has_mpn_field": False})
+        self.assertIn("the BOM has no MPN field", no_field["findings"])
+
 
 if __name__ == "__main__":
     unittest.main()

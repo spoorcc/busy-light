@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-# Evidence for the USB-C receptacle (J1). The part is not chosen; only the USB-IF compliance document is available. See hw/evidence/README.md.
+# Evidence for the USB-C receptacle (J1): GCT USB4085-GF-A (through-hole, top mount, placed at the board edge by the custom footprint; identified 2026-11-09 from the GCT drawing). See hw/evidence/README.md.
 schema_version: 1
 part:
   key: USB-C-RECEPTACLE
-  mpn: not chosen (footprint GCT USB4085)
-  manufacturer: not chosen
+  mpn: USB4085-GF-A
+  manufacturer: Global Connector Technology (GCT)
   description: USB 2.0 Type-C receptacle, 16 contacts, SMT
-  selection: placeholder
+  selection: chosen
   package:
     code: USB4085
-    name: Footprint Connector_USB:USB_C_Receptacle_GCT_USB4085
+    name: Custom footprint CUSTOM:USB_C_Receptacle_GCT_USB4085_edge (pads as the GCT drawing, placed at the PCB edge)
   used_in:
   - J1
   schematic_symbol: Connector:USB_C_Receptacle_USB2.0_16P
@@ -34,6 +34,17 @@ documents:
   pages: 2
   retrieved_on: '2026-11-05'
   notes: Probably obtained through RS Components (from the file name; not recorded). Content is an Amphenol cut sheet for other part numbers. The text layer is font-encoded and cannot be read by pdftotext; no claim cites it.
+- id: gct-usb4085-dwg
+  title: USB4085 USB Type-C Charging Product Drawing
+  doc_number: USB4085 drawing, revision B, 9 April 2018
+  revision_date: April 2018
+  origin: manufacturer
+  url: https://gct.co/Files/Drawings/USB4085.pdf
+  file: gct-usb4085-drawing-revB.pdf
+  sha256: 39afb82c5104579e8c2db4f4e758825c48cab1c4b06d4c61c62056470ff09e9e
+  pages: 3
+  retrieved_on: '2026-11-09'
+  notes: Drawing with specification block and ordering grid. The revision letter is read from the title block (text layer, wide layout).
 defaults:
   source_document: usb-c-cts-21b
   method: extracted
@@ -61,13 +72,45 @@ claims:
   notes: The USB Type-C Cable and Connector Specification (the document that names the pins) is not in the datasheets folder, and the vendor datasheet of the chosen receptacle is missing. The contact numbers are known only from the compliance
     document (claim contacts_usb2).
 - id: USB-C-RECEPTACLE.vbus_current_rating
-  parameter: VBUS contact current rating
+  parameter: VBUS contacts current rating, all VBUS pins together
   category: electrical
-  status: source-missing
-  notes: No datasheet for the chosen receptacle in the folder. Required for the 3 A step.
+  max: 5
+  unit: A
+  notes: 'The drawing also gives 6.25 A for the GND pins together, 1.25 A for A5/B5 and 0.25 A per pin for all other pins. The HW-010 top step is about 1.5 A.'
+  source: {document: gct-usb4085-dwg, page: 1, locator: Specifications Electrical, quote: 'Current Rating: 5.00A collectively for VBUS pins'}
+- id: USB-C-RECEPTACLE.voltage_rating
+  parameter: Voltage rating
+  category: electrical
+  max: 48
+  unit: V
+  source: {document: gct-usb4085-dwg, page: 1, locator: Specifications Electrical, quote: 'Voltage Rating: 48V DC'}
+- id: USB-C-RECEPTACLE.contact_resistance
+  parameter: Contact resistance, initial
+  category: electrical
+  max: 40
+  unit: mohm
+  notes: 50 mohm after test (same block).
+  source: {document: gct-usb4085-dwg, page: 1, locator: Specifications Electrical, quote: 'Contact Resistance: 40mΩ max initial.'}
+- id: USB-C-RECEPTACLE.temp_range
+  parameter: Operating temperature
+  category: recommended
+  min: -40
+  max: 85
+  unit: degC
+  source: {document: gct-usb4085-dwg, page: 1, locator: Specifications Mechanical and environmental, quote: 'Operating Temperature: -40°C to 85°C'}
+- id: USB-C-RECEPTACLE.durability
+  parameter: Durability
+  category: mechanical
+  statement: 20,000 mating cycles.
+  source: {document: gct-usb4085-dwg, page: 1, locator: Specifications Mechanical and environmental, quote: 'Durability: 20,000 cycles'}
+- id: USB-C-RECEPTACLE.mounting
+  parameter: Mounting type of the USB4085
+  category: mechanical
+  statement: 'Dip type, PCB top mount (through-hole). The drawing shows no edge-mount variant; the ordering grid has only contact plating and packing options.'
+  notes: The project footprint has the same pad pattern as the drawing (0.85 mm pitch, 1.35 mm row offset, shell tails 8.65 mm apart against 8.64 mm) and puts the connector at the PCB edge. The overhang and fit are a mechanical question and are not checked here.
+  source: {document: gct-usb4085-dwg, page: 1, locator: Title block, quote: 'Dip Type, PCB Top Mount'}
 - id: USB-C-RECEPTACLE.mpn
-  parameter: Manufacturer part number
+  parameter: Manufacturer part number and ordering grid
   category: other
-  status: source-missing
-  notes: The footprint is Connector_USB:USB_C_Receptacle_GCT_USB4085 but the schematic value is only 'USB-C receptacle'. No GCT datasheet is in the folder. The Amphenol cut sheet usb-c-receptacle-rs.pdf is for other part numbers (12401610E4#2A
-    etc.) and its text is not extractable (font-encoded), so nothing was taken from it.
+  statement: 'USB4085-GF-A: contact plating GF (gold flash, standard), packing A (tape and reel, 700 per reel).'
+  source: {document: gct-usb4085-dwg, page: 1, locator: Ordering Grid, quote: 'GF = Gold Flash (Standard)'}

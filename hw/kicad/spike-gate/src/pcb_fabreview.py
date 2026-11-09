@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """Assembly and documentation checks of a spike board (HW-010): what the DRC and pcb_fabcheck.py do not cover.
 
-Usage: python3 pcb_fabreview.py <board.kicad_pcb> <bom.csv>      (bom.csv from `kicad-cli sch export bom`; needs pcbnew)
+Usage: python3 pcb_fabreview.py <board.kicad_pcb> <bom.csv>      (bom.csv from `kicad-cli sch export bom --exclude-dnp --ref-range-delimiter ""`; needs pcbnew)
 Checks: unannotated references in the BOM, BOM against the board, parts with a tbd value, reference designators on the
 silkscreen, fiducials. Prints JSON; exit 0 when there are no findings, 1 otherwise. It does not check part numbers or
-availability (the BOM has no MPN field) and it does not replace a fabricator's review.
+availability (it only checks that every part has an MPN) and it does not replace a fabricator's review.
 """
 from __future__ import annotations
 
@@ -53,6 +53,10 @@ def verdict(m: dict) -> dict:
         f.append("no reference designators on the silkscreen")
     elif m.get("missing_silk"):
         f.append("%d parts without a silkscreen designator: %s" % (len(m["missing_silk"]), ", ".join(m["missing_silk"])))
+    if not m.get("has_mpn_field", True):
+        f.append("the BOM has no MPN field")
+    elif m.get("missing_mpn"):
+        f.append("%d parts without an MPN: %s" % (len(m["missing_mpn"]), ", ".join(m["missing_mpn"])))
     if m["open_values"]:
         f.append("parts with a tbd value: %s" % ", ".join(m["open_values"]))
     return {"status": "FINDINGS" if f else "OK", "findings": f}
@@ -62,7 +66,7 @@ def main(argv: list[str]) -> int:
     import pcbnew  # noqa: PLC0415
     b = pcbnew.LoadBoard(argv[1])
     fps = b.GetFootprints()
-    board_refs = [f.GetReference() for f in fps]
+    board_refs = [f.GetReference() for f in fps if not f.IsDNP()]      # the BOM is exported with --exclude-dnp
     rows = list(csv.DictReader(open(argv[2], encoding="utf-8")))
     bom_refs = [x.strip() for r in rows for x in r["Refs"].split(",")]
     val = [(x.strip(), r["Value"]) for r in rows for x in r["Refs"].split(",")]
@@ -70,8 +74,9 @@ def main(argv: list[str]) -> int:
          "open_values": open_values(val), "refs_on_silk": refs_on_silk([f.Reference().GetLayerName() for f in fps]),
          "missing_silk": refs_missing_silk([(f.GetReference(), f.Reference().GetLayerName()) for f in fps]),
          "fiducials": fiducials([f.GetReference() if f.GetReference().startswith("FID") else str(f.GetFPID().GetLibItemName()) for f in fps]),
-         "parts": len(fps), "bottom_side": sum(1 for f in fps if f.GetLayerName() == "B.Cu"),
-         "has_mpn_field": "MPN" in rows[0]}
+         "dnp": sorted(f.GetReference() for f in fps if f.IsDNP()), "parts": len(fps), "bottom_side": sum(1 for f in fps if f.GetLayerName() == "B.Cu"),
+         "has_mpn_field": "MPN" in rows[0],
+         "missing_mpn": missing_mpn([(x.strip(), r) for r in rows for x in r["Refs"].split(",")])}
     m["no_fiducials"] = m["fiducials"] == 0
     m["verdict"] = verdict(m)
     print(json.dumps(m, indent=1))

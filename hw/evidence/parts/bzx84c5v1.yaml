@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
 # Evidence for the 5.1 V zener diodes at the supply pins of the TMUX1101 and the TUSB321 (D_Z1..D_Z3; HW-010 amendment, ADR-0016). See hw/evidence/README.md.
-# Source: Vishay Telefunken BZX84C2V7-BZX84C51, Rev. 1, 01-Apr-99, supplied by the owner (copy from a datasheet archive, 5 pages). Old revision: confirm against the current maker datasheet before the BOM is frozen.
+# Updated 2026-11-09: the BOM part is the Nexperia BZX84-C5V1,215 (sourcing.py); its data sheet (Rev. 7, 2023) is the second document below and the claims with 'nx' in the id come from it. The Vishay claims stay for the record; they differ (350 mW against 250 mW, 420 K/W against 500 K/W): use the Nexperia ones for the BOM part.
+# Source of the first document: Vishay Telefunken BZX84C2V7-BZX84C51, Rev. 1, 01-Apr-99, supplied by the owner (copy from a datasheet archive, 5 pages). Old revision: confirm against the current maker datasheet before the BOM is frozen.
 # The leakage column shows the unit "mA" in the text where the part is a microampere part; no value is entered for it.
 schema_version: 1
 part:
   key: BZX84C5V1
-  mpn: BZX84C5V1
-  manufacturer: Vishay
-  description: 350 mW surface mount zener diode 5.1 V, SOT-23
+  mpn: BZX84-C5V1,215
+  manufacturer: Nexperia
+  description: 250 mW surface mount zener diode 5.1 V (C grade, 5 %), SOT-23
   selection: candidate
   package:
     code: SOT-23
@@ -28,6 +29,18 @@ documents:
   sha256: 6a50857005d9bfb3a8808dd44e76075fd7bb76ceb69bd44f9ce58f4ea9260caa
   pages: 5
   retrieved_on: '2026-11-07'
+  notes: Vishay document of 1999 for the same type family; not the maker of the BOM part.
+- id: bzx84-ser-ds
+  title: BZX84 series Voltage regulator diodes
+  doc_number: BZX84_SER Rev. 7, 1 January 2023
+  revision_date: January 2023
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/6cd8164ad20709883ab8293a7d9bf7de.pdf
+  file: bzx84-series-nexperia-rev7.pdf
+  sha256: e6278027e055c1b077d2fb733903d60f3fd66724e45a310a7501c69edb99ddb9
+  pages: 14
+  retrieved_on: '2026-11-09'
+  notes: Copy hosted by LCSC, found through the product page of C294621 (the Nexperia server refused the download with HTTP 403). Not compared with the file on the Nexperia server.
 defaults:
   source_document: bzx84c-ds
   method: extracted
@@ -66,3 +79,100 @@ claims:
   max: 420
   unit: K/W
   source: {page: 1, locator: Maximum thermal resistance, quote: Junction ambient on ceramic substrate 10mm x 8mm x 0.7mm RthJA 420 K/W}
+- id: BZX84C5V1.nx_vz_c
+  parameter: Working voltage VZ of the C grade at IZ = 5 mA (BZX84-C5V1)
+  category: electrical
+  min: 4.8
+  max: 5.4
+  unit: V
+  notes: The C row sits on its own line under the 5V1 row; the quote is that line.
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: 'C 4.80 5.40'}
+- id: BZX84C5V1.nx_rdif_5ma
+  parameter: Maximum differential resistance rdif at IZ = 5 mA
+  category: electrical
+  max: 60
+  unit: ohm
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: '5V1 A 5.04 5.16 480 60 2 2 -2.7 1.2 300 6.0'}
+- id: BZX84C5V1.nx_rdif_1ma
+  parameter: Maximum differential resistance rdif at IZ = 1 mA
+  category: electrical
+  max: 480
+  unit: ohm
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: '5V1 A 5.04 5.16 480 60 2 2 -2.7 1.2 300 6.0'}
+- id: BZX84C5V1.nx_ir
+  parameter: Reverse current IR at VR = 2 V
+  category: electrical
+  condition:
+    vr: {value: 2, unit: V}
+  max: 2
+  unit: uA
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: '5V1 A 5.04 5.16 480 60 2 2 -2.7 1.2 300 6.0'}
+- id: BZX84C5V1.nx_sz
+  parameter: Temperature coefficient SZ at IZ = 5 mA
+  category: electrical
+  min: -2.7
+  max: 1.2
+  unit: mV/K
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: '5V1 A 5.04 5.16 480 60 2 2 -2.7 1.2 300 6.0'}
+- id: BZX84C5V1.nx_cd
+  parameter: Diode capacitance Cd at f = 1 MHz, VR = 0 V
+  category: electrical
+  condition:
+    frequency: {value: 1, unit: MHz}
+    vr: {value: 0, unit: V}
+  max: 300
+  unit: pF
+  notes: Footnote [1] of the table gives the test condition f = 1 MHz; VR = 0 V. The same row is the A, B and C grade.
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: '5V1 A 5.04 5.16 480 60 2 2 -2.7 1.2 300 6.0'}
+- id: BZX84C5V1.nx_izsm
+  parameter: Non-repetitive peak reverse current IZSM, tp = 100 us
+  category: abs_max
+  max: 6
+  unit: A
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 5, locator: Table 8 Characteristics per type, quote: '5V1 A 5.04 5.16 480 60 2 2 -2.7 1.2 300 6.0'}
+- id: BZX84C5V1.nx_ptot
+  parameter: Total power dissipation Ptot at Tamb up to 25 degC
+  category: abs_max
+  max: 250
+  unit: mW
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 4, locator: Table 5 Limiting values, quote: 'Ptot total power dissipation Tamb ≤ 25 °C [2] - 250 mW'}
+- id: BZX84C5V1.nx_pzsm
+  parameter: Non-repetitive peak reverse power dissipation PZSM, tp = 100 us
+  category: abs_max
+  max: 40
+  unit: W
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 4, locator: Table 5 Limiting values, quote: 'PZSM non-repetitive peak [1] - 40 W'}
+- id: BZX84C5V1.nx_if
+  parameter: Forward current IF
+  category: abs_max
+  max: 200
+  unit: mA
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 4, locator: Table 5 Limiting values, quote: 'IF forward current - 200 mA'}
+- id: BZX84C5V1.nx_rthja
+  parameter: Thermal resistance junction to ambient, in free air
+  category: thermal
+  max: 500
+  unit: K/W
+  method: extracted
+  extracted_on: '2026-11-09'
+  source: {document: bzx84-ser-ds, page: 4, locator: Table 6 Thermal characteristics, quote: 'Rth(j-a) thermal resistance from in free air [1] - - 500 K/W'}

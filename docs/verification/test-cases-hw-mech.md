@@ -221,6 +221,15 @@
 - **Automated:** no
 - **Evidence:** none yet
 
+### TC-217 Damping footprint and hot-plug surge record on the prototype
+
+- **Verifies:** HW-017
+- **Level:** Inspection, then prototype
+- **Procedure:** TBD. Inspection of the board file and DRC for the footprint. Bench part (surge option S1, ADR-0021): lab supply with a current limit and a short cable first, then a USB-C source; scope on VBUS_IC, +5V and the supply pin of each 6 V part at plug-in, repeated at least [20] times, with the 0 ohm link fitted and then with a ferrite or resistor fitted; record the peak voltage at each point.
+- **Expected result / pass criteria:** see acceptance criteria of HW-017; for the bench part the record itself is the result: peaks above 6 V (7 V at the TPS2553) trigger the revisit of ADR-0021.
+- **Automated:** no
+- **Evidence:** none yet
+
 ### TC-309 PCB retention and reopening
 
 - **Verifies:** MECH-009
