@@ -1,18 +1,17 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-# Evidence placeholder for the TVS/ESD diodes TVS1 (VBUS) and TVS2 (ESD diode). Parts not chosen (schematic values 'TVS' and 'ESD diode', footprint D_SOD-323).
+# Evidence placeholder for the ESD diode TVS2 (button input). Part not chosen (schematic value 'ESD diode', footprint D_SOD-323). TVS1 has its own file, pesd5v0s1ba.yaml (2026-11-09).
 schema_version: 1
 part:
   key: TVS-SOD323
   mpn: not chosen
   manufacturer: not chosen
-  description: Unidirectional TVS (TVS1) and ESD diode (TVS2) in SOD-323
+  description: ESD diode (TVS2) in SOD-323
   selection: placeholder
   package:
     code: SOD-323
     name: D_SOD-323
     pin_count: 2
   used_in:
-  - TVS1
   - TVS2
   schematic_symbol: Device:D_TVS
 documents: []
@@ -23,7 +22,7 @@ defaults:
   status: source-missing
 claims:
 - id: TVS-SOD323.vrwm
-  parameter: Reverse stand-off voltage (VBUS clamp TVS1)
+  parameter: Reverse stand-off voltage
   category: electrical
   status: source-missing
   notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.

@@ -102,7 +102,7 @@ SOURCING.update(
             "MPN": "BZX84-C5V1,215",
             "Manufacturer": "Nexperia",
             "LCSC": "C294621",
-            "Evidence": _DK + "; datasheet PDF not opened",
+            "Evidence": _DK + "; Nexperia BZX84 series Rev. 7 read 2026-11-09 (hw/evidence/parts/bzx84c5v1.yaml, unverified claims)",
         },
         "Button": {
             "MPN": "TL3342F160QG",
@@ -193,7 +193,7 @@ SOURCING["TVS"] = {
     "LCSC": "C19224",
     "Evidence": ("owner choice 2026-11-09 (surge option S1); LCSC/JLCPCB listing and datasheet text via web search "
                  "2026-11-09: bidirectional 5 V stand-off, SOD-323, Cd 35 pF typ at 0 V, clamp 14 V max at 12 A; "
-                 "datasheet PDF not opened; does NOT keep the 6 V pins below 6 V on its own"),
+                 "datasheet read 2026-11-09 (hw/evidence/parts/pesd5v0s1ba.yaml, unverified claims); does NOT keep the 6 V pins below 6 V on its own"),
 }
 
 _DCB = ("LCSC/JLCPCB listing, web lookup 2026-11-09; X5R +-10 %. DC-bias curve read from the "

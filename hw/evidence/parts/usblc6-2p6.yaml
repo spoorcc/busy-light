@@ -180,3 +180,9 @@ claims:
   category: abs_max
   status: source-missing
   notes: 'Searched DS4260 Rev 7 Table 1 (absolute ratings): no continuous voltage rating for the VBUS pin is listed; only VRM = 5.25 V (leakage test point) and VBR min 6 V. Whether VBUS up to 5.5 V is allowed is not stated.'
+- id: USBLC6-2P6.c_vbus
+  parameter: Capacitance of the VBUS pin to GND
+  category: electrical
+  status: source-missing
+  notes: 'Searched DS4260 Rev 7 (tables 1 and 2, the capacitance figures 1 and 2 and the text) on 2026-11-09: only the I/O capacitances are given (Ci/o-GND 2.5 typ, 3.5 max pF); no value for the VBUS pin. ADR-0021 and the DC-bias analysis assume 35 pF.'
+
