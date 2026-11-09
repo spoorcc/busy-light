@@ -75,9 +75,9 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "C28": (*C1206, "100n C0G 5% 50V"), "C29": (*C1206, "100n C0G 5% 50V"),
     "C30": (*C1206, "100n C0G 5% 50V"), "C31": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
-    "C2": (*C, "4.7u"), "C3": (*C0805, "10u"), "R8": (*R, "100k"),
+    "C2": (*C, "4.7u 16V X5R"), "C3": (*C0805, "10u 25V X5R"), "R8": (*R, "100k"),
     "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
-    "C5": (*C, "2.2u"), "C6": (*C, "10u"),
+    "C5": (*C, "2.2u 16V X5R"), "C6": (*C, "10u 10V X5R"),
     "U9": (None, None, "CUSTOM:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),    # no such footprint in the KiCad libraries; pcb_full.derive_u9_footprint writes it
     "R9": (*R, "10k"), "C7": (*C, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),

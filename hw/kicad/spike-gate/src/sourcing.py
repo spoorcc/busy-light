@@ -184,6 +184,21 @@ SOURCING.update(
     }
 )
 
+_DCB = ("LCSC/JLCPCB listing, web lookup 2026-11-09; X5R +-10 %. DC-bias curve read from the "
+        "Samsung Component Library 2026-11-09 and applied in hw/sim/scripts/dc_bias_caps.py")
+SOURCING.update(
+    {
+        "4.7u 16V X5R": {"MPN": "CL10A475KO8NNNC", "Manufacturer": "Samsung Electro-Mechanics",
+                         "LCSC": "C19666", "Evidence": _DCB + "; 0603 4.7 uF 16 V, JLCPCB basic part (C2)"},
+        "10u 25V X5R": {"MPN": "CL21A106KAYNNNE", "Manufacturer": "Samsung Electro-Mechanics",
+                        "LCSC": "C15850", "Evidence": _DCB + "; 0805 10 uF 25 V (C3); listing showed 0 stock"},
+        "2.2u 16V X5R": {"MPN": "CL10A225KO8NNNC", "Manufacturer": "Samsung Electro-Mechanics",
+                         "LCSC": "C23630", "Evidence": _DCB + "; 0603 2.2 uF 16 V, JLCPCB basic part (C5)"},
+        "10u 10V X5R": {"MPN": "CL10A106KP8NNNC", "Manufacturer": "Samsung Electro-Mechanics",
+                        "LCSC": "C19702", "Evidence": _DCB + "; 0603 10 uF 10 V (C6); one LCSC page marks it not recommended for new designs"},
+    }
+)
+
 FIELDS = ("MPN", "Manufacturer", "LCSC")
 
 

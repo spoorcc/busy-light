@@ -54,10 +54,16 @@ class SchematicFieldsTest(unittest.TestCase):
         self.assertTrue(f["MPN"].effects.hide)
 
     def test_unlisted_part_has_empty_mpn_and_is_reported(self):
-        f = self.fields("C2")           # waits for the DC-bias analysis (HW-014), so no MPN yet
+        f = self.fields("J1")           # edge-mount variant of the USB-C connector not identified yet
         self.assertEqual(f["MPN"].value, "")
         row = {k: v.value for k, v in f.items()}
-        self.assertEqual(pcb_fabreview.missing_mpn([("C2", row)]), ["C2"])
+        self.assertEqual(pcb_fabreview.missing_mpn([("J1", row)]), ["J1"])
+
+    def test_bias_analysed_capacitors_carry_fields(self):
+        # HW-014/015: C2, C3, C5, C6 follow hw/sim/scripts/dc_bias_caps.py
+        for ref, mpn in (("C2", "CL10A475KO8NNNC"), ("C3", "CL21A106KAYNNNE"),
+                         ("C5", "CL10A225KO8NNNC"), ("C6", "CL10A106KP8NNNC")):
+            self.assertEqual(self.fields(ref)["MPN"].value, mpn, ref)
 
     def test_passive_carries_fields(self):
         self.assertEqual(self.fields("R1")["MPN"].value, "0603WAF1003T5E")
