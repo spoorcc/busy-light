@@ -53,11 +53,12 @@ class SchematicFieldsTest(unittest.TestCase):
         self.assertEqual(f["LCSC"].value, "C2673506")
         self.assertTrue(f["MPN"].effects.hide)
 
-    def test_unlisted_part_has_empty_mpn_and_is_reported(self):
-        f = self.fields("J1")           # edge-mount variant of the USB-C connector not identified yet
-        self.assertEqual(f["MPN"].value, "")
-        row = {k: v.value for k, v in f.items()}
-        self.assertEqual(pcb_fabreview.missing_mpn([("J1", row)]), ["J1"])
+    def test_every_reference_has_an_mpn_and_the_missing_check_reports_an_empty_one(self):
+        # J1 (GCT USB4085-GF-A) and TVS1, TVS2 (PESD parts) are listed since 2026-11-09
+        for ref, mpn in (("J1", "USB4085-GF-A"), ("TVS1", "PESD5V0S1BA,115"), ("TVS2", "PESD3V3L1BA,115")):
+            self.assertEqual(self.fields(ref)["MPN"].value, mpn, ref)
+        row = {"MPN": "", "Manufacturer": "", "LCSC": ""}
+        self.assertEqual(pcb_fabreview.missing_mpn([("X1", row)]), ["X1"])
 
     def test_bias_analysed_capacitors_carry_fields(self):
         # HW-014/015: C2, C3, C5, C6 follow hw/sim/scripts/dc_bias_caps.py

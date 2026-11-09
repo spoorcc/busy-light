@@ -112,6 +112,12 @@ def hw015_high_with_protection() -> float:
     return hw015_high() + protection_total()
 
 
+def u6_vbus_break_even() -> float:
+    """Capacitance of the USBLC6-2P6 VBUS pin that would use up the whole room on VBUS_IC at 0 V (HW-015).
+    The datasheet gives no VBUS-pin value (claim USBLC6-2P6.c_vbus is source-missing); this is the sensitivity."""
+    return USB_MAX - hw015_high() - (protection_total() - PROTECTION["U6"])
+
+
 def start_up_bound() -> float:
     """HW-014 upper bound from bulk_cap_bounds with C6 at its high value (module not counted)."""
     return bcb.c_max(c_3v3=c_high(CAPS["C6"][1]))
@@ -126,6 +132,8 @@ def main() -> None:
           f"room {(USB_MAX - hw015_high())*u:.2f} uF")
     print(f"HW-015 protection parts bound {protection_total()*1e9:.2f} nF; VBUS_IC at 0 V with them "
           f"{hw015_high_with_protection()*u:.3f} uF (need <= {USB_MAX*u:.1f})")
+    print(f"HW-015 USBLC6-2P6 VBUS pin could be up to {u6_vbus_break_even()*u:.2f} uF before the 10 uF limit "
+          f"(assumed {PROTECTION['U6']*1e12:.0f} pF)")
     print(f"HW-014 C5 effective at 5.5 V: {hw014_ldo_input()*u:.2f} uF (need > {LDO_EFFECTIVE_MIN*u:.2f}); "
           f"break-even retention {break_even(CAPS['C5'][1], LDO_EFFECTIVE_MIN):.2f}")
     print(f"HW-014 populated sum at 0 V: {hw014_sum_at_0v()*u:.1f} uF; room for spares {spare_headroom()*u:.1f} uF")

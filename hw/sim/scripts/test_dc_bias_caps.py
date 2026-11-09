@@ -73,3 +73,9 @@ def test_protection_parts_fit_in_the_usb_maximum_with_three_orders_of_margin():
     assert d.protection_total() == pytest.approx(0.98e-9, rel=1e-6)
     assert d.hw015_high_with_protection() < d.USB_MAX
     assert (d.USB_MAX - d.hw015_high()) / d.protection_total() > 1000
+
+
+def test_u6_vbus_pin_capacitance_would_need_to_be_microfarads_to_matter():
+    # 10 uF - 6.33 uF - (0.98 nF - 35 pF) = 3.67 uF
+    assert d.u6_vbus_break_even() == pytest.approx(3.67e-6, rel=0.005)
+    assert d.u6_vbus_break_even() / d.PROTECTION["U6"] > 1e4

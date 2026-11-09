@@ -184,5 +184,5 @@ claims:
   parameter: Capacitance of the VBUS pin to GND
   category: electrical
   status: source-missing
-  notes: 'Searched DS4260 Rev 7 (tables 1 and 2, the capacitance figures 1 and 2 and the text) on 2026-11-09: only the I/O capacitances are given (Ci/o-GND 2.5 typ, 3.5 max pF); no value for the VBUS pin. ADR-0021 and the DC-bias analysis assume 35 pF.'
+  notes: 'Searched DS4260 Rev 7 (tables 1 and 2, the capacitance figures 1 and 2 and the text) on 2026-11-09: only the I/O capacitances are given (Ci/o-GND 2.5 typ, 3.5 max pF); no value for the VBUS pin. ADR-0021 and the DC-bias analysis assume 35 pF. Web searches of 2026-11-09 (ST product page, mirrors of the datasheet, application notes) found no VBUS-pin figure either. Sensitivity: the pin would need more than 3.6 uF to break the HW-015 limit of 10 uF (dc_bias_caps.py), so the gap does not change a result; TC-215 measures the real VBUS capacitance.'
 

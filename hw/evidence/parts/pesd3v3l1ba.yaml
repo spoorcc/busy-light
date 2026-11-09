@@ -1,0 +1,127 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for TVS2 (ESD diode on the BUTTON input, 3V3 GPIO): Nexperia PESD3V3L1BA,115 (owner choice 2026-11-09). See hw/evidence/README.md.
+# Source: the PESDxL1BA series data sheet Rev. 02 of 20 August 2009 (NXP era, the revision that LCSC hosts for C51450). A newer Nexperia revision may differ: compare before the BOM is frozen.
+schema_version: 1
+part:
+  key: PESD3V3L1BA
+  mpn: PESD3V3L1BA,115
+  manufacturer: Nexperia
+  description: Low capacitance bidirectional ESD protection diode, 3.3 V stand-off, 500 W 8/20 us, SOD323
+  selection: chosen
+  package:
+    code: SOD-323
+    name: SOD323
+    pin_count: 2
+  used_in:
+  - TVS2
+  schematic_symbol: Device:D_TVS
+documents:
+- id: pesdxl1ba-ds
+  title: PESDxL1BA series Low capacitance bidirectional ESD protection diodes in SOD323
+  doc_number: PESDXL1BA_SER_2, Rev. 02, 20 August 2009
+  revision_date: August 2009
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/dd64a91ba92941589511f0fd8c5c373a.pdf
+  file: pesdxl1ba-nxp-rev02-2009.pdf
+  sha256: ec2bf3070951e1d0a89cc22a4045029bbf06eb7b2501aaa9b93f4c4061ca9f50
+  pages: 15
+  retrieved_on: '2026-11-09'
+  notes: Copy hosted by LCSC, found through the product page of C51450. A series data sheet; each claim names the 3V3 type in its quote.
+defaults:
+  source_document: pesdxl1ba-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-09'
+  status: unverified
+  package: SOD-323
+claims:
+- id: PESD3V3L1BA.vrwm
+  parameter: Reverse stand-off voltage VRWM
+  category: electrical
+  max: 3.3
+  unit: V
+  notes: The 3V3 rail can sit slightly above 3.3 V (regulator tolerance); the leakage at VRWM is 2 uA maximum, small against the 10 kohm pull-up.
+  source: {page: 5, locator: Table 8 Characteristics, quote: 'PESD3V3L1BA - - 3.3 V'}
+- id: PESD3V3L1BA.irm
+  parameter: Reverse leakage current IRM at VRWM = 3.3 V
+  category: electrical
+  condition:
+    vrwm: {value: 3.3, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 0.09
+  max: 2
+  unit: uA
+  source: {page: 5, locator: Table 8 Characteristics, quote: 'PESD3V3L1BA VRWM = 3.3 V - 0.09 2 µA'}
+- id: PESD3V3L1BA.vbr
+  parameter: Breakdown voltage V(BR) at IR = 5 mA
+  category: electrical
+  condition:
+    ir: {value: 5, unit: mA}
+    temperature: {value: 25, unit: degC}
+  min: 5.8
+  typ: 6.4
+  max: 6.9
+  unit: V
+  source: {page: 5, locator: Table 8 Characteristics, quote: 'PESD3V3L1BA 5.8 6.4 6.9 V'}
+- id: PESD3V3L1BA.cd
+  parameter: Diode capacitance Cd
+  category: electrical
+  condition:
+    frequency: {value: 1, unit: MHz}
+    vr: {value: 0, unit: V}
+    temperature: {value: 25, unit: degC}
+  typ: 101
+  unit: pF
+  notes: With the 1 kohm series resistor R12 and 101 pF the time constant is about 0.1 us, far below the debounce time.
+  source: {page: 5, locator: Table 8 Characteristics, quote: 'PESD3V3L1BA - 101 - pF'}
+- id: PESD3V3L1BA.vcl.ipp_1a
+  parameter: Clamping voltage V(CL)R at Ipp = 1 A, 8/20 us
+  category: electrical
+  condition:
+    ipp: {value: 1, unit: A}
+    pulse: 8/20 us
+    temperature: {value: 25, unit: degC}
+  max: 8
+  unit: V
+  source: {page: 5, locator: Table 8 Characteristics, quote: 'Ipp = 1 A - - 8 V'}
+- id: PESD3V3L1BA.vcl.ipp_18a
+  parameter: Clamping voltage V(CL)R at Ipp = 18 A, 8/20 us
+  category: electrical
+  condition:
+    ipp: {value: 18, unit: A}
+    pulse: 8/20 us
+    temperature: {value: 25, unit: degC}
+  max: 26
+  unit: V
+  notes: The GPIO absolute maximum is not checked against this clamp here; the series resistor R12 limits the current into the pin during a pulse.
+  source: {page: 5, locator: Table 8 Characteristics, quote: 'Ipp = 18 A - - 26 V'}
+- id: PESD3V3L1BA.rdif
+  parameter: Differential resistance rdif at IR = 1 mA
+  category: electrical
+  max: 400
+  unit: ohm
+  source: {page: 6, locator: Table 8 Characteristics continued, quote: 'PESD3V3L1BA - - 400 Ω'}
+- id: PESD3V3L1BA.ppp
+  parameter: Peak pulse power Ppp, 8/20 us
+  category: abs_max
+  max: 500
+  unit: W
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'PESD3V3L1BA - 500 W'}
+- id: PESD3V3L1BA.ipp
+  parameter: Peak pulse current Ipp, 8/20 us
+  category: abs_max
+  max: 18
+  unit: A
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'PESD3V3L1BA - 18 A'}
+- id: PESD3V3L1BA.tj
+  parameter: Junction temperature Tj
+  category: abs_max
+  max: 150
+  unit: degC
+  source: {page: 3, locator: Table 5 Limiting values, quote: 'Tj junction temperature - 150 °C'}
+- id: PESD3V3L1BA.esd_contact
+  parameter: Electrostatic discharge capability, IEC 61000-4-2 contact discharge
+  category: abs_max
+  max: 30
+  unit: kV
+  source: {page: 3, locator: Table 6 ESD maximum ratings, quote: 'PESD3V3L1BA - 30 kV'}

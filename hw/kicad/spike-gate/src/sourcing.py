@@ -21,11 +21,8 @@ SOURCING = {
 # manufacturers' ordering
 # tables unless stated). Orderable names and LCSC numbers must be re-checked against the shop at
 # order time
-# (HW-008, spike 7.4). Not listed on purpose: ESP32-C3-MINI-1 (flash variant -N4/-H4 not
-# decided), J1 (GCT
-# USB4085-GF-A is a through-hole part; the footprint is edge mount), TVS1/TVS2 (no part chosen),
-# C2 to C6 (tbd),
-# resistors and capacitors (no manufacturer chosen).
+# (HW-008, spike 7.4). Not listed on purpose: ESP32-C3-MINI-1 variant entries are below; J1, TVS1, TVS2 are set
+# at the end of this file (2026-11-09).
 _DK = "distributor listing (DigiKey/LCSC/RS), web lookup 2026-11-08"
 SOURCING.update(
     {
@@ -194,6 +191,27 @@ SOURCING["TVS"] = {
     "Evidence": ("owner choice 2026-11-09 (surge option S1); LCSC/JLCPCB listing and datasheet text via web search "
                  "2026-11-09: bidirectional 5 V stand-off, SOD-323, Cd 35 pF typ at 0 V, clamp 14 V max at 12 A; "
                  "datasheet read 2026-11-09 (hw/evidence/parts/pesd5v0s1ba.yaml, unverified claims); does NOT keep the 6 V pins below 6 V on its own"),
+}
+
+# J1: USB4085-GF-A identified 2026-11-09. There is no edge-mount variant: the GCT drawing (rev B) lists one part,
+# "Dip Type, PCB Top Mount", and the project footprint has its pad pattern; the edge position is a placement choice.
+SOURCING["USB-C receptacle"] = {
+    "MPN": "USB4085-GF-A",
+    "Manufacturer": "Global Connector Technology (GCT)",
+    "LCSC": "C7095263",
+    "Evidence": ("GCT drawing USB4085 rev B read 2026-11-09 (hw/evidence/parts/usb-c-receptacle.yaml, unverified claims); "
+                 "LCSC listing via web search, one snapshot showed 0 stock, check live stock; through-hole part, "
+                 "hand or selective soldering at assembly"),
+}
+
+# TVS2 (button input, 3V3 GPIO): owner choice 2026-11-09 between PESD3V3L1BA and a reuse of the TVS1 part.
+SOURCING["ESD diode"] = {
+    "MPN": "PESD3V3L1BA,115",
+    "Manufacturer": "Nexperia",
+    "LCSC": "C51450",
+    "Evidence": ("owner choice 2026-11-09; data sheet PESDxL1BA series Rev. 02 (2009, NXP era) read 2026-11-09 "
+                 "(hw/evidence/parts/pesd3v3l1ba.yaml, unverified claims); LCSC listing via web search, stock and "
+                 "Basic/Extended status not read; a newer Nexperia revision may differ"),
 }
 
 _DCB = ("LCSC/JLCPCB listing, web lookup 2026-11-09; X5R +-10 %. DC-bias curve read from the "
