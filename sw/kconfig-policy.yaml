@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Kconfig security policy for product firmware, read by scripts/check_kconfig_policy.py.
+# Rule catalogue: docs/regulatory/automated-checks.md (SWC-001, SWC-002).
+#
+# forbidden (SWC-001, gate): options that must never be 'y' in a product configuration. Each one
+#   opens an interface or weakens a protection that CRA Annex I Part I asks to limit (verify clause letters).
+# required (SWC-002, report until a product configuration exists): hardening options that the
+#   product build is expected to set. They are reported, not enforced, while sw/app is the spike
+#   gate firmware of plan 07; the owner decides when SWC-002 becomes a gate (ADR-0022).
+#
+# A config file is in scope when it matches 'product_configs' and not 'exclude'. The built
+# .config (build/zephyr/.config) is checked with --dotconfig, so options that a default or a
+# board file switches on are caught too.
+product_configs:
+  - sw/app/prj.conf
+  - sw/app/boards/*.conf
+  - sw/app/*.conf
+exclude:
+  - sw/app/tests/**
+  - "**/*debug*.conf"
+  - "**/*test*.conf"
+forbidden:
+  CONFIG_SHELL: "interactive shell: an unauthenticated command interface (attack surface, CRA Annex I Part I (2)(j))"
+  CONFIG_NET_SHELL: "network shell commands (attack surface)"
+  CONFIG_SHELL_BACKEND_TELNET: "telnet shell: unauthenticated, unencrypted remote access"
+  CONFIG_SHELL_BACKEND_MQTT: "remote shell over MQTT"
+  CONFIG_GDBSTUB: "debugger stub: full memory access over a serial line"
+  CONFIG_TEST_RANDOM_GENERATOR: "non-cryptographic random numbers (not for keys, nonces or session IDs)"
+  CONFIG_TIMER_RANDOM_GENERATOR: "non-cryptographic random numbers"
+  CONFIG_ZTEST: "test framework in a product image"
+  CONFIG_LOG_BACKEND_NET: "logs leave the device (applicability item 10: no logs leave the device)"
+  CONFIG_DEBUG_OPTIMIZATIONS: "debug build: optimisations off, asserts and symbols intended for development"
+  CONFIG_MCUMGR_TRANSPORT_UDP: "unauthenticated image management over the network (updates go through SYS-029 path only)"
+required:
+  CONFIG_HW_STACK_PROTECTION: "stack overflow detection by hardware (CRA Annex I Part I (2)(k) exploitation mitigation)"
+  CONFIG_STACK_CANARIES: "stack smashing protection (exploitation mitigation)"
+  CONFIG_FORTIFY_SOURCE_COMPILE_TIME: "compile-time buffer overflow checks of libc calls"
+  CONFIG_WATCHDOG: "hardware watchdog (SW-010, SYS-027 fault recovery)"
+  CONFIG_BOOTLOADER_MCUBOOT: "signed images and rollback (SYS-029, ADR-0007)"

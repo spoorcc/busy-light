@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Boards checked by scripts/check_hw_compliance.py (rule catalogue: docs/regulatory/automated-checks.md).
+# Net and reference names are those of the stored board files. A waiver needs a rule, board, item, a
+# reason and a ref to a DEV-, RISK- or ADR- record; a waiver that matches no finding fails the run.
+boards:
+  - name: spike-gate
+    pcb: hw/kicad/spike-gate/board/busy_light_spike.kicad_pcb
+    sch: hw/kicad/spike-gate/board/busy_light_spike.kicad_sch
+    # Parts a user or a cable can touch: the USB-C receptacle and the push button (through the housing).
+    external_interfaces: [J1, SW1]
+    # Parts whose function is an ESD or surge clamp (USBLC6-2P6 array, the two TVS diodes).
+    protection_refs: [U6, TVS1, TVS2]
+    exempt_nets: [GND]
+    protection_max_distance_mm: 10
+    power_nets: [VBUS_IC, +5V, +3V3, GND]
+    access_nets:
+      reset: Net-(U9-EN)
+      boot: Net-(U9-GPIO9_(boot))
+    board_id_pattern: '(?i)busy.?light.*rev'
+    # Nets that give debug, programming or flash access to the processor (HWC-009 inventory).
+    debug_nets: [Net-(U9-EN), Net-(U9-GPIO9_(boot)), /USB_DP, /USB_DN, Net-(U9-GPIO20_U0RXD), Net-(U9-GPIO21_U0TXD)]
+    debug_inventory_skip: [U9]
+waivers:
+  # Spike board only (plan 06, not a product board). DEV-007 is Proposed; the owner approves or rejects it.
+  - {rule: HWC-001, board: spike-gate, item: "J1:/CC1", ref: DEV-007,
+     reason: "No CC-line ESD clamp; the CC-pin ESD requirement is still to be written (plan 07 condition)."}
+  - {rule: HWC-001, board: spike-gate, item: "J1:/CC2", ref: DEV-007,
+     reason: "No CC-line ESD clamp; the CC-pin ESD requirement is still to be written (plan 07 condition)."}
+  - {rule: HWC-003, board: spike-gate, item: VBUS_IC, ref: DEV-007,
+     reason: "HW-006 lists 5 V, 3.3 V and GND only; design-hw.md 1 asks for every rail and TC-210 probes VBUS_IC."}
+  - {rule: HWC-005, board: spike-gate, item: silkscreen, ref: DEV-007,
+     reason: "The generated spike board has no board name or revision text."}
+  - {rule: HWC-006, board: spike-gate, item: J1, ref: DEV-007,
+     reason: "MPN is in sourcing.py (2026-11-09); the stored schematic was not regenerated."}
+  - {rule: HWC-006, board: spike-gate, item: TVS1, ref: DEV-007,
+     reason: "MPN is in sourcing.py (2026-11-09); the stored schematic was not regenerated."}
+  - {rule: HWC-006, board: spike-gate, item: TVS2, ref: DEV-007,
+     reason: "MPN is in sourcing.py (2026-11-09); the stored schematic was not regenerated."}
+  - {rule: HWC-008, board: spike-gate, item: TUSB321RWBR, ref: DEV-007,
+     reason: "Owner choice of the TUSB321 (ADR-0016); NRND status is from a shop listing and not checked at TI."}

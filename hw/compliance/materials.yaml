@@ -1,0 +1,198 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Materials register: RoHS, REACH and lifecycle status per manufacturer part number (MPN).
+# Read by scripts/check_hw_compliance.py (rules HWC-007, HWC-008). Seeded 2026-11-10 from the spike schematic
+# and hw/kicad/spike-gate/src/sourcing.py.
+#
+# rohs / reach values:
+#   unknown          no document in hand (the seed value: nothing has been collected yet)
+#   distributor-claim a shop or distributor page says compliant; not a manufacturer declaration
+#   declared         a manufacturer declaration (RoHS: EU 2011/65 + 2015/863 Annex II; REACH: Art. 33 SVHC
+#                    statement against a named Candidate List date) is filed under
+#                    docs/regulatory/technical-file/07-supplier-declarations/ with its SHA-256 in 'evidence'
+#   exempt-declared  as declared, with a RoHS Annex III/IV exemption named in 'exemption'
+# lifecycle: active | nrnd | eol | obsolete | unknown, with 'source' and 'checked' (date).
+# EN IEC 63000 accepts supplier declarations as technical documentation; it asks for a risk-based
+# assessment of the supplier (verify against the standard text). Only 'declared' counts as evidence.
+parts:
+  "0603WAF1001T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "0603WAF1002T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "0603WAF1003T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "0603WAF1503T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "0603WAF3300T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "0603WAF4700T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "0603WAF8873T5E":
+    manufacturer: "UNI-ROYAL"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "BZX84-C5V1,215":
+    manufacturer: "Nexperia"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "CL10A105KB8NNNC":
+    manufacturer: "Samsung Electro-Mechanics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "CL10A106KP8NNNC":
+    manufacturer: "Samsung Electro-Mechanics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "CL10A225KO8NNNC":
+    manufacturer: "Samsung Electro-Mechanics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "CL10A475KO8NNNC":
+    manufacturer: "Samsung Electro-Mechanics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "CL10B104KB8NNNC":
+    manufacturer: "Samsung Electro-Mechanics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "CL21A106KAYNNNE":
+    manufacturer: "Samsung Electro-Mechanics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "ESP32-C3-MINI-1-N4":
+    manufacturer: "Espressif"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "GRM31C5C1H104JA01L":
+    manufacturer: "Murata"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "PESD3V3L1BA,115":
+    manufacturer: "Nexperia"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "PESD5V0S1BA,115":
+    manufacturer: "Nexperia"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "RT0603BRE0727K4L":
+    manufacturer: "Yageo"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "SN74AHCT1G125DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "SN74LVC1G02DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "SN74LVC1G04DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "SN74LVC1G08DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "SN74LVC1G11DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TD03G3010BT":
+    manufacturer: "FH (Guangdong Fenghua)"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TD03G4702BT":
+    manufacturer: "FH (Guangdong Fenghua)"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TD03G5622BT":
+    manufacturer: "FH (Guangdong Fenghua)"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TL3342F160QG":
+    manufacturer: "E-Switch"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TLV75733PDBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TMUX1101DCKR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TPS2553DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TPS3840DL40DBVR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "TUSB321RWBR":
+    manufacturer: "Texas Instruments"
+    rohs: unknown
+    reach: unknown
+    lifecycle: nrnd
+    source: "LCSC listing marks it not recommended for new designs (spike-fab-review.md, 2026-11-08); not checked at TI"
+    checked: "2026-11-08"
+  "USB4085-GF-A":
+    manufacturer: "GCT"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "USBLC6-2P6":
+    manufacturer: "STMicroelectronics"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
+  "WS2812B-2020":
+    manufacturer: "Worldsemi"
+    rohs: unknown
+    reach: unknown
+    lifecycle: unknown
