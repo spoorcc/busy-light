@@ -20,6 +20,13 @@ boards:
     # Nets that give debug, programming or flash access to the processor (HWC-009 inventory).
     debug_nets: [Net-(U9-EN), Net-(U9-GPIO9_(boot)), /USB_DP, /USB_DN, Net-(U9-GPIO20_U0RXD), Net-(U9-GPIO21_U0TXD)]
     debug_inventory_skip: [U9]
+    # HWC-010: design current per supply net (SYS-020 top step 1577 mA on the USB side; HW-010) and the
+    # copper of the JLCPCB 4-layer stack of ADR-0020 (1 oz outer, 0.5 oz inner; tolerance not verified).
+    track_current:
+      temp_rise_k: 10
+      outer_copper_um: 35
+      inner_copper_um: 17.5
+      nets: {VBUS_IC: 1.6, "+5V": 1.6}
 waivers:
   # Spike board only (plan 06, not a product board). DEV-007 is Proposed; the owner approves or rejects it.
   - {rule: HWC-001, board: spike-gate, item: "J1:/CC1", ref: DEV-007,

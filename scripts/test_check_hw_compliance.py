@@ -199,3 +199,29 @@ def test_spike_board_finds_the_known_gaps() -> None:
     # The button is protected through R12 and TVS2; VBUS and the data lines through TVS1 and U6.
     assert not any(r == "HWC-001" and i.startswith("SW1") for r, i in found)
     assert ("HWC-001", "J1:VBUS_IC") not in found
+
+
+def test_ipc2221_width_matches_hand_calculation() -> None:
+    # 1.5 A, 10 K, 35 um outer: A = (1.5 / (0.048 * 10**0.44))**(1/0.725) = 28.5 mil^2 -> 0.53 mm
+    assert hwc.ipc2221_min_width_mm(1.5, 10, 35, outer=True) == pytest.approx(0.53, abs=0.01)
+    inner = hwc.ipc2221_min_width_mm(1.5, 10, 17.5, outer=False)
+    assert inner > 5 * hwc.ipc2221_min_width_mm(1.5, 10, 35, outer=True) / 2
+
+
+def test_track_current_reports_narrow_segments_per_layer_group(tmp_path: Path) -> None:
+    seg = '(segment (start 0 0) (end 1 0) (width {w}) (layer "{layer}") (net "{net}"))'
+    text = (
+        "(kicad_pcb "
+        + seg.format(w=1.0, layer="F.Cu", net="+5V")
+        + seg.format(w=0.2, layer="B.Cu", net="+5V")
+        + seg.format(w=0.2, layer="F.Cu", net="SIG")
+        + seg.format(w=5.0, layer="In1.Cu", net="+5V")
+        + ")"
+    )
+    b = make_board(tmp_path, text)
+    assert len(b.segments) == 4  # noqa: PLR2004
+    cfg = {"track_current": {"nets": {"+5V": 1.5}, "inner_copper_um": 17.5}}
+    found = hwc.check_track_current("t", b, cfg)
+    assert [(f.rule, f.item) for f in found] == [("HWC-010", "+5V:outer")]
+    assert "1 of 2" in found[0].message
+    assert hwc.check_track_current("t", b, {}) == []

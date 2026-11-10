@@ -111,8 +111,62 @@ RULES: dict[str, Rule] = {
             "CRA Annex I Part I (2)(j) attack surface (verify); EN 18031-1 (verify); "
             "docs/standards/design-hw.md 4a",
         ),
+        Rule(
+            "HWC-010",
+            "Tracks of a supply net are wide enough for its current (IPC-2221 chart formula)",
+            "report",
+            "RED Art. 3(1)(a) via EN IEC 62368-1 (heating under normal and fault current, verify); "
+            "IPC-2221; docs/standards/design-hw.md 3; HW-003",
+        ),
     )
 }
+
+MIL_PER_MM = 39.3701
+IPC2221_B, IPC2221_C = 0.44, 0.725
+
+
+def ipc2221_min_width_mm(amps: float, rise_k: float, copper_um: float, outer: bool) -> float:
+    """Minimum track width for a current and temperature rise (IPC-2221: I = k dT^b A^c).
+
+    k is 0.048 for outer and 0.024 for inner layers, A in square mil. The formula is a design
+    chart, conservative for short tracks near copper areas; it is not a thermal simulation.
+    """
+    k = 0.048 if outer else 0.024
+    area_mil2 = (amps / (k * rise_k**IPC2221_B)) ** (1 / IPC2221_C)
+    thickness_mil = copper_um / 1000 * MIL_PER_MM
+    return float(area_mil2 / thickness_mil / MIL_PER_MM)
+
+
+def check_track_current(name: str, board: kicad_sexp.Board, cfg: dict[str, Any]) -> list[Finding]:
+    tc = cfg.get("track_current") or {}
+    rise = float(tc.get("temp_rise_k", 10))
+    outer_layers = set(tc.get("outer_layers", ["F.Cu", "B.Cu"]))
+    out: list[Finding] = []
+    for net, amps in (tc.get("nets") or {}).items():
+        for outer in (True, False):
+            widths = [
+                s.width
+                for s in board.segments
+                if s.net == net and (s.layer in outer_layers) == outer
+            ]
+            if not widths:
+                continue
+            copper = float(tc.get("outer_copper_um" if outer else "inner_copper_um", 35))
+            need = ipc2221_min_width_mm(float(amps), rise, copper, outer)
+            narrow = [w for w in widths if w < need]
+            if narrow:
+                where = "outer" if outer else "inner"
+                out.append(
+                    Finding(
+                        "HWC-010",
+                        name,
+                        f"{net}:{where}",
+                        f"{net}: {len(narrow)} of {len(widths)} {where}-layer segments narrower "
+                        f"than {need:.2f} mm for {amps} A at {rise:g} K rise "
+                        f"(narrowest {min(narrow):.2f} mm; copper areas are not counted)",
+                    )
+                )
+    return out
 
 
 @dataclass
@@ -283,6 +337,7 @@ def check_board(cfg: dict[str, Any], materials: dict[str, dict[str, Any]]) -> li
     if cfg.get("sch"):
         findings += check_bom(name, kicad_sexp.read_schematic(ROOT / cfg["sch"]), materials)
     findings += debug_inventory(name, board, cfg)
+    findings += check_track_current(name, board, cfg)
     return findings
 
 

@@ -92,9 +92,17 @@ class Text:
 
 
 @dataclass
+class Segment:
+    net: str
+    width: float
+    layer: str
+
+
+@dataclass
 class Board:
     footprints: list[Footprint]
     texts: list[Text]
+    segments: list[Segment] = field(default_factory=list)
 
     def by_ref(self) -> dict[str, Footprint]:
         return {f.ref: f for f in self.footprints}
@@ -132,7 +140,11 @@ def read_board(path: Path) -> Board:
             )
         )
     texts = [Text(atom(t, 1), atom(child(t, "layer"))) for t in children(root, "gr_text")]
-    return Board(fps, texts)
+    segments = [
+        Segment(_pad_net(s), float(atom(child(s, "width"), 1, "0")), atom(child(s, "layer")))
+        for s in children(root, "segment")
+    ]
+    return Board(fps, texts, segments)
 
 
 @dataclass
