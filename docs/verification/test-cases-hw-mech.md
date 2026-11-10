@@ -270,6 +270,18 @@
 - **Evidence:** spike board on 2026-11-10: no silkscreen text (waived, DEV-007)
 
 
+### TC-221 Flammability class of the board material
+
+- **Verifies:** HW-021
+- **Level:** Inspection
+- **Preconditions / setup:** fabrication notes and the fabricator's material statement for the board revision.
+- **Procedure:**
+  1. Read the laminate name and class in the fabrication notes.
+  2. Compare them with the fabricator's confirmation for the lot.
+- **Expected result / pass criteria:** see acceptance criteria of HW-021
+- **Automated:** no
+- **Evidence:** none yet (no fabrication notes exist; `hw/fabrication/` is empty)
+
 ### TC-309 PCB retention and reopening
 
 - **Verifies:** MECH-009
@@ -278,3 +290,29 @@
 - **Expected result / pass criteria:** see acceptance criteria of MECH-009
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-310 Flammability class of the housing material
+
+- **Verifies:** MECH-010
+- **Level:** Inspection
+- **Preconditions / setup:** drawing with the material named; the maker's data sheet or yellow card; printed coupons if the part is printed.
+- **Procedure:**
+  1. Read the class and the rated thickness in the maker's document.
+  2. Compare the rated thickness with the thinnest housing wall.
+  3. For a printed part, run the coupon flame test and record the result.
+- **Expected result / pass criteria:** see acceptance criteria of MECH-010
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-311 Strength of a mounting accessory
+
+- **Verifies:** MECH-011
+- **Level:** Prototype
+- **Preconditions / setup:** [3] printed housings and accessories; a force gauge or a weight; the heat soak of MECH-008.
+- **Procedure:**
+  1. Lock the unit to the accessory and fix the accessory as in use.
+  2. Apply the force for [1] min in the direction of the fall.
+  3. Repeat after the heat soak.
+- **Expected result / pass criteria:** see acceptance criteria of MECH-011
+- **Automated:** no
+- **Evidence:** none yet

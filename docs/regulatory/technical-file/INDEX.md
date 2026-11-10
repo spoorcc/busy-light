@@ -7,15 +7,15 @@ after placing on the market *(verify per act; CRA: longer if support period is l
 
 | # | Content (typical across CRA Annex VII, RED/LVD/EMCD, RoHS) | Source in repo | Status |
 |---|------------------------------------------------------------|----------------|--------|
-| 01 | General description: product, intended use, variants, versions, photos, markets | `01-general/` | Open |
-| 01 | Applicability assessment, conformity route, responsible economic operator | `../applicability.md` | Open |
+| 01 | General description: product, intended use, variants, versions, photos, markets | `01-general/`; `01-general/product-description.md` (Draft; no model designation, no photos) | Draft |
+| 01 | Applicability assessment, conformity route, responsible economic operator | `../applicability.md` (RAA-001 v0.3, Draft; manufacturer not decided) | Draft |
 | 02 | Design & manufacturing drawings, schematics, PCB layout, BOM, assembly drawings | `hw/fabrication/<rev>/`, `mech/exports/<rev>/` | Open |
 | 02 | Architecture, interface and software design descriptions; ADRs | `docs/architecture/`, `docs/decisions/` | Open |
 | 02 | Requirements and traceability (incl. regulatory requirements) | `docs/requirements/`, `../compliance-matrix.md`; automated checks `../automated-checks.md` (DOC-001 keeps the matrix consistent) | Partial |
-| 03 | Risk assessment: safety/hazards (LVD/GPSR), EMC, **cybersecurity risk assessment (CRA)** | `docs/risk/` | Open |
+| 03 | Risk assessment: safety/hazards (LVD/GPSR), EMC, **cybersecurity risk assessment (CRA)** | `docs/risk/`; `03-risk-and-safety/risk-assessment.md` (Draft v0.1: safety, EMC, radio, substances; cybersecurity summary only) | Draft |
 | 03 | Photobiological (EN 62471), thermal, fire/flammability, mechanical safety analyses | `03-risk-and-safety/` | Open |
 | 04 | List of standards/specifications applied (with versions, full/partial application) | `04-standards-and-testing/standards-list.md` (Draft, candidate set 2026-11-10) | Draft |
-| 04 | Test reports: EMC, safety, radio, EMF, environmental; pre-compliance and accredited | `04-standards-and-testing/`, `docs/verification/reports/` | Open |
+| 04 | Test reports: EMC, safety, radio, EMF, environmental; pre-compliance and accredited | `04-standards-and-testing/`, `docs/verification/reports/`; plan: `04-standards-and-testing/conformity-test-plan.md` (Draft; no test run) | Open |
 | 05 | **SBOM** (machine-readable, e.g. SPDX/CycloneDX) per release | `05-cybersecurity/sbom/`; generated in CI by `west spdx` (artefact `sw-static`, rule SWC-009) | Partial |
 | 05 | Vulnerability handling process + coordinated disclosure policy + contact; `security.txt` | `05-cybersecurity/` (draft: `05-cybersecurity/vulnerability-handling.md`) | Open |
 | 05 | Security update mechanism & support period; secure-by-default configuration; update test evidence | `05-cybersecurity/` (key management: `05-cybersecurity/key-management.md`, Draft) | Open |

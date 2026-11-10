@@ -123,3 +123,29 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
+
+### MECH-010 Flammability class of the housing material for units placed on the market
+
+- **Statement:** The housing parts of every unit placed on the market shall be made of a material whose flammability class, at the wall thickness used, meets what the fire classification of SYS-050 asks of the housing.
+- **Rationale:** RISK-047. If any circuit is class PS2 and the housing is its fire enclosure, EN IEC 62368-1 asks for V-1 or better for the enclosure material *(verify clause 6.4.8 and Annex S)*; if every circuit is PS1, no fire enclosure is needed and HB is the working minimum. ADR-0011 accepts FDM-printed PETG for the prototype only; common PETG filament has no flammability rating, and a rating of the raw material does not automatically hold for a printed part with layers and infill. This requirement can therefore change the material or the process for sold units, and needs its own ADR.
+- **Parent:** SYS-050
+- **Acceptance criteria:** The drawing names the material, its maker and grade; the maker's data sheet or a UL yellow card states the class at a thickness at or below the thinnest housing wall; for a printed part, a flame test of [5] printed coupons at the product wall thickness and print settings to IEC 60695-11-10 confirms the class. The 10 internal prototypes are out of scope.
+- **Verification method:** Inspection
+- **Verified by:** TC-310
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN IEC 62368-1 clause 6.4 and Annex S; IEC 60695-11-10 *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### MECH-011 Strength of a wall, ceiling or rack mounting accessory
+
+- **Statement:** An accessory that holds the unit on a wall, on a ceiling or in a rack shall hold a force of [3] times the weight of the unit with its cable, and at least [50] N, applied for [1] min in the direction of the fall, without release or damage.
+- **Rationale:** RISK-039. EN IEC 62368-1 clause 8.7 tests the mounting means of equipment that is mounted on a wall or ceiling *(verify the force values and whether the clause applies to a unit of this mass)*. MECH-008 leaves its pull-off force [X] N open; this requirement gives the safety-driven lower bound for the accessories that carry the unit above a person or a surface.
+- **Parent:** NEED-022
+- **Acceptance criteria:** On [3] printed accessories and housings, the force is applied to the locked unit for [1] min before and after the heat soak of MECH-008; the unit stays locked and no part cracks. A desk stand is out of scope.
+- **Verification method:** Test
+- **Verified by:** TC-311
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN IEC 62368-1 clause 8.7 *(verify)*
+- **Priority:** Should
+- **Status:** Draft

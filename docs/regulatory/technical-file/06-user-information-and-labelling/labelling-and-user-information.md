@@ -42,6 +42,12 @@ Each row is one item to show on the unit, the packaging or in the user informati
 | M12 | Supply: use a USB-C source that complies with EN IEC 62368-1 (or its successor); input rating 5 V, maximum current | EN IEC 62368-1 instructions *(verify)*; SYS-020 |
 | M13 | Photobiological safety statement for the LED ring (if the assessment gives a risk group above exempt) | EN 62471 |
 | M14 | Explanation of the certificate pin (ADR-0008) | applicability consequence 13 (not legal) |
+| M15 | Not a toy; keep away from small children; small parts | GPSR Art. 9(7); risk assessment I3 |
+| M16 | Not for safety signalling; the indication can be late or wrong | risk assessment I4 |
+| M17 | Do not cover; indoor, dry use; highest ambient temperature | EN IEC 62368-1 instructions *(verify)*; risk assessment I2 |
+| M18 | Flashing light notice and how to lower the brightness, if the assessment asks for it | risk assessment I5 |
+| M19 | Mounting: only the supplied accessories and their limits | EN IEC 62368-1 clause 8.7 *(verify)*; risk assessment I6 |
+| M20 | Minimum distance to the body, only if the exposure assessment needs one | SYS-052 |
 
 ## 4. Open items for the owner
 1. Manufacturer legal person and postal address (deferred by the owner; needed before the first supply to anyone).

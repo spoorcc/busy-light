@@ -512,3 +512,91 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Verified by:** TC-217
 - **Status:** Open
 
+
+### RISK-047 Fire from a board fault fed by the USB source
+
+- **Hazard / failure mode:** A part on the board overheats and ignites the board or the printed housing
+- **Cause:** Short circuit of a capacitor, TVS diode, LED or semiconductor on VBUS_IC or +5V; the current-limit switch fails short; the source delivers 15 W or more; the housing material has no flammability rating
+- **Effect:** Fire on a desk or wall, injury, property damage
+- **Severity (1-5):** 5  **Likelihood (1-5):** 2  **Initial risk:** 10
+- **Mitigated by:** SYS-050, HW-010, HW-021, MECH-010, HW-013
+- **Residual risk (after mitigation):** Not assessed until the circuit classification and the single-fault tests exist. The circuits before the current-limit switch have no limit of their own. See `docs/regulatory/technical-file/03-risk-and-safety/risk-assessment.md` hazard H-02.
+- **Verified by:** TC-050, TC-221, TC-310
+- **Status:** Open
+
+### RISK-048 Burn from a hot accessible surface
+
+- **Hazard / failure mode:** The housing, the button or the cable plug is hotter than a person can touch safely
+- **Cause:** LEDs at the top current step in a hot room; hung firmware holds the top step (RISK-029); small closed housing
+- **Effect:** Minor burn, a startled user drops or pulls the unit
+- **Severity (1-5):** 2  **Likelihood (1-5):** 2  **Initial risk:** 4
+- **Mitigated by:** SYS-051, HW-013, MECH-005, SW-010
+- **Residual risk (after mitigation):** Low if MECH-005 holds (about [50] degC at the wall); not measured. Hazard H-04 of the risk assessment.
+- **Verified by:** TC-051, TC-213
+- **Status:** Open
+
+### RISK-049 Electrostatic discharge at the USB-C port or the button damages or upsets the unit
+
+- **Hazard / failure mode:** A discharge from a person or a cable reaches an unprotected pin
+- **Cause:** No clamp on the CC1 and CC2 lines of the spike board (rule HWC-001); clamp for D+ and D- is 11.2 mm from the connector; thin printed housing near the button
+- **Effect:** CC detection IC damaged (unit takes the wrong current step or stops), reset, latch-up with heating; failed immunity test at the laboratory
+- **Severity (1-5):** 3  **Likelihood (1-5):** 4  **Initial risk:** 12
+- **Mitigated by:** HW-018, HW-003, SYS-049
+- **Residual risk (after mitigation):** Open until the CC clamp is chosen and the ESD test is run. Hazard E-03 of the risk assessment.
+- **Verified by:** TC-218, TC-049
+- **Status:** Open
+
+### RISK-050 Over-voltage from a faulty or non-compliant USB source or cable
+
+- **Hazard / failure mode:** VBUS carries more than 5.5 V (a Power Delivery source that stays at 9 V to 20 V, a faulty charger, a wrong cable)
+- **Cause:** The device does not negotiate Power Delivery, but a defective source or adapter cable can still apply a higher voltage; parts on VBUS_IC are rated 6 V to 7 V (RISK-046)
+- **Effect:** TVS1 conducts continuously and overheats, parts fail short, possible fire (RISK-047)
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** SYS-050
+- **Residual risk (after mitigation):** No design measure exists: there is no over-voltage cut-off and no fuse. SYS-050 only makes the outcome visible in the fault tests. A design decision is needed (input over-voltage protection, fuse, or a stated limit with evidence that the failure is safe). Hazard H-03 of the risk assessment.
+- **Verified by:** TC-050
+- **Status:** Open
+
+### RISK-051 Restricted substance or undeclared substance of very high concern in a part
+
+- **Hazard / failure mode:** A part or the housing material contains a RoHS-restricted substance above the limit, or an SVHC above 0.1 % that is not communicated
+- **Cause:** Parts chosen from a shop listing without a manufacturer declaration; a second source with a different material; filament with unknown additives
+- **Effect:** Units cannot be placed on the market or must be withdrawn; duty to inform customers not met
+- **Severity (1-5):** 3  **Likelihood (1-5):** 2  **Initial risk:** 6
+- **Mitigated by:** HW-019, HW-008
+- **Residual risk (after mitigation):** Open: 0 of 33 part numbers have a declaration on file (`hw/compliance/materials.yaml`); the housing material is not in the register.
+- **Verified by:** TC-219
+- **Status:** Open
+
+### RISK-052 Flashing light pattern triggers a seizure or dazzles
+
+- **Hazard / failure mode:** A status or level pattern flashes a large part of the ring at 3 Hz or faster, close to the user's eyes
+- **Cause:** A built-in pattern, a user mapping or a fault that toggles frames quickly; saturated red; a dark room
+- **Effect:** Seizure in a person with photosensitive epilepsy; discomfort or distraction for others
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** SYS-053, SYS-018
+- **Residual risk (after mitigation):** Open until the pattern engine enforces the limit. Hazard H-07 of the risk assessment.
+- **Verified by:** TC-053
+- **Status:** Open
+
+### RISK-053 Small part comes loose and is swallowed by a child
+
+- **Hazard / failure mode:** The lid, a bayonet accessory or a broken printed lug separates from the unit within reach of a small child
+- **Cause:** Printed snap hooks or lugs break or creep (RISK-039); the housing is opened and not closed; the product looks like a toy (small, round, coloured light)
+- **Effect:** Choking
+- **Severity (1-5):** 5  **Likelihood (1-5):** 1  **Initial risk:** 5
+- **Mitigated by:** MECH-009, MECH-008, SYS-048
+- **Residual risk (after mitigation):** The product is not a toy and is not marketed to children; the user information warns to keep it away from small children. A small-parts check of each detachable part against the small-parts cylinder is not planned yet. Hazard H-10 of the risk assessment.
+- **Verified by:** TC-309, TC-308, TC-048
+- **Status:** Open
+
+### RISK-054 Radio operates outside the approved power or channel settings
+
+- **Hazard / failure mode:** The transmit power or the channel set differs from the values the module was approved with
+- **Cause:** Wrong country code or power default in the firmware; a user-changeable country setting; an update of Zephyr or the Wi-Fi blobs changes a default
+- **Effect:** The product does not meet RED Art. 3(2); interference with other users of the band; withdrawal from the market
+- **Severity (1-5):** 4  **Likelihood (1-5):** 3  **Initial risk:** 12
+- **Mitigated by:** SW-013, HW-005
+- **Residual risk (after mitigation):** Open: no firmware with Wi-Fi exists yet. Hazard R-01 of the risk assessment.
+- **Verified by:** TC-113, TC-205
+- **Status:** Open

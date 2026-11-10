@@ -306,3 +306,16 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** RED 2014/53/EU Art. 10(6); GPSR (EU) 2023/988 Art. 9 *(verify)*
 - **Priority:** Should
 - **Status:** Draft
+
+### HW-021 Flammability class of the board material
+
+- **Statement:** The base material of the printed circuit board shall have a flammability class of V-1 or better, and the fabrication notes of each board revision shall name the material and its class.
+- **Rationale:** SYS-050: EN IEC 62368-1 clause 6 asks for V-1 or better board material where PS2 or PS3 circuits are mounted *(verify)*. Standard FR-4 is rated V-0, so this costs nothing, but the technical file needs the statement and the fabricator's material name.
+- **Parent:** SYS-050
+- **Acceptance criteria:** The fabrication notes in `hw/fabrication/<rev>/` name the laminate and its UL 94 or IEC 60695-11-10 class; the fabricator's order confirmation or material data sheet for the lot is filed with the release record.
+- **Verification method:** Inspection
+- **Verified by:** TC-221
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN IEC 62368-1 clause 6.4 *(verify)*
+- **Priority:** Must
+- **Status:** Draft

@@ -176,3 +176,16 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** CRA (EU) 2024/2847 Annex I Part I (2)(a), Part II (3) *(verify)*
 - **Priority:** Must
 - **Status:** Draft
+
+### SW-013 Radio settings stay within the approved values of the module
+
+- **Statement:** The firmware shall set the Wi-Fi regulatory domain to the European Union values and shall limit the transmit power in each mode to the value in the module's RED test report, and no user setting, stored configuration or update of a setting shall change either.
+- **Rationale:** RED Art. 3(2). EN 300 328 limits the radiated power to 20 dBm e.i.r.p. *(verify)*, and the module's approval holds only for the power table and the channels it was tested with. The radio driver takes the country code and the power limit from the firmware configuration, so a wrong default or a user-set country can put a compliant module outside its approval. An update of Zephyr or of the Wi-Fi binary blobs can change the defaults (RISK-020). RISK-054.
+- **Parent:** SYS-038
+- **Acceptance criteria:** The build configuration and the device tree name the country code and the power limit, with the module test report as the source; a test reads the active country code and the power limit from the driver after start, after a factory reset and after a settings import, and they equal the configured values; the web interface and the push interface offer no way to change them; the release checklist repeats the test after every update of Zephyr or of the blobs.
+- **Verification method:** Test
+- **Verified by:** TC-113
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 3(2); EN 300 328 *(verify)*
+- **Priority:** Must
+- **Status:** Draft

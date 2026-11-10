@@ -27,6 +27,18 @@ the normal process**, not reconstructed at the end. The repository is the techni
 7. **Post-market:** vulnerability handling, incident reporting, corrective actions, support period, record retention
    (keep technical documentation and DoC for **10 years** after placing on the market *(verify per act; CRA: 10 years or support period if longer)*).
 
+## 1a. Document map
+| Question | Document |
+|----------|----------|
+| What is the product? | `technical-file/01-general/product-description.md` |
+| Which rules apply, which do not, and why? Which route, which open decisions? | `applicability.md` (RAA-001) |
+| What can go wrong and what controls it? | `technical-file/03-risk-and-safety/risk-assessment.md`, entries in `docs/risk/risk-register.md` |
+| Which standards, which clauses matter? | `technical-file/04-standards-and-testing/standards-list.md` |
+| Which tests, on what, in which order? | `technical-file/04-standards-and-testing/conformity-test-plan.md` |
+| Which requirement and evidence covers each legal clause? | `compliance-matrix.md` |
+| Which design rules does CI check? | `automated-checks.md` |
+| Is the technical file complete? | `technical-file/INDEX.md` |
+
 ## 2. Legislation to assess (details in `applicability.md`)
 CRA (Regulation (EU) 2024/2847), RED (2014/53/EU) incl. cybersecurity delegated act (EU) 2022/30, LVD (2014/35/EU),
 EMCD (2014/30/EU), RoHS (2011/65/EU), REACH, WEEE (2012/19/EU), Batteries Regulation (EU) 2023/1542, GPSR (EU) 2023/988,

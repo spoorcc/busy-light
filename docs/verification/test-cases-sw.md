@@ -124,3 +124,16 @@
 - **Expected result / pass criteria:** see acceptance criteria of SW-012
 - **Automated:** yes (`scripts/ci_sw_static.sh`, CI job software)
 - **Evidence:** local run on 2026-11-10 (clang-tidy 18.1.3, cppcheck 2.13.0): clang-tidy no finding in main.c and gate.c; cppcheck MISRA on gate.c 0 Mandatory/Required, 14 Advisory (15.5 x11, 17.8 x2, 8.7 x1, categories from the table in `check_sw_static.py`, verify); main.c NOT RUN for cppcheck
+
+### TC-113 Radio settings stay within the approved values
+
+- **Verifies:** SW-013
+- **Level:** Integration
+- **Preconditions / setup:** target hardware with the release firmware; the module's RED test report (power table, channels).
+- **Procedure:**
+  1. Read the active country code and transmit power limit from the driver after start.
+  2. Repeat after a factory reset and after a settings import.
+  3. Try to change them through each interface.
+- **Expected result / pass criteria:** see acceptance criteria of SW-013
+- **Automated:** TBD
+- **Evidence:** none yet
