@@ -631,3 +631,29 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Draft
+
+### SYS-048 Regulatory marking and user information
+
+- **Statement:** Every unit placed on the market shall carry, on the unit or where the size does not allow it on the packaging and in the documents, the CE marking, the WEEE crossed-out bin symbol, the type and a serial or batch number, and the manufacturer's name and postal address; the user information shall state the Wi-Fi frequency band and the maximum transmitted power, the safety information, the support end date, the vulnerability contact and where the EU declaration of conformity is found.
+- **Rationale:** RED Art. 10(6), 10(7), 10(8), 10(9) and Art. 17-19 (CE marking), WEEE Art. 14 and EN 50419, GPSR Art. 9, CRA Art. 13 and Annex II *(verify article numbers against the legal text)*. The housing is about 53 mm, so the label space is tight (applicability item 12, MECH-006). Item list: `docs/regulatory/technical-file/06-user-information-and-labelling/labelling-and-user-information.md`.
+- **Parent:** NEED-011
+- **Acceptance criteria:** Inspection of a first-article unit, its packaging and the user information against each item of the list; every item is present, legible, and the CE marking is at least 5 mm high *(verify)*.
+- **Verification method:** Inspection
+- **Verified by:** TC-048
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 10, 17-19; WEEE 2012/19/EU Art. 14; GPSR (EU) 2023/988 Art. 9; CRA (EU) 2024/2847 Art. 13, Annex II *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-049 Electromagnetic compatibility
+
+- **Statement:** The product shall meet the emission limits and the immunity criteria of the EMC standards listed for it in `docs/regulatory/technical-file/04-standards-and-testing/standards-list.md` (residential environment, class B emission), powered from a USB-C source.
+- **Rationale:** RED Art. 3(1)(b) asks for EMC as set out in the EMC Directive 2014/30/EU. The compliance matrix had no requirement for it (row "none yet"). The LED data line, the Wi-Fi module and the USB-C cable are the expected emission paths; the USB-C port and the button are the ESD entry points (applicability item 9).
+- **Parent:** NEED-011
+- **Acceptance criteria:** An accredited test report against the listed standards for the released hardware revision shows a pass; before that, a pre-compliance scan shows at least [6] dB margin to the emission limits (design-hw.md 4a) and the ESD test of EN 61000-4-2 at the levels of EN 301 489-1 *(verify levels)* gives performance criterion B or better.
+- **Verification method:** Test
+- **Verified by:** TC-049
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(b); EN 301 489-1, EN 301 489-17, EN 55032, EN 55035 *(verify editions and harmonised status)*
+- **Priority:** Must
+- **Status:** Draft

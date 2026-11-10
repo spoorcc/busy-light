@@ -99,3 +99,28 @@
 - **Expected result / pass criteria:** see acceptance criteria of SW-010
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-111 Security configuration policy
+
+- **Verifies:** SW-011
+- **Level:** Inspection
+- **Preconditions / setup:** release build of the firmware with its `build/zephyr/.config`.
+- **Procedure:**
+  1. Run `python3 -I scripts/check_kconfig_policy.py --dotconfig build/zephyr/.config`.
+  2. Record the SWC-001 and SWC-002 findings.
+- **Expected result / pass criteria:** see acceptance criteria of SW-011
+- **Automated:** yes (`scripts/ci_sw_static.sh`, CI job software)
+- **Evidence:** native_sim gate build on 2026-11-10: 0 forbidden options; 5 hardening options not set (HW stack protection, canaries, fortify, watchdog, MCUboot), report only
+
+### TC-112 Static analysis of the project C code
+
+- **Verifies:** SW-012
+- **Level:** Inspection
+- **Preconditions / setup:** west workspace; native_sim build with `compile_commands.json`; clang-tidy and cppcheck installed.
+- **Procedure:**
+  1. Run `scripts/ci_sw_static.sh build` with `SW_CI_OUT` set.
+  2. Keep `clang-tidy.txt` and the cppcheck XML files.
+  3. Record the files marked NOT RUN.
+- **Expected result / pass criteria:** see acceptance criteria of SW-012
+- **Automated:** yes (`scripts/ci_sw_static.sh`, CI job software)
+- **Evidence:** local run on 2026-11-10 (clang-tidy 18.1.3, cppcheck 2.13.0): clang-tidy no finding in main.c and gate.c; cppcheck MISRA on gate.c 0 Mandatory/Required, 14 Advisory (15.5 x11, 17.8 x2, 8.7 x1, categories from the table in `check_sw_static.py`, verify); main.c NOT RUN for cppcheck

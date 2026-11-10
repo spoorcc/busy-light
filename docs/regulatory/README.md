@@ -15,6 +15,10 @@ the normal process**, not reconstructed at the end. The repository is the techni
 2. **Regulatory requirements** become normal requirements (`SYS-/SW-/HW-/MECH-`) with a `Regulatory:` field citing the
    legal basis and standard clause. They are verified like any other requirement.
 3. **Compliance matrix** (`compliance-matrix.md`): legal requirement / standard clause -> requirement ID -> TC / evidence.
+   **Automated design-rule checks** (`automated-checks.md`, ADR-0022 Proposed) run in CI on every change: hardware rules on
+   the KiCad files (ESD clamps on interfaces, test access, identification, part numbers, materials register, lifecycle),
+   firmware rules (Kconfig attack surface, secrets, clang-tidy CERT, cppcheck MISRA, SBOM) and the matrix consistency check.
+   They produce evidence of design rules; they never show conformity on their own.
 4. **Pre-compliance** testing during design (EMC near-field/scan, ESD, safety checks, security testing); final accredited
    tests on a frozen design.
 5. **Technical file** (`technical-file/`) kept current; reviewed at every gate. Checklist: `technical-file/INDEX.md`.

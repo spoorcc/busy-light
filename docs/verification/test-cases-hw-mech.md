@@ -230,6 +230,46 @@
 - **Automated:** no
 - **Evidence:** none yet
 
+### TC-218 ESD clamps on the external interface nets
+
+- **Verifies:** HW-018
+- **Level:** Analysis
+- **Preconditions / setup:** stored board and schematic of the revision under test; `hw/compliance/boards.yaml` names the interface parts and the clamp parts.
+- **Procedure:**
+  1. Run `python3 -I scripts/check_hw_compliance.py --out hw-compliance.json`.
+  2. Read the HWC-001 and HWC-002 findings.
+  3. Check the ESD rating and capacitance of each clamp in its evidence file.
+- **Expected result / pass criteria:** see acceptance criteria of HW-018
+- **Automated:** yes (`scripts/check_hw_compliance.py`, CI job python-tools); the datasheet step is manual
+- **Evidence:** CI artefact `compliance-reports/hw-compliance.json`; spike board on 2026-11-10: CC1 and CC2 without clamp (waived, DEV-007), U6 is 11.2 mm from J1
+
+### TC-219 Material declarations and lifecycle
+
+- **Verifies:** HW-019
+- **Level:** Inspection
+- **Preconditions / setup:** schematic of the revision under test; `hw/compliance/materials.yaml`; declarations under `technical-file/07-supplier-declarations/`.
+- **Procedure:**
+  1. Run `python3 -I scripts/check_hw_compliance.py`.
+  2. Read the HWC-006, HWC-007 and HWC-008 findings.
+  3. Open each declaration file and compare its SHA-256 with the register.
+- **Expected result / pass criteria:** see acceptance criteria of HW-019
+- **Automated:** partly (`scripts/check_hw_compliance.py`)
+- **Evidence:** spike board on 2026-11-10: 33 part numbers, none with a declaration on file; 3 references without MPN in the stored schematic (DEV-007)
+
+### TC-220 Board name and revision on the silkscreen
+
+- **Verifies:** HW-020
+- **Level:** Inspection
+- **Preconditions / setup:** stored board of the revision under test.
+- **Procedure:**
+  1. Run `python3 -I scripts/check_hw_compliance.py`.
+  2. Read the HWC-005 finding.
+  3. Measure the text height in the board file.
+- **Expected result / pass criteria:** see acceptance criteria of HW-020
+- **Automated:** partly (`scripts/check_hw_compliance.py`)
+- **Evidence:** spike board on 2026-11-10: no silkscreen text (waived, DEV-007)
+
+
 ### TC-309 PCB retention and reopening
 
 - **Verifies:** MECH-009

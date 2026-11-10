@@ -17,4 +17,8 @@ legal statements *(verify)*.
 4. EMC/safety: layout/filter/ESD decisions, creepage/clearance, thermal, flammability, photobiological, labelling space.
 5. Does it produce technical-file evidence (drawing, report, declaration)? Put/link it under `docs/regulatory/technical-file/`
    and update `INDEX.md` status.
-6. List open compliance questions for the user; never state the product "is CE compliant" - state which evidence exists.
+6. Run the automated rules and read their findings: `python3 -I scripts/check_hw_compliance.py`,
+   `python3 -I scripts/check_kconfig_policy.py`, `python3 -I scripts/check_secrets.py`,
+   `python3 -I scripts/check_compliance_matrix.py` (catalogue: `docs/regulatory/automated-checks.md`). A new rule goes into
+   the catalogue and the script's `RULES` table together.
+7. List open compliance questions for the user; never state the product "is CE compliant" - state which evidence exists.

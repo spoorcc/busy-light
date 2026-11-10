@@ -1,7 +1,7 @@
 # Regulatory Applicability Assessment (RAA-001)
 
 - **Status:** Draft -- answers marked TBD must be provided by the product owner
-- **Version:** 0.1   **Owner:**   **Last reviewed:**
+- **Version:** 0.2   **Owner:**   **Last reviewed:** (not reviewed; assistant update of 2026-11-10 in section 3)
 - Re-run when: radio, battery, mains, cloud/app, data collection, new market, or new function is added.
 
 ## 1. Product definition inputs (drive everything below)
@@ -28,10 +28,10 @@
 | **REACH** | Articles with SVHC > 0.1 % w/w | Applies (info duty Art. 33) | Supplier declarations | -- |
 | **WEEE** 2012/19/EU | EEE | Applies (marking, registration per country) | Registration | EN 50419 marking |
 | **Batteries Reg.** 2023/1542 | Battery included/removable | Not applicable (no battery) | Per regulation | -- |
-| **GPSR** 2023/988 | Consumer products not fully covered by sector law | TBD | Risk assessment, traceability, labelling | -- |
-| **ESPR/Ecodesign** | If delegated acts cover the product or its PSU | TBD | Per act | EU 2019/1782 etc. for external PSUs *(verify)* |
-| **PPWR** | Packaging | TBD | -- | -- |
-| **GDPR** | Personal data | TBD | -- | -- |
+| **GPSR** 2023/988 | Consumer products not fully covered by sector law | Likely applies for the aspects the RED and the CRA do not cover (traceability, manufacturer contact, warnings, accident notification), if units go to consumers *(verify, assistant 2026-11-10)* | Risk assessment, traceability, labelling | -- |
+| **ESPR/Ecodesign** | If delegated acts cover the product or its PSU | No PSU is supplied (the user supplies the USB source), so (EU) 2019/1782 does not apply. Standby and networked standby (EU) 2023/826, applying from 9 May 2025: scope test open, depends on whether the product is equipment listed in its Annex I *(verify, assistant 2026-11-10)* | Per act | EN 50643 / EN 50564 power measurement if in scope *(verify)* |
+| **PPWR** (EU) 2025/40 | Packaging | Applies to the packaging of sold units; most duties apply from August 2026 onward *(verify dates)* | Per regulation | -- |
+| **GDPR** | Personal data | Not triggered by design if no personal data leaves or is stored on the device (consequence 10); owner to confirm | -- | -- |
 
 ## 3. Derived consequences
 Author's first assessment of 2026-11-03 from the design plan 02 and ADR-0002 to ADR-0008. It is guidance, not legal advice, and the owner has not reviewed it. Items marked *(verify)* need a check against the current legal text or an expert.
@@ -67,6 +67,20 @@ Author's first assessment of 2026-11-03 from the design plan 02 and ADR-0002 to 
 4. Is the project published as open source with no commercial supply, or sold? This changes the CRA role (steward or manufacturer) *(verify)*. Since ADR-0013 (2026-11-04) the hardware and documents are source-available under CC BY-NC-SA 4.0 and the owner may sell commercial licences. The open-source steward path therefore cannot be assumed; plan for the manufacturer role (RV-005, needs a lawyer).
 5. Do you accept that units placed on the market need secure boot and flash encryption, or a written justification?
 6. Who will be the manufacturer (legal person and postal address) on the label for the first sold units? Deferred by the owner; needed before the first supply to others.
+
+### Update of 2026-11-10 (assistant; secondary sources only, the official texts could not be opened from the session)
+Details and the candidate standards per article: `technical-file/04-standards-and-testing/standards-list.md`. Automated design-rule checks: `automated-checks.md`.
+
+| # | Finding | Effect on this assessment |
+|---|---------|---------------------------|
+| A1 | The RED cybersecurity delegated act (EU) 2022/30 applies from 1 August 2025 and is repealed with effect from 11 December 2027 by Delegated Regulation (EU) 2026/339 (published 29 April 2026) *(verify)* | Units placed on the market before 11 December 2027: RED Art. 3(3)(d)-(f) with EN 18031-1. Units after: CRA only. Plan for the CRA; the first sale date decides whether EN 18031-1 is needed at all |
+| A2 | EN 18031-1/-2/-3:2024 are cited under the RED by Implementing Decision (EU) 2025/138, with a restriction where the user may skip setting a password *(verify)* | The per-unit passphrase (ADR-0006) keeps the design outside the restricted case |
+| A3 | CRA: reporting duties (Art. 14) apply from 11 September 2026; Chapter IV (notified bodies) from 11 June 2026; everything else from 11 December 2027 *(verify)* | No unit is on the market, so no reporting duty today; the procedure must exist before the first supply |
+| A4 | No CRA harmonised standard is cited yet in the sources read *(verify)* | Argue Annex I directly (`technical-file/05-cybersecurity/cra-annex-i-mapping.md`); use ETSI EN 303 645 and the CEN/CENELEC drafts as state of the art |
+| A5 | CRA product class: default. Annex III class I lists smart-home products with security functions (locks, cameras, alarms), virtual assistants and others; a status light is not among them; classification follows the core function, not the parts *(verify against Implementing Regulation (EU) 2025/2392)* | Internal control (Module A) remains the expected route |
+| A6 | EN IEC 62368-1:2024 is published but sources say it is unlikely to be cited soon; the 2020 edition is the working reference *(verify)* | Use 2020+A11:2020 for the safety assessment; re-check at test-lab booking |
+| A7 | Common-charger rule (RED as amended by (EU) 2022/2380) covers listed rechargeable portable devices *(verify)* | Not in scope: no battery |
+| A8 | New Draft requirements for the gaps found: SYS-048 (marking and user information), SYS-049 (EMC), HW-018 (ESD clamps on every interface net, also CC1/CC2), HW-019 (material declarations), HW-020 (board identification), SW-011 (Kconfig security policy), SW-012 (static analysis) | Owner review and approval needed |
 
 ## 4. Review
 Independent regulatory review recommended before the architecture gate and again before test-lab booking.

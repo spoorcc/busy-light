@@ -30,8 +30,9 @@ Rule precedence on conflict: project deviation record > CERT > MISRA > Zephyr st
 | Tool | Purpose | Config |
 |------|---------|--------|
 | compiler warnings as errors | baseline | CMake |
-| clang-tidy (`cert-*`, `bugprone-*`, `clang-analyzer-*`) | CERT checks | `sw/.clang-tidy` |
-| cppcheck with MISRA addon (rule texts supplied locally) or commercial checker | MISRA compliance | to be decided in ADR-0001 |
+| clang-tidy (`cert-*`, `bugprone-*`, `clang-analyzer-*`) | CERT checks | `sw/.clang-tidy`, run by `scripts/ci_sw_static.sh` |
+| cppcheck with MISRA addon (rule texts supplied locally) or commercial checker | MISRA findings (no compliance claim) | `scripts/ci_sw_static.sh`, `scripts/check_sw_static.py` (ADR-0022 Proposed: Mandatory/Required fail, Advisory reported; files that need Zephyr headers are NOT RUN) |
+| Kconfig security policy, secret scan, SBOM (`west spdx`) | CRA attack surface, credentials, SBOM | `sw/kconfig-policy.yaml`, `scripts/check_kconfig_policy.py`, `scripts/check_secrets.py`, `scripts/check_sbom.py` |
 | clang-format | style | `sw/.clang-format` (Zephyr) |
 | Twister + native_sim unit tests, coverage (gcov) | verification | `sw/app/tests` |
 | Sanitizers (ASan/UBSan on native_sim) | runtime defects | CI |

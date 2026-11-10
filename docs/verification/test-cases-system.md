@@ -437,3 +437,29 @@
 - **Expected result / pass criteria:** see acceptance criteria of SYS-047
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-048 Regulatory marking and user information inspection
+
+- **Verifies:** SYS-048
+- **Level:** Inspection
+- **Preconditions / setup:** first-article unit, packaging and user information of the release under test; the item list in `technical-file/06-user-information-and-labelling/labelling-and-user-information.md`.
+- **Procedure:**
+  1. Check each item of the list on the unit, the packaging and the user information.
+  2. Measure the height of the CE marking.
+  3. Record each item as present or absent with a photo.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-048
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-049 EMC pre-compliance and accredited test
+
+- **Verifies:** SYS-049
+- **Level:** System
+- **Preconditions / setup:** released hardware revision in the closed housing, USB-C supply and cable of a stated type; test plan per the standards list.
+- **Procedure:**
+  1. Run a radiated and conducted emission pre-scan with the LEDs at the limited maximum and continuous Wi-Fi traffic.
+  2. Run ESD contact and air discharges on the USB-C shell and the button area.
+  3. Book the accredited test when the pre-scan margin is at least [6] dB.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-049
+- **Automated:** no
+- **Evidence:** none yet

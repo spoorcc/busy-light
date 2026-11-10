@@ -51,6 +51,12 @@ IPC-7711/7721 (rework), IPC-D-356 (netlist test), IEC 62368-1 (safety), IEC 6100
 - Bring-up plan and first-article inspection recorded in `docs/verification/reports/`.
 - Libraries: project-local symbols/footprints in `hw/kicad/libs/`, each part with datasheet link, MPN, lifecycle fields.
 
+## 7a. Automated rule checks
+`scripts/check_hw_compliance.py` checks rules of sections 1, 2, 4a and 5 on every change (catalogue `docs/regulatory/automated-checks.md`):
+clamp on every external interface net, test points on rails and reset/boot, board name and revision on the silkscreen, MPN and
+manufacturer per BOM part, RoHS/REACH register entries, lifecycle, and a debug-access inventory. Board settings and waivers:
+`hw/compliance/boards.yaml`; materials register: `hw/compliance/materials.yaml`.
+
 ## 8. Review checklist (use in `design-review`)
 DFT hooks present? Test coverage by TC? Fab limits respected? Footprints verified? Derating done? Protection at interfaces?
 Second sources? ERC/DRC clean? Revision/serial identifiable? Mechanical fit checked against STEP (see mechanical standard)?
