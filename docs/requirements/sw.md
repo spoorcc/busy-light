@@ -150,3 +150,42 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Must
 - **Status:** Approved (owner, 2026-11-07; [10] s stays open; the select pin state at reset is checked on the prototype)
 - **Approved amendment, folded into the text above (owner decision of 2026-11-07, RV-011 finding 14; text approved by the owner 2026-11-07):** The watchdog timeout is [8] s so that the restart and the boot time fit inside the [10] s of the statement. A watchdog reset counts toward the brown-out back-off of SW-007. Acceptance criterion to add: a repeated forced hang (3 times in 10 min) leaves the step lowest until the next power-up (TC-110). Not run: no firmware.
+
+### SW-011 Security configuration policy of the product firmware
+
+- **Statement:** The product firmware configuration (every Kconfig fragment of `sw/app` outside the tests and the built `.config`) shall not enable an option listed as forbidden in `sw/kconfig-policy.yaml` (interactive shells, debugger stubs, non-cryptographic random generators, test frameworks, network log backends, unauthenticated image management), and shall enable the hardening options listed as required there.
+- **Rationale:** Each forbidden option opens an interface or weakens a protection; CRA Annex I Part I asks to limit attack surfaces and to reduce the impact of an incident by exploitation mitigation *(verify clause letters)*. Applicability item 10: no logs leave the device. A check on the built `.config` also catches options that a board default switches on.
+- **Parent:** SYS-016, SYS-027
+- **Acceptance criteria:** Rule SWC-001 shows no finding for the release build; rule SWC-002 shows no missing hardening option for the release build, or each missing option has a DEV record. Until the product configuration exists (plan 07 builds the gate firmware only), SWC-002 is a report.
+- **Verification method:** Inspection
+- **Verified by:** TC-111
+- **Category:** Security
+- **Regulatory:** CRA (EU) 2024/2847 Annex I Part I (2)(j), (k) *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SW-012 Static analysis of the project C code
+
+- **Statement:** The project C code (`sw/app`, `sw/drivers`, `sw/lib`) shall have no clang-tidy finding of the checks in `sw/.clang-tidy` (CERT C, bugprone, clang-analyzer), no cppcheck error or warning, and no finding of a Mandatory or Required MISRA C:2012 rule reported by the cppcheck MISRA addon, and every suppression shall name a DEV record.
+- **Rationale:** docs/standards/coding-sw.md 1, 4 and 5 (ADR-0001). The CRA asks for products without known exploitable vulnerabilities and for regular tests and reviews *(verify)*. cppcheck covers part of the MISRA rules only, so this is not a MISRA compliance claim.
+- **Parent:** SYS-045, SYS-025
+- **Acceptance criteria:** Rules SWC-006, SWC-007 and SWC-008 pass in CI for the release commit; the reports (`clang-tidy.txt`, `cppcheck-misra-*.xml`) are kept with the release record; files for which cppcheck prints NOT RUN are listed in the release record.
+- **Verification method:** Inspection
+- **Verified by:** TC-112
+- **Category:** Security
+- **Regulatory:** CRA (EU) 2024/2847 Annex I Part I (2)(a), Part II (3) *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SW-013 Radio settings stay within the approved values of the module
+
+- **Statement:** The firmware shall set the Wi-Fi regulatory domain to the European Union values and shall limit the transmit power in each mode to the value in the module's RED test report, and no user setting, stored configuration or update of a setting shall change either.
+- **Rationale:** RED Art. 3(2). EN 300 328 limits the radiated power to 20 dBm e.i.r.p. *(verify)*, and the module's approval holds only for the power table and the channels it was tested with. The radio driver takes the country code and the power limit from the firmware configuration, so a wrong default or a user-set country can put a compliant module outside its approval. An update of Zephyr or of the Wi-Fi binary blobs can change the defaults (RISK-020). RISK-054.
+- **Parent:** SYS-038
+- **Acceptance criteria:** The build configuration and the device tree name the country code and the power limit, with the module test report as the source; a test reads the active country code and the power limit from the driver after start, after a factory reset and after a settings import, and they equal the configured values; the web interface and the push interface offer no way to change them; the release checklist repeats the test after every update of Zephyr or of the blobs.
+- **Verification method:** Test
+- **Verified by:** TC-113
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 3(2); EN 300 328 *(verify)*
+- **Priority:** Must
+- **Status:** Draft

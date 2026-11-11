@@ -47,6 +47,10 @@ ALLOW: set[str] = {
     "hw/evidence/parts/usblc6-2p6.yaml",
     "hw/evidence/parts/ws2812b.yaml",
     "hw/evidence/schema/part-evidence.schema.json",
+    # Compliance data read by scripts/check_hw_compliance.py (ADR-0022): board settings, waivers
+    # and the RoHS/REACH/lifecycle register are hardware documentation, not code (CC-BY-NC-SA-4.0).
+    "hw/compliance/boards.yaml",
+    "hw/compliance/materials.yaml",
 }
 
 

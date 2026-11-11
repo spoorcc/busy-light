@@ -631,3 +631,81 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Draft
+
+### SYS-048 Regulatory marking and user information
+
+- **Statement:** Every unit placed on the market shall carry, on the unit or where the size does not allow it on the packaging and in the documents, the CE marking, the WEEE crossed-out bin symbol, the type and a serial or batch number, and the manufacturer's name and postal address; the user information shall state the Wi-Fi frequency band and the maximum transmitted power, the safety information, the support end date, the vulnerability contact and where the EU declaration of conformity is found.
+- **Rationale:** RED Art. 10(6), 10(7), 10(8), 10(9) and Art. 17-19 (CE marking), WEEE Art. 14 and EN 50419, GPSR Art. 9, CRA Art. 13 and Annex II *(verify article numbers against the legal text)*. The housing is about 53 mm, so the label space is tight (applicability item 12, MECH-006). Item list: `docs/regulatory/technical-file/06-user-information-and-labelling/labelling-and-user-information.md`.
+- **Parent:** NEED-011
+- **Acceptance criteria:** Inspection of a first-article unit, its packaging and the user information against each item of the list; every item is present, legible, and the CE marking is at least 5 mm high *(verify)*.
+- **Verification method:** Inspection
+- **Verified by:** TC-048
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 10, 17-19; WEEE 2012/19/EU Art. 14; GPSR (EU) 2023/988 Art. 9; CRA (EU) 2024/2847 Art. 13, Annex II *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-049 Electromagnetic compatibility
+
+- **Statement:** The product shall meet the emission limits and the immunity criteria of the EMC standards listed for it in `docs/regulatory/technical-file/04-standards-and-testing/standards-list.md` (residential environment, class B emission), powered from a USB-C source.
+- **Rationale:** RED Art. 3(1)(b) asks for EMC as set out in the EMC Directive 2014/30/EU. The compliance matrix had no requirement for it (row "none yet"). The LED data line, the Wi-Fi module and the USB-C cable are the expected emission paths; the USB-C port and the button are the ESD entry points (applicability item 9).
+- **Parent:** NEED-011
+- **Acceptance criteria:** An accredited test report against the listed standards for the released hardware revision shows a pass; before that, a pre-compliance scan shows at least [6] dB margin to the emission limits (design-hw.md 4a) and the ESD test of EN 61000-4-2 at the levels of EN 301 489-1 *(verify levels)* gives performance criterion B or better.
+- **Verification method:** Test
+- **Verified by:** TC-049
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(b); EN 301 489-1, EN 301 489-17, EN 55032, EN 55035 *(verify editions and harmonised status)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-050 Fire safety and energy source classification
+
+- **Statement:** The device shall meet the fire safeguards of EN IEC 62368-1 clause 6 for the power source class of each of its circuits, in normal operation, in abnormal operation and with any single fault, when supplied from a USB-C source.
+- **Rationale:** RED Art. 3(1)(a) applies the safety objectives of the Low Voltage Directive to radio equipment with no lower voltage limit, so the 5 V supply does not remove the safety assessment. All circuits are below 60 V DC and are class ES1 (no electric-shock safeguard needed). Fire is the main hazard: a compliant USB-C source can deliver 15 W at 5 V, and a faulty or Power Delivery source more. Circuits after the current-limit switch (HW-010) are limited to about 8.7 W (1577 mA at 5.5 V) and are candidates for class PS1 (at most 15 W after 3 s). The circuits before the switch (connector, TVS1, C2, the supply pins fed from VBUS_IC) are fed by the source without a limit of our own, and the switch itself counts as a single fault; these are treated as PS2 unless the test laboratory accepts PS1 *(verify: classification rules of clause 6.2 and the 15 W / 100 W limits)*. RISK-047, RISK-050.
+- **Parent:** NEED-011
+- **Acceptance criteria:** (1) The safety assessment holds a table of every circuit with its ES and PS class and the measured or calculated power under normal and single-fault conditions. (2) For each PS2 circuit the table names the safeguard: board material of HW-021, housing material of MECH-010, or the separation that the standard allows. (3) A single-fault test series on [3] units (short circuit of each power semiconductor and each capacitor on VBUS_IC and +5V, the current-limit switch shorted, one LED shorted, select outputs stuck high) shows no sustained flame, no molten metal and no ignition of the housing; the criteria of the standard apply *(verify)*.
+- **Verification method:** Test
+- **Verified by:** TC-050
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN IEC 62368-1 clauses 5, 6 and Annex B *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-051 Temperature of accessible surfaces
+
+- **Statement:** No outer surface of the device that a person can touch shall exceed [60] degC at an ambient temperature of [35] degC at the highest current step in normal operation.
+- **Rationale:** Burn hazard (thermal energy source class TS1 of EN IEC 62368-1 clause 9; the limit for a plastic surface touched for up to 1 min is taken as [60] degC *(verify against Table 38 of the edition applied)*). MECH-005 limits the housing wall to about [50] degC for the PETG prototype, but that limit follows the material and would rise with another material; this requirement fixes the safety limit on its own. The button is pressed with a finger (MECH-004). RISK-048.
+- **Parent:** SYS-020
+- **Acceptance criteria:** In the run of HW-013 (TC-213, closed housing, [35] degC ambient, top current step, [60] min after equilibrium), a thermocouple or thermal camera shows every outer surface, the button and the USB-C plug overmold at or below the limit, horizontal and vertical. The hung-firmware run of HW-013 (1577 mA) is recorded against the limit as an abnormal-operation result.
+- **Verification method:** Test
+- **Verified by:** TC-051
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN IEC 62368-1 clause 9 *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-052 Radio-frequency exposure
+
+- **Statement:** The radio-frequency exposure of a person from the device shall stay within the general-public limits of Council Recommendation 1999/519/EC at every distance at which a person can be in the intended use, including a hand on the housing.
+- **Rationale:** RED Art. 3(1)(a) covers health. The Wi-Fi module transmits at up to about 20 dBm (module data, not read in this work), which is above the 20 mW low-power exclusion of EN 62479 / EN 50663 as a peak value. Two routes exist: (a) show a time-averaged power of at most 20 mW by a firmware transmit-duty limit (the same limit that ADR-0019 option A needs), or (b) an exposure assessment to EN IEC 62311. A first far-field estimate (160 mW EIRP assumed, 10 W/m2 reference level at 2.4 GHz) gives compliance beyond about 4 cm; closer than that the far-field estimate is not valid, so route (a) or a measurement is needed. The estimate is not evidence.
+- **Parent:** NEED-011
+- **Acceptance criteria:** An exposure assessment report for the released hardware and firmware names the route (EN 50663 with the measured time-averaged power, or EN IEC 62311), the conducted power and antenna gain from the module documents, the duty cycle and how the firmware enforces it, and shows the limits are met at 0 cm from the housing or states the minimum distance that then goes into the user information (SYS-048).
+- **Verification method:** Analysis
+- **Verified by:** TC-052
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN 50663 or EN IEC 62311; Council Recommendation 1999/519/EC *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### SYS-053 Flash rate of light patterns
+
+- **Statement:** No light pattern of the device, in any state or setting, shall change the brightness or the colour of more than [25] % of the ring more than [3] times in any period of 1 s.
+- **Rationale:** Flashing light between about 3 Hz and 60 Hz can trigger seizures in people with photosensitive epilepsy; saturated red flashes are the most critical. The limit of three flashes per second is the general threshold of WCAG 2.x success criterion 2.3.1 and of ISO 9241-391 *(verify)*. SYS-018 asks for distinct status patterns and SYS-032 for level displays, and a user-set mapping (SYS-008) could produce a fast blink. The product is viewed at close range on a desk. RISK-052.
+- **Parent:** SYS-001, SYS-018
+- **Acceptance criteria:** A host test of the pattern engine checks every built-in pattern and the fastest pattern that the mapping settings allow, frame by frame, against the limit. A photodiode record of the fastest pattern on a prototype confirms the rate. The pattern documentation states the rate of each pattern.
+- **Verification method:** Test
+- **Verified by:** TC-053
+- **Category:** Safety
+- **Regulatory:** GPSR (EU) 2023/988 Art. 5, 6 (general safety requirement); RED 2014/53/EU Art. 3(1)(a) *(verify)*
+- **Priority:** Must
+- **Status:** Draft

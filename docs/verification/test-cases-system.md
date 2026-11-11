@@ -437,3 +437,83 @@
 - **Expected result / pass criteria:** see acceptance criteria of SYS-047
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-048 Regulatory marking and user information inspection
+
+- **Verifies:** SYS-048
+- **Level:** Inspection
+- **Preconditions / setup:** first-article unit, packaging and user information of the release under test; the item list in `technical-file/06-user-information-and-labelling/labelling-and-user-information.md`.
+- **Procedure:**
+  1. Check each item of the list on the unit, the packaging and the user information.
+  2. Measure the height of the CE marking.
+  3. Record each item as present or absent with a photo.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-048
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-049 EMC pre-compliance and accredited test
+
+- **Verifies:** SYS-049
+- **Level:** System
+- **Preconditions / setup:** released hardware revision in the closed housing, USB-C supply and cable of a stated type; test plan per the standards list.
+- **Procedure:**
+  1. Run a radiated and conducted emission pre-scan with the LEDs at the limited maximum and continuous Wi-Fi traffic.
+  2. Run ESD contact and air discharges on the USB-C shell and the button area.
+  3. Book the accredited test when the pre-scan margin is at least [6] dB.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-049
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-050 Energy source classification and single-fault tests
+
+- **Verifies:** SYS-050
+- **Level:** System
+- **Preconditions / setup:** released hardware revision in its housing; USB-C sources: default current, 1.5 A, 3 A and a Power Delivery source; thermocouples; a camera; the fault list of the risk assessment (`technical-file/03-risk-and-safety/risk-assessment.md`).
+- **Procedure:**
+  1. Measure the power into each circuit in normal operation and record the ES and PS class.
+  2. Apply each single fault of the fault list in turn on a fresh or checked unit.
+  3. Run each fault until the result is stable or a part opens.
+  4. Record temperatures, the input current, and any flame, smoke or deformation.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-050
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-051 Temperature of accessible surfaces
+
+- **Verifies:** SYS-051
+- **Level:** System
+- **Preconditions / setup:** the setup of TC-213 (closed housing, [35] degC ambient, top current step); thermocouples on the lid, the base, the button and the cable plug.
+- **Procedure:**
+  1. Run the device to thermal equilibrium, horizontal.
+  2. Record the highest temperature of each outer surface.
+  3. Repeat in the vertical position.
+  4. Record the same points in the hung-firmware run of TC-213.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-051
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-052 Radio-frequency exposure assessment
+
+- **Verifies:** SYS-052
+- **Level:** Analysis
+- **Preconditions / setup:** module test report and datasheet (conducted power, antenna gain); the firmware transmit-duty limit and its test record.
+- **Procedure:**
+  1. Choose the route: EN 50663 low-power exclusion or EN IEC 62311.
+  2. Calculate the time-averaged power or the exposure at the use distances.
+  3. Write the assessment report with inputs, method and result.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-052
+- **Automated:** no
+- **Evidence:** none yet
+
+### TC-053 Flash rate of light patterns
+
+- **Verifies:** SYS-053
+- **Level:** Unit, then Bench
+- **Preconditions / setup:** pattern engine built for the host (SYS-025); a prototype with a photodiode and an oscilloscope.
+- **Procedure:**
+  1. Run each built-in pattern in the host test and count the brightness and colour changes per second.
+  2. Set the mapping to the fastest pattern that the settings allow and repeat.
+  3. Record the fastest pattern on the prototype with the photodiode.
+- **Expected result / pass criteria:** see acceptance criteria of SYS-053
+- **Automated:** partly (host test, to write)
+- **Evidence:** none yet

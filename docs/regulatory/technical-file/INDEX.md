@@ -1,28 +1,28 @@
 # Technical File (Technical Documentation) -- Index and Completeness Checklist
 
-- **Status:** Draft   **Product / model / revision:**   **Baseline tag:**
+- **Status:** Draft (rows updated by the assistant 2026-11-10)   **Product / model / revision:**   **Baseline tag:**
 
 The technical file is assembled from controlled documents in this repository (link, don't duplicate). Retain for **10 years**
 after placing on the market *(verify per act; CRA: longer if support period is longer)*. Record the baseline (git tag) per release.
 
 | # | Content (typical across CRA Annex VII, RED/LVD/EMCD, RoHS) | Source in repo | Status |
 |---|------------------------------------------------------------|----------------|--------|
-| 01 | General description: product, intended use, variants, versions, photos, markets | `01-general/` | Open |
-| 01 | Applicability assessment, conformity route, responsible economic operator | `../applicability.md` | Open |
+| 01 | General description: product, intended use, variants, versions, photos, markets | `01-general/`; `01-general/product-description.md` (Draft; no model designation, no photos) | Draft |
+| 01 | Applicability assessment, conformity route, responsible economic operator | `../applicability.md` (RAA-001 v0.3, Draft; manufacturer not decided) | Draft |
 | 02 | Design & manufacturing drawings, schematics, PCB layout, BOM, assembly drawings | `hw/fabrication/<rev>/`, `mech/exports/<rev>/` | Open |
 | 02 | Architecture, interface and software design descriptions; ADRs | `docs/architecture/`, `docs/decisions/` | Open |
-| 02 | Requirements and traceability (incl. regulatory requirements) | `docs/requirements/`, `../compliance-matrix.md` | Open |
-| 03 | Risk assessment: safety/hazards (LVD/GPSR), EMC, **cybersecurity risk assessment (CRA)** | `docs/risk/` | Open |
+| 02 | Requirements and traceability (incl. regulatory requirements) | `docs/requirements/`, `../compliance-matrix.md`; automated checks `../automated-checks.md` (DOC-001 keeps the matrix consistent) | Partial |
+| 03 | Risk assessment: safety/hazards (LVD/GPSR), EMC, **cybersecurity risk assessment (CRA)** | `docs/risk/`; `03-risk-and-safety/risk-assessment.md` (Draft v0.1: safety, EMC, radio, substances; cybersecurity summary only) | Draft |
 | 03 | Photobiological (EN 62471), thermal, fire/flammability, mechanical safety analyses | `03-risk-and-safety/` | Open |
-| 04 | List of standards/specifications applied (with versions, full/partial application) | `04-standards-and-testing/standards-list.md` | Open |
-| 04 | Test reports: EMC, safety, radio, EMF, environmental; pre-compliance and accredited | `04-standards-and-testing/`, `docs/verification/reports/` | Open |
-| 05 | **SBOM** (machine-readable, e.g. SPDX/CycloneDX) per release | `05-cybersecurity/sbom/` | Open |
+| 04 | List of standards/specifications applied (with versions, full/partial application) | `04-standards-and-testing/standards-list.md` (Draft, candidate set 2026-11-10) | Draft |
+| 04 | Test reports: EMC, safety, radio, EMF, environmental; pre-compliance and accredited | `04-standards-and-testing/`, `docs/verification/reports/`; plan: `04-standards-and-testing/conformity-test-plan.md` (Draft; no test run) | Open |
+| 05 | **SBOM** (machine-readable, e.g. SPDX/CycloneDX) per release | `05-cybersecurity/sbom/`; generated in CI by `west spdx` (artefact `sw-static`, rule SWC-009) | Partial |
 | 05 | Vulnerability handling process + coordinated disclosure policy + contact; `security.txt` | `05-cybersecurity/` (draft: `05-cybersecurity/vulnerability-handling.md`) | Open |
 | 05 | Security update mechanism & support period; secure-by-default configuration; update test evidence | `05-cybersecurity/` (key management: `05-cybersecurity/key-management.md`, Draft) | Open |
-| 05 | Evidence of conformity with CRA Annex I essential requirements; reporting procedure to CSIRT/ENISA | `05-cybersecurity/` | Open |
-| 06 | User instructions & safety information (Annex II CRA etc.), languages, installation, end-of-support date | `06-user-information-and-labelling/` | Open |
-| 06 | Labelling: type/batch/serial, manufacturer name+postal address, CE mark, WEEE symbol, ratings; label drawing | `06-user-information-and-labelling/` | Open |
-| 07 | Supplier declarations: RoHS/REACH (SVHC), material declarations, component datasheets, pre-certified module certificates & grants | `07-supplier-declarations/` | Open |
+| 05 | Evidence of conformity with CRA Annex I essential requirements; reporting procedure to CSIRT/ENISA | `05-cybersecurity/`; mapping `05-cybersecurity/cra-annex-i-mapping.md` (Draft) | Draft |
+| 06 | User instructions & safety information (Annex II CRA etc.), languages, installation, end-of-support date | `06-user-information-and-labelling/`; item list `06-user-information-and-labelling/labelling-and-user-information.md` (Draft) | Draft |
+| 06 | Labelling: type/batch/serial, manufacturer name+postal address, CE mark, WEEE symbol, ratings; label drawing | `06-user-information-and-labelling/`; item list as above (Draft) | Draft |
+| 07 | Supplier declarations: RoHS/REACH (SVHC), material declarations, component datasheets, pre-certified module certificates & grants | `07-supplier-declarations/`; approach `07-supplier-declarations/rohs-reach-weee.md`, register `hw/compliance/materials.yaml` (0 declarations) | Open |
 | 08 | Production controls ensuring conformity (internal production control), traceability, production test, change control | `08-production-and-quality/` | Open |
 | 08 | Records of corrective actions, field issues, vulnerability reports | `08-production-and-quality/` | Open |
 | 09 | EU Declaration of Conformity (per Decision 768/2008/EC annex III format), signed | `09-declaration-of-conformity/` | Open |

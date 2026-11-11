@@ -267,3 +267,55 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Should
 - **Status:** Draft
 
+
+### HW-018 ESD clamp on every external interface net
+
+- **Statement:** Every net that reaches the USB-C receptacle (VBUS, D+, D-, CC1, CC2) or a part that the user can touch through the housing (the push button) shall connect to an ESD clamp, directly or through one series resistor, inductor or ferrite, and the clamp of a connector net shall be within [10] mm of the connector.
+- **Rationale:** SYS-049 (EMC, ESD immunity to EN 61000-4-2 through EN 301 489-1 *(verify)*) and design-hw.md 3 and 4a. HW-003 already asks for ESD on VBUS, D+ and D-; the CC lines were left open (plan 07 condition: "the CC-pin ESD requirement is still to be written"). A clamp far from the connector lets the discharge current flow across the board first.
+- **Parent:** SYS-049, SYS-020
+- **Acceptance criteria:** The automated rule HWC-001 shows no unwaived finding and HWC-002 shows no clamp further than [10] mm (`scripts/check_hw_compliance.py`, report in the CI artefact); each clamp part has a datasheet evidence file that states its IEC 61000-4-2 contact rating of at least [8] kV *(verify level)* and a capacitance that the USB 2.0 data lines and the CC lines tolerate.
+- **Verification method:** Analysis
+- **Verified by:** TC-218
+- **Category:** Regulatory
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(b); EN 301 489-1, EN 55035, EN 61000-4-2 *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### HW-019 Material declarations and lifecycle for every BOM part
+
+- **Statement:** Every part in the BOM of a board revision that is placed on the market shall have a manufacturer part number, a manufacturer, a RoHS declaration and a REACH Article 33 (SVHC) statement from the manufacturer on file, and a lifecycle status that is not not-recommended-for-new-designs, end-of-life or obsolete unless a RISK record accepts it.
+- **Rationale:** RoHS 2011/65/EU Art. 7 asks the manufacturer to draw up technical documentation; EN IEC 63000 describes it as supplier declarations per part with a supplier assessment *(verify)*. REACH Art. 33 asks for SVHC information to recipients. A part that goes out of production during the [5]-year support period (SYS-045) blocks repairs and security fixes that need hardware.
+- **Parent:** SYS-022, SYS-045
+- **Acceptance criteria:** The rules HWC-006 and HWC-008 show no unwaived finding and HWC-007 shows no open item for the board revision; each 'declared' entry in `hw/compliance/materials.yaml` names a file under `docs/regulatory/technical-file/07-supplier-declarations/` with its SHA-256 and date.
+- **Verification method:** Inspection
+- **Verified by:** TC-219
+- **Category:** Regulatory
+- **Regulatory:** RoHS 2011/65/EU Art. 4, 7 and (EU) 2015/863; REACH (EC) 1907/2006 Art. 33; EN IEC 63000 *(verify)*
+- **Priority:** Must
+- **Status:** Draft
+
+### HW-020 Board name and revision on the silkscreen
+
+- **Statement:** Every board revision shall carry on its silkscreen the board name and the revision, in text of at least [1.0] mm height.
+- **Rationale:** design-hw.md 2 and 4a. The board revision links a unit to its design files, test reports and DoC (SYS-024, technical file baseline), and supports the type and batch identification of RED Art. 10(6) and GPSR Art. 9 *(verify)*.
+- **Parent:** SYS-024
+- **Acceptance criteria:** The rule HWC-005 finds a silkscreen text that matches the board pattern in `hw/compliance/boards.yaml`; the text height in the board file is at least the limit.
+- **Verification method:** Inspection
+- **Verified by:** TC-220
+- **Category:** Auditability
+- **Regulatory:** RED 2014/53/EU Art. 10(6); GPSR (EU) 2023/988 Art. 9 *(verify)*
+- **Priority:** Should
+- **Status:** Draft
+
+### HW-021 Flammability class of the board material
+
+- **Statement:** The base material of the printed circuit board shall have a flammability class of V-1 or better, and the fabrication notes of each board revision shall name the material and its class.
+- **Rationale:** SYS-050: EN IEC 62368-1 clause 6 asks for V-1 or better board material where PS2 or PS3 circuits are mounted *(verify)*. Standard FR-4 is rated V-0, so this costs nothing, but the technical file needs the statement and the fabricator's material name.
+- **Parent:** SYS-050
+- **Acceptance criteria:** The fabrication notes in `hw/fabrication/<rev>/` name the laminate and its UL 94 or IEC 60695-11-10 class; the fabricator's order confirmation or material data sheet for the lot is filed with the release record.
+- **Verification method:** Inspection
+- **Verified by:** TC-221
+- **Category:** Safety
+- **Regulatory:** RED 2014/53/EU Art. 3(1)(a); EN IEC 62368-1 clause 6.4 *(verify)*
+- **Priority:** Must
+- **Status:** Draft

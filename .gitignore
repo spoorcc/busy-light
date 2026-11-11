@@ -4,6 +4,7 @@
 /bootloader/
 /tools/
 /.west/
+/doc/
 build/
 build-*/
 

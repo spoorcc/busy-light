@@ -15,6 +15,10 @@ the normal process**, not reconstructed at the end. The repository is the techni
 2. **Regulatory requirements** become normal requirements (`SYS-/SW-/HW-/MECH-`) with a `Regulatory:` field citing the
    legal basis and standard clause. They are verified like any other requirement.
 3. **Compliance matrix** (`compliance-matrix.md`): legal requirement / standard clause -> requirement ID -> TC / evidence.
+   **Automated design-rule checks** (`automated-checks.md`, ADR-0022 Proposed) run in CI on every change: hardware rules on
+   the KiCad files (ESD clamps on interfaces, test access, identification, part numbers, materials register, lifecycle),
+   firmware rules (Kconfig attack surface, secrets, clang-tidy CERT, cppcheck MISRA, SBOM) and the matrix consistency check.
+   They produce evidence of design rules; they never show conformity on their own.
 4. **Pre-compliance** testing during design (EMC near-field/scan, ESD, safety checks, security testing); final accredited
    tests on a frozen design.
 5. **Technical file** (`technical-file/`) kept current; reviewed at every gate. Checklist: `technical-file/INDEX.md`.
@@ -22,6 +26,18 @@ the normal process**, not reconstructed at the end. The repository is the techni
    signed by the responsible person, CE mark and labelling verified on the first article.
 7. **Post-market:** vulnerability handling, incident reporting, corrective actions, support period, record retention
    (keep technical documentation and DoC for **10 years** after placing on the market *(verify per act; CRA: 10 years or support period if longer)*).
+
+## 1a. Document map
+| Question | Document |
+|----------|----------|
+| What is the product? | `technical-file/01-general/product-description.md` |
+| Which rules apply, which do not, and why? Which route, which open decisions? | `applicability.md` (RAA-001) |
+| What can go wrong and what controls it? | `technical-file/03-risk-and-safety/risk-assessment.md`, entries in `docs/risk/risk-register.md` |
+| Which standards, which clauses matter? | `technical-file/04-standards-and-testing/standards-list.md` |
+| Which tests, on what, in which order? | `technical-file/04-standards-and-testing/conformity-test-plan.md` |
+| Which requirement and evidence covers each legal clause? | `compliance-matrix.md` |
+| Which design rules does CI check? | `automated-checks.md` |
+| Is the technical file complete? | `technical-file/INDEX.md` |
 
 ## 2. Legislation to assess (details in `applicability.md`)
 CRA (Regulation (EU) 2024/2847), RED (2014/53/EU) incl. cybersecurity delegated act (EU) 2022/30, LVD (2014/35/EU),
