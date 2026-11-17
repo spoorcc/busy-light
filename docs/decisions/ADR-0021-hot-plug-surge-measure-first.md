@@ -1,6 +1,6 @@
 # ADR-0021: Hot-plug surge on VBUS_IC and +5V: measure first on the prototype (option S1)
 
-- **Status:** Proposed (owner chose S1 in the working session of 2026-11-09; this text is not yet accepted)
+- **Status:** Accepted (by the owner, Ben Spoor, 2026-11-17, in the working session, option S1, together with HW-017; recorded by the assistant, `docs/journal/2026-11-17-p1-order-owner-decisions.md`). Before this: Proposed since 2026-11-09.
 - **Date:** 2026-11-09
 - **Deciders / reviewers:** Ben Spoor (owner); open finding 9 of goldfish review RV-013
 - **Related:** HW-010, HW-014, HW-015, HW-017, ADR-0010, ADR-0016, RISK-046, `docs/verification/reports/analysis-vbus-5v-part-ratings.md`, `docs/verification/reports/shortlist-tvs1-3v3-regulator.md`

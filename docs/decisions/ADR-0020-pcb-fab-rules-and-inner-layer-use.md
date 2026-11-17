@@ -50,3 +50,6 @@ Fabricator DFM report on the Gerbers of the accepted board; repeat the batch wit
 
 ## Critical review notes
 Strongest objection: the spike needed three days of tuning, and the fine rules may only hide a placement that is too dense. Answer: partly true; the same placement routes complete at the fine rules in half of the runs and not at all at the coarse rules, so the rules are the limit, and the margin to the fabricator is stated above. A second objection: 0.1 mm lines for a product that may be built by another fabricator; not answered, the other fabricators were not read.
+
+## Update 2026-11-17 (owner answer, not an acceptance)
+The owner did not accept option B. In the working session of 2026-11-17 the owner chose JLCPCB Economic PCBA, one-sided assembly (HW-008 Approved with amendment), 4 layers 1.6 mm HASL lead-free, and 0.15 mm tracks ("use 0.15 traces"), with no via-in-pad (`docs/journal/2026-11-17-p1-order-owner-decisions.md`). This ADR stays Proposed. A revision with the 0.15 mm rule set, the local neck-down at fine-pitch parts and the Economic PCBA limits follows with plan 08; the JLCPCB numbers above were read 2026-11-08 and were not re-checked (no network to jlcpcb.com from the 2026-11-17 container).
