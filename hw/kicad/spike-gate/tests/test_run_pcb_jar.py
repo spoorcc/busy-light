@@ -36,6 +36,28 @@ class JarCheck(unittest.TestCase):
         self.assertIn("sha256", out)
 
 
+class PinnedHashes(unittest.TestCase):
+    """Owner answer 8 of 2026-11-17: the GitHub release jar and the Maven Central executable jar of v2.5.0 are both pinned."""
+    GITHUB = "f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7"
+    MAVEN = "7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976"
+
+    def test_both_hashes_pinned(self):
+        text = SCRIPT.read_text()
+        self.assertIn(self.GITHUB, text)
+        self.assertIn(self.MAVEN, text)
+
+    @unittest.skipUnless(os.environ.get("FREEROUTING_JAR"), "FREEROUTING_JAR not set")
+    def test_given_jar_is_accepted(self):
+        """With a real pinned jar the script passes the jar check and stops later (empty netlist)."""
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            (t / "in").mkdir()
+            (t / "in" / "kicad.net").write_text("")
+            res = subprocess.run(["sh", str(SCRIPT), str(t / "in"), str(t / "out"), "4"], env=dict(os.environ),
+                                 capture_output=True, text=True, check=False)
+        self.assertNotIn("sha256 is not the pinned", res.stdout + res.stderr)
+
+
 class PlanesArgument(unittest.TestCase):
     """Plan 06 A-8: run_pcb.sh stops before the slow build when the planes argument is invalid."""
 
