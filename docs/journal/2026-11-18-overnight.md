@@ -1,6 +1,6 @@
 # Overnight work on the P1 board, 2026-11-17 to 2026-11-18 (hand-off)
 
-Status at 05:52 UTC, 2026-11-18 (updated through the morning). Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2026-11-17-p1-order-owner-decisions.md`.
+Status at 06:00 UTC (07:00 CET), 2026-11-18, final for this session. Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2026-11-17-p1-order-owner-decisions.md`.
 **The P1 board does not exist yet. No routing run was made tonight. Nothing is ready to order.**
 
 ## Headline (05:52 UTC)
@@ -66,6 +66,31 @@ flag that fails on a non-zero count; 26 new tests. On the stored board the count
   findings for you: HW-017 and HW-003 have `Regulatory: none` (proposed: RED 3(1)(a) / EN 62368-1 and 3(1)(b), verify); no EMC/ESD
   requirement exists (open since 2026-11-03); RoHS declarations and the lead-free hand-soldering of J1 are not in TC-208; the order
   checklist lacks the prototype label. Its finding on the power check is fixed (`706ba3e`).
+
+## Routing experiment on the 54 mm one-sided placement (06:13 to 06:30 UTC, one run, scratch copy)
+`run_pcb.sh`, 0.15 mm default profile, 4 layers, `KEYFIRST=1`, Freerouting 2.5.0 (Maven jar; **needs Java 25**, Java 21 fails).
+Result: M1 unrouted 0; after stitching 17 unconnected; after the clean-up **5 unconnected**; strict gate FAIL on
+`courtyards_overlap` 33 (waiver max 14, the U9 courtyard) and the 5 unconnected; LED ring cells 47 links, none failed.
+One run only (Freerouting varies). Reading: a 54 mm one-sided board is close to routable at 0.15 mm; the U9 courtyard waiver is
+the other blocker. 54 mm means a housing of about 61 mm (MECH-001: 58 mm).
+
+## Agents stopped by the usage limit at about 06:20 UTC (work not committed, local worktrees only)
+- Order package, KiKit panel, CI workflow: `.claude/worktrees/agent-ab92f4156360a614a` (branch `worktree-agent-ab92f4156360a614a`).
+- P1 placement switch (step 5): `.claude/worktrees/agent-a2b671907b52373f3` (branch `worktree-agent-a2b671907b52373f3`).
+Both are lost if this container is reclaimed. Continue them after the limit resets, or redo from plan 08.
+
+## Owner question 2026-11-18 07:00 CET: fewer components?
+Yes, but each option changes an Accepted ADR (ADR-0010, ADR-0016, ADR-0004) and needs datasheets read; nothing below is checked.
+Rough savings against today's 101 footprints:
+| Option | Parts saved (about) | Cost / risk |
+|---|---|---|
+| A USB power switch with two current-limit inputs selected by a pin (TI's USB charging-port-controller family has ILIM_HI/ILIM_LO pins; fit to our step windows not checked) instead of TPS2553 + two TMUX1101 + their protection and pull-downs | 8 to 10 | ADR-0010/0016 amendment; three steps become two unless the part has three |
+| One configurable mixed-signal logic IC (GreenPAK class) for U2, U3, U4, U10, U13, maybe also the hold-off timer | 5 to 11 | needs NVM programming (JLCPCB cannot), new verification of the "independent hardware gate" argument |
+| A supervisor with a fixed internal delay inside 200 to 600 ms instead of TPS3840DL + six 100 nF C0G | 6 | part to find; delay tolerance against the HW-010 window |
+| Fewer LED bypass capacitors (one per 2 or 4 LEDs) | 8 to 12 | ADR-0004 / LED datasheet; supply ripple at the LEDs |
+| Option T2 (shared supply protection) | 2 | rejected: one fault unpowers both switches (RV-014) |
+Recommendation: look at the switch with selectable limits first (largest saving, simplest safety argument, stays all-hardware),
+then the fixed-delay supervisor. Together about 15 parts, which may be enough for one side at 46 to 50 mm.
 
 ## Not done
 P1 placement (all parts on top), via-in-pad removal, routing batches, finishing, `board-p1/`, order package, KiKit panel, CI
