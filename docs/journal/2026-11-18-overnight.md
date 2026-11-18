@@ -13,7 +13,7 @@ ring14 knobs `PLACE_GRID=1.0 PLACE_BLOCKS=3 PLACE_ORIENT=1.5`, 16 seeds of 16000
 | Baseline, vendor antenna keep-out on | 25.1 (placed DRC: 61 `courtyards_overlap`, waiver max 14) |
 | Keep-out off | 6.6 |
 | Keep-out on, five of the six hold-off capacitors removed (as if one part) | 9.0 |
-| Both (keep-out off, five capacitors removed) | see the update below |
+| Both (keep-out off, five capacitors removed) | 0.57 (closest; still not overlap-free, and at that density routing on one side at 0.15 mm is not likely) |
 | Baseline with 4x iterations | see the update below |
 
 Reading: one-sided P1 on 46 mm needs a decision from you before routing makes sense. The levers, each yours:
