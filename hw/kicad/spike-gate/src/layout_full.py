@@ -82,7 +82,7 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R0402, "1k"), "TVS2": (*TVS, "ESD diode"),
     "U11": (*AHCT125, "74AHCT1G125"),
-    "R10": (*R0402, "330"), "R11": (*R0402, "10k"), "C4": (*C0805, "DNP spare"), "C32": (*C0805, "DNP spare"),   # HW-016: two spare footprints on +5V (0805, ADR-0023)
+    "R10": (*R0402, "330"), "R11": (*R0402, "10k"), "C4": (*C1206, "DNP spare"), "C32": (*C1206, "DNP spare"),   # HW-016: two spare 1206 footprints on +5V (P1: bottom side, not fitted)
     "R22": ("Device", "R", "Resistor_SMD:R_1206_3216Metric", "0"),   # HW-017: 0 ohm damping link VBUS -> VBUS_IC
    
     # supply-pin protection (HW-010 amendment, owner 2026-11-07): series resistor, 100 nF and 5.1 V zener per 6 V pin

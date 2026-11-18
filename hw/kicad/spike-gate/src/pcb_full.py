@@ -178,7 +178,10 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
                 ("C24", "U14", 6.0), ("C25", "U15", 6.0),         # bypass capacitor at the switch supply pin
                 ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0),
                 ("C1", "U5", 8.0), ("C27", "U5", 12.0), ("C28", "U5", 14.0), ("C29", "U5", 14.0),
-                ("C30", "U5", 14.0), ("C31", "U5", 14.0))
+                ("C30", "U5", 14.0), ("C31", "U5", 14.0),
+                # HW-016 (Approved): spare pad centres within [10] mm of U7 pin 6. Part centres: 10 - 1.3 (U7 centre to pin 6,
+                # SOT-23-6) - 1.0 (0805 centre to pad centre) - 0.2 margin = 7.5 mm. Batch p1b3 without it: C4 at 24.8 mm.
+                ("C4", "U7", 7.5), ("C32", "U7", 7.5))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 # Plan 08 section 4.2 (P1, HW-008): the LED bypass capacitors move beside their LED on the top side, which frees the ring
@@ -199,8 +202,10 @@ def p1_enabled(env=None):
 
 
 def part_sides(ref, p1):
-    """Sides a movable part may take: test points on the bottom; with P1 every other part on the top, else both."""
-    if ref.startswith("TP"):
+    """Sides a movable part may take: test points on the bottom; with P1 the do-not-populate spares of HW-016 on the bottom
+    too (not assembled, so the assembly stays one-sided; the top around U7 has no room within [10] mm, batch p1b3 and
+    the placement check of 2026-11-18) and every other part on the top; without P1 both sides."""
+    if ref.startswith("TP") or (p1 and ref in DNP_REFS_P1):
         return "B"
     return "F" if p1 else "FB"
 
@@ -338,6 +343,16 @@ def corner_points(az, r0, r1, half_w):
         a = math.radians(az)
         out.append(K(r * math.cos(a) - t * math.sin(a), r * math.sin(a) + t * math.cos(a)))
     return out
+
+
+def tab_keepouts():
+    """P1 (plan 08 section 4.5): one box per panel tab of pcb_rules.P1_TAB_AZIMUTHS, around the tab cut on the board edge:
+    tangential half width = half the tab width + P1_TAB_CAP_MM + margin, radial from R_PCB - (P1_TAB_CAP_MM + margin) to
+    R_PCB + 1 mm. An LED capacitor whose courtyard meets a box takes the other side of its LED. (name, polygon KiCad mm)."""
+    m = pcb_rules.P1_TAB_KEEPOUT_MARGIN
+    hw_ = pcb_rules.P1_TAB_WIDTH / 2 + pcb_rules.P1_TAB_CAP_MM + m
+    r0 = MO.R_PCB - (pcb_rules.P1_TAB_CAP_MM + m)
+    return [("tab_%g" % az, corner_points(az, r0, MO.R_PCB + 1.0, hw_)) for az in pcb_rules.P1_TAB_AZIMUTHS]
 
 
 def place_led_cap_top(d, c, az, obstacles):
@@ -576,6 +591,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         obstacles = [(dref, court_poly_mm(fps[dref])) for dref, _, _ in led_ring_refs()]
         obstacles += [("J1", court_poly_mm(j1)), ("J1 extent", rect_poly(*pad_extent_mm(j1, 0.3)))]
         obstacles += [("hook_%d" % az, corner_points(az, r0, r1, hw_)) for az, r0, r1, hw_ in MO.hook_keepouts()]
+        obstacles += tab_keepouts()
         for dref, cref, i in led_ring_refs():
             c = fps[cref]
             orient(c, MO.led_rotation_deg(MO.led_azimuths()[i]), "F")

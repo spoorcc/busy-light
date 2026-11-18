@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullS4/full.kicad_sch")
-		(date "2026-11-18T20:10:23")
+		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullS6/full.kicad_sch")
+		(date "2026-11-18T21:10:56")
 		(tool "Eeschema 10.0.8")
 		(sheet
 			(number "1")
@@ -273,7 +273,7 @@
 		(comp
 			(ref "C4")
 			(value "DNP spare")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
 				(field
 					(name "MPN")
@@ -285,7 +285,7 @@
 					(name "LCSC")
 				)
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -2298,7 +2298,7 @@
 		(comp
 			(ref "C32")
 			(value "DNP spare")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
 				(field
 					(name "MPN")
@@ -2310,7 +2310,7 @@
 					(name "LCSC")
 				)
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -6777,8 +6777,7 @@
 				(field
 					(name "Manufacturer") "STMicroelectronics")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C15999")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:SOT-666")
 				(field
@@ -6803,7 +6802,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C15999")
 			)
 			(property
 				(name "Sheetname")

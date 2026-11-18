@@ -85,3 +85,14 @@ class PlanesArgument(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RunMetaThreads(unittest.TestCase):
+    """2026-11-18: run_meta.json said 4 router threads for a batch run with FR_THREADS=1 (the value was a literal 4)."""
+
+    def test_meta_records_the_thread_setting(self):
+        txt = SCRIPT.read_text(encoding="utf-8")
+        call = txt[txt.index('"$PY" - "$A/run_meta.json"'):]
+        call = call[:call.index("<<'PYEOF'")]
+        self.assertIn('"${FR_THREADS:-4}"', call)
+        self.assertNotIn('"${FR_PASSES:-60}" 4 ', call)

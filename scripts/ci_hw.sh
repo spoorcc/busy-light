@@ -13,11 +13,11 @@ OUT="${HW_CI_OUT:-$(mktemp -d)}"; mkdir -p "$OUT"
 shopt -s nullglob globstar
 sch=(hw/kicad/**/*.kicad_sch); pcb=(hw/kicad/**/*.kicad_pcb)
 ((${#sch[@]} + ${#pcb[@]})) || { echo "hw: NOT RUN - no .kicad_sch or .kicad_pcb file in hw/kicad"; exit 0; }
-# The generated spike board (hw/kicad/spike-gate/board) has known, waived findings: the antenna keep-out overlaps (DEV-004,
+# The generated spike boards (hw/kicad/spike-gate/board and board-p1) have known, waived findings: the antenna keep-out overlaps (DEV-004,
 # ADR-0003). Its checks go through the strict wrapper, which fails on every
 # finding outside the waiver list (hw/kicad/spike-gate/known-open-violations.json). Every other file keeps the raw check.
 STRICT=hw/kicad/spike-gate/src/kicad_strict.py
-is_spike_board() { [[ "$1" == hw/kicad/spike-gate/board/* ]]; }
+is_spike_board() { [[ "$1" == hw/kicad/spike-gate/board/* || "$1" == hw/kicad/spike-gate/board-p1/* ]]; }   # board-p1: plan 08
 for f in "${sch[@]}"; do
   echo "== ERC $f"
   if is_spike_board "$f"; then

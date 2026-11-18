@@ -44,6 +44,12 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- P1 placement (plan 08, HW-016, HW-008): the do-not-populate spares C4 and C32 go on the bottom side (not assembled, so the
+  assembly stays one-sided) in 1206 again, held within 7.5 mm of U7 by a hard layout rule and pin ties (batch p1b3 put C4 24.8 mm
+  from U7 pin 6, against HW-016's [10] mm); the LED capacitors keep out of boxes around four panel tabs at 105, 217.5, 285 and
+  330 deg (`pcb_rules.P1_TAB_AZIMUTHS`, new `scripts/fab_p1.sh` default), so the 3 mm capacitor-to-tab rule can hold (it could
+  not before: best 2.42 mm). `run_meta.json` records the real router thread count. `scripts/ci_hw.sh` gates `board-p1/` with
+  the strict wrapper. New `src/pcb_sourcing.py` copies sourcing fields from the schematic to a stored board.
 - Sourcing: U6 USBLC6-2P6 has LCSC C15999 (web search 2026-11-18); `scripts/fab_missing_lcsc.txt` now lists only R22 (candidate
   C190124, 20 mohm max against HW-017's [10] mohm) and U5 (no listing found) (HW-008, HW-017, HW-010).
 - Spike board tooling, no via-in-pad (plan 08 step 4, HW-008, RV-014): one rule `pcb_rules.via_hits_smd_pad` (any net, pad box grown by 0.05 mm) used by the stitcher (the U9 via-in-pad shortcut is removed; the via goes beside the pad with a short track) and by the grid router of `pcb_fix.py` (and so the LED ring cells of `pcb_ring.py`); `pcb_fabcheck.py` reports `via_in_smd_pad` and fails on it with `--no-via-in-pad`. The stored board `board/` has 35 such vias (32 in the LED ring cells, 2 at DZ15, 1 at C32; none at U9) and is not regenerated.

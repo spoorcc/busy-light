@@ -104,7 +104,7 @@ if [ -n "$FREEROUTING_JAR" ]; then
   echo "wrote $A/check_routed.json"
   echo "M1 unrouted (routed board, plane nets excluded): $("$PY" "$HERE/src/pcb_check.py" m1 "$A/drc_routed.json")"
   "$PY" - "$A/run_meta.json" "$PLACED_SHA" "$(sha256sum "$A/b.dsn" | cut -d' ' -f1)" "$(kicad-cli version)" \
-    "$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)" "${FR_PASSES:-60}" 4 "$(java -version 2>&1 | head -1)" "$WALL" "$PLANES" <<'PYEOF'
+    "$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)" "${FR_PASSES:-60}" "${FR_THREADS:-4}" "$(java -version 2>&1 | head -1)" "$WALL" "$PLANES" <<'PYEOF'
 import sys
 import pcb_replay
 a = sys.argv[1:]

@@ -14,7 +14,8 @@ FABCHECK="$ROOT/hw/kicad/spike-gate/src/pcb_fabcheck.py"
 PRESET="$ROOT/scripts/panel_p1.json"
 MISSING_LCSC="$ROOT/scripts/fab_missing_lcsc.txt"
 # Mechanical azimuths of the panel tabs (scripts/panel_tabs.py explains the choice and the checks).
-TAB_AZIMUTHS="${TAB_AZIMUTHS:-45,120,215,325}"
+# P1: equal to hw/kicad/spike-gate/src/pcb_rules.py P1_TAB_AZIMUTHS (the placer keeps the LED capacitors away from these).
+TAB_AZIMUTHS="${TAB_AZIMUTHS:-105,217.5,285,330}"
 
 die() { echo "fab_p1: $*" >&2; exit 2; }
 (($# == 2)) || die "usage: scripts/fab_p1.sh <board.kicad_pcb> <out dir>"

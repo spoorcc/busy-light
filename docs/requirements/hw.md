@@ -259,6 +259,7 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Should
 - **Status:** Approved (owner, Ben Spoor, 2026-11-17, in the working session, with [5] mm changed to [10] mm; recorded by the assistant, `docs/journal/2026-11-17-p1-order-owner-decisions.md`)
 - **Proposed change (ADR-0023, owner decision 3 of 2026-11-18 left to the assistant's recommendation; for the owner to confirm):** footprint size [1206] becomes [0805] for one-sided placement; a 0805 part limits the spare value (about 10 to 22 uF X5R) and the HW-014 analysis counts the 0805 value.
+- **Proposed change withdrawn (assistant, 2026-11-18 evening; the owner confirms):** the 0805 size did not bring the spares within [10] mm on the full top side (batch p1b3: C4 at 24.8 mm, the board failed this requirement). The P1 placer now puts the two spares on the **bottom** side: they are do-not-populate, so the assembly stays one-sided (HW-008), and the bottom has room under U7. The footprints are [1206] again, as approved; measured 2.05 and 2.95 mm from U7 pin 6 on the placement check. Hand-fitting is on the bottom, under the board (about 3 mm free, rationale above). Check: `tests/test_board_p1.py`.
 
 ### HW-017 Damping footprint in the VBUS path of the prototype
 

@@ -308,9 +308,9 @@ def test_missing_list_format(tmp_path: Path) -> None:
 
 
 def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
-    """Every listed ref (except R22, added by plan 08 step 3) is on the board, and its value has an
-    MPN but no LCSC number in sourcing.py: a number added there makes this test ask for the list
-    update."""
+    """Every listed ref (except R22, which has no recorded part yet) is on the board, and its value
+    has an MPN but no LCSC number in sourcing.py: a number added there makes this test ask for the
+    list update. The board is board-p1 when it exists."""
     listed = fc.read_missing_list(ROOT / "scripts" / "fab_missing_lcsc.txt")
     # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers
     assert set(listed) == {"R22", "U5"}
@@ -318,7 +318,9 @@ def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
     board = p1 if p1.exists() else SPIKE / "board" / "busy_light_spike.kicad_pcb"
     values = {f.ref: f.value for f in fc.read_footprints(board)}
     sourcing = load("sourcing", SPIKE / "src" / "sourcing.py").SOURCING
-    for ref in set(listed) - ({"R22"} - set(values)):
+    if p1.exists():  # HW-017: R22 is on the P1 board; no part is recorded for it (owner decides)
+        assert "R22" in values
+    for ref in set(listed) - {"R22"}:
         entry = sourcing[values[ref]]
         assert entry["MPN"], ref
         assert entry["LCSC"] == "", ref

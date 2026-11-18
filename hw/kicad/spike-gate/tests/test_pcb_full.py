@@ -49,7 +49,10 @@ class PlacementWeights(unittest.TestCase):
         bypass = {"tie:C24-U14", "tie:C25-U15"}
         regulator = {"tie:C5-U8", "tie:C6-U8"}              # TLV757P: input capacitor at pin 1, output capacitor at pin 5
         paths = {"tie:J1A4-U7", "tie:J1B9-U7", "tie:C2-U7", "tie:U8-U9"}      # current paths of the power check
-        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | regulator | paths)
+        spares = {"tie:C4-U7", "tie:C32-U7"}                                    # HW-016: spares at U7 pin 6
+        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | regulator | paths | spares)
+        for name in spares:
+            self.assertEqual(pcb_rules.PIN_TIES[name][1], ("U7", "6"))
         for name, (a, b, w) in pcb_rules.PIN_TIES.items():
             if name in bypass:
                 self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
@@ -414,12 +417,36 @@ class P1Board(unittest.TestCase):
         inter.BooleanIntersection(cb)
         return inter.Area() / 1e12
 
-    def test_every_footprint_but_the_test_points_is_on_top(self):
+    def test_every_assembled_footprint_is_on_top(self):
+        """HW-008 one side: the test points and the do-not-populate HW-016 spares (not assembled) are on the bottom."""
         self.assertIn("J1", self.fps)
-        bad = [r for r, f in self.fps.items()
-               if f.GetLayer() != (pcbnew.B_Cu if r.startswith("TP") else pcbnew.F_Cu)]
+        bottom = lambda r: r.startswith("TP") or r in pcb_full.DNP_REFS_P1      # noqa: E731
+        bad = [r for r, f in self.fps.items() if f.GetLayer() != (pcbnew.B_Cu if bottom(r) else pcbnew.F_Cu)]
         self.assertEqual(bad, [])
         self.assertEqual(len([r for r in self.fps if r.startswith("TP")]), 6)
+        self.assertTrue(all(self.fps[r].IsDNP() for r in pcb_full.DNP_REFS_P1))
+
+    def test_spares_are_1206_on_the_rule_that_keeps_them_at_u7(self):
+        """HW-016 (Approved): two 1206 footprints; the placer rule keeps their centres within 7.5 mm of U7 (pad centres
+        then within [10] mm of pin 6). The reduced annealing run of this test is not asserted to meet the rule; the
+        batch board is (tests/test_board_p1.py)."""
+        for ref in pcb_full.DNP_REFS_P1:
+            self.assertEqual(str(self.fps[ref].GetFPID().GetLibItemName()), "C_1206_3216Metric", ref)
+            self.assertIn((ref, "U7", 7.5), pcb_full.LAYOUT_RULES)
+
+    def test_led_capacitors_keep_out_of_the_tab_boxes(self):
+        """Plan 08 section 4.5: no LED capacitor courtyard meets the box around a P1 panel tab cut."""
+        boxes = pcb_full.tab_keepouts()
+        self.assertEqual(len(boxes), len(pcb_full.pcb_rules.P1_TAB_AZIMUTHS))
+        bad = [(c, name) for _, c, _ in pcb_full.led_ring_refs() for name, box in boxes
+               if not pcb_full.convex_clear(pcb_full.court_poly_mm(self.fps[c]), box, pcb_full.LED_CAP_GAP)]
+        self.assertEqual(bad, [])
+
+    def test_tab_azimuths_equal_the_order_script_default(self):
+        import re
+        txt = (HERE.parents[3] / "scripts" / "fab_p1.sh").read_text(encoding="utf-8")
+        got = re.search(r'TAB_AZIMUTHS="\$\{TAB_AZIMUTHS:-([0-9.,]+)\}"', txt).group(1)
+        self.assertEqual(tuple(float(a) for a in got.split(",")), pcb_full.pcb_rules.P1_TAB_AZIMUTHS)
 
     def test_led_capacitors_sit_beside_their_led_on_top(self):
         for d, c, _ in pcb_full.led_ring_refs():

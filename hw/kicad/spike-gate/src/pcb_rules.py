@@ -168,18 +168,32 @@ PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
             # Regulator bypass (layout experiment 2026-11-08, ring11): input capacitor C5 at the +5V pin and output capacitor C6
             # at the +3V3 pin of the TLV757P (U8 pins 1 and 5; the datasheet asks for the input capacitor close to the part).
             "tie:C5-U8": (("C5", "1"), ("U8", "1"), 4.0),
-            "tie:C6-U8": (("C6", "1"), ("U8", "5"), 4.0)}
+            "tie:C6-U8": (("C6", "1"), ("U8", "5"), 4.0),
+            # HW-016 (Approved, [10] mm): the spare footprints at the TPS2553 output pin. Without these ties batch p1b3 put C4
+            # 24.8 mm from U7 pin 6 (it sat in the regulator block).
+            "tie:C4-U7": (("C4", "1"), ("U7", "6"), 4.0),
+            "tie:C32-U7": (("C32", "1"), ("U7", "6"), 4.0)}
+
+# P1 panel tabs (plan 08 section 4.5; scripts/fab_p1.sh TAB_AZIMUTHS, scripts/panel_tabs.py): mechanical azimuths in gaps
+# between two ring LEDs whose bypass capacitors both face away from the tab, clear of the J1 tab, the notch, the hooks and
+# the button. 105 deg is the only such gap on the top rail side (0 to 180 deg); no LED is shared by two tabs. The P1 placer
+# keeps every LED capacitor courtyard out of a box around each tab cut (P1_TAB_CAP_MM plus a margin), so the 3 mm
+# MLCC-to-tab rule holds (batch p1b3: best 2.42 mm without this).
+P1_TAB_AZIMUTHS = (105.0, 217.5, 285.0, 330.0)
+P1_TAB_WIDTH = 3.0
+P1_TAB_CAP_MM = 3.0
+P1_TAB_KEEPOUT_MARGIN = 0.3
 
 # Functional blocks (layout experiment 2026-11-08, ring12): (anchor, member, radius mm). A member sits within the radius of the
 # anchor part, so each circuit reads as one group. The weight is PLACE_BLOCKS in pcb_place.py (0 = off). The radii are a first
 # guess from the part sizes, not a derived value.
 BLOCKS = tuple((anchor, m, rad) for anchor, rad, members in (
-    ("U8", 6.0, ("C3", "C4", "C5", "C6")),                                        # 5 V to 3.3 V regulator
+    ("U8", 6.0, ("C3", "C5", "C6")),                                              # 5 V to 3.3 V regulator (C4 moved: HW-016)
     ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R8")),                # supervisor, timing capacitors, GATE_OK_RB pull-up
     ("U14", 7.0, ("C24", "DZ14", "R_SU14", "R2", "R18", "R14")),                  # current-limit step 2 switch
     ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch                  # current-limit step 3 switch
     ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1")),                           # USB-C CC detect
-    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22")),   # VBUS switch, protection, ILIM resistors
+    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22", "C4", "C32")),   # VBUS switch, protection, ILIM, HW-016 spares
     ("U9", 12.0, ("R9", "C7", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts (R13 removed, ADR-0023)
 ) for m in members)
 # Twins: the parts of the two identical switch circuits. They take the same rotation and side, so the circuits look alike.

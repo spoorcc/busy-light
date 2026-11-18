@@ -92,3 +92,12 @@ unchanged, and the hardware reaction is toward the lowest step.
 4. **U9 courtyard as an obstacle** (owner chose it over a body-only courtyard, which the assistant recommended, and over a larger waiver): with P1 the placer keeps every movable part out of the full ESP32-C3-MINI-1 library courtyard (43 x 32 mm, antenna keep-out included; `pcb_full.CourtyardMask`, test `test_no_movable_part_touches_the_u9_courtyard`). Measured: overlap 12.6 mm2 at the old module position.
 5. **Module 5 mm towards the antenna-side edge** (`mech_outline` MOD_OFF 1.0 to -4.0 mm; owner chose it, recommended): the courtyard hangs partly off the board; with eight more parts in 0402 (C7, C24, C25, C26, R_SU1, R_SU14, R_SU15, R8) the measured overlap is 0.0 mm2 and 14 fixed parts touch the courtyard (D6 to D12, C13 to C18, SW1; waiver 14). The antenna end is then about 6.5 mm from the LED ring; range is unverified (spike 7.2, TC-205). Related: ADR-0003 (antenna and board topology), HW-005.
 Routing evidence before decisions 4 and 5 (3 runs, 0.15 mm, one side): best run 2 unconnected items after the clean-up, strict gate FAIL in 4 classes, power check FAIL 2 (the batch on the final design is in the P1 report).
+
+## Update 2026-11-18 evening (assistant, reversible; the owner confirms)
+- **Spare footprints C4, C32:** the 0805 size of decision 3 is reverted to 1206 (HW-016 as approved). Batch p1b3 showed the top
+  side has no room within [10] mm of U7 pin 6 (C4 at 24.8 mm; the HW-016 acceptance failed), and a hard placer rule could not be
+  met there either. The spares are do-not-populate, so the P1 placer puts them on the bottom (`pcb_full.part_sides`), where the
+  assembly stays one-sided; measured 2.05 and 2.95 mm from U7 pin 6. Rule `LAYOUT_RULES` C4/C32 to U7 7.5 mm (part centres).
+- **Panel tabs:** the LED capacitors beside the LEDs left no tab azimuth with 3 mm to a capacitor (best 2.42 mm). The P1 placer
+  now keeps the LED capacitors out of boxes around four tab cuts at 105, 217.5, 285 and 330 deg (`pcb_rules.P1_TAB_AZIMUTHS`,
+  `scripts/fab_p1.sh` default); the placement check gives 3.38 mm minimum.
