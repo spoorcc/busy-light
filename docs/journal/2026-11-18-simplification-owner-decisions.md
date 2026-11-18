@@ -66,3 +66,11 @@ Question: body-only courtyard (recommended), raise the waiver to about 30, or ke
 - 15 fixed ring parts lie inside it whatever the placer does: the LEDs D6 to D12 and the LED capacitors C12 to C19; the waiver
   allows 14 overlaps with U9 (DEV-004), so the strict gate fails on the ring alone unless one capacitor leaves the courtyard or the
   owner changes the waiver.
+
+## Owner answer on the module position (2026-11-18, in the working session)
+Measured with the U9 courtyard as a placer obstacle (scratch copy, P1, 46 mm, keep-out on): module offset +1 mm (today) 12.6 mm2,
+-2 mm 2.1 mm2, -4 mm 0.24 mm2; -4 mm plus 0402 for C7, C24, C25, C26, R_SU1, R_SU14, R_SU15, R8: **0.0 mm2**, and exactly 14 fixed
+parts touch the U9 courtyard (D6 to D12, C13 to C18, SW1; the waiver allows 14). Question: move the module 5 mm towards the
+antenna-side edge (MOD_OFF 1.0 to -4.0 mm)? **Answer: yes, shift 5 mm** (recommended). The antenna end then sits about 6.5 mm from
+the LED ring; range is not verified either way (spike 7.2, TC-205). Parts for the extra 0402 swaps (web search, JLCPCB basic):
+Samsung CL05B104KO5NNNC C1525 (100 nF 16 V X7R), CL05A105KA5NQNC C52923 (1 uF 25 V X5R), Uni-Royal 0402WGF4700TCE C25117 (470 ohm).
