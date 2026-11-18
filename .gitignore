@@ -1,6 +1,7 @@
 # West workspace (fetched by `west update`)
 /zephyr/
 /modules/
+/doc/          # west project (Zephyr requirements module) fetched by `west update`
 /bootloader/
 /tools/
 /.west/
@@ -44,3 +45,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 /.venv-sw/
+
+# Agent worktrees of Claude Code sessions (separate git checkouts)
+/.claude/worktrees/
