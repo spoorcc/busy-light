@@ -36,7 +36,8 @@ SOURCING.update(
             "MPN": "TPS3840DL40DBVR",
             "Manufacturer": "Texas Instruments",
             "LCSC": "",
-            "Evidence": "TI package addendum 29-Apr-2025 (Active, DBV 5) and DigiKey listing",
+            "Evidence": "TI package addendum 29-Apr-2025 (Active, DBV 5) and DigiKey listing; no LCSC or JLCPCB listing "
+            "of this exact part found by web search 2026-11-18 (only TPS3840DL40DBVRQ1 C6560464, shown out of stock)",
         },
         "TPS2553": {
             "MPN": "TPS2553DBVR",
@@ -55,8 +56,9 @@ SOURCING.update(
         "USBLC6-2P6": {
             "MPN": "USBLC6-2P6",
             "Manufacturer": "STMicroelectronics",
-            "LCSC": "",
-            "Evidence": "ST product page (Active, SOT666)",
+            "LCSC": "C15999",
+            "Evidence": "ST product page (Active, SOT666); LCSC C15999 listing (ST, SOT-666-6) by web search "
+            "2026-11-18, page not opened",
         },
         "74LVC1G04": {
             "MPN": "SN74LVC1G04DCKR",

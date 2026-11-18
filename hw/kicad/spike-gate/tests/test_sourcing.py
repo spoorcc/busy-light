@@ -53,6 +53,11 @@ class SchematicFieldsTest(unittest.TestCase):
         self.assertEqual(f["LCSC"].value, "C2673506")
         self.assertTrue(f["MPN"].effects.hide)
 
+    def test_esd_part_has_its_lcsc_number(self):
+        """2026-11-18: U6 USBLC6-2P6 found as LCSC C15999 (web search); U5 TPS3840DL40DBVR still has none."""
+        self.assertEqual(self.fields("U6")["LCSC"].value, "C15999")
+        self.assertEqual(self.fields("U5")["LCSC"].value, "")
+
     def test_every_reference_has_an_mpn_and_the_missing_check_reports_an_empty_one(self):
         # J1 (GCT USB4085-GF-A) and TVS1, TVS2 (PESD parts) are listed since 2026-11-09
         for ref, mpn in (("J1", "USB4085-GF-A"), ("TVS1", "PESD5V0S1BA,115"), ("TVS2", "PESD3V3L1BA,115")):

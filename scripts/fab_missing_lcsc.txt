@@ -3,12 +3,6 @@
 # scripts/fab_check.py fails on every other BOM line without an LCSC number. CI passes this file and the
 # release notes print it. A number found at order time goes into hw/kicad/spike-gate/src/sourcing.py with its
 # evidence, the ref leaves this list, and a new release is made, so the ordered BOM equals a hashed manifest.
-# Source of the list: sourcing.py on 2026-11-18 (MPN recorded, LCSC empty) and plan 08 section 4.1 (R22).
-R22   0 ohm 1206 damping link (HW-017): no part is recorded; check [10] mohm at 1.5 A and [3] A at O2
-U5    TPS3840DL40DBVR (HW-010 hold-off): MPN recorded, no LCSC number; without U5 the hold-off does not work
-U6    USBLC6-2P6: MPN recorded, no LCSC number
-U3    SN74LVC1G11DBVR: MPN recorded, no LCSC number
-U4    SN74LVC1G11DBVR: MPN recorded, no LCSC number
-U10   SN74LVC1G08DBVR: MPN recorded, no LCSC number
-U11   SN74AHCT1G125DBVR: MPN recorded, no LCSC number
-U13   SN74LVC1G02DBVR: MPN recorded, no LCSC number
+# Source of the list: sourcing.py on 2026-11-18, after ADR-0023 (U10, U13 removed; U3, U4, U11 found) and the U6 lookup.
+R22   0 ohm 1206 damping link (HW-017): candidate Vishay CRCW12060000Z0EA, LCSC C190124, jumper 3.5 A but max 20 mohm against [10] mohm: owner decides
+U5    TPS3840DL40DBVR (HW-010 hold-off): no LCSC or JLCPCB listing found 2026-11-18 (Q1 variant C6560464 out of stock); without U5 the hold-off does not work

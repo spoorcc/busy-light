@@ -312,7 +312,8 @@ def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
     MPN but no LCSC number in sourcing.py: a number added there makes this test ask for the list
     update."""
     listed = fc.read_missing_list(ROOT / "scripts" / "fab_missing_lcsc.txt")
-    assert set(listed) == {"R22", "U5", "U6", "U3", "U4", "U10", "U11", "U13"}
+    # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers
+    assert set(listed) == {"R22", "U5"}
     p1 = SPIKE / "board-p1" / "busy_light_spike.kicad_pcb"
     board = p1 if p1.exists() else SPIKE / "board" / "busy_light_spike.kicad_pcb"
     values = {f.ref: f.value for f in fc.read_footprints(board)}

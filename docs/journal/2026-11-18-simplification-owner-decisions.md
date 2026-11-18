@@ -102,3 +102,14 @@ Two changes to the routing flow (spike-gate, tests in `tests/test_pcb_check_stit
    so the router routes around them. Smoke test on run3's ring board: 100 of 102 plane pads get a via (the two misses are the
    0.4 mm-pitch GND pads of U1, which the router or the post-route stitch handle). A batch with the same placement seeds (p1b3)
    is running; its result decides whether P1 uses this.
+
+## Part lookups for the order (2026-11-18 evening, web search; shop pages not opened)
+After ADR-0023 only three BOM parts had no LCSC number (C4 and C32 are DNP and out of the BOM):
+- **U6 USBLC6-2P6: LCSC C15999** (ST, SOT-666-6). Recorded in `sourcing.py`; it leaves `scripts/fab_missing_lcsc.txt`. JLCPCB
+  C2827693 is a TECH PUBLIC part with other numbers, not this one.
+- **U5 TPS3840DL40DBVR: no LCSC or JLCPCB listing found.** Only the automotive TPS3840DL40DBVRQ1 (C6560464, shown out of stock)
+  and other thresholds (for example DL27, C2066499) appeared; a different threshold changes the HW-010 hold-off. Owner decision
+  at order step O2: the Q1 part if stocked, JLCPCB global sourcing, or hand-fitting. Without U5 the hold-off does not work.
+- **R22 0 ohm 1206 (HW-017): candidate Vishay CRCW12060000Z0EA, LCSC C190124**, jumper rating 3.5 A but at most 20 mohm by the
+  datasheet summary, against HW-017's [10] mohm. Not recorded as the part: the owner decides between this part and the
+  bracketed value. At 1.5 A, 20 mohm is 30 mV and 45 mW.
