@@ -117,15 +117,40 @@ class TmuxCandidate(unittest.TestCase):
         self.assertGreater(both[2], il.STEP3_MAX_MA)
 
 
+class TrimT1(unittest.TestCase):
+    """Plan 08 trim T1 (owner rule of 2026-11-17 in HW-010): one 27.7 k 0.1 % part replaces 27.4 k + 301 ohm."""
+
+    def test_value_is_e192(self):
+        self.assertIn(2.77, il.E192_M)
+        self.assertEqual(il.candidate_p1(), (47.0, 56.2, 27.7))
+
+    def test_windows_stay_inside_hw010(self):
+        kw = dict(leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        mg = il.margins(*il.candidate_p1(), il.TOL_01PCT, **kw)
+        self.assertTrue(all(v > 0 for v in mg.values()), mg)
+        w = il.step_windows(*il.candidate_p1(), il.TOL_01PCT, **kw)
+        self.assertGreaterEqual(w["3"][0], il.STEP3_MIN_MA)
+        self.assertLessEqual(w["3"][1], il.STEP3_MAX_MA)
+        self.assertGreaterEqual(w["2"][0], il.STEP2_BAND_MA[0])
+        self.assertLessEqual(w["2"][1], il.STEP2_BAND_MA[1])
+
+    def test_margins_within_0p1_ma_of_the_series_pair(self):
+        kw = dict(leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        old = il.margins(*il.candidate_c(), il.TOL_01PCT, **kw)
+        new = il.margins(*il.candidate_p1(), il.TOL_01PCT, **kw)
+        for k in old:
+            self.assertLessEqual(abs(new[k] - old[k]), 0.1, k)   # within 0.1 mA in both directions (plan 08 4.1)
+
+
 class Generator(unittest.TestCase):
     def test_generator_values_are_the_checked_set(self):
         P = layout_full.PARTS
-        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R20"][-1]),
-                         ("47.0k 0.1%", "56.2k 0.1%", "27.4k 0.1%", "301 0.1%"))
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
+                         ("47.0k 0.1%", "56.2k 0.1%", "27.7k 0.1%"))     # plan 08 trim T1
+        self.assertNotIn("R20", P)
         r1, r2 = ohms(P["R_ILIM1"][-1]) / 1e3, ohms(P["R_ILIM2"][-1]) / 1e3
-        r3 = (ohms(P["R_ILIM3"][-1]) + ohms(P["R20"][-1])) / 1e3
-        self.assertEqual((r1, r2), il.candidate_c()[:2])
-        self.assertAlmostEqual(r3, il.candidate_c()[2], places=6)
+        r3 = ohms(P["R_ILIM3"][-1]) / 1e3
+        self.assertEqual((r1, r2, r3), il.candidate_p1())
         mg = il.margins(r1, r2, r3, il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
         self.assertTrue(all(v >= 0 for v in mg.values()), mg)
 

@@ -68,7 +68,7 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
     # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
-    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R20": (*R, "301 0.1%"),
+    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": ("Device", "R", "Resistor_SMD:R_0805_2012Metric", "27.7k 0.1%"),   # plan 08 trim T1 (was 27.4k + R20 301 ohm in series); 0.1 % 27.7 k exists in 0805 only (stock-check-ilim-holdoff.md)
     "R_ILIM1": (*R, "47.0k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
     "R6": (*R, "150k"), "C1": (*C1206, "100n C0G 5% 50V"), "C27": (*C1206, "100n C0G 5% 50V"),
@@ -84,6 +84,7 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
     "U10": (*G08, "74LVC1G08"), "U11": (*AHCT125, "74AHCT1G125"),
     "R10": (*R, "330"), "R11": (*R, "10k"), "C4": (*C1206, "DNP spare"), "C32": (*C1206, "DNP spare"),   # HW-016: two spare 1206 on +5V
+    "R22": ("Device", "R", "Resistor_SMD:R_1206_3216Metric", "0"),   # HW-017: 0 ohm damping link VBUS -> VBUS_IC
    
     # supply-pin protection (HW-010 amendment, owner 2026-11-07): series resistor, 100 nF and 5.1 V zener per 6 V pin
     "R_SU1": (*R, "470"), "R_SU14": (*R, "1k"), "R_SU15": (*R, "1k"),
@@ -176,7 +177,7 @@ PLACE = {
     "R_ILIM2": (gx(250.19), 50.8, 90),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
     "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
-    "R20": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
+    "R_ILIM3": (gx(250.19), 91.44, 90),
     "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C27": (gx(86.36), 146.05, 0),
     "C28": (gx(93.98), 146.05, 0), "C29": (gx(101.6), 146.05, 0), "C30": (gx(109.22), 146.05, 0),
     "C31": (gx(116.84), 146.05, 0),
@@ -191,6 +192,7 @@ PLACE = {
     "R_SU1": (290.0, 143.0, 90), "C26": (306.0, 149.0, 0), "DZ1": (316.0, 149.0, 270),
     "R_SU14": (330.0, 143.0, 90), "DZ14": (346.0, 149.0, 270),
     "R_SU15": (356.0, 143.0, 90), "DZ15": (372.0, 149.0, 270),
+    "R22": (385.0, 143.0, 90),   # HW-017 damping link
 }
 TEXT = {
     "J1": (-7.62, 26.0, "left"), "TVS1": (-3.81, -5.5, "left"), "U6": (6.0, 8.0, "left"),
@@ -199,7 +201,7 @@ TEXT = {
     "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
     "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
-    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R20": (-2.54, 2.54, "left"),
+    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"),
     "R_ILIM1": (-2.54, -1.27, "right"),
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
     "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
@@ -390,17 +392,17 @@ def _build():
     s.caption("Rails (sources are in this sheet):", 18, 20, 1.27)
 
     # ------------------------------------------------------------ rails with power flags
-    for k, net in enumerate(("VBUS_IC", "+5V", "+3V3", "GND")):
+    for k, net in enumerate(("VBUS_IC", "+5V", "+3V3", "GND", "VBUS")):
         s.rail(net, 20, 28 + 7 * k)
 
     # ------------------------------------------------------------ USB-C
     for pin in ("A4", "B4", "A9", "B9"):
-        s.bind("VBUS_IC", "J1", pin)
+        s.bind("VBUS", "J1", pin)     # HW-017: connector side, R22 joins it to VBUS_IC
     vb = P("J1", "A4")
     s.wire(vb, (53.34, vb[1]))
-    s.pw("VBUS_IC", (48.26, vb[1]), True)
+    s.pw("VBUS", (48.26, vb[1]), True)
     s.junction(48.26, vb[1])
-    s.bind("VBUS_IC", "TVS1", 1)
+    s.bind("VBUS", "TVS1", 1)
     s.bind("GND", "TVS1", 2)
     s.pw("GND", ("TVS1", "2"), True)
     for pin in ("A1", "B1", "A12", "B12"):
@@ -430,7 +432,7 @@ def _build():
     ydp = P("J1", "B6")[1]
     s.wire((50.32, ydn), (55.4, ydn), (55.4, P("U6", "1")[1]), P("U6", "1"))
     s.wire((50.32, ydp), (50.32, P("U6", "3")[1]), P("U6", "3"))
-    s.pw("VBUS_IC", ("U6", "5"), True)
+    s.pw("VBUS", ("U6", "5"), True)
     s.pw("GND", ("U6", "2"), True)
     s.stub("USB_DN", ("U6", "6"), 6.6, 0, 0)
     s.stub("USB_DP", ("U6", "4"), 6.6, 0, 0)
@@ -502,8 +504,8 @@ def _build():
         s.bind("GND", sw, 2)
         s.pw("GND", (sw, "3"), True)
         s.wire(P(sw, 2), P(sw, 3))
-    # step 2: switch - 56.2 k - ILIM; step 3: switch - 301 ohm - 27.4 k - ILIM (decision (b))
-    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R20", "R_ILIM3"), "ILIM_D_U15")):
+    # step 2: switch - 56.2 k - ILIM; step 3: switch - 27.7 k - ILIM (plan 08 trim T1; was 301 ohm + 27.4 k)
+    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3",), "ILIM_D_U15")):
         prev, prev_pin = P(sw, 1), (sw, 1)
         for k, rl in enumerate(chain):
             (lo_pin, lo), (hi_pin, hi) = sorted((("1", P(rl, 1)), ("2", P(rl, 2))), key=lambda e: e[1][0])
@@ -729,6 +731,11 @@ def _build():
         if cap:
             s.stub(vnet, (cap, "1"), 0, -5.08, 90)
             s.pw("GND", (cap, "2"), True)
+
+    # ------------------------------------------------------------ HW-017 damping link (plan 08)
+    s.caption("HW-017: 0 ohm link, VBUS (connector, TVS1, U6) to VBUS_IC", 380, 132, 1.27)
+    s.pw("VBUS", ("R22", "1"), False)
+    s.pw("VBUS_IC", ("R22", "2"), False, 180)
 
     # ------------------------------------------------------------ LED data buffer
     a = P("U11", 2)

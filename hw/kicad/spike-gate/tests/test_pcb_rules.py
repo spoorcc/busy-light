@@ -136,19 +136,33 @@ class ViaRemoval(unittest.TestCase):
 
 class MainPathSplit(unittest.TestCase):
     def test_main_path_pads(self):
-        self.assertTrue(R.is_main_path_pad("VBUS_IC", "J1", "A4"))
+        # HW-017 (plan 08): the 1.5 A path runs J1 -> VBUS -> R22 -> VBUS_IC -> U7 pin 1
+        self.assertTrue(R.is_main_path_pad("VBUS", "J1", "A4"))
+        self.assertTrue(R.is_main_path_pad("VBUS", "TVS1", "1"))
+        self.assertTrue(R.is_main_path_pad("VBUS", "R22", "1"))
+        self.assertFalse(R.is_main_path_pad("VBUS", "U6", "5"))           # ESD reference pin: microamps
+        self.assertTrue(R.is_main_path_pad("VBUS_IC", "R22", "2"))
         self.assertTrue(R.is_main_path_pad("VBUS_IC", "U7", "1"))
+        self.assertTrue(R.is_main_path_pad("VBUS_IC", "C2", "1"))
         self.assertFalse(R.is_main_path_pad("VBUS_IC", "U7", "3"))        # enable pin: microamps
         self.assertFalse(R.is_main_path_pad("VBUS_IC", "R1", "1"))
         self.assertTrue(R.is_main_path_pad("GND", "R1", "2"))             # other nets are not split
+
+    def test_both_main_path_nets_are_wide_outer_and_first(self):
+        for n in ("VBUS", "VBUS_IC"):
+            self.assertIn(n, R.MAIN_PATH_NETS)
+            self.assertIn(n, R.ROUTE_FIRST)
+            self.assertIn(n, R.OUTER_ONLY)
+            self.assertEqual(R.NET_WIDTH[n], 0.6)
 
     def test_branch_width_is_a_legal_narrow_track(self):
         self.assertGreaterEqual(R.BRANCH_WIDTH, R.MIN_TRACK)
         self.assertLess(R.BRANCH_WIDTH, R.NET_WIDTH["VBUS_IC"])
 
     def test_main_path_pins_exist_in_the_main_net_table(self):
-        self.assertEqual(R.MAIN_PATH_NET, "VBUS_IC")
-        self.assertIn("J1", R.MAIN_PATH_PADS)
+        self.assertEqual(R.MAIN_PATH_NETS, ("VBUS", "VBUS_IC"))
+        self.assertIn("J1", R.MAIN_PATH_PADS["VBUS"])
+        self.assertIn("U7", R.MAIN_PATH_PADS["VBUS_IC"])
 
 
 class RouteFirst(unittest.TestCase):

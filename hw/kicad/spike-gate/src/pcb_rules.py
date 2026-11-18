@@ -19,7 +19,7 @@ I_TOP_STEP_MAX_A = 1.577
 # Net widths in mm used by the spike. IPC-2221 external layer, 1 oz, 10 K rise: 1.5 A -> 0.53 mm, 1.577 A -> 0.56 mm,
 # 2.0 A -> 0.78 mm. The spike uses 0.6 mm (>= 0.56 mm for the highest allowed current limit); the earlier run used
 # 0.8 mm (2.0 A) and left the VBUS_IC net unrouted.
-NET_WIDTH = {"VBUS_IC": 0.6, "+5V": 0.6, "+3V3": 0.3}      # +3V3: 0.3 mm = 1.0 A by IPC-2221 (the TLV757P rating); the ESP32-C3 needs about 0.35 A
+NET_WIDTH = {"VBUS": 0.6, "VBUS_IC": 0.6, "+5V": 0.6, "+3V3": 0.3}   # VBUS: connector side of R22 (HW-017)      # +3V3: 0.3 mm = 1.0 A by IPC-2221 (the TLV757P rating); the ESP32-C3 needs about 0.35 A
 
 
 # ---- rule values (moved here from pcb_full.py and pcb_stitch.py; the numbers are unchanged)
@@ -153,7 +153,7 @@ def write_dru(path, layers=4, silk_waiver=None):
 # Placement weights of the simulated-annealing placer (pcb_place.py): the half-perimeter wire length of the named
 # nets counts this many times, so the ADR-0016 gate parts and the hold-off capacitors stay together. Without them the
 # annealer minimises total wire length only and the layout rules of the tests hold by chance.
-NET_WEIGHT = {"VBUS_IC": 3.0, "/ILIM_STEP2_EN": 4.0, "/ILIM_STEP3_EN": 4.0, "/SUP_CT": 3.0, "/ILIM": 2.0}
+NET_WEIGHT = {"VBUS": 3.0, "VBUS_IC": 3.0, "/ILIM_STEP2_EN": 4.0, "/ILIM_STEP3_EN": 4.0, "/SUP_CT": 3.0, "/ILIM": 2.0}
 # Pin ties: a bypass capacitor sits at the supply pin of its part. Added to the annealer as two-pin pseudo-nets
 # (not on the board): name -> ((ref, pad), (ref, pad), weight). Owner decision 2026-11-05 (a): 0.1 uF on the TMUX1101 VDD pin.
 PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
@@ -177,9 +177,9 @@ BLOCKS = tuple((anchor, m, rad) for anchor, rad, members in (
     ("U8", 6.0, ("C3", "C4", "C5", "C6")),                                        # 5 V to 3.3 V regulator
     ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R6")),                # supervisor and its timing capacitors
     ("U14", 7.0, ("C24", "DZ14", "R_SU14", "R2", "R18", "R14")),                  # current-limit step 2 switch
-    ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch
+    ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch                  # current-limit step 3 switch
     ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1")),                           # USB-C CC detect
-    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R20")),   # VBUS switch, protection, ILIM resistors
+    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22")),   # VBUS switch, protection, ILIM resistors
     ("U9", 12.0, ("R9", "C7", "R13", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts
 ) for m in members)
 # Twins: the parts of the two identical switch circuits. They take the same rotation and side, so the circuits look alike.
@@ -218,7 +218,7 @@ def reuse_targets(x, y, vias, net, max_dist):
 # Nets the router lays first, on their own, before the other nets (run_pcb.sh stage 1). Their tracks are locked for stage 2.
 # Chosen from the nets that the single-pass run left open: the 1.5 A USB power path VBUS_IC (the only net still open after the
 # placement change). Plane nets (GND, +5V) are left to the planes and the stitcher. Default off (KEYFIRST=0): see the report.
-ROUTE_FIRST = ("VBUS_IC",)
+ROUTE_FIRST = ("VBUS", "VBUS_IC")   # HW-017 (plan 08): the main path crosses R22 from VBUS to VBUS_IC
 
 
 def is_key_net(name):
@@ -230,17 +230,19 @@ def is_key_net(name):
 # capacitor and the clamp; every other pin of the net (supervisor, ESD part, dividers, supply-pin resistors, enable) draws
 # microamps. Stage 1 routes the main path alone at NET_WIDTH; stage 2 routes the branches at BRANCH_WIDTH and joins them to the
 # locked main path. Pins: ref -> pins, None means every pin of the ref.
-MAIN_PATH_NET = "VBUS_IC"
-MAIN_PATH_PADS = {"J1": None, "U7": ("1",), "C2": ("1",), "TVS1": ("1",)}
+# HW-017 (plan 08, 2026-11-17): the path is split by the 0 ohm link R22; each side has its own main-path pads.
+MAIN_PATH_PADS = {"VBUS": {"J1": None, "TVS1": ("1",), "R22": ("1",)},
+                  "VBUS_IC": {"R22": ("2",), "U7": ("1",), "C2": ("1",)}}
+MAIN_PATH_NETS = tuple(MAIN_PATH_PADS)
 BRANCH_WIDTH = 0.2
 
 
 def is_main_path_pad(net, ref, pin):
-    """True when the pad takes part in stage 1 of the split routing: any pad of a net other than MAIN_PATH_NET, and
-    the MAIN_PATH_PADS pads of MAIN_PATH_NET."""
-    if net != MAIN_PATH_NET:
+    """True when the pad takes part in stage 1 of the split routing: any pad of a net other than MAIN_PATH_NETS, and
+    the MAIN_PATH_PADS pads of each main-path net."""
+    if net not in MAIN_PATH_PADS:
         return True
-    pins = MAIN_PATH_PADS.get(ref, ())
+    pins = MAIN_PATH_PADS[net].get(ref, ())
     return pins is None or pin in pins
 
 
@@ -258,7 +260,7 @@ def joins_nothing(x, y, track_ends, pad_boxes, tol=0.01):
 # other net except GND keeps off In1, so that signal tracks do not cut the ground plane into islands (a ground via on an
 # island is not connected; seen on run 5 of 2026-11-08). The router gets a `use_layer` rule per class; the clean-up router
 # obeys the same function.
-OUTER_ONLY = ("VBUS_IC", "+3V3")
+OUTER_ONLY = ("VBUS", "VBUS_IC", "+3V3")
 OUTER_LAYERS = ("F.Cu", "B.Cu")
 NOT_IN1_LAYERS = ("F.Cu", "In2.Cu", "B.Cu")
 GROUND_NET = "GND"

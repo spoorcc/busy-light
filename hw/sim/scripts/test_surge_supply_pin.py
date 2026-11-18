@@ -43,3 +43,31 @@ def test_sustained_9v_power_within_half_rating():
         _, p_r, p_z = s.dc_s3(r)
         assert p_r <= MAX_R_POWER_W
         assert p_z <= MAX_Z_POWER_W
+
+
+# Plan 08 option T2 (NOT applied: it changes Approved HW-010 text, so it is the owner's call; RV-014): U14 and U15 would
+# share one 1 kohm resistor and one zener (net VDD_SW);
+# each supply pin keeps its own 100 nF. Conservative model: the node carries both loads and only ONE worst-case capacitor
+# (as if the second were far away); the real node has two.
+TMUX_VDD_MIN_V = 1.08  # TMUX1101 SCDS410D recommended supply minimum (quoted in the script docstring)
+VBUS_MIN_V = 4.5
+
+
+@pytest.mark.parametrize("bv", s.VZ_CORNERS)
+def test_shared_tmux_supply_stays_below_limit(bv):
+    two_loads = 2 * s.LOADS["TMUX1101"]
+    for shape in s.SURGES.values():
+        assert s.run_case(1000.0, WORST_C, two_loads, shape, bv=bv) <= LIMIT
+
+
+def test_shared_tmux_supply_dc_drop_and_minimum_supply():
+    drop = s.dc_drop(1000.0, 2 * s.LOADS["TMUX1101"])
+    assert drop == pytest.approx(0.002)
+    assert VBUS_MIN_V - drop >= TMUX_VDD_MIN_V
+
+
+def test_shared_tmux_supply_sustained_power_unchanged():
+    # one resistor and one zener carry the same S3 current as each did before (the load current is negligible)
+    _, p_r, p_z = s.dc_s3(1000.0)
+    assert p_r <= MAX_R_POWER_W
+    assert p_z <= MAX_Z_POWER_W

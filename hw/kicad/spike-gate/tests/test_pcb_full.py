@@ -132,11 +132,12 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 100)
+        self.assertEqual(len(self.comps), 101)     # plan 08: R20 out (trim T1), R22 in (HW-017); C32 (HW-016) was missing in the old fixture
         self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 55)
-        for ref in ("U13", "C27", "C28", "C29", "C30", "C31", "U14", "U15", "R20", "R18", "R19", "C24", "C25", "R3", "R15"):
+        for ref in ("U13", "C27", "C28", "C29", "C30", "C31", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
+                    "C32"):
             self.assertIn(ref, self.comps)
-        for ref in ("Q2", "Q3"):
+        for ref in ("Q2", "Q3", "R20"):
             self.assertNotIn(ref, self.comps)
 
     def test_board_matches_netlist(self):
@@ -145,7 +146,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 55)
+        self.assertEqual(res["nets_named"], 55)        # plan 08: +VBUS (HW-017), -R20 mid net (trim T1)
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")

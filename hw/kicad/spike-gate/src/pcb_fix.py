@@ -469,7 +469,7 @@ def blockers(board, net, pairs, fx, margin=2.5, limit=5):
     cx, cy = (lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2
     near = {}
     for L, x0, y0, x1, y1, w, n in fx.segs:
-        if n == net or n in R.PLANE_NETS or n == R.MAIN_PATH_NET or not n:
+        if n == net or n in R.PLANE_NETS or n in R.MAIN_PATH_NETS or not n:
             continue
         if min(x0, x1) - margin <= hi[0] and max(x0, x1) + margin >= lo[0] and min(y0, y1) - margin <= hi[1] and max(y0, y1) + margin >= lo[1]:
             d = math.hypot((x0 + x1) / 2 - cx, (y0 + y1) / 2 - cy)
@@ -662,7 +662,7 @@ def auto(folder, stem="stitched", profile="stitched-4l", rounds=5):
 
 
 def width_for(net, refs):
-    if net == R.MAIN_PATH_NET:
+    if net in R.MAIN_PATH_NETS:
         return R.BRANCH_WIDTH
     return R.NET_TRACK.get(net, R.TRACK)
 

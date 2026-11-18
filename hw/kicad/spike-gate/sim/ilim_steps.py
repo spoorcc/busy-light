@@ -166,6 +166,11 @@ def candidate_c():
     return 47.0, 56.2, round(sum(R3_PARTS_K), 6)
 
 
+def candidate_p1():
+    """Plan 08 trim T1 (2026-11-17): one E192 0.1 % part, 27.7 k, replaces the 27.4 k + 301 ohm series pair."""
+    return 47.0, 56.2, 27.7
+
+
 def candidate_b():
     r1 = min(r for r in e96(44.0, 50.0) if limits(r, TOL_1PCT, (), 2, leak_a=0.0)[2] <= STEP1_MAX_MA)
     r3 = max(r for r in e96(10.0, 232.0) if limits(r1, TOL_1PCT, (r,), 1, leak_a=0.0)[0] >= STEP3_MIN_MA)

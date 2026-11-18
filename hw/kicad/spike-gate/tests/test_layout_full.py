@@ -175,14 +175,16 @@ class FullBoard(unittest.TestCase):
 
     def test_ilim_resistor_values(self):
         P = layout_full.PARTS
-        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R20"][-1]),
-                         ("47.0k 0.1%", "56.2k 0.1%", "27.4k 0.1%", "301 0.1%"))   # E96, HW-010 revision
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
+                         ("47.0k 0.1%", "56.2k 0.1%", "27.7k 0.1%"))   # plan 08 trim T1: one E192 part for step 3
+        self.assertNotIn("R20", P)
+        self.assertEqual(P["R_ILIM3"][2], "Resistor_SMD:R_0805_2012Metric")   # 0.1 % 27.7 k is listed in 0805 only
 
     def test_tmux1101_ilim_switches(self):
         """Owner decision 2026-11-05 (a). TMUX1101DCK (SCDS410D tab. 5-1): 1 D, 2 S, 3 GND, 4 SEL, 5 VDD."""
         pn, P = self.pin_net, layout_full.PARTS
         for sw, en, r_ilim, cap, rpd in (("U14", "ILIM_STEP2_EN", "R_ILIM2", "C24", "R18"),
-                                         ("U15", "ILIM_STEP3_EN", "R20", "C25", "R19")):
+                                         ("U15", "ILIM_STEP3_EN", "R_ILIM3", "C25", "R19")):
             self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, f"VDD_{sw}"])   # VDD from VBUS_IC through R_SU14 / R_SU15
             self.assertEqual(pn[(sw, "1")], pn[(r_ilim, "1")])
             self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), (f"VDD_{sw}", "GND"))
@@ -193,7 +195,6 @@ class FullBoard(unittest.TestCase):
             self.assertEqual(P[sw][2], "Package_TO_SOT_SMD:SOT-353_SC-70-5")
         self.assertNotIn("Q2", P)
         self.assertNotIn("Q3", P)
-        self.assertEqual(pn[("R20", "2")], pn[("R_ILIM3", "1")])
         self.assertEqual(pn[("R_ILIM3", "2")], "ILIM")
 
     def test_holdoff_capacitor_set(self):
@@ -304,6 +305,34 @@ class GateOkReadback(unittest.TestCase):
 
     def test_gate_is_the_and_part(self):
         self.assertEqual(layout_full.PARTS["U10"][1], "74LVC1G08")
+
+
+class DampingLink(unittest.TestCase):
+    """HW-017 (Approved 2026-11-17), plan 08 4.1 item 1: R22, 0 ohm 1206, between the connector side VBUS and VBUS_IC."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sch, cls.intent = layout_full.build()
+        cls.pin_net = pin_net_of(cls.intent)
+
+    def test_r22_part(self):
+        self.assertEqual(layout_full.PARTS["R22"][2], "Resistor_SMD:R_1206_3216Metric")
+        self.assertEqual(layout_full.PARTS["R22"][3], "0")
+
+    def test_r22_in_series(self):
+        # pin 1 on the connector side: pcb_rules.MAIN_PATH_PADS depends on this order
+        self.assertEqual((self.pin_net[("R22", "1")], self.pin_net[("R22", "2")]), ("VBUS", "VBUS_IC"))
+
+    def test_connector_side_members(self):
+        members = {k for k, v in self.pin_net.items() if v == "VBUS"}
+        expected = {("J1", p) for p in ("A4", "A9", "B4", "B9")} | {("TVS1", "1"), ("U6", "5")}
+        self.assertEqual(members - {("R22", "1"), ("R22", "2")}, expected)
+
+    def test_switch_side_members(self):
+        members = {k for k, v in self.pin_net.items() if v == "VBUS_IC"}
+        expected = {("U7", "1"), ("U7", "3"), ("C2", "1"), ("R1", "1"), ("R6", "1"), ("R21", "1"), ("R_SU1", "1"),
+                    ("R_SU14", "1"), ("R_SU15", "1"), ("U5", "2"), ("R22", "2")}
+        self.assertEqual(members, expected)
 
 
 if __name__ == "__main__":

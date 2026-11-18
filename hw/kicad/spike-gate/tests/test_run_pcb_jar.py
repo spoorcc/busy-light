@@ -42,9 +42,10 @@ class PinnedHashes(unittest.TestCase):
     MAVEN = "7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976"
 
     def test_both_hashes_pinned(self):
-        text = SCRIPT.read_text()
-        self.assertIn(self.GITHUB, text)
-        self.assertIn(self.MAVEN, text)
+        """The check line itself (not the comment block) holds both hashes and nothing else (RV-014 finding)."""
+        lines = [ln.strip() for ln in SCRIPT.read_text().splitlines() if ln.strip().startswith("JAR_SHAS=")]
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0].split("=", 1)[1].strip('"').split(), [self.GITHUB, self.MAVEN])
 
     @unittest.skipUnless(os.environ.get("FREEROUTING_JAR"), "FREEROUTING_JAR not set")
     def test_given_jar_is_accepted(self):

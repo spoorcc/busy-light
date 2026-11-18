@@ -130,12 +130,6 @@ SOURCING.update(
         "470": _uni("0603WAF4700T5E", "C23179"),
         "150k": _uni("0603WAF1503T5E", "C22807", "; LCSC product page not seen, number from the JLCPCB page"),
         "887k": _uni("0603WAF8873T5E", "C23259", "; listing showed 0 stock, check at order time"),
-        "301 0.1%": {
-            "MPN": "TD03G3010BT",
-            "Manufacturer": "FH (Guangdong Fenghua)",
-            "LCSC": "C666860",
-            "Evidence": "LCSC listing, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm, extended part",
-        },
         "47.0k 0.1%": {
             "MPN": "TD03G4702BT",
             "Manufacturer": "FH (Guangdong Fenghua)",
@@ -148,11 +142,14 @@ SOURCING.update(
             "LCSC": "C667119",
             "Evidence": "LCSC datasheet file name and listing text, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm",
         },
-        "27.4k 0.1%": {
-            "MPN": "RT0603BRE0727K4L",
+        "27.7k 0.1%": {
+            "MPN": "RT0805BRD0727K7L",
             "Manufacturer": "Yageo",
-            "LCSC": "",
-            "Evidence": "DigiKey listing, web lookup 2026-11-08 (thin film 0603 0.1%); no LCSC number seen",
+            "LCSC": "C865349",
+            "Evidence": (
+                "JLCPCB library mirror query recorded in docs/verification/reports/stock-check-ilim-holdoff.md (27.7 k row: "
+                "0.1 % exists in 0805 only, C865349 RT0805BRD0727K7L); stock not confirmed; plan 08 trim T1, 2026-11-17"
+            ),
         },
         "100n": {
             "MPN": "CL10B104KB8NNNC",
