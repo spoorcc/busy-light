@@ -100,8 +100,9 @@ Two changes to the routing flow (spike-gate, tests in `tests/test_pcb_check_stit
    board it stitches U11.5; U7.6, C5.1 and U6.2 still fail (no free first leg at 0.6 mm for U7.6; one at 0.25 mm for U6.2).
 2. **Fan-out first (`PRESTITCH=1`, default off):** the plane pads get their via before the router runs and the vias are locked,
    so the router routes around them. Smoke test on run3's ring board: 100 of 102 plane pads get a via (the two misses are the
-   0.4 mm-pitch GND pads of U1, which the router or the post-route stitch handle). A batch with the same placement seeds (p1b3)
-   is running; its result decides whether P1 uses this.
+   0.4 mm-pitch GND pads of U1, which the router or the post-route stitch handle). The batch meant to compare it (p1b3) **did
+   not use it**: the local container wrapper did not pass `PRESTITCH` (see below). The switch stays off by default, untested in
+   a batch.
 
 ## Part lookups for the order (2026-11-18 evening, web search; shop pages not opened)
 After ADR-0023 only three BOM parts had no LCSC number (C4 and C32 are DNP and out of the BOM):
@@ -113,3 +114,31 @@ After ADR-0023 only three BOM parts had no LCSC number (C4 and C32 are DNP and o
 - **R22 0 ohm 1206 (HW-017): candidate Vishay CRCW12060000Z0EA, LCSC C190124**, jumper rating 3.5 A but at most 20 mohm by the
   datasheet summary, against HW-017's [10] mohm. Not recorded as the part: the owner decides between this part and the
   bracketed value. At 1.5 A, 20 mohm is 30 mV and 45 mW.
+
+## Batch p1b3: first one-sided board that passes every gate (2026-11-18, 20:10 to 20:49 UTC)
+Same settings and placement seeds as p1b2; differences: the DNP spares out of the BOM in the schematic, the one-corner stitch,
+and a new Freerouting run (not deterministic). `PRESTITCH=1` was set but not passed into the container, so it did not run; the
+result is **not** evidence for the fan-out-first switch.
+
+| Run | Unconnected after clean-up | Strict gate FAIL classes | Power check FAIL |
+|---|---|---|---|
+| run1 (best) | **0** | **0** | **0** |
+| run2 | 11 | 1 | 2 |
+| run3 | 2 | 1 | 1 |
+
+run1 was finished (designators, fiducials, sourcing fields refreshed) and checked as `board-p1/`, but is **not committed**:
+it fails HW-016 and the panel tab rule (below), so the next batch (p1b4) replaces it. Copy with its README in the assistant's
+scratchpad. Summary: strict ERC 0; strict DRC only the tolerated U9 classes (14 + 1); fab check with no via in
+SMD pads PASS; power drops 15.8 / 28.9 / 34.6 / 43.4 mV (+3V3, +5V, VBUS, VBUS_IC); 91 assembled parts on top, test points on
+the bottom. First end-to-end run of `scripts/fab_p1.sh`: BOM/CPL checks pass; **the panel tab check fails** (no tab azimuth
+keeps 3 mm from an LED capacitor; best 2.42 mm with three tabs at 44, 111, 314 deg). Not ready to order: panel tabs, U5 part,
+R22 part (owner decisions).
+
+## Two defects of the p1b3 board and their fix (2026-11-18, 21:00 to 21:20 UTC)
+- **HW-016 failed:** C4 24.8 mm and C32 8.6 mm from U7 pin 6 ([10] mm Approved). C4 sat in the regulator block; a hard placer rule
+  (7.5 mm part centres) could not be met on the full top side. Fix: the do-not-populate spares go on the bottom (assembly stays
+  one-sided) in 1206 again; placement check 2.05 and 2.95 mm. The 0805 proposal of ADR-0023 is withdrawn (HW-016 note).
+- **Panel tabs:** no tab azimuth kept 3 mm from an LED capacitor (best 2.42 mm, three tabs). Fix: four tabs in LED gaps at 105,
+  217.5, 285 and 330 deg, the neighbouring LED capacitors turned away by keep-out boxes; placement check 3.38 mm minimum.
+- New stored-board test `tests/test_board_p1.py` (sides, HW-016, HW-017, panel tabs): on the p1b3 board it fails exactly these two.
+- Batch p1b4 with both fixes started 21:16 UTC.
