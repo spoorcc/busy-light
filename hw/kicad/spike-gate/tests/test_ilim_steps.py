@@ -142,17 +142,51 @@ class TrimT1(unittest.TestCase):
             self.assertLessEqual(abs(new[k] - old[k]), 0.1, k)   # within 0.1 mA in both directions (plan 08 4.1)
 
 
+class BothOnStep3(unittest.TestCase):
+    """ADR-0023 (owner 2026-11-18): step 3 = both select switches on; R_ILIM3 = R_ILIM2 = 56.2 k (0.1 %)."""
+    KW = dict(leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+
+    def test_values(self):
+        self.assertEqual(il.candidate_both_on(), (47.0, 56.2, 56.2))
+
+    def test_every_state_inside_the_hw010_limits(self):
+        w = il.both_on_windows(*il.candidate_both_on(), il.TOL_01PCT, **self.KW)
+        self.assertGreaterEqual(w["1"][0], il.STEP1_MIN_MA)
+        self.assertLessEqual(w["1"][1], il.STEP1_MAX_MA)
+        self.assertGreaterEqual(w["2"][0], il.STEP2_BAND_MA[0])
+        self.assertLessEqual(w["2"][1], il.STEP2_BAND_MA[1])
+        self.assertGreaterEqual(w["3"][0], il.STEP3_MIN_MA)
+        self.assertLessEqual(w["3"][1], il.STEP3_MAX_MA)
+        # EN3 alone is a legal state too: it must stay at or below the step 3 maximum (no over-limit state exists)
+        self.assertLessEqual(w["en3_only"][1], il.STEP3_MAX_MA)
+
+    def test_numbers_of_the_owner_question(self):
+        w = il.both_on_windows(*il.candidate_both_on(), il.TOL_01PCT, **self.KW)
+        self.assertAlmostEqual(w["3"][0], 1368.8, delta=0.2)
+        self.assertAlmostEqual(w["3"][1], 1553.5, delta=0.2)
+
+    def test_the_old_over_limit_state_is_gone(self):
+        # exclusive design: both switches on gave 1817 to 2020 mA (only the NOR gate prevented it)
+        old = il.three_steps(*il.candidate_p1(), il.TOL_01PCT, **self.KW)["both"]
+        self.assertGreater(old[2], il.STEP3_MAX_MA)
+        new = il.both_on_windows(*il.candidate_both_on(), il.TOL_01PCT, **self.KW)
+        self.assertLessEqual(max(v[1] for v in new.values()), il.STEP3_MAX_MA)
+
+
 class Generator(unittest.TestCase):
     def test_generator_values_are_the_checked_set(self):
         P = layout_full.PARTS
         self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
-                         ("47.0k 0.1%", "56.2k 0.1%", "27.7k 0.1%"))     # plan 08 trim T1
+                         ("47.0k 0.1%", "56.2k 0.1%", "56.2k 0.1%"))     # ADR-0023: step 3 = both switches on
         self.assertNotIn("R20", P)
         r1, r2 = ohms(P["R_ILIM1"][-1]) / 1e3, ohms(P["R_ILIM2"][-1]) / 1e3
         r3 = ohms(P["R_ILIM3"][-1]) / 1e3
-        self.assertEqual((r1, r2, r3), il.candidate_p1())
-        mg = il.margins(r1, r2, r3, il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
-        self.assertTrue(all(v >= 0 for v in mg.values()), mg)
+        self.assertEqual((r1, r2, r3), il.candidate_both_on())
+        w = il.both_on_windows(r1, r2, r3, il.TOL_01PCT, leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        self.assertGreaterEqual(w["1"][0], il.STEP1_MIN_MA)
+        self.assertLessEqual(w["1"][1], il.STEP1_MAX_MA)
+        self.assertGreaterEqual(w["3"][0], il.STEP3_MIN_MA)
+        self.assertLessEqual(max(v[1] for v in w.values()), il.STEP3_MAX_MA)
 
 
 if __name__ == "__main__":

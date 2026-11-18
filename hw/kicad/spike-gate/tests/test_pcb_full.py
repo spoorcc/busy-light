@@ -87,7 +87,7 @@ class PlacementWeights(unittest.TestCase):
         ics = pcb_full.ic_families(comps, fixed)
         self.assertTrue(ics)
         self.assertTrue(all(r.startswith("U") for f in ics for r in f))
-        self.assertIn(("U14", "U15"), [f for f in ics if "U14" in f and len(f) == 2] or [()])
+        self.assertTrue(any({"U14", "U15"} <= set(f) for f in ics))     # same footprint family (U11 joins it in SC-70, ADR-0023)
         self.assertTrue(all(len({comps[r][1] for r in f}) == 1 for f in ics))
         row = pcb_full.test_point_row(comps, fixed)
         self.assertEqual(len(row), 1)
@@ -132,12 +132,12 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 101)     # plan 08: R20 out (trim T1), R22 in (HW-017); C32 (HW-016) was missing in the old fixture
-        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 55)
-        for ref in ("U13", "C27", "C28", "C29", "C30", "C31", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
+        self.assertEqual(len(self.comps), 97)      # ADR-0023: U13, U10, R6, R13 out
+        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 52)
+        for ref in ("C27", "C28", "C29", "C30", "C31", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
                     "C32"):
             self.assertIn(ref, self.comps)
-        for ref in ("Q2", "Q3", "R20"):
+        for ref in ("Q2", "Q3", "R20", "U13", "U10", "R6", "R13"):
             self.assertNotIn(ref, self.comps)
 
     def test_board_matches_netlist(self):
@@ -146,7 +146,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 55)        # plan 08: +VBUS (HW-017), -R20 mid net (trim T1)
+        self.assertEqual(res["nets_named"], 52)        # ADR-0023: -CC_OK_NOT_S3, -HOLD_OK, -FAULT_N (wired into GATE_OK_RB)
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")
@@ -320,7 +320,7 @@ class Board(unittest.TestCase):
         net = self.nets["/ILIM_STEP3_EN"]
         self.assertIn(("U15", "4"), net)
         self.assertEqual(pcb_full.STAR["/ILIM_STEP3_EN"], ("U15", "4"))
-        for ref in ("U13", "R3", "R15", "U4"):
+        for ref in ("R3", "R15", "U4"):     # U13 removed by ADR-0023
             self.assertIn(ref, [r for r, _ in net])
 
 
@@ -447,7 +447,7 @@ class P1Board(unittest.TestCase):
         self.assertEqual(self.fps["U7"].GetField("LCSC").GetText(), "C55266")
         self.assertEqual(sourcing.sourcing_fields(self.fps["U7"].GetValue())["LCSC"], "C55266")
         for ref, f in self.fps.items():
-            want = sourcing.sourcing_fields(f.GetValue())
+            want = sourcing.sourcing_fields(f.GetValue(), str(f.GetFPID().GetLibItemName()))
             for k in sourcing.FIELDS:
                 fld = f.GetField(k)
                 self.assertIsNotNone(fld, (ref, k))

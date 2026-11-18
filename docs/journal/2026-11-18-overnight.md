@@ -82,7 +82,7 @@ The main session ran the tests on the partial work and committed it:
   `panel_p1.json`, `fab_missing_lcsc.txt`, `requirements-fab.txt` and 38 tests (pass on the host and in the KiCad image; ruff and
   `reuse lint` clean). **Not run end to end on any board**, and the CI release workflow (section 4.6) was not written.
 
-## ADR-0022 proposed (2026-11-18 morning)
+## Proposed decision record ADR-0022 (2026-11-18 morning)
 `docs/decisions/ADR-0022-p1-board-fit.md` (Proposed): five options weighed with the measurements above. Recommendation: two-sided
 Standard PCBA for P1 (the only configuration with complete routing in the record; needs a P1 exception to HW-008 and a price within
 your limit), and part reduction (switch with selectable current limit, fixed-delay supervisor) as the direction for the next board.

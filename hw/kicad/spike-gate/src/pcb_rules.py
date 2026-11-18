@@ -175,12 +175,12 @@ PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
 # guess from the part sizes, not a derived value.
 BLOCKS = tuple((anchor, m, rad) for anchor, rad, members in (
     ("U8", 6.0, ("C3", "C4", "C5", "C6")),                                        # 5 V to 3.3 V regulator
-    ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R6")),                # supervisor and its timing capacitors
+    ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R8")),                # supervisor, timing capacitors, GATE_OK_RB pull-up
     ("U14", 7.0, ("C24", "DZ14", "R_SU14", "R2", "R18", "R14")),                  # current-limit step 2 switch
     ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch                  # current-limit step 3 switch
     ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1")),                           # USB-C CC detect
     ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22")),   # VBUS switch, protection, ILIM resistors
-    ("U9", 12.0, ("R9", "C7", "R13", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts
+    ("U9", 12.0, ("R9", "C7", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts (R13 removed, ADR-0023)
 ) for m in members)
 # Twins: the parts of the two identical switch circuits. They take the same rotation and side, so the circuits look alike.
 TWINS = (("U14", "U15"), ("C24", "C25"), ("DZ14", "DZ15"), ("R_SU14", "R_SU15"), ("R2", "R3"), ("R18", "R19"))

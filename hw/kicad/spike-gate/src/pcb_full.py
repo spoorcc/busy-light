@@ -44,7 +44,7 @@ GND = "GND"
 from pcb_rules import NET_TRACK   # noqa: E402  (signal nets at the 0.4 mm pitch pads of U1 use the minimum width)
 import pcb_rules                  # noqa: E402
 # Star nets: every pad is routed straight to the named pad, so the branch point is at that pad.
-# ADR-0016 layout rule: the step 3 switch control pin (U15 SEL) is the tap point of U13 pin 2, R3, R19 and the readback R15.
+# ADR-0016 layout rule: the step 3 switch control pin (U15 SEL) is the tap point of R3, R19 and the readback R15 (U13 removed, ADR-0023).
 STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 
 # ----------------------------------------------------------------------------- provisional substitutions
@@ -744,7 +744,7 @@ def set_p1_fields(fps, comps):
     (sourcing.sourcing_fields of its value, the same table the schematic generator uses) on its footprint, hidden on the
     Fab layer of its side; C4 and C32 are do-not-populate and excluded from the BOM."""
     for ref, fp in fps.items():
-        for k, v in sourcing.sourcing_fields(comps[ref][0]).items():
+        for k, v in sourcing.sourcing_fields(comps[ref][0], comps[ref][1]).items():
             fp.SetField(k, v)
             fld = fp.GetField(k)
             fld.SetVisible(False)                   # a new field is visible on the silkscreen by default

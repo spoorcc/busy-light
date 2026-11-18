@@ -171,6 +171,19 @@ def candidate_p1():
     return 47.0, 56.2, 27.7
 
 
+def candidate_both_on():
+    """ADR-0023 (owner 2026-11-18): step 3 = both switches on; R_ILIM3 equals R_ILIM2 (one part type)."""
+    return 47.0, 56.2, 56.2
+
+
+def both_on_windows(r1, r2, r3, tol, **kw):
+    """{state: (min mA, max mA)} for the non-exclusive gate of ADR-0023: step 1 (both off, two switches leak), step 2
+    (switch 2 on), en3_only (switch 3 on alone, a legal state), step 3 (both on, no off switch)."""
+    s = {"1": limits(r1, tol, (), 2, **kw), "2": limits(r1, tol, (r2,), 1, **kw),
+         "en3_only": limits(r1, tol, (r3,), 1, **kw), "3": limits(r1, tol, (r2, r3), 0, **kw)}
+    return {k: (v[0], v[2]) for k, v in s.items()}
+
+
 def candidate_b():
     r1 = min(r for r in e96(44.0, 50.0) if limits(r, TOL_1PCT, (), 2, leak_a=0.0)[2] <= STEP1_MAX_MA)
     r3 = max(r for r in e96(10.0, 232.0) if limits(r1, TOL_1PCT, (r,), 1, leak_a=0.0)[0] >= STEP3_MIN_MA)
