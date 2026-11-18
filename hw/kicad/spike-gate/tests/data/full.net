@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullS1/full.kicad_sch")
-		(date "2026-11-18T17:25:26")
+		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullS2/full.kicad_sch")
+		(date "2026-11-18T17:38:40")
 		(tool "Eeschema 10.0.8")
 		(sheet
 			(number "1")
@@ -3624,14 +3624,11 @@
 			(footprint "Diode_SMD:D_SOD-323")
 			(fields
 				(field
-					(name "MPN")
-				)
+					(name "MPN") "BZT52C5V1S")
 				(field
-					(name "Manufacturer")
-				)
+					(name "Manufacturer") "LGE")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C545356")
 				(field
 					(name "Footprint") "Diode_SMD:D_SOD-323")
 				(field
@@ -3648,15 +3645,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "")
+				(value "BZT52C5V1S")
 			)
 			(property
 				(name "Manufacturer")
-				(value "")
+				(value "LGE")
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C545356")
 			)
 			(property
 				(name "Sheetname")
@@ -3699,14 +3696,11 @@
 			(footprint "Diode_SMD:D_SOD-323")
 			(fields
 				(field
-					(name "MPN")
-				)
+					(name "MPN") "BZT52C5V1S")
 				(field
-					(name "Manufacturer")
-				)
+					(name "Manufacturer") "LGE")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C545356")
 				(field
 					(name "Footprint") "Diode_SMD:D_SOD-323")
 				(field
@@ -3723,15 +3717,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "")
+				(value "BZT52C5V1S")
 			)
 			(property
 				(name "Manufacturer")
-				(value "")
+				(value "LGE")
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C545356")
 			)
 			(property
 				(name "Sheetname")
@@ -3774,14 +3768,11 @@
 			(footprint "Diode_SMD:D_SOD-323")
 			(fields
 				(field
-					(name "MPN")
-				)
+					(name "MPN") "BZT52C5V1S")
 				(field
-					(name "Manufacturer")
-				)
+					(name "Manufacturer") "LGE")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C545356")
 				(field
 					(name "Footprint") "Diode_SMD:D_SOD-323")
 				(field
@@ -3798,15 +3789,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "")
+				(value "BZT52C5V1S")
 			)
 			(property
 				(name "Manufacturer")
-				(value "")
+				(value "LGE")
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C545356")
 			)
 			(property
 				(name "Sheetname")
@@ -3966,11 +3957,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -3987,7 +3978,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -3995,7 +3986,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -4035,16 +4026,16 @@
 		(comp
 			(ref "R2")
 			(value "10k")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1002T5E")
+					(name "MPN") "0402WGF1002TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25804")
+					(name "LCSC") "C25744")
 				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -4059,7 +4050,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1002T5E")
+				(value "0402WGF1002TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4067,7 +4058,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25804")
+				(value "C25744")
 			)
 			(property
 				(name "Sheetname")
@@ -4107,16 +4098,16 @@
 		(comp
 			(ref "R3")
 			(value "10k")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1002T5E")
+					(name "MPN") "0402WGF1002TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25804")
+					(name "LCSC") "C25744")
 				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -4131,7 +4122,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1002T5E")
+				(value "0402WGF1002TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4139,7 +4130,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25804")
+				(value "C25744")
 			)
 			(property
 				(name "Sheetname")
@@ -4182,11 +4173,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4203,7 +4194,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4211,7 +4202,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -4254,11 +4245,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4275,7 +4266,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4283,7 +4274,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -4398,11 +4389,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1002T5E")
+					(name "MPN") "0402WGF1002TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25804")
+					(name "LCSC") "C25744")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4419,7 +4410,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1002T5E")
+				(value "0402WGF1002TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4427,7 +4418,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25804")
+				(value "C25744")
 			)
 			(property
 				(name "Sheetname")
@@ -4470,11 +4461,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF3300T5E")
+					(name "MPN") "0402WGF3300TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C23138")
+					(name "LCSC") "C25104")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4491,7 +4482,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF3300T5E")
+				(value "0402WGF3300TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4499,7 +4490,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C23138")
+				(value "C25104")
 			)
 			(property
 				(name "Sheetname")
@@ -4542,11 +4533,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1002T5E")
+					(name "MPN") "0402WGF1002TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25804")
+					(name "LCSC") "C25744")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4563,7 +4554,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1002T5E")
+				(value "0402WGF1002TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4571,7 +4562,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25804")
+				(value "C25744")
 			)
 			(property
 				(name "Sheetname")
@@ -4614,11 +4605,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1001T5E")
+					(name "MPN") "0402WGF1001TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C21190")
+					(name "LCSC") "C11702")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4635,7 +4626,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1001T5E")
+				(value "0402WGF1001TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4643,7 +4634,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C21190")
+				(value "C11702")
 			)
 			(property
 				(name "Sheetname")
@@ -4686,11 +4677,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4707,7 +4698,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4715,7 +4706,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -4758,11 +4749,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4779,7 +4770,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4787,7 +4778,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -4830,11 +4821,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1002T5E")
+					(name "MPN") "0402WGF1002TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25804")
+					(name "LCSC") "C25744")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4851,7 +4842,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1002T5E")
+				(value "0402WGF1002TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4859,7 +4850,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25804")
+				(value "C25744")
 			)
 			(property
 				(name "Sheetname")
@@ -4902,11 +4893,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1002T5E")
+					(name "MPN") "0402WGF1002TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25804")
+					(name "LCSC") "C25744")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4923,7 +4914,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1002T5E")
+				(value "0402WGF1002TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4931,7 +4922,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25804")
+				(value "C25744")
 			)
 			(property
 				(name "Sheetname")
@@ -4971,16 +4962,16 @@
 		(comp
 			(ref "R18")
 			(value "100k")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -4995,7 +4986,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -5003,7 +4994,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -5043,16 +5034,16 @@
 		(comp
 			(ref "R19")
 			(value "100k")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1003T5E")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25803")
+					(name "LCSC") "C25741")
 				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -5067,7 +5058,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1003T5E")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -5075,7 +5066,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25803")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -6453,11 +6444,11 @@
 			(footprint "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")
 			(fields
 				(field
-					(name "MPN") "SN74LVC1G04DBVR")
+					(name "MPN") "SN74LVC1G04DCKR")
 				(field
 					(name "Manufacturer") "Texas Instruments")
 				(field
-					(name "LCSC") "C7827")
+					(name "LCSC") "C8207")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")
 				(field
@@ -6474,7 +6465,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "SN74LVC1G04DBVR")
+				(value "SN74LVC1G04DCKR")
 			)
 			(property
 				(name "Manufacturer")
@@ -6482,7 +6473,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C7827")
+				(value "C8207")
 			)
 			(property
 				(name "Sheetname")
@@ -6534,12 +6525,11 @@
 			(footprint "Package_TO_SOT_SMD:SOT-363_SC-70-6")
 			(fields
 				(field
-					(name "MPN") "SN74LVC1G11DBVR")
+					(name "MPN") "SN74LVC1G11DCKR")
 				(field
 					(name "Manufacturer") "Texas Instruments")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C529281")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:SOT-363_SC-70-6")
 				(field
@@ -6556,7 +6546,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "SN74LVC1G11DBVR")
+				(value "SN74LVC1G11DCKR")
 			)
 			(property
 				(name "Manufacturer")
@@ -6564,7 +6554,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C529281")
 			)
 			(property
 				(name "Sheetname")
@@ -6619,12 +6609,11 @@
 			(footprint "Package_TO_SOT_SMD:SOT-363_SC-70-6")
 			(fields
 				(field
-					(name "MPN") "SN74LVC1G11DBVR")
+					(name "MPN") "SN74LVC1G11DCKR")
 				(field
 					(name "Manufacturer") "Texas Instruments")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C529281")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:SOT-363_SC-70-6")
 				(field
@@ -6641,7 +6630,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "SN74LVC1G11DBVR")
+				(value "SN74LVC1G11DCKR")
 			)
 			(property
 				(name "Manufacturer")
@@ -6649,7 +6638,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C529281")
 			)
 			(property
 				(name "Sheetname")
@@ -7187,12 +7176,11 @@
 			(footprint "Package_TO_SOT_SMD:SOT-353_SC-70-5")
 			(fields
 				(field
-					(name "MPN") "SN74AHCT1G125DBVR")
+					(name "MPN") "SN74AHCT1G125DCKR")
 				(field
 					(name "Manufacturer") "Texas Instruments")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C350557")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:SOT-353_SC-70-5")
 				(field
@@ -7209,7 +7197,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "SN74AHCT1G125DBVR")
+				(value "SN74AHCT1G125DCKR")
 			)
 			(property
 				(name "Manufacturer")
@@ -7217,7 +7205,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C350557")
 			)
 			(property
 				(name "Sheetname")

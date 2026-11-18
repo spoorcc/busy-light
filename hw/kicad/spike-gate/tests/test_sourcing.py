@@ -68,7 +68,8 @@ class SchematicFieldsTest(unittest.TestCase):
 
     def test_passive_carries_fields(self):
         self.assertEqual(self.fields("R1")["MPN"].value, "0402WGF1003TCE")      # 0402 since ADR-0023
-        self.assertEqual(self.fields("R18")["MPN"].value, "0603WAF1003T5E")     # same value, 0603: another part
+        self.assertEqual(self.fields("R2")["MPN"].value, "0402WGF1002TCE")      # 10k in 0402
+        self.assertEqual(self.fields("R8")["MPN"].value, "0603WAF1002T5E")      # 10k in 0603: another part
         self.assertEqual(self.fields("R_ILIM1")["MPN"].value, "TD03G4702BT")
         self.assertEqual(self.fields("U9")["MPN"].value, "ESP32-C3-MINI-1-N4")
 

@@ -61,10 +61,10 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R21": (*R, "887k"), "R1": (*R0402, "100k"),
     "U2": (*G04, "74LVC1G04"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
-    "R4": (*R0402, "100k"), "R5": (*R0402, "100k"), "R2": (*R, "10k"), "R3": (*R, "10k"),
+    "R4": (*R0402, "100k"), "R5": (*R0402, "100k"), "R2": (*R0402, "10k"), "R3": (*R0402, "10k"),
     "U14": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
-    "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
+    "R18": (*R0402, "100k"), "R19": (*R0402, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
     # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
     "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "56.2k 0.1%"),   # ADR-0023: step 3 = both switches on, same part as R_ILIM2 (replaces trim T1)
     "R_ILIM1": (*R, "47.0k 0.1%"),
