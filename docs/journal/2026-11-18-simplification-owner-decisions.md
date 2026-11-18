@@ -57,3 +57,12 @@ snippets; datasheet and shop sites are blocked from this container) and marked a
   and the vendor no-parts zone stay; DEV-004 update), or the full courtyard as a placer obstacle (then one side does not fit).
 - A 3-run batch with the pull-downs in 0402 (full flow: placement, routing at 0.15 mm, stitching, clean-up, strict gate) was
   started at about 17:45 UTC; its result follows in this file or in the P1 report.
+
+## Owner answer on the U9 courtyard (2026-11-18, in the working session)
+Question: body-only courtyard (recommended), raise the waiver to about 30, or keep the full library courtyard as a placer obstacle.
+**Answer: courtyard as obstacle.** Measured consequences (real P1 placement board, `u9cy.py` in the scratchpad):
+- the U9 front courtyard spans x -23.4 to +8.5 mm and y -21.6 to +21.6 mm around the board centre; of the 1063 mm2 movable disc
+  (r 18.4 mm) 576 mm2 lie inside it, so about 490 mm2 remain for about 360 mm2 of part bounding boxes;
+- 15 fixed ring parts lie inside it whatever the placer does: the LEDs D6 to D12 and the LED capacitors C12 to C19; the waiver
+  allows 14 overlaps with U9 (DEV-004), so the strict gate fails on the ring alone unless one capacitor leaves the courtyard or the
+  owner changes the waiver.
