@@ -11,6 +11,11 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- CI workflow `.github/workflows/fab-release.yml` (plan 08 section 4.6, owner answer 17): test, build and publish jobs; on a push
+  to `main` it refreshes the draft release `fab-latest` with the P1 order package, on a published release it attaches the files;
+  without a stored `board-p1/` it reports NOT RUN. Hash-pinned test tools `scripts/requirements-fab-test.txt`; structure test
+  `scripts/tests/test_fab_release_workflow.py`; proposed DEV-007 (release instead of a committed `hw/fabrication/<rev>/`). Not
+  run on GitHub yet (HW-008, HW-009).
 - Spike routing flow: `run_pcb.sh` switch `PRESTITCH=1` (default off) gives the plane pads their via before the router runs and
   locks it (fan-out first); `pcb_stitch.py --reuse-max` limits the track to an existing via; the stitcher tries a track with one
   corner when every straight escape is blocked (P1 batch of 2026-11-18; plan 08, HW-008).

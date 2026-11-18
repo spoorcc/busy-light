@@ -63,3 +63,21 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Risk assessment:** a real silk problem on these five parts is hidden. Compensating measure: the rule names the footprints and only silkscreen layers; copper clearance, edge clearance of copper and all other checks stay on. A production board needs the silk fixed instead.
 - **Scope & duration:** spike only, until the placement is decided by the owner
 - **Approved by / date:** proposed 2026-11-07; **not approved**: the owner declined it (2026-11-08, in the session). The waiver is off by default (`SPIKE_SILK_WAIVER=1` switches it on for comparison); the silk findings must be fixed by placement or footprint changes, still open.
+
+### DEV-007 P1 order files in a GitHub release instead of a committed `hw/fabrication/<rev>/`
+
+- **Status:** Proposed (written by the assistant 2026-11-18 from the owner's answer 17 of 2026-11-17; the owner approves)
+- **Rule / requirement deviated from:** `docs/process/README.md` (hardware releases: tagged, with Gerbers/BOM/PnP in
+  `hw/fabrication/<rev>/` plus ERC/DRC reports); CLAUDE.md rule 12 (do not commit build output). Plan 08 section 4.6.
+- **Location:** `.github/workflows/fab-release.yml`, `scripts/fab_p1.sh`; release tags of the repository (`fab-latest` draft and
+  the published P1 tag)
+- **Justification:** the owner asked for CI to keep the latest order package from `main` as a draft release and to attach the files
+  to a real release. Generated Gerbers, BOM and CPL are build output; a tagged release with a manifest of sha256 hashes gives the
+  same traceability (tag = commit, manifest = exact files) without committing generated files.
+- **Risk assessment:** a release asset can be replaced (`--clobber`) after the tag exists, so the files no longer prove what was
+  ordered. Compensating measures: the owner orders only from a published, tagged release (plan 08 order step O0), never from the
+  draft; the manifest hashes go into the P1 report at order time; the publishing job holds the only write permission and runs no
+  repository code (`scripts/tests/test_fab_release_workflow.py`). Not verified: the workflow has not run on GitHub (it cannot run
+  in the assistant's container; actionlint is not installed).
+- **Scope & duration:** P1 prototype order; revisit before any production release.
+- **Approved by / date:** not approved (Proposed 2026-11-18)
