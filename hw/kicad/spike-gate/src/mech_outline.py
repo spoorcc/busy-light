@@ -222,9 +222,10 @@ def vendor_keepout_rect():
     return (x0 - m("ANT_KEEPOUT"), y0, x0, y1)
 
 
-def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None):
-    """Region where movable parts may sit, mechanical coordinates. Top (F): inside r_move and outside the module.
-    Bottom (B): inside r_move, or on the tab behind the LED ring. Never in the antenna strip."""
+def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None, top_tab=False):
+    """Region where movable parts may sit, mechanical coordinates. Top (F): inside r_move and outside the module, or on
+    the tab when top_tab (plan 08 P1: every part on the top side). Bottom (B): inside r_move, or on the tab behind the LED
+    ring. Never in the antenna strip."""
     pts = [(x0, y0), (x0, y1), (x1, y0), (x1, y1)]
     ax0, ay0, ax1, ay1 = antenna_strip()
     if x1 > ax0 - 0.3 and x0 < ax1 + 0.3 and y1 > ay0 - 0.3 and y0 < ay1 + 0.3:
@@ -232,12 +233,12 @@ def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None):
     sx0, sy0, sx1, sy1 = slot_rect()
     if x1 > sx0 - 0.6 and x0 < sx1 + 0.6 and y1 > sy0 - 0.6 and y0 < sy1 + 0.6:       # slot and 0.6 mm to copper
         return False
+    hw = m("V1_TAB_W") / 2.0 - 0.7
+    tr = m("V1_TAB_R") if tab_r is None else tab_r
+    on_tab = x0 >= 22.9 and x1 <= tr - 0.7 and y0 >= -hw and y1 <= hw
     if side == "F":
         mx0, my0, mx1, my1 = module_rect()
         if x1 > mx0 - 0.3 and x0 < mx1 + 0.3 and y1 > my0 - 0.3 and y0 < my1 + 0.3:
             return False
-        return all(math.hypot(px, py) <= r_move for px, py in pts)
-    hw = m("V1_TAB_W") / 2.0 - 0.7
-    tr = m("V1_TAB_R") if tab_r is None else tab_r
-    on_tab = x0 >= 22.9 and x1 <= tr - 0.7 and y0 >= -hw and y1 <= hw
+        return (top_tab and on_tab) or all(math.hypot(px, py) <= r_move for px, py in pts)
     return on_tab or all(math.hypot(px, py) <= r_move for px, py in pts)
