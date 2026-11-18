@@ -57,6 +57,16 @@ router of `pcb_fix.py` (and so `pcb_ring.py`), and a `via_in_smd_pad` count in `
 flag that fails on a non-zero count; 26 new tests. On the stored board the count is **35** (32 in the LED ring cells, 2 at DZ15,
 1 at C32; none at U9): the plan's "via-in-pad under U9" was wrong and is corrected.
 
+## Side work done by agents (2026-11-18, 06:00 to 06:12 UTC)
+- **Firmware target build** (`docs/verification/reports/sw-target-build-2026-11-18.md`, `c88ad64`): `sw/app` builds for
+  `esp32c3_devkitm` with Zephyr v4.5.0 and SDK 1.0.1, 0 warnings, flash 134 884 B (3.22 %); host tests 20 of 20 on native_sim.
+  The target image does **not** contain the gate logic yet (`sw/app/CMakeLists.txt` adds only `main.c`); `gate.c` compiled alone
+  for the target: 0 warnings, 884 B text. No flashing, no hardware.
+- **Regulatory check** (`docs/regulatory/compliance-matrix.md`, technical-file index, `3f9bd7e`): no applicability input changed;
+  findings for you: HW-017 and HW-003 have `Regulatory: none` (proposed: RED 3(1)(a) / EN 62368-1 and 3(1)(b), verify); no EMC/ESD
+  requirement exists (open since 2026-11-03); RoHS declarations and the lead-free hand-soldering of J1 are not in TC-208; the order
+  checklist lacks the prototype label. Its finding on the power check is fixed (`706ba3e`).
+
 ## Not done
 P1 placement (all parts on top), via-in-pad removal, routing batches, finishing, `board-p1/`, order package, KiKit panel, CI
 release workflow, housing check, firmware target build (Zephyr fetch started 05:45 UTC), regulatory update. Plan 08 section 5
