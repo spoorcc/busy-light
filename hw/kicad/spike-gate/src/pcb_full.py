@@ -409,6 +409,30 @@ def add_rule_area(board, name, layers, pts, tracks=True, vias=True, pours=True, 
     return z
 
 
+class CourtyardMask:
+    """Raster (step mm) of a footprint's front courtyard in the SA frame (origin at CX, CY, KiCad axes). Owner decision
+    2026-11-18 (ADR-0023): with P1 the full U9 library courtyard, antenna keep-out included, is an obstacle for movable parts."""
+
+    def __init__(self, poly, step=0.25):
+        self.step = step
+        bb = poly.BBox()
+        self.x0, self.y0 = pcbnew.ToMM(bb.GetX()) - CX, pcbnew.ToMM(bb.GetY()) - CY
+        nx, ny = int(pcbnew.ToMM(bb.GetWidth()) / step) + 2, int(pcbnew.ToMM(bb.GetHeight()) / step) + 2
+        self.cells = {(i, j) for i in range(nx) for j in range(ny)
+                      if poly.Contains(pcbnew.VECTOR2I(pcbnew.FromMM(CX + self.x0 + i * step), pcbnew.FromMM(CY + self.y0 + j * step)))}
+
+    def hits(self, x, y):
+        return (int(round((x - self.x0) / self.step)), int(round((y - self.y0) / self.step))) in self.cells
+
+    def hits_rect(self, x0, y0, x1, y1, pitch=0.5):
+        n = max(2, int(max(x1 - x0, y1 - y0) / pitch) + 1)
+        return any(self.hits(x0 + (x1 - x0) * a / (n - 1), y0 + (y1 - y0) * c / (n - 1)) for a in range(n) for c in range(n))
+
+
+def u9_courtyard_mask(fp):
+    return CourtyardMask(fp.GetCourtyard(pcbnew.F_CrtYd))
+
+
 def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     global CUSTOM_DIR
     os.makedirs(outdir, exist_ok=True)
@@ -628,7 +652,11 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
             sa_nets[tie] = [a, b]
             weights[tie] = w
 
+    u9_mask = u9_courtyard_mask(fps["U9"]) if p1 else None
+
     def region_ok(side, x0, y0, x1, y1):       # SA frame (y down) -> mechanical frame (y up)
+        if u9_mask is not None and side == "F" and u9_mask.hits_rect(x0, y0, x1, y1):
+            return False
         return MO.region_rect_ok(side, x0, -y1, x1, -y0, r_move, tab_r, top_tab=p1)
 
     def layout_rules_ok(st):

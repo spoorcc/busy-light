@@ -20,7 +20,7 @@ class Table(unittest.TestCase):
         self.assertEqual(MO.m("N_LED"), 16)
         self.assertEqual(MO.m("D_RING"), 40.0)
         self.assertEqual(MO.m("POST_AZ"), (30.0, 150.0, 270.0))
-        self.assertEqual(MO.m("MOD_OFF"), 1.0)
+        self.assertEqual(MO.m("MOD_OFF"), -4.0)   # ADR-0023, owner 2026-11-18
 
     def test_antenna_strip_is_the_datasheet_length(self):
         """ESP32-C3-MINI-1 datasheet fig 11-1: 16.6 mm - 11.2 mm pad area - 0.8 mm = 4.6 mm."""
@@ -81,7 +81,9 @@ class Table(unittest.TestCase):
 
     def test_region_excludes_module_and_antenna(self):
         self.assertFalse(MO.region_rect_ok("F", 0, -1, 2, 1))
-        self.assertFalse(MO.region_rect_ok("B", -5, -1, -3, 1))
+        ax0, ay0, ax1, ay1 = MO.antenna_strip()          # the strip moves with MOD_OFF (ADR-0023)
+        mx = (ax0 + ax1) / 2
+        self.assertFalse(MO.region_rect_ok("B", mx - 1, -1, mx + 1, 1))
         self.assertTrue(MO.region_rect_ok("B", 5, -1, 7, 1))
         self.assertFalse(MO.region_rect_ok("F", 18, 0, 20, 1))       # beyond the move radius
 

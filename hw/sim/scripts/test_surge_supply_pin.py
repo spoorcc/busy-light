@@ -11,7 +11,7 @@ import surge_supply_pin as s  # noqa: E402
 
 pytestmark = pytest.mark.skipif(shutil.which("ngspice") is None, reason="ngspice not installed")
 LIMIT = s.V_ABS_MAX - s.MARGIN
-MAX_R_POWER_W = 0.05  # half of a 100 mW 0603 resistor
+MAX_R_POWER_W = 0.031  # half of a 62.5 mW 0402 resistor (R_SU1, R_SU14, R_SU15 are 0402 since ADR-0023; was 0603, 100 mW)
 MAX_Z_POWER_W = 0.15  # half of a 300 mW zener class
 WORST_C = 50e-9
 

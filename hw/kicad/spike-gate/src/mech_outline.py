@@ -51,7 +51,8 @@ MECH = {
                     "base board around the antenna; width 1.0 mm = a 1.0 mm router bit (to be checked with the fabricator)"),
     "SLOT_GAP": (1.5, "distance from the antenna end of the module to the slot (assumption of the spike)"),
     "SLOT_OVER": (1.0, "slot extends this far past each long side of the module"),
-    "MOD_OFF": (1.0, "script P['MOD_OFF']: module centre offset towards azimuth 0 (report 5)"),
+    "MOD_OFF": (-4.0, "owner decision 2026-11-18 (ADR-0023): 5 mm towards the antenna-side edge so the U9 keep-out courtyard hangs "
+                       "partly off the board (was 1.0, script P['MOD_OFF'], report 5)"),
     "MOD_ANT_AZ": (180.0, "script P['MOD_ANT_AZ']: antenna end points to -X"),
     "ANT_KEEPOUT": (15.0, "script P['ANT_KEEPOUT']: vendor recommendation, plan 05 section 4.6"),
     "V1_TAB_W": (12.0, "script P['V1_TAB_W'] (variant V1): PCB tab width"),

@@ -228,6 +228,11 @@ SOURCING_BY_FP = {
     ("100k", "R_0402_1005Metric"): {"MPN": "0402WGF1003TCE", "Manufacturer": _U04, "LCSC": "C25741", "Evidence": _U04E},
     ("10k", "R_0402_1005Metric"): {"MPN": "0402WGF1002TCE", "Manufacturer": _U04, "LCSC": "C25744", "Evidence": _U04E},
     ("1k", "R_0402_1005Metric"): {"MPN": "0402WGF1001TCE", "Manufacturer": _U04, "LCSC": "C11702", "Evidence": _U04E},
+    ("470", "R_0402_1005Metric"): {"MPN": "0402WGF4700TCE", "Manufacturer": _U04, "LCSC": "C25117", "Evidence": _U04E},
+    ("100n", "C_0402_1005Metric"): {"MPN": "CL05B104KO5NNNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C1525",
+                                    "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 100 nF 16 V X7R 10%; ADR-0023"},
+    ("1u", "C_0402_1005Metric"): {"MPN": "CL05A105KA5NQNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C52923",
+                                  "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 1 uF 25 V X5R 10%; ADR-0023"},
     ("330", "R_0402_1005Metric"): {"MPN": "0402WGF3300TCE", "Manufacturer": _U04, "LCSC": "C25104",
                                    "Evidence": _U04E + "; the 330 ohm value is read from the part number, the listing text did not show it"},
 }

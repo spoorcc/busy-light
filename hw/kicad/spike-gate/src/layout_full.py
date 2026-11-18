@@ -49,6 +49,7 @@ G11 = ("74xGxx", "74LVC1G11", "Package_TO_SOT_SMD:SOT-363_SC-70-6")
 ZENER = ("Device", "D_Zener", "Diode_SMD:D_SOD-323")   # ADR-0023: SOD-323 (pin 1 K, pin 2 A)
 AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-353_SC-70-5")
 R0402 = ("Device", "R", "Resistor_SMD:R_0402_1005Metric")   # ADR-0023: non-critical pull-ups and series resistors
+C0402 = ("Device", "C", "Capacitor_SMD:C_0402_1005Metric")   # ADR-0023: small bypass and RC capacitors
 TP = ("Connector", "TestPoint", "TestPoint:TestPoint_Pad_D1.5mm")
 # pin numbers of the KiCad symbol LED:WS2812B-2020 (the 5050 symbol has other numbers: 1 VDD, 2 DOUT, 3 VSS, 4 DIN)
 LED_DOUT, LED_VSS, LED_DIN, LED_VDD = "1", "2", "3", "4"
@@ -64,7 +65,7 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R4": (*R0402, "100k"), "R5": (*R0402, "100k"), "R2": (*R0402, "10k"), "R3": (*R0402, "10k"),
     "U14": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
-    "R18": (*R0402, "100k"), "R19": (*R0402, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
+    "R18": (*R0402, "100k"), "R19": (*R0402, "100k"), "C24": (*C0402, "100n"), "C25": (*C0402, "100n"),
     # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
     "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "56.2k 0.1%"),   # ADR-0023: step 3 = both switches on, same part as R_ILIM2 (replaces trim T1)
     "R_ILIM1": (*R, "47.0k 0.1%"),
@@ -73,11 +74,11 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "C28": (*C1206, "100n C0G 5% 50V"), "C29": (*C1206, "100n C0G 5% 50V"),
     "C30": (*C1206, "100n C0G 5% 50V"), "C31": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
-    "C2": (*C, "4.7u 16V X5R"), "C3": (*C0805, "10u 25V X5R"), "R8": (*R, "10k"),   # ADR-0023: the one pull-up of GATE_OK_RB (hold-off AND no fault, wired)
+    "C2": (*C, "4.7u 16V X5R"), "C3": (*C0805, "10u 25V X5R"), "R8": (*R0402, "10k"),   # ADR-0023: the one pull-up of GATE_OK_RB (hold-off AND no fault, wired)
     "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
     "C5": (*C, "2.2u 16V X5R"), "C6": (*C, "10u 10V X5R"),
     "U9": (None, None, "CUSTOM:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),    # no such footprint in the KiCad libraries; pcb_full.derive_u9_footprint writes it
-    "R9": (*R0402, "10k"), "C7": (*C, "1u"),
+    "R9": (*R0402, "10k"), "C7": (*C0402, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
     "R12": (*R0402, "1k"), "TVS2": (*TVS, "ESD diode"),
     "U11": (*AHCT125, "74AHCT1G125"),
@@ -85,8 +86,8 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R22": ("Device", "R", "Resistor_SMD:R_1206_3216Metric", "0"),   # HW-017: 0 ohm damping link VBUS -> VBUS_IC
    
     # supply-pin protection (HW-010 amendment, owner 2026-11-07): series resistor, 100 nF and 5.1 V zener per 6 V pin
-    "R_SU1": (*R, "470"), "R_SU14": (*R, "1k"), "R_SU15": (*R, "1k"),
-    "C26": (*C, "100n"),
+    "R_SU1": (*R0402, "470"), "R_SU14": (*R0402, "1k"), "R_SU15": (*R0402, "1k"),
+    "C26": (*C0402, "100n"),
     "DZ1": (*ZENER, "BZT52C5V1S"), "DZ14": (*ZENER, "BZT52C5V1S"), "DZ15": (*ZENER, "BZT52C5V1S"),
 }
 for i in range(1, 17):

@@ -393,6 +393,16 @@ class P1Board(unittest.TestCase):
     def tearDownClass(cls):
         cls.tmp.cleanup()
 
+    def test_no_movable_part_touches_the_u9_courtyard(self):
+        """Owner decision 2026-11-18 (ADR-0023): with P1 the full U9 courtyard is an obstacle for movable parts. The fixed ring
+        parts (LEDs, their capacitors), J1, SW1, fiducials and test points are placed by rule and are not checked here."""
+        import re
+        u9 = self.fps["U9"].GetCourtyard(pcbnew.F_CrtYd)
+        fixed = re.compile(r"^(U9|J1|SW1|FID\d+|TP\d+|D\d+|C(8|9|1\d|2[0-3]))$")
+        hits = [r for r, f in self.fps.items() if not fixed.match(r) and f.GetLayer() == pcbnew.F_Cu
+                and f.GetCourtyard(pcbnew.F_CrtYd).OutlineCount() and f.GetCourtyard(pcbnew.F_CrtYd).Collide(u9)]
+        self.assertEqual(hits, [])
+
     def centre(self, ref):
         p = self.fps[ref].GetPosition()
         return pcbnew.ToMM(p.x), pcbnew.ToMM(p.y)
