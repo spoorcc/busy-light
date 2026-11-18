@@ -3,7 +3,8 @@
 
 Usage: python3 pcb_ring.py <placed.kicad_pcb> <out.kicad_pcb>   (the placement.json of the same stem sits next to the input)
 
-Each ring LED Dn (top) and its bypass capacitor C(n+7) (bottom, under it) form one cell. The cell is the same for all 16:
+Each ring LED Dn (top) and its bypass capacitor C(n+7) (bottom, under it; with plan 08 P1 on the top beside it, linked
+on F.Cu without a via) form one cell. The cell is the same for all 16:
   +5V  LED pad 4  --track--  via  --track--  capacitor pad 1   (the via also meets the +5V plane In2)
   GND  LED pad 2  --track--  via  --track--  capacitor pad 2   (the via also meets the GND plane In1)
 and the data chain: DOUT (pad 1) of Dn on the top layer to DIN (pad 3) of Dn+1 (D8 to D9 included; D16 has no link).
@@ -32,6 +33,12 @@ def cells():
     return [("D%d" % i, "C%d" % (i + 7)) for i in range(1, 17)]
 
 
+def cap_link_layer(board, ref):
+    """Copper layer of the capacitor end of a cell link: the capacitor's own side (plan 08 P1: F.Cu to F.Cu, no via;
+    the two-sided board: B.Cu, through a via)."""
+    return "F.Cu" if board.FindFootprintByReference(ref).GetLayer() == pcbnew.F_Cu else "B.Cu"
+
+
 def build(src, dst, tab_r=None):
     board = pcbnew.LoadBoard(src)
     if tab_r is None:
@@ -49,10 +56,11 @@ def build(src, dst, tab_r=None):
         fx.commit(net, path, a, b, w)
         count += 1
     for d, c in cells():
+        cap_layer = cap_link_layer(board, c)
         for net, dn, cn in (("+5V", LED_VDD, CAP_5V), ("GND", LED_VSS, CAP_GND)):
             (x0, y0, n0), (x1, y1, n1) = fx.pads[(d, dn)], fx.pads[(c, cn)]
             assert n0 == n1 == net, (d, dn, n0, c, cn, n1)
-            link(net, (x0, y0), "F.Cu", (x1, y1), "B.Cu", STUB, "%s %s to %s" % (net, d, c))
+            link(net, (x0, y0), "F.Cu", (x1, y1), cap_layer, STUB, "%s %s to %s" % (net, d, c))
     for i in range(1, 16):
         d, e = "D%d" % i, "D%d" % (i + 1)
         (x0, y0, n0), (x1, y1, n1) = fx.pads[(d, LED_DOUT)], fx.pads[(e, LED_DIN)]

@@ -35,6 +35,10 @@ class Ring(unittest.TestCase):
     def test_every_cell_completes(self):
         self.assertEqual(self.failed, [])
 
+    def test_two_sided_cells_link_to_the_bottom_capacitor(self):
+        # plan 08 step 5: the link layer follows the capacitor; without P1 the capacitors are on B.Cu
+        self.assertEqual({pcb_ring.cap_link_layer(self.board, c) for _, c in pcb_ring.cells()}, {"B.Cu"})
+
     def test_cap_pads_sit_under_the_led_pads_of_the_same_net(self):
         mm = pcbnew.ToMM
         for d, c in pcb_ring.cells():

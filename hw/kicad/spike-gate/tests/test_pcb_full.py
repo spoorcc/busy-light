@@ -308,6 +308,14 @@ class Board(unittest.TestCase):
         for r1, r2, lim in pcb_full.LAYOUT_RULES:
             self.assertLessEqual(dist(r1, r2), lim, "%s %s" % (r1, r2))
 
+    def test_without_p1_the_two_sided_rules_stay(self):
+        """Plan 08 step 5: P1 unset keeps the old sides and move radius, and no part is marked do-not-populate."""
+        self.assertIs(self.info["p1"], False)
+        self.assertEqual(self.info["r_move"], pcb_full.R_MOVE)
+        self.assertNotIn("led_caps", self.info)
+        self.assertTrue(any(f.GetLayer() == pcbnew.B_Cu for r, f in self.fps.items() if not r.startswith("TP")))
+        self.assertFalse(self.fps["C4"].IsDNP() or self.fps["C32"].IsDNP())
+
     def test_star_net_is_the_q3_gate(self):
         net = self.nets["/ILIM_STEP3_EN"]
         self.assertIn(("U15", "4"), net)
@@ -332,6 +340,129 @@ class Stitch(unittest.TestCase):
                 {"items": [{"description": "PTH pad A5 [/CC1] of J1"}, {"description": "Pad 1 [+5V] of C8 on B.Cu"}]}]}))
             got = pcb_stitch.unconnected_pads(str(f), ("GND", "+5V"))
         self.assertEqual(got, {("U11", "3"): ("GND", "F.Cu"), ("C8", "1"): ("+5V", "B.Cu")})
+
+
+class P1Switch(unittest.TestCase):
+    """Plan 08 section 4.2 (HW-008): the P1 switch and the pure geometry of the LED capacitor search."""
+
+    def test_switch_is_read_from_the_environment_and_off_by_default(self):
+        self.assertFalse(pcb_full.p1_enabled({}))
+        self.assertFalse(pcb_full.p1_enabled({"P1": "0"}))
+        self.assertTrue(pcb_full.p1_enabled({"P1": "1"}))
+
+    def test_sides_of_movable_parts(self):
+        self.assertEqual(pcb_full.part_sides("TP1", True), "B")
+        self.assertEqual(pcb_full.part_sides("TP1", False), "B")
+        self.assertEqual(pcb_full.part_sides("R1", True), "F")
+        self.assertEqual(pcb_full.part_sides("R1", False), "FB")
+        self.assertAlmostEqual(pcb_full.R_MOVE_P1, 18.4)
+
+    def test_convex_clear(self):
+        a = pcb_full.rect_poly(0, 0, 1, 1)
+        self.assertTrue(pcb_full.convex_clear(a, pcb_full.rect_poly(1.1, 0, 2, 1), 0.05))
+        self.assertFalse(pcb_full.convex_clear(a, pcb_full.rect_poly(1.03, 0, 2, 1), 0.05))   # closer than the gap
+        self.assertFalse(pcb_full.convex_clear(a, pcb_full.rect_poly(0.5, 0.5, 2, 2)))       # overlap
+        diamond = [(2.0, 0.5), (2.5, 1.0), (2.0, 1.5), (1.5, 1.0)]                         # rotated square, 0.5 mm away
+        self.assertTrue(pcb_full.convex_clear(a, diamond, 0.4))
+        self.assertFalse(pcb_full.convex_clear(a, diamond, 0.6))
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class P1Board(unittest.TestCase):
+    """Plan 08 step 5 (HW-008, HW-016, RV-014 readiness B1 and B3): a board built with P1=1 in a subprocess (the switch is
+    read at build time), with a reduced annealing run. The placement is not asserted overlap-free: one side on 46 mm is
+    known not to fit (plan 08 A3, R1); the placement gate of section 4.3 is a separate step."""
+
+    SA_ITERS = 4000
+
+    @classmethod
+    def setUpClass(cls):
+        import os
+        import subprocess
+        cls.tmp = tempfile.TemporaryDirectory()
+        out = cls.tmp.name + "/p1"
+        code = ("import sys; sys.path.insert(0, %r); import pcb_full; pcb_full.build(%r, %r, sa_iters=%d, layers=4)"
+                % (str(HERE.parent / "src"), str(NETLIST), out, cls.SA_ITERS))
+        subprocess.run([sys.executable, "-c", code], env=dict(os.environ, P1="1"), check=True, capture_output=True)
+        cls.pcb = out + "/busy_light_spike.kicad_pcb"
+        cls.board = pcbnew.LoadBoard(cls.pcb)
+        cls.fps = {f.GetReference(): f for f in cls.board.GetFootprints()}
+        cls.info = json.loads(Path(cls.pcb).with_suffix(".placement.json").read_text())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def centre(self, ref):
+        p = self.fps[ref].GetPosition()
+        return pcbnew.ToMM(p.x), pcbnew.ToMM(p.y)
+
+    def overlap_mm2(self, a, b):
+        ca, cb = self.fps[a].GetCourtyard(pcbnew.F_CrtYd), self.fps[b].GetCourtyard(pcbnew.F_CrtYd)
+        self.assertTrue(ca.OutlineCount() and cb.OutlineCount(), (a, b))
+        inter = pcbnew.SHAPE_POLY_SET(ca)
+        inter.BooleanIntersection(cb)
+        return inter.Area() / 1e12
+
+    def test_every_footprint_but_the_test_points_is_on_top(self):
+        self.assertIn("J1", self.fps)
+        bad = [r for r, f in self.fps.items()
+               if f.GetLayer() != (pcbnew.B_Cu if r.startswith("TP") else pcbnew.F_Cu)]
+        self.assertEqual(bad, [])
+        self.assertEqual(len([r for r in self.fps if r.startswith("TP")]), 6)
+
+    def test_led_capacitors_sit_beside_their_led_on_top(self):
+        for d, c, _ in pcb_full.led_ring_refs():
+            self.assertEqual(self.fps[c].GetLayer(), pcbnew.F_Cu, c)
+            self.assertLessEqual(math.dist(self.centre(c), self.centre(d)), 3.5, c)
+            self.assertIn(c, self.info["led_caps"])
+
+    def test_led_capacitor_long_axis_is_radial(self):
+        for d, c, _ in pcb_full.led_ring_refs():
+            pads = {p.GetNumber(): p.GetPosition() for p in self.fps[c].Pads()}
+            vx, vy = pcbnew.ToMM(pads["1"].x - pads["2"].x), pcbnew.ToMM(pads["1"].y - pads["2"].y)
+            rx, ry = self.centre(d)[0] - pcb_full.CX, self.centre(d)[1] - pcb_full.CY
+            self.assertGreater(abs(vx * rx + vy * ry) / (math.hypot(vx, vy) * math.hypot(rx, ry)), 0.99, c)
+
+    def test_led_capacitors_clear_j1_the_leds_and_each_other(self):
+        """RV-014 readiness B3: no capacitor courtyard meets J1 (courtyard or pad extent), an LED or another capacitor."""
+        caps = [c for _, c, _ in pcb_full.led_ring_refs()]
+        leds = [d for d, _, _ in pcb_full.led_ring_refs()]
+        jx0, jy0, jx1, jy1 = pcb_full.pad_extent_mm(self.fps["J1"], 0.0)
+        bad = []
+        for c in caps:
+            bad += [(c, o) for o in leds + ["J1"] + [x for x in caps if x > c] if self.overlap_mm2(c, o) > 0.0]
+            poly = pcb_full.court_poly_mm(self.fps[c])
+            if not pcb_full.convex_clear(poly, pcb_full.rect_poly(jx0, jy0, jx1, jy1)):
+                bad.append((c, "J1 pads"))
+        self.assertEqual(bad, [])
+
+    def test_placement_json_records_the_switch(self):
+        self.assertIs(self.info["p1"], True)
+        self.assertAlmostEqual(self.info["r_move"], 18.4)
+        self.assertEqual(self.info["sa_iters"], self.SA_ITERS)
+
+    def test_sourcing_fields_on_every_footprint(self):
+        import sourcing
+        self.assertEqual(self.fps["U7"].GetField("LCSC").GetText(), "C55266")
+        self.assertEqual(sourcing.sourcing_fields(self.fps["U7"].GetValue())["LCSC"], "C55266")
+        for ref, f in self.fps.items():
+            want = sourcing.sourcing_fields(f.GetValue())
+            for k in sourcing.FIELDS:
+                fld = f.GetField(k)
+                self.assertIsNotNone(fld, (ref, k))
+                self.assertEqual(fld.GetText(), want[k], (ref, k))
+                self.assertFalse(fld.IsVisible(), (ref, k))
+
+    def test_spare_capacitors_are_dnp_and_out_of_the_bom(self):
+        for ref in ("C4", "C32"):
+            self.assertTrue(self.fps[ref].IsDNP(), ref)
+            self.assertTrue(self.fps[ref].IsExcludedFromBOM(), ref)
+        self.assertFalse(self.fps["C2"].IsDNP() or self.fps["C2"].IsExcludedFromBOM())
+
+    def test_ring_links_follow_the_capacitor_layer(self):
+        import pcb_ring
+        self.assertEqual({pcb_ring.cap_link_layer(self.board, c) for _, c in pcb_ring.cells()}, {"F.Cu"})
 
 
 if __name__ == "__main__":
