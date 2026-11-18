@@ -72,6 +72,7 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** RED Art. 3(2) *(verify)*
 - **Priority:** Must
 - **Status:** Draft
+- **Note (owner decisions of 2026-11-18, ADR-0023 update):** for P1 the module moves 5 mm towards the antenna-side board edge and the full library courtyard of the module (antenna keep-out included) is kept free of movable parts; the LED ring parts D6 to D12 and their capacitors stay inside the vendor keep-out as before (DEV-004). Not measured: range (TC-205).
 
 ### HW-006 Test points and programming access
 

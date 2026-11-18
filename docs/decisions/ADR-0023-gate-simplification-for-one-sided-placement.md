@@ -87,3 +87,8 @@ state (about 1 A) and a failed-open switch 3 drops it to step 2. Answer: both fa
 firmware sees the step through the EN2/EN3 readbacks and the input current. A second objection: wiring FAULT into the gate changes
 an accepted ADR-0018 behaviour a day after acceptance. Answer: the owner chose it explicitly; the readback meaning on GPIO6 is
 unchanged, and the hardware reaction is toward the lowest step.
+
+## Update 2026-11-18 (owner decisions 4 and 5, same session, `docs/journal/2026-11-18-simplification-owner-decisions.md`)
+4. **U9 courtyard as an obstacle** (owner chose it over a body-only courtyard, which the assistant recommended, and over a larger waiver): with P1 the placer keeps every movable part out of the full ESP32-C3-MINI-1 library courtyard (43 x 32 mm, antenna keep-out included; `pcb_full.CourtyardMask`, test `test_no_movable_part_touches_the_u9_courtyard`). Measured: overlap 12.6 mm2 at the old module position.
+5. **Module 5 mm towards the antenna-side edge** (`mech_outline` MOD_OFF 1.0 to -4.0 mm; owner chose it, recommended): the courtyard hangs partly off the board; with eight more parts in 0402 (C7, C24, C25, C26, R_SU1, R_SU14, R_SU15, R8) the measured overlap is 0.0 mm2 and 14 fixed parts touch the courtyard (D6 to D12, C13 to C18, SW1; waiver 14). The antenna end is then about 6.5 mm from the LED ring; range is unverified (spike 7.2, TC-205). Related: ADR-0003 (antenna and board topology), HW-005.
+Routing evidence before decisions 4 and 5 (3 runs, 0.15 mm, one side): best run 2 unconnected items after the clean-up, strict gate FAIL in 4 classes, power check FAIL 2 (the batch on the final design is in the P1 report).
