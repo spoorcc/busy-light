@@ -142,3 +142,23 @@ R22 part (owner decisions).
   217.5, 285 and 330 deg, the neighbouring LED capacitors turned away by keep-out boxes; placement check 3.38 mm minimum.
 - New stored-board test `tests/test_board_p1.py` (sides, HW-016, HW-017, panel tabs): on the p1b3 board it fails exactly these two.
 - Batch p1b4 with both fixes started 21:16 UTC.
+
+## Batch p1b4: spares on the bottom, tab keep-outs (2026-11-18, 21:16 to 22:35 UTC)
+Placement with both fixes, netlist with the DNP spares out of the BOM, `KEYFIRST=1`, one Freerouting thread per run,
+`PRESTITCH` off. No run is clean, so nothing is stored:
+
+| Run | Unconnected after clean-up | Strict gate FAIL classes | Power check FAIL |
+|---|---|---|---|
+| run1 | 26 | 2 | 1 |
+| run2 | 7 | 1 | 2 |
+| run3 (best) | 3 | 1 | 0 |
+
+run3, the three open connections: the bottom spare C4 pad 1 (+5V) has no via (the post-route stitch found no free spot under
+U7, where the router had used the space), one GND track piece on F.Cu near (41, 27) mm, one +3V3 track piece to U3 pad 5.
+Not repaired by hand.
+
+Next lever, fan-out first. The local container wrapper now passes `PRESTITCH` and `PRESTITCH_REUSE` (assistant's scratch tool,
+not in the repository; CI runs the scripts in the container directly). Smoke test of the pre-route stitch on the three p1b4
+placements: 99 of 102, 96 of 98 and 95 of 97 plane pads get a via, C4 and C32 included; the misses are the U1 GND pads 4 and
+10 (0.4 mm pitch) and, on run1, U7 pin 6. Batch p1b5: the same placement seeds 1, 17, 33 plus seed 49, `PRESTITCH=1`, started
+22:37 UTC.

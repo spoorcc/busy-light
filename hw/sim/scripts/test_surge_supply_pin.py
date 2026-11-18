@@ -11,7 +11,8 @@ import surge_supply_pin as s  # noqa: E402
 
 pytestmark = pytest.mark.skipif(shutil.which("ngspice") is None, reason="ngspice not installed")
 LIMIT = s.V_ABS_MAX - s.MARGIN
-MAX_R_POWER_W = 0.031  # half of a 62.5 mW 0402 resistor (R_SU1, R_SU14, R_SU15 are 0402 since ADR-0023; was 0603, 100 mW)
+# half of a 62.5 mW 0402 resistor (R_SU1, R_SU14, R_SU15 are 0402 since ADR-0023; was 0603, 100 mW)
+MAX_R_POWER_W = 0.031
 MAX_Z_POWER_W = 0.15  # half of a 300 mW zener class
 WORST_C = 50e-9
 
@@ -45,11 +46,12 @@ def test_sustained_9v_power_within_half_rating():
         assert p_z <= MAX_Z_POWER_W
 
 
-# Plan 08 option T2 (NOT applied: it changes Approved HW-010 text, so it is the owner's call; RV-014): U14 and U15 would
-# share one 1 kohm resistor and one zener (net VDD_SW);
-# each supply pin keeps its own 100 nF. Conservative model: the node carries both loads and only ONE worst-case capacitor
-# (as if the second were far away); the real node has two.
-TMUX_VDD_MIN_V = 1.08  # TMUX1101 SCDS410D recommended supply minimum (quoted in the script docstring)
+# Plan 08 option T2 (NOT applied: it changes Approved HW-010 text, so it is the owner's call;
+# RV-014): U14 and U15 would share one 1 kohm resistor and one zener (net VDD_SW);
+# each supply pin keeps its own 100 nF. Conservative model: the node carries both loads and
+# only ONE worst-case capacitor (as if the second were far away); the real node has two.
+# TMUX1101 SCDS410D recommended supply minimum (quoted in the script docstring)
+TMUX_VDD_MIN_V = 1.08
 VBUS_MIN_V = 4.5
 
 
@@ -67,7 +69,8 @@ def test_shared_tmux_supply_dc_drop_and_minimum_supply():
 
 
 def test_shared_tmux_supply_sustained_power_unchanged():
-    # one resistor and one zener carry the same S3 current as each did before (the load current is negligible)
+    # one resistor and one zener carry the same S3 current as each did before
+    # (the load current is negligible)
     _, p_r, p_z = s.dc_s3(1000.0)
     assert p_r <= MAX_R_POWER_W
     assert p_z <= MAX_Z_POWER_W
