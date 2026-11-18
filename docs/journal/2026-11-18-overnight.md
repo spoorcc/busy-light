@@ -51,6 +51,12 @@ errors; strict ERC 0 findings, 55 nets equal to the intent table, deterministic)
 - **Trim T2 (shared zener for U14/U15) was made and then reverted:** RV-014 showed one fault would then unpower both switches,
   an unspecified state that may raise the limit. Its surge tests stay as an analysis option only.
 
+## Step 4 (no via-in-pad), merged 2026-11-18 06:10 UTC
+Made by an agent in a separate worktree (commit `63fd71a`), merged: one helper `via_hits_smd_pad` used by the stitcher, the grid
+router of `pcb_fix.py` (and so `pcb_ring.py`), and a `via_in_smd_pad` count in `pcb_fabcheck.py` with a `--no-via-in-pad`
+flag that fails on a non-zero count; 26 new tests. On the stored board the count is **35** (32 in the LED ring cells, 2 at DZ15,
+1 at C32; none at U9): the plan's "via-in-pad under U9" was wrong and is corrected.
+
 ## Not done
 P1 placement (all parts on top), via-in-pad removal, routing batches, finishing, `board-p1/`, order package, KiKit panel, CI
 release workflow, housing check, firmware target build (Zephyr fetch started 05:45 UTC), regulatory update. Plan 08 section 5

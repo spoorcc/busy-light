@@ -11,6 +11,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Power check of the spike board follows the HW-017 split: cases VBUS (J1 to R22) and VBUS_IC (R22 to the TPS2553 input), with a test (HW-010, HW-017, plan 08 step 3).
 - Evidence report `sw-target-build-2026-11-18.md`: `sw/app` builds for `esp32c3_devkitm` with Zephyr v4.5.0 and SDK 1.0.1 (FLASH 134 884 B, 3.22 %, 0 warnings; simple boot, no MCUboot); host tests 20 of 20 pass on `native_sim/native/64`. The gate logic is not linked into the target image; nothing flashed or run on hardware (plan 07, SW-005, SW-009).
 - Spike generator for the P1 board (plan 08): HW-017 damping link R22 (0 ohm 1206) between the connector-side net VBUS (J1, TVS1, U6) and VBUS_IC, with per-net main-path routing rules; trim T1 under the owner rule (R_ILIM3 27.7 k 0.1 % 0805 replaces 27.4 k + R20 301 ohm, windows recalculated). The stored two-sided board is not regenerated (HW-010, HW-017).
 - Owner decisions of 2026-11-17 for the prototype board P1 (journal `2026-11-17-p1-order-owner-decisions.md`): one-sided SMD assembly at JLCPCB Economic PCBA, 0.15 mm tracks, 4 layers HASL lead-free, own KiKit panel, CI draft release of the order files. HW-008 (amended: hand-soldered through-hole J1 allowed), HW-016 (spares within [10] mm), HW-017 and ADR-0021 approved or accepted by the owner; HW-010 gets an owner rule for part trims; ADR-0020 option B not accepted (HW-008, HW-010, HW-016, HW-017, ADR-0020, ADR-0021).

@@ -16,7 +16,8 @@
 The owner wants to order a first prototype board (P1): 5 bare PCBs, 2 of them assembled by JLCPCB with the **Economic**
 PCBA service, at most EUR 100 (answers 1, 3, 11). The stored board `hw/kicad/spike-gate/board/busy_light_spike.kicad_pcb`
 (ring14 run 9, made with `SPIKE_PROFILE=fine`, i.e. **0.1 mm tracks and clearance**, vias 0.5 / 0.2 mm) has 41 footprints on
-the top side and 60 on the bottom (6 of them bare test pads), uses via-in-pad ground stitching under U9, and its
+the top side and 60 on the bottom (6 of them bare test pads), has 35 vias inside SMD pads (32 in the LED ring cells, 2 at DZ15,
+1 at C32; none under U9, although the stitcher code had a U9 via-in-pad path; measured 2026-11-18 by `pcb_fabcheck.py`), and its
 `largest_dim_mm` is 59.24 (MECH-001 allows 58 mm). Economic PCBA, as the assistant understands it (not read, A1), assembles
 one side only and no through-hole parts. P1 therefore needs a new placement with every assembled part on the top side.
 

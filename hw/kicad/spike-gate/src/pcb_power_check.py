@@ -28,7 +28,10 @@ R_VIA = 0.001
 TARGET_V = 0.050
 # net: (source (ref, pad or None for all pads of the ref), load (ref, pad), current A, basis)
 CASES = {
-    "VBUS_IC": (("J1", None), ("U7", "1"), 1.5, "J1 VBUS pins to the TPS2553 input; 1.5 A step limit, requirement text HW-010"),
+    # HW-017 (plan 08): the input path is split by the 0 ohm link R22; the two cases add up, plus R22's own resistance
+    # (not known until a part is chosen, HW-017 [10] mohm)
+    "VBUS": (("J1", None), ("R22", "1"), 1.5, "J1 VBUS pins to the damping link R22; 1.5 A step limit, HW-010, HW-017"),
+    "VBUS_IC": (("R22", "2"), ("U7", "1"), 1.5, "R22 to the TPS2553 input; 1.5 A step limit, HW-010, HW-017"),
     "+5V": (("U7", "6"), ("U8", "1"), 1.0, "TPS2553 output to the 3V3 regulator input; analyst assumption 1.0 A"),
     "+3V3": (("U8", "5"), ("U9", "3"), 0.5, "regulator output to the module; analyst assumption 0.5 A"),
 }
