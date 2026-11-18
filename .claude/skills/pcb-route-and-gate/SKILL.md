@@ -26,7 +26,9 @@ All commands run from `hw/kicad/spike-gate`.
    and `src/pcb_full.py` (`LAYOUT_RULES`). Change one thing at a time.
 3. **Route.** `SPIKE_ALLOW_KNOWN_OPEN=0 sh run_best.sh <input dir> <out dir> <N>`. Set the variable to 0 here:
    the run scripts default to 1 (known-open list accepted), so the result would not be a strict result.
-   Required: Java, `FREEROUTING_JAR` and `PCB_PYTHON` (KiCad 10 `pcbnew`; the system `python3` works). They are not set by
+   Required: Java 25 or later (Freerouting 2.5.0 is class file version 69; Java 21 fails with UnsupportedClassVersionError,
+   seen 2026-11-18), `FREEROUTING_JAR` (the GitHub release jar or the Maven Central `freerouting-2.5.0-executable.jar`, both pinned
+   in `run_pcb.sh`) and `PCB_PYTHON` (KiCad 10 `pcbnew`; the system `python3` works). They are not set by
    default. The pinned 2.5.0 jar was at `~/Programming/busy-light-tools/freerouting-2.5.0.jar` (sha256 pinned in
    `run_pcb.sh`). Each run starts a Freerouting job of `FR_THREADS` (default 4) threads: 12 runs load the whole machine
    and take tens of minutes. Start from a clean tree or record `git status` in the report; see `run_pcb.sh`.
