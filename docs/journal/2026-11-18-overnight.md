@@ -1,7 +1,24 @@
 # Overnight work on the P1 board, 2026-11-17 to 2026-11-18 (hand-off)
 
-Status at 05:50 UTC, 2026-11-18. Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2026-11-17-p1-order-owner-decisions.md`.
+Status at 05:52 UTC, 2026-11-18 (updated through the morning). Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2026-11-17-p1-order-owner-decisions.md`.
 **The P1 board does not exist yet. No routing run was made tonight. Nothing is ready to order.**
+
+## Headline (05:52 UTC)
+**With every assembled part on the top side, the 46 mm board does not fit: the placer finds no overlap-free placement**,
+before any routing. Scratch experiments (copy of `pcb_full.py` with P1 sides, LED capacitors beside the LEDs, `R_MOVE` 18.4 mm,
+ring14 knobs `PLACE_GRID=1.0 PLACE_BLOCKS=3 PLACE_ORIENT=1.5`, 16 seeds of 160000 iterations each; netlist with T1 and R22):
+
+| Variant | Best overlap (mm2, 0 = fits) |
+|---|---|
+| Baseline, vendor antenna keep-out on | 25.1 (placed DRC: 61 `courtyards_overlap`, waiver max 14) |
+| Keep-out off | 6.6 |
+| Keep-out on, five of the six hold-off capacitors removed (as if one part) | 9.0 |
+| Both (keep-out off, five capacitors removed) | see the update below |
+| Baseline with 4x iterations | see the update below |
+
+Reading: one-sided P1 on 46 mm needs a decision from you before routing makes sense. The levers, each yours:
+grow the board (MECH-001 is already exceeded), fewer parts (hold-off capacitors, LED capacitors, logic), give up the vendor
+antenna keep-out (DEV-004), or go two-sided (Standard PCBA, the stored board's layout family).
 
 ## Time line
 - 21:50 to 22:15 UTC: 20 owner questions; set-up of this container (KiCad 10.0.8 in the `kicad/kicad:10.0` Docker image,
@@ -18,7 +35,7 @@ Status at 05:50 UTC, 2026-11-18. Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2
 | `fd03b6d` | Plan 08 revision 3 and review record RV-014 (44 merged findings, resolutions) |
 | `d901a5c` | TC-208, TC-216, TC-217 procedures (drafted, not run) |
 
-## Done, not committed (waits for the readiness GO of RV-014, owner answer 16)
+## Done after the readiness review (RV-014 step 4: NO-GO overall, steps 1 to 4 ready; committed `aa4438a`, `9fc37cb`)
 In `hw/kicad/spike-gate` and `hw/sim/scripts`; all tests pass (318 passed, 1 skipped for the jar variable, 15 known `GATE_NET`
 errors; strict ERC 0 findings, 55 nets equal to the intent table, deterministic):
 - **Trim T1:** R_ILIM3 27.4 k + R20 301 ohm replaced by one 27.7 k 0.1 % in 0805 (Yageo RT0805BRD0727K7L, LCSC C865349, from the
