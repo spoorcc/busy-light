@@ -5,7 +5,7 @@
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
 #   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
-# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
+# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), PRESTITCH (default 0; 1 = stitch the plane pads before the router and lock the vias, reuse limit PRESTITCH_REUSE mm, default 1.6), FR_THREADS (default 4).
 #      FREEROUTING_JAR  path of a Freerouting v2.5.0 jar, one of two pinned files (not part of the repository):
 #        sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7  freerouting-2.5.0.jar, official GitHub release
 #        sha256 7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976  freerouting-2.5.0-executable.jar, Maven Central
@@ -60,6 +60,14 @@ if [ -n "$FREEROUTING_JAR" ]; then
     "$PY" "$HERE/src/pcb_dsn.py" lock "$A/ring.kicad_pcb" "$A/ring_locked.kicad_pcb" 2>&1 | filter
     for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/ring_locked.$e"; done
     BASE="$A/ring_locked.kicad_pcb"
+  fi
+  if [ "${PRESTITCH:-0}" = 1 ]; then  # fan-out first (P1 batch of 2026-11-18): the plane pads get their via before the router runs, locked
+    "$PY" "$HERE/src/kicad_strict.py" drc "$BASE" "placed-${LAYERS}l" --out "$A/drc_prestitch_in.json" > /dev/null 2>&1 || true
+    "$PY" "$HERE/src/pcb_stitch.py" "$BASE" "$A/drc_prestitch_in.json" "$A/prestitch.kicad_pcb" --reuse-max="${PRESTITCH_REUSE:-1.6}" 2>&1 \
+      | filter | grep -E '^\{' || echo "pre-route stitch: report missing"
+    "$PY" "$HERE/src/pcb_dsn.py" lock "$A/prestitch.kicad_pcb" "$A/prestitch_locked.kicad_pcb" 2>&1 | filter
+    for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/prestitch_locked.$e"; done
+    BASE="$A/prestitch_locked.kicad_pcb"
   fi
   if [ "${KEYFIRST:-0}" = 1 ]; then
     # stage 1: only the nets of pcb_rules.ROUTE_FIRST are routed (the other pads are obstacles); the tracks are then locked

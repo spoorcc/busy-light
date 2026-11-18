@@ -263,8 +263,9 @@ class Full(L.Sheet):
             for p in self.syms[-1].properties:
                 if p.key in ("Reference", "Value"):
                     p.position.angle = (-rot) % 360
-        if ref in DNP:                  # HW-016: spare footprints, not fitted
+        if ref in DNP:                  # HW-016: spare footprints, not fitted and not in the BOM (DRC parity with the P1 footprint)
             self.syms[-1].dnp = True
+            self.syms[-1].inBom = False
         sym = self.syms[-1]             # hidden BOM fields from the sourcing table (empty when the part has no recorded source)
         sym.properties.extend(w.prop(k, v, sym.position.X, sym.position.Y, 4 + n, True)
                               for n, (k, v) in enumerate(sourcing_fields(PARTS[ref][3], PARTS[ref][2]).items()))

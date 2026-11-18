@@ -249,6 +249,16 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(len(tps), 6)
         self.assertTrue(all(y.inBom is False for y in tps))
 
+    def test_spare_footprints_are_dnp_and_not_in_the_bom(self):
+        """HW-016: C4 and C32 are not fitted; the P1 footprints are DNP and excluded from the BOM, the symbols must say the
+        same (KiCad DRC footprint_symbol_mismatch, P1 batch of 2026-11-18)."""
+        spares = {p.value: y for y in self.sch.schematicSymbols for p in y.properties
+                  if p.key == "Reference" and p.value in ("C4", "C32")}
+        self.assertEqual(set(spares), {"C4", "C32"})
+        for ref, y in spares.items():
+            self.assertTrue(y.dnp, ref)
+            self.assertIs(y.inBom, False, ref)
+
     def test_test_points(self):
         nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 7)}
         self.assertEqual(nets, {"+5V", "+3V3", "GND", "LED_DATA", "CHIP_EN", "BOOT"})

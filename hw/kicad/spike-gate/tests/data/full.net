@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullS3/full.kicad_sch")
-		(date "2026-11-18T19:16:32")
+		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullS4/full.kicad_sch")
+		(date "2026-11-18T20:10:23")
 		(tool "Eeschema 10.0.8")
 		(sheet
 			(number "1")
@@ -317,6 +317,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "dnp")
@@ -2339,6 +2342,9 @@
 			(property
 				(name "Sheetfile")
 				(value "full.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "dnp")

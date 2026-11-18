@@ -8,7 +8,9 @@ the antenna strip) with a short track from the pad to the via. No via touches an
 included (pcb_rules.via_hits_smd_pad; plan 08 section 4.3, HW-008): the module ground pads of U9 also get a via beside
 the pad, not in it. Deterministic. Exploratory.
 
-Usage: python3 pcb_stitch.py <in.kicad_pcb> <drc.json> <out.kicad_pcb> [nets, default GND,+5V]
+Usage: python3 pcb_stitch.py <in.kicad_pcb> <drc.json> <out.kicad_pcb> [nets, default GND,+5V] [--reuse-max=<mm>]
+  --reuse-max  longest track from a pad to a via of its net that exists already (default 5.0 mm). run_pcb.sh PRESTITCH=1 runs
+               the stitcher once before the router (fan-out first) with a short limit, so no long track crosses unrouted space.
 """
 import json
 import math
@@ -27,6 +29,8 @@ VIA_D, VIA_DRILL = R.VIA_DIA, R.VIA_DRILL
 CLR = R.CLEARANCE + R.STITCH_MARGIN            # DRC clearance plus a margin
 DIST = (0.8, 1.0, 1.25, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0)
 ANG = [i * 11.25 for i in range(32)]
+DOG_FIRST = (0.5, 0.7, 1.0, 1.4)                 # first leg of a one-corner escape (dogleg), mm
+DOG_SECOND_MAX = 2.5                             # longest second leg, mm
 
 
 def seg_dist(px, py, x0, y0, x1, y1):
@@ -78,6 +82,7 @@ class Stitcher:
         self.netitems = board.GetNetsByName()
         self.added = []
         self.failed = []
+        self.reuse_max = DIST[-1]                # longest track to a via of the net that exists already (mm)
 
     def free(self, x, y, r, net, layer=None):
         """True when a disc of radius r at (x, y) clears the copper of other nets: all layers (conservative) or, with `layer`
@@ -144,21 +149,48 @@ class Stitcher:
         """Connect one pad: a track to a via of the net within DIST[-1], else a new via beside the pad with a short track.
         The via-in-pad shortcut for the U9 ground pads is gone (plan 08 section 4.3): the pad centre is in the pad."""
         w = stitch_width(net)
-        for v in R.reuse_targets(cx, cy, self.vias, net, DIST[-1]):      # join a via of the net that exists already
+        for v in R.reuse_targets(cx, cy, self.vias, net, self.reuse_max):   # join a via of the net that exists already
             if self.track_free((cx, cy), (v[0], v[1]), w, net, self.b.GetLayerName(layer)):
                 self.add_track(ref, num, net, layer, (cx, cy), (v[0], v[1]), w)
                 self.added.append((ref, num, net, round(math.hypot(v[0] - cx, v[1] - cy), 2)))
                 return True
+        lname = self.b.GetLayerName(layer)
         for d in DIST:
             for a in ANG:
                 x, y = cx + d * math.cos(math.radians(a)), cy + d * math.sin(math.radians(a))
-                if self.via_ok(x, y, net) and self.track_free((cx, cy), (x, y), w, net, self.b.GetLayerName(layer)):
+                if self.via_ok(x, y, net) and self.track_free((cx, cy), (x, y), w, net, lname):
                     self.put_via(ref, num, net, x, y)
                     self.add_track(ref, num, net, layer, (cx, cy), (x, y), w)
                     self.added.append((ref, num, net, round(d, 2)))
                     return True
+        corner = self.dogleg(cx, cy, w, net, lname)
+        if corner is not None:
+            (mx, my), (x, y) = corner
+            self.put_via(ref, num, net, x, y)
+            self.add_track(ref, num, net, layer, (cx, cy), (mx, my), w)
+            self.add_track(ref, "%s:b" % num, net, layer, (mx, my), (x, y), w)
+            self.added.append((ref, num, net, round(math.hypot(mx - cx, my - cy) + math.hypot(x - mx, y - my), 2)))
+            return True
         self.failed.append((ref, num, net))
         return False
+
+    def dogleg(self, cx, cy, w, net, lname):
+        """Plan 08 section 4.3 (one side, no via-in-pad): when every straight track from the pad to a via spot is blocked,
+        try a track with one corner: pad -> corner (DOG_FIRST) -> via (DIST up to DOG_SECOND_MAX), both legs on the pad
+        layer. First fit in a fixed order (deterministic); ((corner), (via)) or None."""
+        for d1 in DOG_FIRST:
+            for a1 in ANG:
+                mx, my = cx + d1 * math.cos(math.radians(a1)), cy + d1 * math.sin(math.radians(a1))
+                if not self.track_free((cx, cy), (mx, my), w, net, lname):
+                    continue
+                for d2 in [d for d in DIST if d <= DOG_SECOND_MAX]:
+                    for a2 in ANG:
+                        x, y = mx + d2 * math.cos(math.radians(a2)), my + d2 * math.sin(math.radians(a2))
+                        if math.hypot(x - cx, y - cy) < DIST[0]:
+                            continue                     # a via this close to the pad was a straight candidate already
+                        if self.via_ok(x, y, net) and self.track_free((mx, my), (x, y), w, net, lname):
+                            return (mx, my), (x, y)
+        return None
 
 
 def unconnected_pads(drc_path, nets):
@@ -208,7 +240,7 @@ def remove_dangling_vias(board, drc):
     return n
 
 
-def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None):
+def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None, reuse_max=None):
     board = pcbnew.LoadBoard(src)
     report = json.load(open(drc, encoding="utf-8"))
     tidy = {"dangling_vias_removed": remove_dangling_vias(board, report)}
@@ -216,6 +248,8 @@ def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None):
     st = Stitcher(board, dst)
     info = json.load(open(src.rsplit("/", 1)[0] + "/busy_light_spike.placement.json")) if tab_r is None else {"tab_r": tab_r}
     st.tab_r = info["tab_r"]
+    if reuse_max is not None:
+        st.reuse_max = reuse_max
     todo = unconnected_pads(drc, nets)
     fps = {f.GetReference(): f for f in board.GetFootprints()}
     jobs = []
@@ -246,7 +280,10 @@ def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
+    args = [a for a in sys.argv[1:] if not a.startswith("--reuse-max=")]
+    opt = [float(a.split("=", 1)[1]) for a in sys.argv[1:] if a.startswith("--reuse-max=")]
+    if len(args) < 3:
         sys.exit(__doc__)
-    rep = main(sys.argv[1], sys.argv[2], sys.argv[3], tuple((sys.argv[4] if len(sys.argv) > 4 else ",".join(R.PLANE_NET_ORDER)).split(",")))
+    rep = main(args[0], args[1], args[2], tuple((args[3] if len(args) > 3 else ",".join(R.PLANE_NET_ORDER)).split(",")),
+               reuse_max=opt[-1] if opt else None)
     sys.exit(1 if rep["failed"] else 0)      # a pad that could not be stitched is a failure (plan 06 G3)

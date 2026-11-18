@@ -180,3 +180,94 @@ class StitcherNoViaInPad(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class StitcherDogleg(unittest.TestCase):
+    """P1 batch of 2026-11-18: on the one-sided board the router boxed plane pads in, so every straight track from the pad
+    to a via spot was blocked (U11 pad 5 among them). The stitcher now tries one corner before it gives up."""
+
+    def stitcher(self, t):
+        src = Path(t) / "b.kicad_pcb"
+        fixture_board(src, [(pcb_full.CX, pcb_full.CY)])
+        st = pcb_stitch.Stitcher(pcbnew.LoadBoard(str(src)), str(src))
+        st.tab_r = 30.0
+        return st
+
+    def boxed_in(self, st, first_leg_free=True):
+        """Every straight track from the pad centre longer than 0.6 mm is blocked; tracks that start elsewhere are free."""
+        cx, cy = pcb_full.CX, pcb_full.CY
+
+        def track_free(p0, p1, w, net, layer=None):
+            if abs(p0[0] - cx) < 1e-9 and abs(p0[1] - cy) < 1e-9:
+                return first_leg_free and math.hypot(p1[0] - cx, p1[1] - cy) <= 0.6
+            return True
+        st.track_free = track_free
+        st.via_ok = lambda x, y, net: math.hypot(x - cx, y - cy) >= 0.8
+        return cx, cy
+
+    def test_boxed_in_pad_gets_a_track_with_one_corner(self):
+        with tempfile.TemporaryDirectory() as t:
+            st = self.stitcher(t)
+            cx, cy = self.boxed_in(st)
+            self.assertTrue(st.stitch_pad("T1", "1", "GND", pcbnew.F_Cu, cx, cy))
+            self.assertEqual(st.failed, [])
+            via = st.vias[-1]
+            corner = (st.segs[-2][2], st.segs[-2][3])
+            self.assertAlmostEqual(math.hypot(corner[0] - cx, corner[1] - cy), pcb_stitch.DOG_FIRST[0])
+            self.assertGreaterEqual(math.hypot(via[0] - cx, via[1] - cy), pcb_stitch.DIST[0])
+            self.assertEqual((st.segs[-1][0], st.segs[-1][1]), corner)              # the second leg starts at the corner
+            self.assertEqual((st.segs[-1][2], st.segs[-1][3]), (via[0], via[1]))   # and ends on the via
+
+    def test_dogleg_is_deterministic(self):
+        got = []
+        for _ in range(2):
+            with tempfile.TemporaryDirectory() as t:
+                st = self.stitcher(t)
+                cx, cy = self.boxed_in(st)
+                got.append(st.dogleg(cx, cy, 0.25, "GND", "F.Cu"))
+        self.assertIsNotNone(got[0])
+        self.assertEqual(got[0], got[1])
+
+    def test_pad_without_a_free_first_leg_still_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            st = self.stitcher(t)
+            cx, cy = self.boxed_in(st, first_leg_free=False)
+            self.assertFalse(st.stitch_pad("T1", "1", "GND", pcbnew.F_Cu, cx, cy))
+            self.assertEqual(st.failed, [("T1", "1", "GND")])
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class StitcherReuseLimit(unittest.TestCase):
+    """run_pcb.sh PRESTITCH=1 stitches before the router: a pad must not run a long track to a far via across copper that
+    is not routed yet, so the reuse distance is limited there (--reuse-max)."""
+
+    def stitch_with(self, reuse_max):
+        cx, cy = pcb_full.CX, pcb_full.CY
+        with tempfile.TemporaryDirectory() as t:
+            src = Path(t) / "b.kicad_pcb"
+            fixture_board(src, [(cx, cy)])
+            st = pcb_stitch.Stitcher(pcbnew.LoadBoard(str(src)), str(src))
+            st.tab_r = 30.0
+            st.vias.append((cx + 3.0, cy, pcb_stitch.VIA_D, "GND"))      # a via of the net 3 mm away
+            if reuse_max is not None:
+                st.reuse_max = reuse_max
+            n0 = len(st.vias)
+            self.assertTrue(st.stitch_pad("T1", "1", "GND", pcbnew.F_Cu, cx, cy))
+            return len(st.vias) - n0, st.added[-1][3]
+
+    def test_default_joins_the_via_3_mm_away(self):
+        self.assertEqual(self.stitch_with(None), (0, 3.0))
+
+    def test_short_limit_places_a_new_via_beside_the_pad(self):
+        new, dist = self.stitch_with(1.6)
+        self.assertEqual(new, 1)
+        self.assertLess(dist, 1.6)
+
+    def test_run_pcb_prestitch_uses_the_limit(self):
+        txt = (Path(__file__).resolve().parent.parent / "run_pcb.sh").read_text(encoding="utf-8")
+        block = txt[txt.index('if [ "${PRESTITCH:-0}" = 1 ]'):]
+        block = block[:block.index("\n  fi\n")]
+        self.assertIn("pcb_stitch.py", block)
+        self.assertIn('--reuse-max="${PRESTITCH_REUSE:-1.6}"', block)
+        self.assertIn("pcb_dsn.py\" lock", block)                          # the fan-out vias are locked for the router

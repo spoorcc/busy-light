@@ -74,3 +74,31 @@ parts touch the U9 courtyard (D6 to D12, C13 to C18, SW1; the waiver allows 14).
 antenna-side edge (MOD_OFF 1.0 to -4.0 mm)? **Answer: yes, shift 5 mm** (recommended). The antenna end then sits about 6.5 mm from
 the LED ring; range is not verified either way (spike 7.2, TC-205). Parts for the extra 0402 swaps (web search, JLCPCB basic):
 Samsung CL05B104KO5NNNC C1525 (100 nF 16 V X7R), CL05A105KA5NQNC C52923 (1 uF 25 V X5R), Uni-Royal 0402WGF4700TCE C25117 (470 ohm).
+
+## Routing batch on the final design (p1b2, 2026-11-18, 19:19 to 20:03 UTC)
+Settings: P1=1, 46 mm, module offset -4 mm, U9 courtyard as placer obstacle, 0.15 mm, 4 layers, router sees the In1 GND plane
+(`planes inner`), KEYFIRST two-stage, Freerouting 2.5.0 (Maven jar), 3 runs, strict gate with SPIKE_ALLOW_KNOWN_OPEN=0.
+
+| Run | Unconnected after clean-up | Strict gate FAIL classes | Power check FAIL |
+|---|---|---|---|
+| run1 | 6 | 2 | 1 |
+| run2 | 6 | 2 | 1 |
+| run3 (best) | 4 | 2 | 1 |
+
+Best run (run3), findings that still fail:
+- `unconnected_items` 4: plane pads without a via to their plane: TPS2553 OUT U7.6 (+5V), regulator input capacitor C5.1 (+5V),
+  ESD part U6.2 (GND), plus one GND track piece. The stitcher found no free straight track to a via spot: the router had wrapped
+  the /ILIM and VBUS_IC tracks around U7.6 and the USB data tracks around U6.2 (it does not know that a plane pad still needs a via).
+- `footprint_symbol_mismatch` 2: C4 and C32 are excluded from the BOM on the P1 footprints, not on the schematic symbols. **Fixed:**
+  the generator now writes `in_bom no` for the DNP spares (`test_spare_footprints_are_dnp_and_not_in_the_bom`).
+- Power check: +5V from U7 to the regulator input has no path (infinite), because U7.6 is not stitched. VBUS 18.3 mV, VBUS_IC
+  29.5 mV, +3V3 45.3 mV at their analyst currents (all within 50 mV).
+- Tolerated by the waiver: 14 U9 courtyard overlaps (max 14), 1 U9 rule-area finding (max 1). No clearance finding after clean-up.
+
+Two changes to the routing flow (spike-gate, tests in `tests/test_pcb_check_stitch.py`):
+1. **Dogleg stitch:** when every straight track to a via spot is blocked, the stitcher tries one corner. Replayed on run3's routed
+   board it stitches U11.5; U7.6, C5.1 and U6.2 still fail (no free first leg at 0.6 mm for U7.6; one at 0.25 mm for U6.2).
+2. **Fan-out first (`PRESTITCH=1`, default off):** the plane pads get their via before the router runs and the vias are locked,
+   so the router routes around them. Smoke test on run3's ring board: 100 of 102 plane pads get a via (the two misses are the
+   0.4 mm-pitch GND pads of U1, which the router or the post-route stitch handle). A batch with the same placement seeds (p1b3)
+   is running; its result decides whether P1 uses this.
