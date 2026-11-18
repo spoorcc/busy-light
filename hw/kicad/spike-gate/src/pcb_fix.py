@@ -4,7 +4,8 @@ stitcher, with a small deterministic A* grid router on four layers.
 
 Each pair is routed on its own: obstacles are the copper of other nets (pads, tracks, vias, board edge, slot, rule areas)
 grown by the clearance plus half the track width; the copper of the same net is free. Vias are through vias and keep the
-hole-to-hole distance. New copper is added to the obstacle maps before the next pair. No random numbers; pairs in report
+hole-to-hole distance; no via touches an SMD pad of any net, the same net included (pcb_rules.via_hits_smd_pad; plan 08
+section 4.3, HW-008). New copper is added to the obstacle maps before the next pair. No random numbers; pairs in report
 order. The result is checked by `kicad-cli pcb drc`, which this script does not replace.
 
 Usage: python3 pcb_fix.py <in.kicad_pcb> <drc.json> <out.kicad_pcb>            route the unconnected pairs
@@ -25,6 +26,7 @@ from scipy import ndimage
 import mech_outline as MO
 import pcb_full as P
 import pcb_rules as R
+import pcb_stitch as S
 
 RES = 0.05                    # grid step, mm
 SIGHT = 0.06                  # extra margin against grid rounding and diagonal moves, mm (about 1.2 grid steps)
@@ -86,8 +88,10 @@ class Fixer:
         self.via_pts = []
         self.segs = []                                    # (layer, x0, y0, x1, y1, w, net)
         self.pads = {}
+        self.pad_boxes = []                               # (x0, y0, x1, y1, is_smd): input of pcb_rules.via_hits_smd_pad
         self.added = []
         self._load()
+        self.via_in_pad = self.via_in_pad_mask()          # cells where a via centre would touch an SMD pad (any net)
 
     # ----------------------------------------------------------------- raster
     def cell(self, x, y):
@@ -141,6 +145,7 @@ class Fixer:
                     self.stamp_rect(self.cu[L], x0, y0, x1, y1, -1 if npth else nid)
                 pos = p.GetPosition()
                 self.pads[(f.GetReference(), p.GetNumber())] = (mmf(pos.x), mmf(pos.y), nm)
+                self.pad_boxes.append((x0, y0, x1, y1, S.is_smd_pad(p)))
         tr = b.Tracks()
         for it in [tr[i] for i in range(tr.size())]:
             nid = self.nets.get(it.GetNetname(), 0) or -1
@@ -161,6 +166,23 @@ class Fixer:
                 for L in LAYERS:
                     if z.IsOnLayer(LAYER_ID[L]):
                         self.stamp_rect(self.hard[L], mmf(bb.GetX()), mmf(bb.GetY()), mmf(bb.GetRight()), mmf(bb.GetBottom()), True)
+
+    def via_in_pad_mask(self):
+        """Boolean map: True where a via (R.VIA_DIA) centred on the cell would touch an SMD pad of any net, by
+        pcb_rules.via_hits_smd_pad itself, evaluated at the cell centre (the point where commit places the via).
+        Only the cells near each pad are evaluated; the rest stay False."""
+        mask = np.zeros((self.ny, self.nx), dtype=bool)
+        reach = R.VIA_DIA / 2 + R.VIA_IN_PAD_GROW + RES
+        for box in self.pad_boxes:
+            if not box[4]:
+                continue
+            ix0, iy0 = self.cell(box[0] - reach, box[1] - reach)
+            ix1, iy1 = self.cell(box[2] + reach, box[3] + reach)
+            for iy in range(max(0, iy0), min(self.ny - 1, iy1) + 1):
+                for ix in range(max(0, ix0), min(self.nx - 1, ix1) + 1):
+                    if not mask[iy, ix] and R.via_hits_smd_pad(*self.xy(ix, iy), R.VIA_DIA, (box,)):
+                        mask[iy, ix] = True
+        return mask
 
     def inside_mask(self, margin):
         """Boolean map: cell centre inside the PCB outline (circle, tab, minus the slot), `margin` from the edge."""
@@ -201,8 +223,11 @@ class Fixer:
         for vx, vy in self.via_pts:                            # hole-to-hole: centre distance
             self.stamp_disc(hole, vx, vy, R.VIA_DRILL + R.HOLE_TO_HOLE + sight, True)
         via_ok &= ~hole
+        via_ok &= ~self.via_in_pad                             # no via-in-pad, any net (plan 08 section 4.3)
         s = self.cell(*p0) + (LAYERS.index(l0),)
         g = self.cell(*p1) + (LAYERS.index(l1),)
+        if R.via_hits_smd_pad(p0[0], p0[1], R.VIA_DIA, self.pad_boxes):
+            via_ok[s[1], s[0]] = False                         # a via on the start cell sits at p0 itself (commit)
         for lay in (s, g):                                     # the end points are on same-net copper: always free
             ok[LAYERS[lay[2]]][lay[1], lay[0]] = True
         wx0, wx1 = sorted((s[0], g[0]))
@@ -266,6 +291,8 @@ class Fixer:
         while i < len(pts) - 1:
             (a, la), (c, lb) = pts[i], pts[i + 1]
             if la != lb:                                       # layer change at the same point: a via
+                if R.via_hits_smd_pad(a[0], a[1], R.VIA_DIA, self.pad_boxes):     # guard: route() keeps vias off pads
+                    raise ValueError("via in an SMD pad at (%.3f, %.3f) on net %s" % (a[0], a[1], net))
                 v = pcbnew.PCB_VIA(self.b)
                 v.SetPosition(P.vec(*a))
                 v.SetViaType(pcbnew.VIATYPE_THROUGH)

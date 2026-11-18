@@ -179,3 +179,97 @@ class SnapToVias(unittest.TestCase):
         self.assertEqual(len(self.tracks(b)), 2)
         pcb_fix.snap_to_vias(b, near=[(59.22, 34.15)])
         self.assertEqual(len(self.tracks(b)), 1)
+
+
+def stacked_board():
+    """Two 1.0 mm pads of net A at the board centre, one on F.Cu and one on B.Cu: the route from one to the other needs a
+    via, and before plan 08 the router put it at the pad centre (in both pads)."""
+    b = pcbnew.BOARD()
+    b.SetCopperLayerCount(4)
+    net = pcbnew.NETINFO_ITEM(b, "A")
+    b.Add(net)
+    cx, cy = pcb_full.CX, pcb_full.CY
+    for ref, layer in (("T", pcbnew.F_Cu), ("U", pcbnew.B_Cu)):
+        f = pcbnew.FOOTPRINT(b)
+        f.SetReference(ref)
+        f.SetPosition(pcb_full.vec(cx, cy))
+        p = pcbnew.PAD(f)
+        p.SetNumber("1")
+        p.SetShape(pcbnew.PAD_SHAPE_RECT)
+        p.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+        ls = pcbnew.LSET()
+        ls.AddLayer(layer)
+        p.SetLayerSet(ls)
+        p.SetSize(pcbnew.VECTOR2I(pcb_full.mm(1.0), pcb_full.mm(1.0)))
+        p.SetPosition(pcb_full.vec(cx, cy))
+        p.SetNet(net)
+        f.Add(p)
+        b.Add(f)
+    edge = pcbnew.PCB_SHAPE(b)
+    edge.SetShape(pcbnew.SHAPE_T_CIRCLE)
+    edge.SetStart(pcb_full.vec(cx, cy))
+    edge.SetEnd(pcb_full.vec(cx + 20.0, cy))
+    edge.SetLayer(pcbnew.Edge_Cuts)
+    b.Add(edge)
+    return b
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class NoViaInPad(unittest.TestCase):
+    """Plan 08 section 4.3 (HW-008, RV-014): the grid router (and so pcb_ring.py) places no via on an SMD pad of any net."""
+
+    def vias(self, fx):
+        return [a[2] for a in fx.added if a[0] == "via"]
+
+    def test_mask_is_the_helper_at_every_cell_near_the_pads(self):
+        fx = pcb_fix.Fixer(small_board(), 30.0)
+        cx, cy = pcb_full.CX, pcb_full.CY
+        ix0, iy0 = fx.cell(cx - 6.0, cy - 5.0)
+        ix1, iy1 = fx.cell(cx + 6.0, cy + 5.0)
+        bad = [(ix, iy) for iy in range(iy0, iy1 + 1) for ix in range(ix0, ix1 + 1)
+               if fx.via_in_pad[iy, ix] != pcb_rules.via_hits_smd_pad(*fx.xy(ix, iy), pcb_rules.VIA_DIA, fx.pad_boxes)]
+        self.assertEqual(bad, [])
+        for x in (cx - 4.0, cx, cx + 4.0):                     # the pads of net A and of net B alike
+            ix, iy = fx.cell(x, cy)
+            self.assertTrue(fx.via_in_pad[iy, ix], x)
+
+    def test_layer_change_between_stacked_pads_puts_the_via_beside_them(self):
+        import pcb_fabcheck
+        b = stacked_board()
+        fx = pcb_fix.Fixer(b, 30.0)
+        cx, cy = pcb_full.CX, pcb_full.CY
+        path = fx.route("A", (cx, cy), "F.Cu", (cx, cy), "B.Cu", pcb_rules.TRACK)
+        self.assertIsNotNone(path)
+        fx.commit("A", path, (cx, cy), (cx, cy), pcb_rules.TRACK)
+        vias = self.vias(fx)
+        self.assertTrue(vias)
+        for x, y in vias:
+            self.assertFalse(pcb_rules.via_hits_smd_pad(x, y, pcb_rules.VIA_DIA, fx.pad_boxes), (x, y))
+        self.assertEqual(pcb_fabcheck.vias_in_smd_pads(b), [])
+
+    def test_a_via_on_the_start_cell_is_judged_at_the_start_point(self):
+        # commit puts a via of the start cell at the start point itself, not at the cell centre: a start point 0.02 mm
+        # inside the reach of a pad whose cell centre is 0.01 mm outside it may not take a via there
+        fx = pcb_fix.Fixer(stacked_board(), 30.0)
+        c = fx.xy(*fx.cell(pcb_full.CX + 5.0, pcb_full.CY))
+        x1 = c[0] - pcb_rules.VIA_DIA / 2 - pcb_rules.VIA_IN_PAD_GROW - 0.01
+        fx.pad_boxes.append((x1 - 1.0, c[1] - 0.5, x1, c[1] + 0.5, True))
+        fx.via_in_pad = fx.via_in_pad_mask()
+        p0 = (c[0] - 0.02, c[1])
+        self.assertEqual(fx.cell(*p0), fx.cell(*c))
+        self.assertTrue(pcb_rules.via_hits_smd_pad(*p0, pcb_rules.VIA_DIA, fx.pad_boxes))
+        self.assertFalse(pcb_rules.via_hits_smd_pad(*c, pcb_rules.VIA_DIA, fx.pad_boxes))
+        path = fx.route("A", p0, "F.Cu", p0, "B.Cu", pcb_rules.TRACK)
+        self.assertIsNotNone(path)
+        fx.commit("A", path, p0, p0, pcb_rules.TRACK)
+        vias = self.vias(fx)
+        self.assertTrue(vias)
+        for x, y in vias:
+            self.assertFalse(pcb_rules.via_hits_smd_pad(x, y, pcb_rules.VIA_DIA, fx.pad_boxes), (x, y))
+
+    def test_commit_refuses_a_via_in_a_pad(self):
+        fx = pcb_fix.Fixer(stacked_board(), 30.0)
+        ix, iy = fx.cell(pcb_full.CX, pcb_full.CY)
+        with self.assertRaises(ValueError):
+            fx.commit("A", [(ix, iy, 0), (ix, iy, 3)], (pcb_full.CX, pcb_full.CY), (pcb_full.CX, pcb_full.CY),
+                      pcb_rules.TRACK)

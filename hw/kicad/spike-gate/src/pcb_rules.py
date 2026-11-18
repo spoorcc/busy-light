@@ -254,6 +254,30 @@ def joins_nothing(x, y, track_ends, pad_boxes, tol=0.01):
     return len(layers) <= 1 and not on_pad
 
 
+# No via-in-pad (plan 08 section 4.3, HW-008, owner answer 9 of 2026-11-17): no via may touch the copper of an SMD pad, of
+# any net. The pad box is grown by VIA_IN_PAD_GROW, which covers the default solder-mask expansion of zero. Every via producer
+# of the spike (pcb_stitch.py, the grid router of pcb_fix.py and so pcb_ring.py) asks via_hits_smd_pad before it places a via;
+# pcb_fabcheck.py counts the vias of a finished board (`via_in_smd_pad`). Freerouting's own vias are not filtered here; the
+# count finds them.
+VIA_IN_PAD_GROW = 0.05
+
+
+def via_hits_smd_pad(x, y, via_dia, pads, grow=VIA_IN_PAD_GROW):
+    """True when a via disc (centre (x, y), diameter `via_dia`, mm) overlaps an SMD pad box grown by `grow` on every side,
+    whatever the net (a same-net pad counts). pads: (x0, y0, x1, y1, is_smd) bounding boxes in mm; a box with is_smd false
+    (a pad with a hole, which the hole rules cover) is skipped. A box is the pad's axis-aligned bounding box, so a rotated or
+    rounded pad is covered with margin. Touching (distance equal to the radius) is not an overlap."""
+    r = via_dia / 2.0
+    for x0, y0, x1, y1, smd in pads:
+        if not smd:
+            continue
+        dx = max(x0 - grow - x, 0.0, x - x1 - grow)
+        dy = max(y0 - grow - y, 0.0, y - y1 - grow)
+        if _math.hypot(dx, dy) < r:
+            return True
+    return False
+
+
 # Layer use (2026-11-07/08): In1 is the GND plane and In2 the +5V plane. VBUS_IC and +3V3 stay on the outer layers; every
 # other net except GND keeps off In1, so that signal tracks do not cut the ground plane into islands (a ground via on an
 # island is not connected; seen on run 5 of 2026-11-08). The router gets a `use_layer` rule per class; the clean-up router

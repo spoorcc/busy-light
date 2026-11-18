@@ -134,6 +134,53 @@ class ViaRemoval(unittest.TestCase):
         self.assertFalse(R.joins_nothing(9.0, 9.0, [], [(8.0, 8.0, 10.0, 10.0)]))   # a pad is there
 
 
+class ViaInPad(unittest.TestCase):
+    """Plan 08 section 4.3 (HW-008, RV-014): no via may touch an SMD pad grown by 0.05 mm, whatever the net."""
+    PAD = (0.0, 0.0, 1.0, 0.5, True)            # a 1.0 x 0.5 mm SMD pad box
+
+    def test_grow_default_is_the_plan_value(self):
+        self.assertEqual(R.VIA_IN_PAD_GROW, 0.05)
+
+    def test_via_at_the_pad_centre_hits(self):
+        self.assertTrue(R.via_hits_smd_pad(0.5, 0.25, 0.6, [self.PAD]))
+
+    def test_via_partly_over_the_pad_edge_hits(self):
+        # centre 0.2 mm right of the pad: the 0.3 mm radius reaches 0.1 mm into the pad
+        self.assertTrue(R.via_hits_smd_pad(1.2, 0.25, 0.6, [self.PAD]))
+
+    def test_the_grow_margin_counts(self):
+        # edge gap 0.03 mm (centre 0.33 mm right of the pad): inside the 0.05 mm grow, so a hit; 0.07 mm gap is clear
+        self.assertTrue(R.via_hits_smd_pad(1.33, 0.25, 0.6, [self.PAD]))
+        self.assertFalse(R.via_hits_smd_pad(1.37, 0.25, 0.6, [self.PAD]))
+        # the same 0.03 mm gap with no grow is clear
+        self.assertFalse(R.via_hits_smd_pad(1.33, 0.25, 0.6, [self.PAD], grow=0.0))
+
+    def test_corner_uses_the_disc_not_a_square(self):
+        # centre diagonal from the grown corner (1.05, 0.55): 0.25 mm in x and y is 0.354 mm away, more than the radius 0.3
+        self.assertFalse(R.via_hits_smd_pad(1.30, 0.80, 0.6, [self.PAD]))
+        # 0.2 mm in x and y is 0.283 mm away: a hit
+        self.assertTrue(R.via_hits_smd_pad(1.25, 0.75, 0.6, [self.PAD]))
+
+    def test_via_diameter_sets_the_reach(self):
+        # centre 0.4 mm right of the pad, 0.35 mm from the grown box: the 0.6 mm via is clear, a 0.9 mm via is not
+        self.assertFalse(R.via_hits_smd_pad(1.4, 0.25, 0.6, [self.PAD]))
+        self.assertTrue(R.via_hits_smd_pad(1.4, 0.25, 0.9, [self.PAD]))
+
+    def test_pad_with_a_hole_is_ignored(self):
+        self.assertFalse(R.via_hits_smd_pad(0.5, 0.25, 0.6, [(0.0, 0.0, 1.0, 0.5, False)]))
+
+    def test_any_pad_of_the_list_counts_and_an_empty_list_never_hits(self):
+        pads = [(5.0, 5.0, 6.0, 6.0, True), (0.0, 0.0, 1.0, 0.5, False), self.PAD]
+        self.assertTrue(R.via_hits_smd_pad(0.5, 0.25, 0.6, pads))
+        self.assertFalse(R.via_hits_smd_pad(3.0, 3.0, 0.6, pads))
+        self.assertFalse(R.via_hits_smd_pad(0.5, 0.25, 0.6, []))
+
+    def test_touching_is_not_a_hit(self):
+        # no grow, centre exactly one radius from the right edge: the disc touches the pad only (values exact in binary)
+        self.assertFalse(R.via_hits_smd_pad(1.25, 0.25, 0.5, [self.PAD], grow=0.0))
+        self.assertTrue(R.via_hits_smd_pad(1.24, 0.25, 0.5, [self.PAD], grow=0.0))
+
+
 class MainPathSplit(unittest.TestCase):
     def test_main_path_pads(self):
         self.assertTrue(R.is_main_path_pad("VBUS_IC", "J1", "A4"))
