@@ -69,6 +69,22 @@ class Ring(unittest.TestCase):
         bad = [v for v in rep["violations"] if v["type"] in ("clearance", "hole_clearance", "hole_to_hole", "copper_edge_clearance", "shorting_items", "track_width", "via_dangling")]
         self.assertEqual(bad, [])
 
+    def test_no_ring_via_touches_an_smd_pad(self):
+        # plan 08 section 4.3 (HW-008): the grid router keeps every cell via off the SMD pads of any net, the LED and
+        # capacitor pads of its own cell included; checked by the producers' rule and by the exact copper of pcb_fabcheck
+        import pcb_fabcheck
+        import pcb_rules
+        import pcb_stitch
+        boxes = pcb_stitch.pad_boxes(self.board)
+        tr = self.board.Tracks()
+        vias = [pcbnew.Cast_to_PCB_VIA(tr[i]) for i in range(tr.size()) if tr[i].GetClass() == "PCB_VIA"]
+        self.assertTrue(vias)
+        hits = [(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)) for v in vias
+                if pcb_rules.via_hits_smd_pad(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y),
+                                              pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)), boxes)]
+        self.assertEqual(hits, [])
+        self.assertEqual(pcb_fabcheck.vias_in_smd_pads(self.board), [])
+
 
 if __name__ == "__main__":
     unittest.main()

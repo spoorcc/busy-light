@@ -4,7 +4,9 @@
 Freerouting treats a net with a copper pour as a plane net and leaves it to the pour; it writes no vias for it,
 so the pads stay unconnected in KiCad. This script reads the unconnected pads of the plane nets from the DRC report,
 and for each one places a via near the pad (checked against pads, tracks and vias of other nets, the board edge and
-the antenna strip) with a short track from the pad to the via. Deterministic. Exploratory.
+the antenna strip) with a short track from the pad to the via. No via touches an SMD pad of any net, its own pad
+included (pcb_rules.via_hits_smd_pad; plan 08 section 4.3, HW-008): the module ground pads of U9 also get a via beside
+the pad, not in it. Deterministic. Exploratory.
 
 Usage: python3 pcb_stitch.py <in.kicad_pcb> <drc.json> <out.kicad_pcb> [nets, default GND,+5V]
 """
@@ -34,6 +36,23 @@ def seg_dist(px, py, x0, y0, x1, y1):
     return math.hypot(px - (x0 + t * dx), py - (y0 + t * dy))
 
 
+def is_smd_pad(pad):
+    """True for a pad without a hole (KiCad SMD or edge-connector attribute): the pads that no via may touch."""
+    return pad.GetAttribute() in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN)
+
+
+def pad_boxes(board):
+    """(x0, y0, x1, y1, is_smd) bounding boxes in mm of every pad of the board, the `pads` input of
+    pcb_rules.via_hits_smd_pad."""
+    out = []
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            bb = p.GetBoundingBox()
+            out.append((pcbnew.ToMM(bb.GetX()), pcbnew.ToMM(bb.GetY()), pcbnew.ToMM(bb.GetRight()),
+                        pcbnew.ToMM(bb.GetBottom()), is_smd_pad(p)))
+    return out
+
+
 def read_copper(pcb_path):
     """Segments and vias from the saved board text (the SWIG track iterator does not work with this Python)."""
     t = open(pcb_path, encoding="utf-8").read()
@@ -55,6 +74,7 @@ class Stitcher:
                 self.pads.append((pcbnew.ToMM(bb.GetX()), pcbnew.ToMM(bb.GetY()), pcbnew.ToMM(bb.GetRight()),
                                   pcbnew.ToMM(bb.GetBottom()), p.GetNetname(),
                                   frozenset(n for n, l in (("F.Cu", pcbnew.F_Cu), ("B.Cu", pcbnew.B_Cu)) if p.IsOnLayer(l))))
+        self.pad_boxes = pad_boxes(board)        # every pad, any net: the no-via-in-pad check (pcb_rules.via_hits_smd_pad)
         self.netitems = board.GetNetsByName()
         self.added = []
         self.failed = []
@@ -85,7 +105,15 @@ class Stitcher:
                 return False
         return True
 
+    def via_ok(self, x, y, net):
+        """True when a stitch via of `net` may sit at (x, y): hole-to-hole gap to every via, clear of other-net copper,
+        and on no SMD pad of any net (no via-in-pad)."""
+        return (R.hole_gap_ok(x, y, self.vias) and not R.via_hits_smd_pad(x, y, VIA_D, self.pad_boxes)
+                and self.free(x, y, VIA_D / 2, net))
+
     def put_via(self, ref, num, net, x, y):
+        if R.via_hits_smd_pad(x, y, VIA_D, self.pad_boxes):      # guard: every caller checks via_ok first
+            raise ValueError("via in an SMD pad at (%.3f, %.3f) for %s %s" % (x, y, ref, num))
         v = pcbnew.PCB_VIA(self.b)
         v.SetPosition(P.vec(x, y))
         v.SetViaType(pcbnew.VIATYPE_THROUGH)
@@ -112,12 +140,10 @@ class Stitcher:
         return all(self.free(p0[0] + (p1[0] - p0[0]) * i / n, p0[1] + (p1[1] - p0[1]) * i / n, w / 2, net, layer)
                    for i in range(1, n + 1))
 
-    def stitch_pad(self, ref, num, net, layer, cx, cy, big=False):
+    def stitch_pad(self, ref, num, net, layer, cx, cy):
+        """Connect one pad: a track to a via of the net within DIST[-1], else a new via beside the pad with a short track.
+        The via-in-pad shortcut for the U9 ground pads is gone (plan 08 section 4.3): the pad centre is in the pad."""
         w = stitch_width(net)
-        if big and R.hole_gap_ok(cx, cy, self.vias) and self.free(cx, cy, VIA_D / 2, net):         # via in a large pad (module ground pad, vendor practice)
-            self.put_via(ref, num, net, cx, cy)
-            self.added.append((ref, num, net, 0.0))
-            return True
         for v in R.reuse_targets(cx, cy, self.vias, net, DIST[-1]):      # join a via of the net that exists already
             if self.track_free((cx, cy), (v[0], v[1]), w, net, self.b.GetLayerName(layer)):
                 self.add_track(ref, num, net, layer, (cx, cy), (v[0], v[1]), w)
@@ -126,8 +152,7 @@ class Stitcher:
         for d in DIST:
             for a in ANG:
                 x, y = cx + d * math.cos(math.radians(a)), cy + d * math.sin(math.radians(a))
-                if R.hole_gap_ok(x, y, self.vias) and self.free(x, y, VIA_D / 2, net) \
-                        and self.track_free((cx, cy), (x, y), w, net, self.b.GetLayerName(layer)):
+                if self.via_ok(x, y, net) and self.track_free((cx, cy), (x, y), w, net, self.b.GetLayerName(layer)):
                     self.put_via(ref, num, net, x, y)
                     self.add_track(ref, num, net, layer, (cx, cy), (x, y), w)
                     self.added.append((ref, num, net, round(d, 2)))
@@ -200,8 +225,7 @@ def main(src, drc, dst, nets=R.PLANE_NET_ORDER, tab_r=None):
                 layer = pcbnew.B_Cu if lname.startswith("B") else pcbnew.F_Cu
                 if not p.IsOnLayer(layer):
                     layer = pcbnew.F_Cu if p.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu
-                # module ground pads: via in the pad (vendor practice; filled or capped vias needed)
-                jobs.append((ref, num, net, layer, pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y), ref == "U9"))
+                jobs.append((ref, num, net, layer, pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y)))
                 break
     # later passes let a pad join a via that a neighbour got in an earlier pass (stop when a pass adds nothing)
     while jobs:

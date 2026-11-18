@@ -29,6 +29,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Spike board tooling, no via-in-pad (plan 08 step 4, HW-008, RV-014): one rule `pcb_rules.via_hits_smd_pad` (any net, pad box grown by 0.05 mm) used by the stitcher (the U9 via-in-pad shortcut is removed; the via goes beside the pad with a short track) and by the grid router of `pcb_fix.py` (and so the LED ring cells of `pcb_ring.py`); `pcb_fabcheck.py` reports `via_in_smd_pad` and fails on it with `--no-via-in-pad`. The stored board `board/` has 35 such vias (32 in the LED ring cells, 2 at DZ15, 1 at C32; none at U9) and is not regenerated.
 - Strict waiver limits of the spike profile `stitched-4l` lowered to the observed counts (owner decision 2026-11-08): `net_conflict` 0, `footprint_symbol_mismatch` 2 (C3, C4 only), `courtyards_overlap` 14 (U9 only); test added (DEV-002, DEV-004).
 - Spike board: U1 and U9 schematic symbols carry the datasheet pad numbers (`layout_full.PAD`), `pcb_full.PADMAP` deleted, test points out of the BOM in the schematic; batch ring7 removes all 77 `net_conflict` findings (98 to 16 findings), no run passes the strict gate (HW-010, DEV-002).
 - README images and captions of the hardware spike regenerated from the best of 12 runs (HW-010).

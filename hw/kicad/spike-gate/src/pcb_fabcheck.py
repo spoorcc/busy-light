@@ -1,22 +1,27 @@
 # SPDX-License-Identifier: Apache-2.0
 """Fabricator-minimum check of a routed spike board (read only; HW-010 spike, ADR-0020 Proposed).
 
-Usage: python3 pcb_fabcheck.py <board.kicad_pcb>   (needs KiCad's pcbnew module and kicad-cli)
+Usage: python3 pcb_fabcheck.py [--no-via-in-pad] <board.kicad_pcb>   (needs KiCad's pcbnew module and kicad-cli)
 Compares the board with the JLCPCB multilayer minimums that ADR-0020 and pcb_rules.py record (capability page read 2026-11-08):
 track and space 0.09 mm (1 oz), via hole 0.15 mm, via diameter 0.25 mm, annular ring 0.15 mm absolute minimum (0.20 recommended),
 via hole to hole 0.2 mm, pad hole to pad hole 0.45 mm, SMD pad to pad 0.15 mm, copper to routed edge 0.2 mm.
 Not a fabricator check: no fabricator reviewed the files, only JLCPCB numbers were used, and the page was not re-read.
 Track and space and the edge distance are implied by the strict gate (0.1 mm clearance, 0.3 mm edge), see the report.
+Via in pad (plan 08 section 4.3, HW-008): `via_in_smd_pad` counts the vias whose copper overlaps the copper of an SMD pad of any
+net grown by pcb_rules.VIA_IN_PAD_GROW (0.05 mm). Reported always; with --no-via-in-pad a count above zero fails the check.
 Exit code: 0 all checks pass, 1 a check fails, 2 not run.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
 import subprocess
 import sys
 import tempfile
+
+import pcb_rules
 
 NM = 1_000_000.0
 FAB = {"track": 0.09, "via_dia": 0.25, "via_drill": 0.15, "annular_min": 0.15, "annular_recommended": 0.20,
@@ -71,8 +76,48 @@ def verdict(checks):
     return "PASS" if all(c["ok"] for c in checks.values()) else "FAIL"
 
 
-def direct_checks(board):
-    """Geometry checks that need no DRC: track width, via size and ring, hole gaps. Returns a dict with `checks` and numbers."""
+def vias_in_smd_pads(board, grow=pcb_rules.VIA_IN_PAD_GROW):
+    """The vias whose copper overlaps the copper of an SMD pad (no hole; any net, the same net included) grown by `grow` mm,
+    on an outer copper layer that both are on. The pad copper is KiCad's effective pad shape (a rotated or rounded pad is
+    not widened to its bounding box, as the via producers' pcb_rules.via_hits_smd_pad does, so a via that a producer
+    accepted is never counted). One entry per via, with the first pad found: {x, y, net, pad, pad_net, layer} (mm)."""
+    import pcbnew  # noqa: PLC0415
+    g = int(round(grow * NM))
+    pads = []
+    for f in board.GetFootprints():
+        pl = f.Pads()
+        for k in range(pl.size() if hasattr(pl, "size") else len(pl)):
+            p = pl[k]
+            if p.GetAttribute() not in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN):
+                continue
+            for lay in (pcbnew.F_Cu, pcbnew.B_Cu):
+                if p.IsOnLayer(lay):
+                    pads.append((f.GetReference(), p.GetNumber(), p.GetNetname(), lay, p.GetEffectiveShape(lay),
+                                 p.GetBoundingBox()))
+    hits = []
+    tr = board.Tracks()        # index loop: the SWIG iterator is broken on Python 3.14
+    for i in range(tr.size()):
+        if tr[i].GetClass() != "PCB_VIA":
+            continue
+        v = pcbnew.Cast_to_PCB_VIA(tr[i])
+        pos = v.GetPosition()
+        for ref, num, pnet, lay, shape, bb in pads:
+            if not v.IsOnLayer(lay):
+                continue
+            reach = v.GetWidth(lay) // 2 + g
+            if not (bb.GetX() - reach < pos.x < bb.GetRight() + reach and bb.GetY() - reach < pos.y < bb.GetBottom() + reach):
+                continue
+            if shape.Collide(pcbnew.SEG(pos, pos), reach):
+                hits.append({"x": round(pos.x / NM, 4), "y": round(pos.y / NM, 4), "net": v.GetNetname(),
+                             "pad": "%s.%s" % (ref, num), "pad_net": pnet, "layer": board.GetLayerName(lay)})
+                break
+    return hits
+
+
+def direct_checks(board, no_via_in_pad=False):
+    """Geometry checks that need no DRC: track width, via size and ring, hole gaps, vias in SMD pads. Returns a dict with
+    `checks` and numbers. The via-in-pad count is always in the result; it is a check (fails above zero) only with
+    `no_via_in_pad`."""
     import pcbnew  # noqa: PLC0415
     tr = board.Tracks()        # index loop: the SWIG iterator is broken on Python 3.14
     widths, vias = [], []
@@ -117,9 +162,13 @@ def direct_checks(board):
         "via_hole_to_hole": {"ok": not close_vias, "pairs_below_limit": len(close_vias), "limit_mm": FAB["via_hole_gap"]},
         "pad_hole_to_hole": {"ok": not close_pads, "pairs_below_limit": len(close_pads), "limit_mm": FAB["pad_hole_gap"]},
     }
+    in_pad = vias_in_smd_pads(board)
+    if no_via_in_pad:
+        c["via_in_smd_pad"] = {"ok": not in_pad, "count": len(in_pad), "grow_mm": pcb_rules.VIA_IN_PAD_GROW}
     return {"checks": c, "vias": len(vias), "tracks": len(widths), "pad_holes": len(pad_holes),
             "min_annular_mm": round(min(rings), 4) if rings else None,
-            "vias_below_recommended_ring": sum(1 for r in rings if r < FAB["annular_recommended"] - 1e-9)}
+            "vias_below_recommended_ring": sum(1 for r in rings if r < FAB["annular_recommended"] - 1e-9),
+            "via_in_smd_pad": len(in_pad), "via_in_smd_pad_examples": in_pad[:5]}
 
 
 def pad_gap_check(path, limit=None):
@@ -146,10 +195,10 @@ def pad_gap_check(path, limit=None):
             "examples": [v["description"][:110] for v in hits[:3]]}
 
 
-def main(path):
+def main(path, no_via_in_pad=False):
     import pcbnew  # noqa: PLC0415
     board = pcbnew.LoadBoard(path)
-    r = direct_checks(board)
+    r = direct_checks(board, no_via_in_pad=no_via_in_pad)
     pg = pad_gap_check(path)
     if pg is None:
         print(json.dumps({"fabcheck": "NOT RUN", "reason": "kicad-cli drc produced no report"}))
@@ -160,5 +209,14 @@ def main(path):
     return 0 if r["verdict"] == "PASS" else 1
 
 
+def parse_args(argv):
+    ap = argparse.ArgumentParser(description="Fabricator-minimum check of a routed spike board (exit 0 pass, 1 fail, 2 not run).")
+    ap.add_argument("board", help="the .kicad_pcb file")
+    ap.add_argument("--no-via-in-pad", action="store_true",
+                    help="fail when a via touches an SMD pad (via_in_smd_pad above zero; plan 08 section 4.3)")
+    return ap.parse_args(argv)
+
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1]))
+    args = parse_args(sys.argv[1:])
+    sys.exit(main(args.board, no_via_in_pad=args.no_via_in_pad))
