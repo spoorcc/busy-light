@@ -271,3 +271,48 @@ class StitcherReuseLimit(unittest.TestCase):
         self.assertIn("pcb_stitch.py", block)
         self.assertIn('--reuse-max="${PRESTITCH_REUSE:-1.6}"', block)
         self.assertIn("pcb_dsn.py\" lock", block)                          # the fan-out vias are locked for the router
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class StitcherSeesLockedTracks(unittest.TestCase):
+    """Batch p1b5 (2026-11-18): the pre-route stitch put a GND via on a locked LED ring track (/LED_ROW2), a short. KiCad
+    writes `(locked yes)` between `width` and `layer` of a segment and the copper reader skipped such segments. After
+    routing every track is unlocked, so only the fan-out-first switch (PRESTITCH=1) met the defect."""
+
+    def board_with_track(self, path, locked):
+        cx, cy = pcb_full.CX, pcb_full.CY
+        fixture_board(path, [(cx, cy)])
+        b = pcbnew.LoadBoard(str(path))
+        net = pcbnew.NETINFO_ITEM(b, "SIG")
+        b.Add(net)
+        tr = pcbnew.PCB_TRACK(b)
+        tr.SetStart(pcbnew.VECTOR2I(pcbnew.FromMM(cx - 3.0), pcbnew.FromMM(cy + 1.2)))
+        tr.SetEnd(pcbnew.VECTOR2I(pcbnew.FromMM(cx + 3.0), pcbnew.FromMM(cy + 1.2)))
+        tr.SetWidth(pcbnew.FromMM(0.25))
+        tr.SetLayer(pcbnew.F_Cu)
+        tr.SetNet(net)
+        tr.SetLocked(locked)
+        b.Add(tr)
+        pcbnew.SaveBoard(str(path), b)
+        return cx, cy
+
+    def test_locked_segment_is_read(self):
+        with tempfile.TemporaryDirectory() as t:
+            src = Path(t) / "b.kicad_pcb"
+            self.board_with_track(src, locked=True)
+            self.assertIn("(locked yes)", src.read_text(encoding="utf-8"))
+            segs, _ = pcb_stitch.read_copper(str(src))
+            self.assertEqual([(s[5], s[6]) for s in segs], [("SIG", "F.Cu")])
+
+    def test_no_via_on_a_locked_track(self):
+        for locked in (False, True):
+            with self.subTest(locked=locked), tempfile.TemporaryDirectory() as t:
+                src = Path(t) / "b.kicad_pcb"
+                cx, cy = self.board_with_track(src, locked)
+                st = pcb_stitch.Stitcher(pcbnew.LoadBoard(str(src)), str(src))
+                st.tab_r = 30.0
+                self.assertFalse(st.via_ok(cx, cy + 1.2, "GND"))           # on the track
+                self.assertTrue(st.stitch_pad("T1", "1", "GND", pcbnew.F_Cu, cx, cy))
+                vx, vy, _, _ = st.vias[-1]
+                self.assertGreaterEqual(pcb_stitch.seg_dist(vx, vy, cx - 3.0, cy + 1.2, cx + 3.0, cy + 1.2),
+                                        pcb_stitch.VIA_D / 2 + 0.125 + pcb_stitch.CLR - 1e-9)

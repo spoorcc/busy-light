@@ -60,8 +60,7 @@ def pad_boxes(board):
 def read_copper(pcb_path):
     """Segments and vias from the saved board text (the SWIG track iterator does not work with this Python)."""
     t = open(pcb_path, encoding="utf-8").read()
-    segs = [(float(a), float(b), float(c), float(d), float(w), n, lay) for a, b, c, d, w, lay, n in re.findall(
-        r'\(segment\s+\(start ([-\d.]+) ([-\d.]+)\)\s+\(end ([-\d.]+) ([-\d.]+)\)\s+\(width ([\d.]+)\)\s+\(layer "([^"]*)"\)\s+\(net "([^"]*)"\)', t, re.S)]
+    segs = [(a, b, c, d, w, n, lay) for a, b, c, d, w, lay, n in R.read_segments(t)]     # locked tracks too (p1b5)
     vias = [(float(x), float(y), float(s), n) for x, y, s, n in re.findall(
         r'\(via\s+(?:\(blind[^)]*\)\s*)?\(at ([-\d.]+) ([-\d.]+)\)\s+\(size ([\d.]+)\).*?\(net "([^"]*)"\)', t, re.S)]
     return segs, vias

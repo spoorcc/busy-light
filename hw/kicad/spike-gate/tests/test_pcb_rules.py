@@ -483,3 +483,41 @@ class FineProfile(unittest.TestCase):
         self.assertGreaterEqual(via, 0.25)                      # via diameter
         self.assertGreaterEqual((via - drill) / 2 + 1e-9, 0.15)  # annular ring absolute minimum
         self.assertGreaterEqual(ring, 0.15)
+
+
+class ReadSegments(unittest.TestCase):
+    """pcb_rules.read_segments (batch p1b5, 2026-11-18): every segment, locked or not, in any field order."""
+
+    TEXT = """
+\t(segment
+\t\t(start 1 2)
+\t\t(end 3 4.5)
+\t\t(width 0.25)
+\t\t(locked yes)
+\t\t(layer "F.Cu")
+\t\t(net "/LED_ROW2")
+\t\t(uuid "a")
+\t)
+\t(segment
+\t\t(start -1.5 2)
+\t\t(end 3 4)
+\t\t(width 0.15)
+\t\t(layer "In2.Cu")
+\t\t(net "+5V")
+\t\t(uuid "b")
+\t)
+\t(via
+\t\t(at 5 5)
+\t\t(size 0.6)
+\t\t(net "GND")
+\t\t(uuid "c")
+\t)
+"""
+
+    def test_locked_and_unlocked(self):
+        self.assertEqual(R.read_segments(self.TEXT), [(1.0, 2.0, 3.0, 4.5, 0.25, "F.Cu", "/LED_ROW2"),
+                                                       (-1.5, 2.0, 3.0, 4.0, 0.15, "In2.Cu", "+5V")])
+
+    def test_vias_and_arcs_are_not_segments(self):
+        arc = '(arc (start 0 0) (mid 1 1) (end 2 0) (width 0.2) (layer "F.Cu") (net "GND") (uuid "d"))'
+        self.assertEqual(R.read_segments(arc + self.TEXT.split("\t(segment", 1)[0]), [])

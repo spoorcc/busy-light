@@ -162,3 +162,21 @@ not in the repository; CI runs the scripts in the container directly). Smoke tes
 placements: 99 of 102, 96 of 98 and 95 of 97 plane pads get a via, C4 and C32 included; the misses are the U1 GND pads 4 and
 10 (0.4 mm pitch) and, on run1, U7 pin 6. Batch p1b5: the same placement seeds 1, 17, 33 plus seed 49, `PRESTITCH=1`, started
 22:37 UTC.
+
+## Batch p1b5: fan-out first, and a defect it found (2026-11-18, 22:37 to 23:12 UTC)
+Same settings and placement seeds as p1b4 plus seed 49, `PRESTITCH=1` passed into the container this time. Every run ended
+worse than p1b4: after clean-up 5, 5 and 8 unconnected (run1 stopped at 22 before clean-up), and new error classes
+`shorting_items` and `tracks_crossing`. The batch log is lost (the assistant's container restarted at about 23:20 UTC); the
+numbers are from the per-run logs.
+
+Cause, found on run3: the pre-route stitch put a GND via on a locked LED ring track (/LED_ROW2, at about (22.1, 36.0) mm).
+The stitcher reads tracks from the board text with a regular expression in a fixed field order; KiCad 10 writes
+`(locked yes)` between `width` and `layer`, so every locked track was invisible to it. After routing the flow unlocks every
+track, which is why the post-route stitch never met the defect. `pcb_check.layout_rules` had the same reader (it measures
+only unlocked final boards, so no reported number changed). **Fixed** with one reader `pcb_rules.read_segments`; regression
+tests fail before and pass after the change. Replayed on the three placements: 95 to 98 plane pads get a via, and the DRC of
+the stitched board has no short, crossing or clearance finding.
+
+A second effect, not changed: on p1b5 run3 the spare C4 got its via before routing, but the post-route clean-up
+(`pcb_fix.py auto`) removed it, because a clearance finding named it, and its re-route failed. Batch p1b6 (fixed reader,
+same seeds, `PRESTITCH=1`) started 23:30 UTC.

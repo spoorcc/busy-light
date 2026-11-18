@@ -202,6 +202,7 @@ TWINS = (("U14", "U15"), ("C24", "C25"), ("DZ14", "DZ15"), ("R_SU14", "R_SU15"),
 
 # ---- post-route clean-up helpers (pure functions; used by pcb_dsn.py import and pcb_stitch.py; tested in test_pcb_rules)
 import math as _math
+import re as _re
 
 
 def clamp_track_width(width_mm):
@@ -214,6 +215,26 @@ def hole_gap_ok(x, y, vias, drill=VIA_DRILL, gap=HOLE_TO_HOLE):
     """True when a drill of diameter `drill` at (x, y) has at least `gap` between its edge and every via in `vias`
     ((x, y, ...) tuples with the via drill VIA_DRILL), whatever the net (the hole-to-hole rule knows no nets)."""
     return all(_math.hypot(x - v[0], y - v[1]) >= (drill + VIA_DRILL) / 2 + gap for v in vias)
+
+
+_SEG_BLOCK = _re.compile(r"\(segment\s+(.*?)\(uuid ", _re.S)
+_SEG_FIELDS = {"start": r"\(start ([-\d.]+) ([-\d.]+)\)", "end": r"\(end ([-\d.]+) ([-\d.]+)\)", "width": r"\(width ([\d.]+)\)",
+               "layer": r'\(layer "([^"]*)"\)', "net": r'\(net "([^"]*)"\)'}
+
+
+def read_segments(text):
+    """(x0, y0, x1, y1, width, layer, net) of every track segment in KiCad board text, whatever the order of the fields and
+    whether `(locked yes)` stands among them (KiCad 10 writes it between width and layer). The SWIG track iterator does not
+    work with this Python, so the stitcher and pcb_check read the text. Batch p1b5 2026-11-18: a reader with a fixed field
+    order skipped the locked LED ring tracks and the pre-route stitch put a GND via on one."""
+    out = []
+    for m in _SEG_BLOCK.finditer(text):
+        f = {k: _re.search(rx, m.group(1)) for k, rx in _SEG_FIELDS.items()}
+        if any(v is None for v in f.values()):
+            continue
+        out.append((float(f["start"].group(1)), float(f["start"].group(2)), float(f["end"].group(1)), float(f["end"].group(2)),
+                    float(f["width"].group(1)), f["layer"].group(1), f["net"].group(1)))
+    return out
 
 
 def dangling_via_positions(drc):
