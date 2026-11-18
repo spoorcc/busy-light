@@ -1,7 +1,7 @@
 # West workspace (fetched by `west update`)
 /zephyr/
 /modules/
-/doc/          # west project (Zephyr requirements module) fetched by `west update`
+/doc/
 /bootloader/
 /tools/
 /.west/
