@@ -70,5 +70,19 @@ conditional on a readiness GO. Those changes stay uncommitted until the GO; T2 i
 | 43 | Low | Full BOM with DNP and extended/basic column (M) | Accepted. Full BOM next to the JLCPCB BOM; extended/basic "not known" | Closed (plan) |
 | 44 | Low | Batch V without criterion; no via-size switch (M, comprehension) | Accepted. Batch V dropped; the 0.7 / 0.3 mm via profile is an owner item | Closed |
 
+## Implementation readiness (step 4, 2026-11-18 05:45 UTC, after a usage-limit stop)
+Verdict: **NO-GO** for the plan as written; steps 1 to 4 (tooling, T1, HW-017 split, no via-in-pad) ready. Blocking gaps:
+B1 no step writes the LCSC fields and the DNP marks onto the P1 board; B2 the CI order check would always fail on the eight
+known missing LCSC numbers and the policy was not stated; B3 the LED-capacitor side rule ignored J1's courtyard. Minor gaps:
+weak T1 and R22 tests (fixed), batch baseline wording (ring14 used `SEED_OFFSET=200` and the fine profile), several deliverables
+without a named test, the fixed-partner rule needs placer support, panel and CI details. Resolution: B1 to B3 fixed in plan
+revision 4 (not re-reviewed); minor gaps are listed for the implementing step.
+
+**Placement feasibility measured after the review (scratch experiment, not a plan step):** with every movable part on the top
+side, LED capacitors beside the LEDs, `R_MOVE` 18.4 mm and the ring14 placer knobs (`PLACE_GRID=1.0 PLACE_ANT_KEEPOUT=1
+PLACE_BLOCKS=3 PLACE_ORIENT=1.5`), the best of 16 seeds still has 25.1 mm2 of part overlap; its placed DRC shows 61
+`courtyards_overlap` (waiver max 14) and 268 unconnected items (expected before routing). On the 46 mm outline the one-sided
+placement does not fit with this placer. This is finding R1 measured, and an owner decision (plan 08 section 7).
+
 ## Outcome
-Plan revised to revision 3. Readiness review: see below.
+Plan revised to revision 4. Steps 1 to 4 implemented; steps 5 and later wait for the owner's decision on R1.

@@ -1,6 +1,6 @@
 # 08 -- Prototype board P1: one-sided assembly for JLCPCB Economic PCBA (design doc)
 
-- **Status:** In Review (revision 3 after RV-014 steps 1 and 2). The owner pre-approved implementation after a GO from the
+- **Status:** In Review (revision 4 after the RV-014 readiness review: NO-GO overall, steps 1 to 4 ready; blocking gaps B1 to B3 fixed in this revision, not re-reviewed). The owner pre-approved implementation after a GO from the
   readiness review (answer 16 of 2026-11-17, `docs/journal/2026-11-17-p1-order-owner-decisions.md`). The owner confirms or
   rejects this plan and its result together.
 - **Date:** 2026-11-17  **Owner:** Ben Spoor (author: assistant)
@@ -111,12 +111,17 @@ A is the owner's choice; A' gives data for the owner. B stays available: `board/
   - the 16 LED bypass capacitors go on **F** in the gap beside their LED (the gap between LED courtyards is about 4.6 mm
     tangentially), long axis radial, on the side that the WS2812B-2020 supply pads face (pad 4 +5V and pad 2 GND sit on opposite
     corners); the tangential offset is the smallest one that clears both courtyards (about 3.1 mm centre to centre); both sides
-    and the four rotations are tried, ranked by the equal-net pad distance; the hook keep-outs are respected. This keeps the ring
+    and the four rotations are tried, ranked by the equal-net pad distance; the hook keep-outs are respected, and **a side whose
+    courtyard meets any fixed courtyard (J1 included, which sits between D16 and D1) is rejected** (RV-014 readiness B3); J1's
+    position is not moved for this (no growth, A4). This keeps the ring
     annulus inside the LEDs free for movable parts (`R_MOVE` 18.4 mm with P1) and leaves about 1.5 mm of the gap for the data link;
   - `pcb_ring.py`: the link layer follows the capacitor's actual layer (F.Cu to F.Cu for P1, no via; the stitcher connects the
     planes); the existing test that asserts the capacitors on B.Cu applies only without P1;
   - the top region of `region_rect_ok` also allows the tab (today bottom only);
-  - the P1 flag and `R_MOVE` are written to `placement.json`; downstream tools read them from there, not from the environment.
+  - the P1 flag and `R_MOVE` are written to `placement.json`; downstream tools read them from there, not from the environment;
+  - **sourcing fields and DNP (RV-014 readiness B1):** `pcb_full.py` copies the schematic fields MPN, Manufacturer and LCSC
+    (from `sourcing.sourcing_fields(value)`) to every footprint and sets do-not-populate and exclude-from-BOM on C4 and C32
+    when P1 is set (today `pcb_spare_caps.py` does this only for a C32 it creates itself); test in `tests/test_pcb_full.py`.
 - **Input path placement (HW-003, HW-017):** `LAYOUT_RULES` (with support for a fixed partner such as J1, measured to its VBUS pad
   centre) get `("TVS1", "J1", 6.0)`, `("U6", "J1", 8.0)`, `("R22", "J1", 8.0)`, `("R22", "U7", 6.0)`; the pin ties J1-U7 become
   J1-R22 pin 1 and R22 pin 2-U7 pin 1. C4 leaves the U8 block (it belongs to U7, HW-016).
@@ -179,7 +184,10 @@ A is the owner's choice; A' gives data for the owner. B stays available: `board/
 - `scripts/fab_check.py <out dir> <board>` (tested): BOM refs equal CPL refs; every assembled ref of the board exactly once;
   every CPL row on the top layer; every CPL point inside the panel outline; no excluded ref present; **every BOM line with an
   empty LCSC number is listed and makes the check exit 1 unless `--allow-missing-lcsc` names it** (the list of A8, O2);
-  R_ILIM1..3 values carry "0.1%" and equal `ilim_steps.candidate_p1()`.
+  R_ILIM1..3 values carry "0.1%" and equal `ilim_steps.candidate_p1()`. **Policy (RV-014 readiness B2):** the known missing
+  numbers are listed with a reason in the committed file `scripts/fab_missing_lcsc.txt`; CI passes that list, and the release
+  notes print it; a number found at order time (O2) goes into `src/sourcing.py` and leads to a new release, so the ordered BOM
+  always equals a hashed manifest.
 - Also in the package: assembly PDF, the board's strict DRC and ERC JSON, `pcb_fabcheck` output, `manifest.json` (sha256 of
   every file, input board sha256, panel JSON sha256, git describe, KiCad and KiKit versions). "Reproducible" means: same file
   content after the date lines that KiCad writes are removed; `fab_check.py --compare` tests it on two builds.
