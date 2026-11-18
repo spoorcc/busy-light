@@ -1,6 +1,6 @@
 # Overnight work on the P1 board, 2026-11-17 to 2026-11-18 (hand-off)
 
-Status at 06:00 UTC (07:00 CET), 2026-11-18, final for this session. Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2026-11-17-p1-order-owner-decisions.md`.
+Status at about 07:30 CET, 2026-11-18 (after the morning follow-up). Branch `ccr-fff92b31-b7kqlu`. Owner answers: `2026-11-17-p1-order-owner-decisions.md`.
 **The P1 board does not exist yet. No routing run was made tonight. Nothing is ready to order.**
 
 ## Headline (05:52 UTC)
@@ -74,10 +74,19 @@ Result: M1 unrouted 0; after stitching 17 unconnected; after the clean-up **5 un
 One run only (Freerouting varies). Reading: a 54 mm one-sided board is close to routable at 0.15 mm; the U9 courtyard waiver is
 the other blocker. 54 mm means a housing of about 61 mm (MECH-001: 58 mm).
 
-## Agents stopped by the usage limit at about 06:20 UTC (work not committed, local worktrees only)
-- Order package, KiKit panel, CI workflow: `.claude/worktrees/agent-ab92f4156360a614a` (branch `worktree-agent-ab92f4156360a614a`).
-- P1 placement switch (step 5): `.claude/worktrees/agent-a2b671907b52373f3` (branch `worktree-agent-a2b671907b52373f3`).
-Both are lost if this container is reclaimed. Continue them after the limit resets, or redo from plan 08.
+## Agents stopped by the usage limit at about 06:20 UTC: their work is now committed (owner request, 2026-11-18 morning)
+The main session ran the tests on the partial work and committed it:
+- **P1 placement switch (plan 08 step 5):** `P1=1`, off by default; commit `45a1d01`, merged. Full spike-gate suite after the merge
+  of the worktree: 360 passed, 1 skipped, 15 known `GATE_NET` errors.
+- **Order package scripts (plan 08 section 4.5):** `scripts/fab_p1.sh`, `fab_package.py`, `fab_check.py`, `panel_tabs.py`,
+  `panel_p1.json`, `fab_missing_lcsc.txt`, `requirements-fab.txt` and 38 tests (pass on the host and in the KiCad image; ruff and
+  `reuse lint` clean). **Not run end to end on any board**, and the CI release workflow (section 4.6) was not written.
+
+## ADR-0022 proposed (2026-11-18 morning)
+`docs/decisions/ADR-0022-p1-board-fit.md` (Proposed): five options weighed with the measurements above. Recommendation: two-sided
+Standard PCBA for P1 (the only configuration with complete routing in the record; needs a P1 exception to HW-008 and a price within
+your limit), and part reduction (switch with selectable current limit, fixed-delay supervisor) as the direction for the next board.
+This goes against your answer 1 (one side); the placement measurements are the reason. Not goldfish-reviewed yet.
 
 ## Owner question 2026-11-18 07:00 CET: fewer components?
 Yes, but each option changes an Accepted ADR (ADR-0010, ADR-0016, ADR-0004) and needs datasheets read; nothing below is checked.
@@ -93,9 +102,9 @@ Recommendation: look at the switch with selectable limits first (largest saving,
 then the fixed-delay supervisor. Together about 15 parts, which may be enough for one side at 46 to 50 mm.
 
 ## Not done
-P1 placement (all parts on top), via-in-pad removal, routing batches, finishing, `board-p1/`, order package, KiKit panel, CI
-release workflow, housing check, firmware target build (Zephyr fetch started 05:45 UTC), regulatory update. Plan 08 section 5
-lists the order of work.
+(Updated in the morning; the items once listed here that are now done are in the sections above.)
+Routing batches and finishing of a P1 board and `board-p1/` (they wait for the ADR-0022 decision); an end-to-end run of the order
+package on a real board; the CI release workflow; the housing check (no FreeCAD here); a goldfish review of ADR-0022.
 
 ## Findings that need the owner (most important first)
 1. **0.15 mm vs 0.1 mm.** The stored board was routed with 0.1 mm rules (`SPIKE_PROFILE=fine`), not 0.15 mm. At 0.15 mm no

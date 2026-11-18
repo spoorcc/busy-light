@@ -11,6 +11,9 @@
   keep-out with DEV-004, test points). ADR-0021 (Accepted 2026-11-17). ADR-0020 stays Proposed: its fab numbers are used as
   **unaccepted inputs** (dated 2026-11-08), and P1 uses the owner's 0.15 mm answer, not ADR-0020 option B.
 - **EGM review record:** RV-014 (comprehension / antagonistic / readiness)
+- **Superseding question (2026-11-18):** the measured one-sided placement does not fit on 46 mm; ADR-0022 (Proposed) asks the owner
+  to choose between two-sided P1 (recommended), part reduction, board growth or giving up the keep-out. Steps 1 to 5 and the order-package
+  scripts are implemented; routing of P1 waits for that decision.
 
 ## 1. Problem definition
 The owner wants to order a first prototype board (P1): 5 bare PCBs, 2 of them assembled by JLCPCB with the **Economic**
