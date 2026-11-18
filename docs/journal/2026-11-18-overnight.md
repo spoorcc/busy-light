@@ -14,7 +14,13 @@ ring14 knobs `PLACE_GRID=1.0 PLACE_BLOCKS=3 PLACE_ORIENT=1.5`, 16 seeds of 16000
 | Keep-out off | 6.6 |
 | Keep-out on, five of the six hold-off capacitors removed (as if one part) | 9.0 |
 | Both (keep-out off, five capacitors removed) | 0.57 (closest; still not overlap-free, and at that density routing on one side at 0.15 mm is not likely) |
-| Baseline with 4x iterations | see the update below |
+| Baseline with 4x iterations (640000 per seed) | 25.2 (no gain: the parts do not fit; not a placer limit) |
+| Board 50 mm, parts also allowed in the annulus outside the LED ring (keep-out on) | 9.7 |
+| Board 54 mm, same | **0.0 (fits)** |
+
+The growth runs used a scratch copy of `mech_outline.py` with `D_PCB` 50 or 54 mm and the hook lugs as top obstacles. Their
+`largest_dim_mm` (59.24) is **not** valid: it uses the constant `R_OUT` 26.5 mm. With today's housing formula (outer diameter
+= board + 7 mm, `housing_params.py`) a 54 mm board gives a housing of about 61 mm against the 58 mm of MECH-001 (estimate).
 
 Reading: one-sided P1 on 46 mm needs a decision from you before routing makes sense. The levers, each yours:
 grow the board (MECH-001 is already exceeded), fewer parts (hold-off capacitors, LED capacitors, logic), give up the vendor
