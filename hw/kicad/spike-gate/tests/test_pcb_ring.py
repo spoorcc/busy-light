@@ -35,6 +35,25 @@ class Ring(unittest.TestCase):
     def test_every_cell_completes(self):
         self.assertEqual(self.failed, [])
 
+    def test_data_chain_is_laid_before_the_power_stubs(self):
+        """Batches p1b4 to p1b9 (2026-11-19): with the stubs first, the stubs and vias of the capacitors turned away from
+        the panel tabs closed four data gaps (D3-D4, D7-D8, D11-D12, D14-D15); the router then left D14-D15 open in every
+        run of one placement. Data links first: all 47 links on the four P1 placements of the batches."""
+        from unittest import mock
+        order = []
+        real = pcb_ring.F.Fixer.commit
+
+        def rec(fx, net, *a, **k):
+            order.append(net)
+            return real(fx, net, *a, **k)
+        with tempfile.TemporaryDirectory() as t, mock.patch.object(pcb_ring.F.Fixer, "commit", rec):
+            shutil.copy(self.pcb, t + "/b.kicad_pcb")
+            shutil.copy(str(Path(self.pcb).with_suffix(".placement.json")), t + "/busy_light_spike.placement.json")
+            self.assertEqual(pcb_ring.build(t + "/b.kicad_pcb", t + "/r.kicad_pcb"), [])
+        self.assertEqual(len(order), 15 + 32)
+        self.assertTrue(all(n not in ("+5V", "GND") for n in order[:15]), order[:15])
+        self.assertTrue(all(n in ("+5V", "GND") for n in order[15:]))
+
     def test_two_sided_cells_link_to_the_bottom_capacitor(self):
         # plan 08 step 5: the link layer follows the capacitor; without P1 the capacitors are on B.Cu
         self.assertEqual({pcb_ring.cap_link_layer(self.board, c) for _, c in pcb_ring.cells()}, {"B.Cu"})

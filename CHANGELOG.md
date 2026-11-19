@@ -63,6 +63,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- Spike LED ring generator (`pcb_ring.py`): the data chain is laid before the power and ground stubs. With the stubs first,
+  the capacitors turned away from the panel tabs closed four data gaps; the router then left D14 to D15 open in all four
+  routings of one placement. Data first completes all 47 ring links on the four P1 placements. Test
+  `test_data_chain_is_laid_before_the_power_stubs` (plan 08 section 4.5, HW-008).
 - Spike clean-up (`pcb_fix.py`): pieces of the supply nets re-routed by the clean-up took the 0.15 mm default width; on batch
   p1b7 run3 the TPS2553 output current ran through 0.15 mm track to the regulator. Supply nets now keep their current-based
   width (`NET_WIDTH`); +5V pieces at LED ring cell pads keep the 0.25 mm ring stub width. Tests `CleanupWidths` (HW-008,

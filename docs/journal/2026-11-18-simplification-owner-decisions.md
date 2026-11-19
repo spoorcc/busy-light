@@ -259,3 +259,12 @@ defect. No committed board is affected (no `board-p1/` is stored).
 
 Batch p1b9 started 02:12 UTC: four Freerouting runs of run3's placement (seeds 33 to 48), since that placement came
 closest twice.
+
+## Batch p1b9 and the LED data link (2026-11-19, 02:12 to 02:42 UTC)
+Four Freerouting runs of one placement (seeds 33 to 48, run3 of p1b7 and p1b8): open connections after clean-up 4, 1, 3, 1;
+run4 passes the power check (with the full-width rule), run2 fails it. **The LED data link D14 to D15 is open in all four**,
+and was in p1b7 run3. Cause: the ring generator lays the 32 power and ground stubs (with their vias) first and the 15 data
+links after; since the panel tab keep-outs turned the LED capacitors away from four gaps, the capacitors and their stubs
+close those gaps, and the generator fails D3-D4, D7-D8, D11-D12, D14-D15 on every placement. The router then lays three
+of them and, on this placement, never D14-D15. **Fixed:** the data chain first, then the stubs. Replayed on the four
+placements: all 47 ring links complete on each. Batch p1b10 (four placements, every fix) started.
