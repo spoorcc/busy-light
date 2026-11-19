@@ -688,9 +688,25 @@ def auto(folder, stem="stitched", profile="stitched-4l", rounds=5):
     return cur
 
 
+def pair_refs(v):
+    """References of the pads among the two items of a DRC `unconnected_items` entry."""
+    return {k[1] for k in (parse_item(i["description"]) for i in v["items"]) if k and k[0] == "pad"}
+
+
 def width_for(net, refs):
+    """Width of a clean-up track: the branch width on the split main-path nets (their main path is routed and locked in
+    stage 1); for the other supply nets the current-based width (NET_WIDTH; batch p1b7: +5V re-routed at 0.15 mm carried
+    the TPS2553 output), except a +5V piece whose pads (`refs`) are all LED ring cell parts, which keeps the ring stub width
+    (pcb_ring.STUB: the In2 plane carries the ring current); else the net's own width or the default."""
     if net in R.MAIN_PATH_NETS:
         return R.BRANCH_WIDTH
+    if net in R.NET_WIDTH:
+        if net == "+5V" and refs:
+            import pcb_ring  # noqa: PLC0415
+            ring = {r for d, c in pcb_ring.cells() for r in (d, c)}
+            if set(refs) <= ring:
+                return pcb_ring.STUB
+        return R.NET_WIDTH[net]
     return R.NET_TRACK.get(net, R.TRACK)
 
 
@@ -713,7 +729,7 @@ def main(src, drc, dst, tab_r=None):
         if a[1] is None or b[1] is None:                   # a via end takes the layer of the other end
             a = (a[0], a[1] or b[1] or "F.Cu", a[2])
             b = (b[0], b[1] or a[1], b[2])
-        w = width_for(net, None)
+        w = width_for(net, pair_refs(v))
         path = fx.route(net, a[0], a[1], b[0], b[1], w)
         if path is None:                                   # second try: wider window, same clearance margin
             path = fx.route(net, a[0], a[1], b[0], b[1], w, window=2 * WINDOW)

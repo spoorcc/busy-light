@@ -273,3 +273,34 @@ class NoViaInPad(unittest.TestCase):
         with self.assertRaises(ValueError):
             fx.commit("A", [(ix, iy, 0), (ix, iy, 3)], (pcb_full.CX, pcb_full.CY), (pcb_full.CX, pcb_full.CY),
                       pcb_rules.TRACK)
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class CleanupWidths(unittest.TestCase):
+    """Batch p1b7 (2026-11-19): the clean-up re-routed ripped-up +5V pieces at the 0.15 mm default width, and the TPS2553
+    output current (analyst assumption 1.0 A) to the regulator ran through 51 mm of 0.15 mm track (Freerouting lays +5V at
+    0.6 mm). A supply net keeps its current-based width (NET_WIDTH) in the clean-up too."""
+
+    def test_supply_nets_keep_their_current_width(self):
+        self.assertEqual(pcb_fix.width_for("+5V", None), pcb_rules.NET_WIDTH["+5V"])
+        self.assertEqual(pcb_fix.width_for("+3V3", None), pcb_rules.NET_WIDTH["+3V3"])
+
+    def test_pieces_at_led_ring_pads_take_the_ring_stub_width(self):
+        """The ring cells feed each LED and its capacitor from the In2 plane through 0.25 mm stubs (pcb_ring.STUB, about
+        20 mA per LED); a clean-up pair at such a pad keeps that width, the other +5V pairs take NET_WIDTH."""
+        import pcb_ring
+        led, cap = pcb_ring.cells()[0]
+        self.assertEqual(pcb_fix.width_for("+5V", {led}), pcb_ring.STUB)
+        self.assertEqual(pcb_fix.width_for("+5V", {cap}), pcb_ring.STUB)
+        self.assertEqual(pcb_fix.width_for("+5V", {"U7"}), pcb_rules.NET_WIDTH["+5V"])
+        self.assertEqual(pcb_fix.width_for("+5V", {led, "U8"}), pcb_rules.NET_WIDTH["+5V"])
+
+    def test_pair_refs_from_the_drc_items(self):
+        v = {"items": [{"description": "Pad 4 [+5V] of D6 on F.Cu"}, {"description": "Track [+5V] on F.Cu, length 0.6364 mm"}]}
+        self.assertEqual(pcb_fix.pair_refs(v), {"D6"})
+
+    def test_branches_of_the_split_main_path_and_signals(self):
+        for net in pcb_rules.MAIN_PATH_NETS:          # main path locked in stage 1; the clean-up joins branches
+            self.assertEqual(pcb_fix.width_for(net, None), pcb_rules.BRANCH_WIDTH)
+        self.assertEqual(pcb_fix.width_for("/CC1", None), pcb_rules.NET_TRACK["/CC1"])
+        self.assertEqual(pcb_fix.width_for("/LED_DATA", None), pcb_rules.TRACK)

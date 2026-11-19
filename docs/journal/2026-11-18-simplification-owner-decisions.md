@@ -201,3 +201,32 @@ Open on run2: U7 pin 6 (+5V) to its via, U1 pad 10 (GND), /CC2 to J1. Two causes
   the 0.15 mm default width (the board rules allow 0.15 mm).
 Replayed on the three placements: 99 of 102, 97 of 98 and 97 of 97 plane pads get a via, no DRC finding on the stitched board.
 Recurring signal opens: /CC1 and /CC2 to J1 in 5 of the 8 runs of p1b5 and p1b6; not changed yet.
+
+## Batch p1b7: both stitcher fixes (2026-11-19, 00:27 to 01:05 UTC)
+Same four placements, `PRESTITCH=1`, stitch vias on the 0.1 um grid and the narrow GND retry. Best result so far, still not
+clean:
+
+| Run | Unconnected after clean-up | Strict gate FAIL classes | Power check FAIL |
+|---|---|---|---|
+| run1 | 6 | 2 | 1 |
+| run2 | 4 | 1 | 1 |
+| run3 (best) | **1** | 1 | 1 |
+| run4 | 3 | 1 | 1 |
+
+The pre-route stitch placed 100 of 102, 101 of 102, 101 of 101 and 105 of 106 plane-pad vias; no clearance or short
+finding is left on any final board, only the tolerated U9 classes and the open connections. run3's one open connection is
+the LED data link D14 to D15 (the ring generator leaves four data links to the router; this one was not routed).
+
+**The power check fails on every run, and on run3 the failure is real.** The +5V drop from U7 pin 6 to the regulator input
+is infinite at the check's 0.1 mm grid and 29.0 mV at 0.05 mm, so the copper is joined. But with every +5V track narrower
+than 0.2 mm removed, the two pins are no longer joined: the TPS2553 output current (analyst assumption 1.0 A) runs through
+0.15 mm track. Freerouting lays +5V at 0.6 mm (routed board: only 0.25 mm ring stubs and 0.6 mm); the first clean-up round
+added 51 mm of 0.15 mm +5V track. Cause: `pcb_fix.width_for` gave every net that is not a main-path net the 0.15 mm default,
+so +5V and +3V3 pieces re-routed by the clean-up ignored their current-based width (`NET_WIDTH`). The infinite drop at
+0.1 mm caught it by luck of the grid; the check measures drop, not track width, so a thin straight piece could pass.
+Earlier boards (p1b3 run1 included) went through the same clean-up and were not checked for this.
+
+**Fixed:** the clean-up uses `NET_WIDTH` for supply nets; a +5V piece whose pads are all LED ring cell parts keeps the ring
+stub width (0.25 mm, `pcb_ring.STUB`: the In2 plane carries the ring current). Tests `CleanupWidths` (the first fails
+before the change). A replay with 0.6 mm for every +5V piece left two +5V pairs open (a ring LED stub and one via-to-track
+piece), hence the ring rule.

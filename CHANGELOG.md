@@ -59,6 +59,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- Spike clean-up (`pcb_fix.py`): pieces of the supply nets re-routed by the clean-up took the 0.15 mm default width; on batch
+  p1b7 run3 the TPS2553 output current ran through 0.15 mm track to the regulator. Supply nets now keep their current-based
+  width (`NET_WIDTH`); +5V pieces at LED ring cell pads keep the 0.25 mm ring stub width. Tests `CleanupWidths` (HW-008,
+  HW-010). Boards cleaned up before this change are not checked for thin supply tracks.
 - Spike stitcher: new stitch vias sit on the 0.1 um Specctra grid, so router tracks end on their centre (batch p1b6: 18 to 28
   `track_not_centered_on_via` per run made the clean-up rip up good pre-route vias, among them the +5V via of U7 pin 6); a
   plane net without a current rating (GND) is retried at the 0.15 mm default width, so the 0.4 mm-pitch GND pads of U1
