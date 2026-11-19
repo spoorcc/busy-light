@@ -31,6 +31,13 @@ DIST = (0.8, 1.0, 1.25, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0)
 ANG = [i * 11.25 for i in range(32)]
 DOG_FIRST = (0.5, 0.7, 1.0, 1.4)                 # first leg of a one-corner escape (dogleg), mm
 DOG_SECOND_MAX = 2.5                             # longest second leg, mm
+SES_GRID_MM = 0.0001                             # KiCad's Specctra export writes (resolution um 10): new stitch vias sit
+                                                 # on this grid, so a router track ends exactly on their centre (batch p1b6)
+
+
+def snap(v):
+    """A coordinate (mm) on the 0.1 um session grid."""
+    return round(round(v / SES_GRID_MM) * SES_GRID_MM, 4)
 
 
 def seg_dist(px, py, x0, y0, x1, y1):
@@ -144,19 +151,32 @@ class Stitcher:
         return all(self.free(p0[0] + (p1[0] - p0[0]) * i / n, p0[1] + (p1[1] - p0[1]) * i / n, w / 2, net, layer)
                    for i in range(1, n + 1))
 
-    def stitch_pad(self, ref, num, net, layer, cx, cy):
-        """Connect one pad: a track to a via of the net within DIST[-1], else a new via beside the pad with a short track.
-        The via-in-pad shortcut for the U9 ground pads is gone (plan 08 section 4.3): the pad centre is in the pad."""
+    @staticmethod
+    def widths(net):
+        """Stitch track widths to try, in order: the net's width (stitch_width); for a net without a current rating
+        (not in NET_WIDTH) also the default track width, for fine-pitch pads such as the 0.4 mm GND pads of U1."""
         w = stitch_width(net)
+        return (w,) if net in R.NET_WIDTH or R.TRACK >= w else (w, R.TRACK)
+
+    def stitch_pad(self, ref, num, net, layer, cx, cy):
+        """Connect one pad: a track to a via of the net within the reuse limit, else a new via beside the pad with a short
+        track, else a track with one corner; each at the widths of `widths`. No via-in-pad (plan 08 section 4.3)."""
+        lname = self.b.GetLayerName(layer)
+        for w in self.widths(net):
+            if self.stitch_at(ref, num, net, layer, lname, cx, cy, w):
+                return True
+        self.failed.append((ref, num, net))
+        return False
+
+    def stitch_at(self, ref, num, net, layer, lname, cx, cy, w):
         for v in R.reuse_targets(cx, cy, self.vias, net, self.reuse_max):   # join a via of the net that exists already
-            if self.track_free((cx, cy), (v[0], v[1]), w, net, self.b.GetLayerName(layer)):
+            if self.track_free((cx, cy), (v[0], v[1]), w, net, lname):
                 self.add_track(ref, num, net, layer, (cx, cy), (v[0], v[1]), w)
                 self.added.append((ref, num, net, round(math.hypot(v[0] - cx, v[1] - cy), 2)))
                 return True
-        lname = self.b.GetLayerName(layer)
         for d in DIST:
             for a in ANG:
-                x, y = cx + d * math.cos(math.radians(a)), cy + d * math.sin(math.radians(a))
+                x, y = snap(cx + d * math.cos(math.radians(a))), snap(cy + d * math.sin(math.radians(a)))
                 if self.via_ok(x, y, net) and self.track_free((cx, cy), (x, y), w, net, lname):
                     self.put_via(ref, num, net, x, y)
                     self.add_track(ref, num, net, layer, (cx, cy), (x, y), w)
@@ -170,7 +190,6 @@ class Stitcher:
             self.add_track(ref, "%s:b" % num, net, layer, (mx, my), (x, y), w)
             self.added.append((ref, num, net, round(math.hypot(mx - cx, my - cy) + math.hypot(x - mx, y - my), 2)))
             return True
-        self.failed.append((ref, num, net))
         return False
 
     def dogleg(self, cx, cy, w, net, lname):
@@ -179,12 +198,12 @@ class Stitcher:
         layer. First fit in a fixed order (deterministic); ((corner), (via)) or None."""
         for d1 in DOG_FIRST:
             for a1 in ANG:
-                mx, my = cx + d1 * math.cos(math.radians(a1)), cy + d1 * math.sin(math.radians(a1))
+                mx, my = snap(cx + d1 * math.cos(math.radians(a1))), snap(cy + d1 * math.sin(math.radians(a1)))
                 if not self.track_free((cx, cy), (mx, my), w, net, lname):
                     continue
                 for d2 in [d for d in DIST if d <= DOG_SECOND_MAX]:
                     for a2 in ANG:
-                        x, y = mx + d2 * math.cos(math.radians(a2)), my + d2 * math.sin(math.radians(a2))
+                        x, y = snap(mx + d2 * math.cos(math.radians(a2))), snap(my + d2 * math.sin(math.radians(a2)))
                         if math.hypot(x - cx, y - cy) < DIST[0]:
                             continue                     # a via this close to the pad was a straight candidate already
                         if self.via_ok(x, y, net) and self.track_free((mx, my), (x, y), w, net, lname):

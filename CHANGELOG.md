@@ -59,6 +59,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- Spike stitcher: new stitch vias sit on the 0.1 um Specctra grid, so router tracks end on their centre (batch p1b6: 18 to 28
+  `track_not_centered_on_via` per run made the clean-up rip up good pre-route vias, among them the +5V via of U7 pin 6); a
+  plane net without a current rating (GND) is retried at the 0.15 mm default width, so the 0.4 mm-pitch GND pads of U1
+  (TUSB321) can be stitched. Regression tests `StitcherViaOnTheSessionGrid`, `StitcherFinePitchGround` (plan 08, HW-008).
 - Spike routing flow: the copper reader of the stitcher and of `pcb_check.layout_rules` skipped every locked track (KiCad 10
   writes `(locked yes)` between `width` and `layer`). With `PRESTITCH=1` the pre-route stitch therefore put vias on locked LED
   ring tracks (batch p1b5: shorts and crossing tracks). One reader `pcb_rules.read_segments` for both; regression tests

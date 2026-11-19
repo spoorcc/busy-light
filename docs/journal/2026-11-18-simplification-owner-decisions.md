@@ -180,3 +180,24 @@ the stitched board has no short, crossing or clearance finding.
 A second effect, not changed: on p1b5 run3 the spare C4 got its via before routing, but the post-route clean-up
 (`pcb_fix.py auto`) removed it, because a clearance finding named it, and its re-route failed. Batch p1b6 (fixed reader,
 same seeds, `PRESTITCH=1`) started 23:30 UTC.
+
+## Batch p1b6: fan-out first with the fixed reader (2026-11-18 23:30 to 2026-11-19 00:23 UTC)
+Same four placements as p1b5, `PRESTITCH=1`. No short or crossing any more, but no clean run:
+
+| Run | Unconnected after clean-up | Strict gate FAIL classes | Power check FAIL |
+|---|---|---|---|
+| run1 | 15 | 2 | 1 |
+| run2 (best) | 3 | 2 | 2 |
+| run3 | 6 | 2 | 2 |
+| run4 | 5 | 1 | 1 |
+
+Open on run2: U7 pin 6 (+5V) to its via, U1 pad 10 (GND), /CC2 to J1. Two causes found, both in the stitcher:
+- The pre-route vias sat at positions such as 51.565807 mm; the router (Specctra resolution 0.1 um) ended its tracks at the
+  rounded point, KiCad reported 18 to 28 `track_not_centered_on_via` per run, and the clean-up (`pcb_fix.py`, which rips up
+  a via named in such a finding together with its tracks) removed good stitches. On run2 that took the +5V via of U7 pin 6.
+  **Fixed:** new stitch vias sit on the 0.1 um grid.
+- The GND pads 4 and 10 of U1 (TUSB321, X2QFN-12, 0.4 mm pitch) never got a stitch: a 0.25 mm track needs 0.335 mm from its
+  centre line to the next pad, the pitch leaves 0.30 mm. **Fixed:** a plane net without a current rating (GND) is retried at
+  the 0.15 mm default width (the board rules allow 0.15 mm).
+Replayed on the three placements: 99 of 102, 97 of 98 and 97 of 97 plane pads get a via, no DRC finding on the stitched board.
+Recurring signal opens: /CC1 and /CC2 to J1 in 5 of the 8 runs of p1b5 and p1b6; not changed yet.

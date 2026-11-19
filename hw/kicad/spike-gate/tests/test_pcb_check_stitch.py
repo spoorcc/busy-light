@@ -316,3 +316,76 @@ class StitcherSeesLockedTracks(unittest.TestCase):
                 vx, vy, _, _ = st.vias[-1]
                 self.assertGreaterEqual(pcb_stitch.seg_dist(vx, vy, cx - 3.0, cy + 1.2, cx + 3.0, cy + 1.2),
                                         pcb_stitch.VIA_D / 2 + 0.125 + pcb_stitch.CLR - 1e-9)
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class StitcherViaOnTheSessionGrid(unittest.TestCase):
+    """Batch p1b6 (2026-11-19): pre-route stitch vias at positions such as 51.565807 mm went through the router (Specctra
+    resolution 0.1 um); the router's tracks ended at the rounded point, KiCad reported `track_not_centered_on_via`, and the
+    clean-up ripped up the via with its stitch track (U7 pin 6 lost its +5V via on run2). Stitch vias sit on the 0.1 um grid."""
+
+    def test_new_via_is_on_the_grid(self):
+        cx, cy = pcb_full.CX + 0.1234567, pcb_full.CY - 0.0987654
+        with tempfile.TemporaryDirectory() as t:
+            src = Path(t) / "b.kicad_pcb"
+            fixture_board(src, [(cx, cy)])
+            st = pcb_stitch.Stitcher(pcbnew.LoadBoard(str(src)), str(src))
+            st.tab_r = 30.0
+            self.assertTrue(st.stitch_pad("T1", "1", "GND", pcbnew.F_Cu, cx, cy))
+            vx, vy, _, _ = st.vias[-1]
+            for v in (vx, vy):
+                self.assertEqual(pcbnew.FromMM(v) % 100, 0, v)          # nm; 100 nm = 0.1 um
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class StitcherFinePitchGround(unittest.TestCase):
+    """Batches p1b4 to p1b6: the GND pads 4 and 10 of U1 (TUSB321, X2QFN-12, 0.4 mm pitch, 0.2 mm pads) never got a stitch:
+    a 0.25 mm GND track needs 0.335 mm from its centre line to the next pad, the pitch leaves 0.30 mm. GND has no current
+    rating (NET_WIDTH), so the stitcher retries at the default track width (0.15 mm needs 0.285 mm)."""
+
+    def board(self, path):
+        cx, cy = pcb_full.CX, pcb_full.CY
+        b = pcbnew.BOARD()
+        b.SetCopperLayerCount(4)
+        nets = {n: pcbnew.NETINFO_ITEM(b, n) for n in ("GND", "SIG")}
+        for n in nets.values():
+            b.Add(n)
+        fp = pcbnew.FOOTPRINT(b)
+        fp.SetReference("U1")
+        for i, dy in enumerate((-0.4, 0.0, 0.4)):            # one side of the QFN: pads 0.5 mm long (x), 0.2 mm wide (y)
+            pad = pcbnew.PAD(fp)
+            pad.SetNumber(str(i + 3))
+            pad.SetShape(pcbnew.PAD_SHAPE_RECT)
+            pad.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+            pad.SetLayerSet(pcbnew.PAD.SMDMask())
+            pad.SetSize(pcbnew.VECTOR2I(pcbnew.FromMM(0.5), pcbnew.FromMM(0.2)))
+            pad.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(cx), pcbnew.FromMM(cy + dy)))
+            pad.SetNet(nets["GND" if dy == 0.0 else "SIG"])
+            fp.Add(pad)
+        for dy in (-1.2, 1.2):                                # the other rows of the package: no escape up or down
+            pad = pcbnew.PAD(fp)
+            pad.SetNumber("9")
+            pad.SetShape(pcbnew.PAD_SHAPE_RECT)
+            pad.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+            pad.SetLayerSet(pcbnew.PAD.SMDMask())
+            pad.SetSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.2), pcbnew.FromMM(0.5)))
+            pad.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(cx + 0.5), pcbnew.FromMM(cy + dy)))
+            pad.SetNet(nets["SIG"])
+            fp.Add(pad)
+        b.Add(fp)
+        pcbnew.SaveBoard(str(path), b)
+        return cx, cy
+
+    def test_ground_pad_at_0_4_mm_pitch_is_stitched_with_a_narrow_track(self):
+        with tempfile.TemporaryDirectory() as t:
+            src = Path(t) / "b.kicad_pcb"
+            cx, cy = self.board(src)
+            st = pcb_stitch.Stitcher(pcbnew.LoadBoard(str(src)), str(src))
+            st.tab_r = 30.0
+            self.assertTrue(st.stitch_pad("U1", "4", "GND", pcbnew.F_Cu, cx, cy))
+            self.assertEqual(st.segs[-1][4], pcb_rules.TRACK)
+
+    def test_rated_net_keeps_its_width(self):
+        """+5V has a current-based width (NET_WIDTH): no narrow retry."""
+        self.assertEqual(pcb_stitch.Stitcher.widths("+5V"), (pcb_rules.NET_WIDTH["+5V"],))
+        self.assertEqual(pcb_stitch.Stitcher.widths("GND"), (pcb_rules.STITCH_W["GND"], pcb_rules.TRACK))
