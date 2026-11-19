@@ -5,12 +5,14 @@
 # Needs: kicad-cli and KiCad's Python (pcbnew) 10.0.x, KiKit 1.8.1 (scripts/requirements-fab.txt), git.
 # The schematic <board>.kicad_sch must be next to the board (strict ERC, assembly BOM fields, full BOM).
 # Every step runs even when an earlier one fails, so the package shows all findings. Exit codes: 0 every gate
-# passed; 1 a gate failed (strict ERC or DRC, pcb_fabcheck, panel tab check, fab_check); 2 a tool or an
+# passed; 1 a gate failed (strict ERC or DRC, pcb_fabcheck with no via in SMD pads, power check, panel tab check,
+# fab_check); 2 a tool or an
 # input is missing, or the panel or the order files could not be made. The out dir must be empty or new.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STRICT="$ROOT/hw/kicad/spike-gate/src/kicad_strict.py"
 FABCHECK="$ROOT/hw/kicad/spike-gate/src/pcb_fabcheck.py"
+POWER="$ROOT/hw/kicad/spike-gate/src/pcb_power_check.py"
 PRESET="$ROOT/scripts/panel_p1.json"
 MISSING_LCSC="$ROOT/scripts/fab_missing_lcsc.txt"
 # Mechanical azimuths of the panel tabs (scripts/panel_tabs.py explains the choice and the checks).
@@ -63,9 +65,26 @@ run "strict ERC" "$out/erc.txt" env SPIKE_ALLOW_KNOWN_OPEN=0 python3 "$STRICT" e
 run "strict DRC" "$out/drc.txt" env SPIKE_ALLOW_KNOWN_OPEN=0 python3 "$STRICT" drc "$board_rel" stitched-4l --out "$out/drc.json" || true
 echo "== pcb_fabcheck"
 rc=0
-python3 "$FABCHECK" "$board_rel" >"$out/pcb_fabcheck.json" || rc=$?
+python3 "$FABCHECK" --no-via-in-pad "$board_rel" >"$out/pcb_fabcheck.json" || rc=$?     # owner answer 9: no via in pad
 cat "$out/pcb_fabcheck.json"
 ((rc == 0)) || { echo "   -> pcb_fabcheck: exit $rc"; failed+=("pcb_fabcheck"); }
+# Supply nets: drop within the analyst's 50 mV and no thin track in the current path (full_width_path; batch p1b7).
+echo "== power check"
+rc=0
+python3 "$POWER" "$board_rel" "$out/power_check.json" >/dev/null || rc=$?
+((rc == 0)) || die "power check did not run (exit $rc)"
+python3 - "$out/power_check.json" <<'PY' || failed+=("power check")
+import json
+import sys
+
+nets = json.load(open(sys.argv[1], encoding="utf-8"))["nets"]
+bad = []
+for n, v in sorted(nets.items()):
+    print("   %-8s %s mV, full-width path %s" % (n, v["drop_mv"], v.get("full_width_path")))
+    if not v["within_50mv"] or v.get("full_width_path") is False:
+        bad.append(n)
+sys.exit(1 if bad else 0)
+PY
 
 # 2. Panel: tab annotations on a copy of the board, then KiKit (scripts/panel_p1.json).
 mkdir -p "$work/tabbed" "$work/panel" "$work/fab"

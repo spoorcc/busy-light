@@ -63,6 +63,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- Order script `scripts/fab_p1.sh`: `pcb_fabcheck` now runs with `--no-via-in-pad` (owner answer 9; before, a via in a pad
+  was reported but did not fail the package), and the power check (drop and full-width path) is a gate. The stored-board
+  test runs the power check too. Tests `scripts/tests/test_fab_p1_script.py` (fail on the old script),
+  `test_supply_drops_and_full_width_paths` (HW-008, HW-010).
 - Spike LED ring generator (`pcb_ring.py`): the data chain is laid before the power and ground stubs. With the stubs first,
   the capacitors turned away from the panel tabs closed four data gaps; the router then left D14 to D15 open in all four
   routings of one placement. Data first completes all 47 ring links on the four P1 placements. Test

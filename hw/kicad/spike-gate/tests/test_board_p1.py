@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """Requirement checks on the stored P1 board `board-p1/` (plan 08 section 5; HW-008, HW-016, HW-017; TC-216, TC-217 board part).
 
-These read the committed board file. The gate (strict DRC and ERC), the fab check and the power check run in
-`scripts/ci_hw.sh` and `scripts/fab_p1.sh`; this file holds the checks that no tool makes: sides, the spare footprints at the
-TPS2553 output, the damping link nets and the panel tab clearance. Skipped without pcbnew or without the board."""
+These read the committed board file. The strict gate (DRC and ERC) runs in `scripts/ci_hw.sh` and `scripts/fab_p1.sh`, the fab
+check and the power check in `scripts/fab_p1.sh` (the power check since 2026-11-19); this file holds the checks that no gate
+makes (sides, the spare footprints at the TPS2553 output, the damping link nets, the panel tab clearance) and runs the power
+check too, so the spike test suite fails on a thin supply path. Skipped without pcbnew or without the board."""
 import json
 import math
 import subprocess
@@ -63,6 +64,16 @@ class BoardP1(unittest.TestCase):
         self.assertEqual({p.GetNumber(): p.GetNetname() for p in f.Pads()}, {"1": "VBUS", "2": "VBUS_IC"})
         self.assertEqual(str(f.GetFPID().GetLibItemName()), "R_1206_3216Metric")
         self.assertFalse(f.IsFlipped())
+
+    def test_supply_drops_and_full_width_paths(self):
+        """pcb_power_check on the stored board: every supply case within the analyst's 50 mV and without a thin track in its
+        current path (batch p1b7: a board whose +5V current ran through 0.15 mm track passed every other check)."""
+        res = subprocess.run([sys.executable, str(HERE.parent / "src" / "pcb_power_check.py"), str(BOARD)],
+                             capture_output=True, text=True, check=True)
+        nets = json.loads(res.stdout[res.stdout.index("{"):])["nets"]
+        for net, v in nets.items():
+            self.assertTrue(v["within_50mv"], (net, v["drop_mv"]))
+            self.assertIs(v["full_width_path"], True, net)
 
     def test_panel_tabs_keep_3_mm_from_every_capacitor(self):
         """Plan 08 section 4.5: scripts/panel_tabs.py with the P1 tab azimuths (the order script default) passes."""
