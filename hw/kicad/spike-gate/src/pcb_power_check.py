@@ -6,6 +6,7 @@ Method: per net, the copper of the net (tracks, pads, vias, zone fills) is raste
 into a resistor network (sheet resistance of copper 0.5 mOhm/square at 35 um outer, 1.13 mOhm/square at 15.2 um inner;
 via barrel 1 mOhm); the effective resistance between the source pads and the load pads follows from one sparse solve.
 The drop is R x the stated current. The currents and the 50 mV target are the analyst's assumptions, not requirements.
+Full-width path: each case is solved again without the tracks narrower than WIDTH_SHARE x NET_WIDTH (`full_width_path`).
 Plane cut: the number of separate pieces and the share of the board area removed from the In1 (GND) and In2 (+5V) fills.
 Not covered: temperature, copper thickness tolerance, current crowding at pads (the grid resolves 0.1 mm), AC behaviour.
 """
@@ -26,6 +27,16 @@ RS_OUTER = 0.0005        # ohm per square, 35 um copper (rho 1.72e-8 ohm m)
 RS_INNER = 0.00113       # 15.2 um inner copper (0.5 oz): JLCPCB stack-ups JLC04161H-7628 and -3313, read 2026-11-08; rho 1.72e-8 ohm m
 R_VIA = 0.001
 TARGET_V = 0.050
+# Full-width path (batch p1b7, 2026-11-19): each case is solved again without the tracks narrower than WIDTH_SHARE times the
+# net's current-based width (pcb_rules.NET_WIDTH); no path then means the current needs a thin track. 0.75 keeps the
+# router's neck-down at pads (0.45 mm on the 0.6 mm nets) and rejects a 0.15 mm track. Analyst's rule, not a requirement.
+WIDTH_SHARE = 0.75
+
+
+def min_path_width(net):
+    """Narrowest track (mm) that counts for the full-width path of a case net."""
+    import pcb_rules  # noqa: PLC0415
+    return WIDTH_SHARE * pcb_rules.NET_WIDTH[net]
 # net: (source (ref, pad or None for all pads of the ref), load (ref, pad), current A, basis)
 CASES = {
     # HW-017 (plan 08): the input path is split by the 0 ohm link R22; the two cases add up, plus R22's own resistance
@@ -63,8 +74,8 @@ class Raster:
         return ((x - self.x0) / RES, (y - self.y0) / RES)
 
 
-def layer_masks(board, ras, net, layers):
-    """{layer name: bool array} copper of `net`; tracks, pads and zone fills."""
+def layer_masks(board, ras, net, layers, min_width=0.0):
+    """{layer name: bool array} copper of `net`; tracks (those at least `min_width` mm wide), pads and zone fills."""
     out = {}
     for L in layers:
         lid = board.GetLayerID(L)
@@ -78,7 +89,7 @@ def layer_masks(board, ras, net, layers):
                 p = ras.px(mm(t.GetPosition().x), mm(t.GetPosition().y))
                 r = mm(via_width(t, lid)) / 2 / RES
                 d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=1)
-            elif t.GetLayer() == lid:
+            elif t.GetLayer() == lid and mm(t.GetWidth()) >= min_width - 1e-6:
                 a, b = ras.px(mm(t.GetStart().x), mm(t.GetStart().y)), ras.px(mm(t.GetEnd().x), mm(t.GetEnd().y))
                 w = max(1, int(round(mm(t.GetWidth()) / RES)))
                 d.line([a, b], fill=1, width=w)
@@ -119,8 +130,8 @@ def pad_cells(board, ras, ref, num, layers):
     return cells
 
 
-def effective_resistance(board, ras, net, src, dst, layers):
-    masks = layer_masks(board, ras, net, layers)
+def effective_resistance(board, ras, net, src, dst, layers, min_width=0.0):
+    masks = layer_masks(board, ras, net, layers, min_width)
     idx, n = {}, 0
     for L in layers:
         ys, xs = np.nonzero(masks[L])
@@ -218,9 +229,12 @@ def main(path, out=None):
     res = {"nets": {}, "planes": {}}
     for net, (src, dst, amps, basis) in CASES.items():
         r = effective_resistance(board, ras, net, src, dst, layers)
+        rw = effective_resistance(board, ras, net, src, dst, layers, min_path_width(net))
         res["nets"][net] = {"resistance_mohm": None if r is None else round(r * 1000, 2), "current_a": amps,
                             "drop_mv": None if r is None else round(r * amps * 1000, 1), "basis": basis,
-                            "within_50mv": None if r is None else r * amps <= TARGET_V}
+                            "within_50mv": None if r is None else r * amps <= TARGET_V,
+                            "full_width_path": None if rw is None else rw != float("inf"),
+                            "min_path_width_mm": round(min_path_width(net), 3)}
     for net, layer in (("GND", "In1.Cu"), ("+5V", "In2.Cu")):
         c = plane_cuts(board, net, layer)
         res["planes"][layer] = {"net": net, "pieces": None if c is None else c[0],

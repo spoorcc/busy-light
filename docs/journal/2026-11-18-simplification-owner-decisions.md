@@ -230,3 +230,32 @@ Earlier boards (p1b3 run1 included) went through the same clean-up and were not 
 stub width (0.25 mm, `pcb_ring.STUB`: the In2 plane carries the ring current). Tests `CleanupWidths` (the first fails
 before the change). A replay with 0.6 mm for every +5V piece left two +5V pairs open (a ring LED stub and one via-to-track
 piece), hence the ring rule.
+
+## Batch p1b8: clean-up keeps supply widths (2026-11-19, 01:27 to 02:11 UTC)
+Same four placements, every fix so far.
+
+| Run | Unconnected after clean-up | Strict gate FAIL classes | Power check FAIL |
+|---|---|---|---|
+| run1 | 10 | 3 | 1 |
+| run2 | 3 | 1 | 2 |
+| run3 (best) | **1** | 1 | **0** |
+| run4 | 4 | 2 | 1 |
+
+run3: no clearance, edge or short finding; only the tolerated U9 classes (14 + 1) and one open connection: R_ILIM2 pad 2 to
+the /ILIM net, 7 mm away past U8 (the clean-up's grid router found no path). Drops at the 0.1 mm grid: +3V3 7.3 mV, +5V
+12.1 mV, VBUS 23.9 mV, VBUS_IC 44.1 mV. Supply widths checked by removing tracks: no +5V track under 0.25 mm (the ring
+stubs); without every VBUS_IC track under 0.6 mm and every +3V3 track under 0.3 mm, the drops are unchanged, so the main
+paths are at full width. The replay's edge-clearance findings did not appear in the batch.
+
+## The power check now checks the width of the supply path
+New in `pcb_power_check.py`: each case is solved again without the tracks narrower than 0.75 x the net's current-based
+width (`full_width_path`); the picker counts a failing case. 0.75 keeps the router's neck-down at pads (0.45 mm on the
+0.6 mm nets); it is the analyst's rule, not a requirement. Results: p1b7 run3 fails (+5V), p1b8 run3 passes every case.
+
+**Correction to the p1b3 entry above:** the p1b3 board (run1, the "first one-sided board that passes every gate", kept in
+the assistant's scratchpad, never committed) **fails the new check on +5V**: its +5V drop of 28.9 mV was within target,
+but the current runs through 0.15 mm clean-up track. It passed every gate that existed then; it had the clean-up width
+defect. No committed board is affected (no `board-p1/` is stored).
+
+Batch p1b9 started 02:12 UTC: four Freerouting runs of run3's placement (seeds 33 to 48), since that placement came
+closest twice.

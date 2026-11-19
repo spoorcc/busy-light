@@ -34,10 +34,11 @@ def strict_fails(board: Path, profile: str = "stitched-4l") -> int:
 
 
 def power_fails_from(text: str) -> int:
-    """Number of power nets over their drop target in the output of pcb_power_check.py (an infinite drop counts); 99 when unreadable."""
+    """Number of power nets over their drop target in the output of pcb_power_check.py (an infinite drop counts), or whose
+    current needs a track narrower than the full-width rule (`full_width_path` false, batch p1b7); 99 when unreadable."""
     try:
         d = json.loads(text[text.index("{"):text.rindex("}") + 1])
-        return sum(1 for v in d["nets"].values() if not v["within_50mv"])
+        return sum(1 for v in d["nets"].values() if not v["within_50mv"] or v.get("full_width_path") is False)
     except (ValueError, KeyError, TypeError):
         return 99
 

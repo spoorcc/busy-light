@@ -11,6 +11,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Spike power check: `full_width_path` per supply case, the case solved again without tracks narrower than 0.75 x the net's
+  current-based width; the board picker counts a failing case like a drop over target. It fails batch p1b7 run3 and the
+  p1b3 board (+5V current through 0.15 mm clean-up track) and passes batch p1b8 run3. Tests `FullWidthPath` and
+  `test_power_fails_counts_a_path_through_thin_track` (HW-008, HW-010).
 - CI workflow `.github/workflows/fab-release.yml` (plan 08 section 4.6, owner answer 17): test, build and publish jobs; on a push
   to `main` it refreshes the draft release `fab-latest` with the P1 order package, on a published release it attaches the files;
   without a stored `board-p1/` it reports NOT RUN. Hash-pinned test tools `scripts/requirements-fab-test.txt`; structure test
