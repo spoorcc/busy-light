@@ -301,3 +301,15 @@ Defects found and fixed in the flow (each with a test that fails before the fix)
 tracks; stitch vias off the router's grid; no stitch for 0.4 mm-pitch GND pads; clean-up re-routed supply nets at 0.15 mm; the
 power check could not see a thin supply path (new full-width rule); the ring generator closed four data gaps; clean-up grid
 points off the router's grid; the order script did not enforce no via in pad and did not run the power check.
+
+## Batch p1b12: new placements (2026-11-19, 04:26 to 05:05 UTC)
+Every fix, placement seeds 65 to 128 (`SEED_OFFSET=64`). Ring complete (47 links) and every plane pad stitched before routing
+on all four runs (one GND pad of C9 left on run3). Open connections after clean-up 5, 7, 3, 4; power check FAIL 1, 0, 0, 1;
+no run clean. Batches stopped here for the hand-off.
+
+Next levers (not tried):
+- A second Freerouting pass on the cleaned-up board with only the open connections (the grid router of the clean-up finds no
+  path for the last 1 to 3; Freerouting can push other tracks aside).
+- Keep signals off the In2 +5V plane, or limit them: the router puts 100 to 200 mm of signal track on In2, which cuts the
+  plane into 3 to 5 pieces (two runs had `Zone [+5V]` islands as open items).
+- More runs per batch: one run uses one core; the container has four.
