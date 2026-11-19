@@ -268,3 +268,12 @@ links after; since the panel tab keep-outs turned the LED capacitors away from f
 close those gaps, and the generator fails D3-D4, D7-D8, D11-D12, D14-D15 on every placement. The router then lays three
 of them and, on this placement, never D14-D15. **Fixed:** the data chain first, then the stubs. Replayed on the four
 placements: all 47 ring links complete on each. Batch p1b10 (four placements, every fix) started.
+
+## Batch p1b10: ring complete, ring stubs broken by the clean-up (2026-11-19, 02:51 to 03:35 UTC)
+Every fix so far, the four placements. The ring generator now lays all 47 links on every run. Open connections after
+clean-up: 10, 2, 2, 3; power check FAIL 1, 2, 0, 0; no run clean. New: broken +5V ring stubs (C14, C18 and via-to-track
+pieces). Cause: the ring generator and the clean-up place vias on the grid router's cells, at positions such as
+y = ...8913 mm (the board centre is not on the 0.1 um grid); the router's In2 tracks to these vias came back off centre
+(`track_not_centered_on_via`), and the clean-up ripped up the stubs and could not lay them again (a via-to-track piece has
+no pad, so it got the 0.6 mm +5V width). The stitch vias had the same problem, fixed earlier tonight. **Fixed:** the grid
+router's points sit on the 0.1 um grid. Ring replay on two placements: all 47 links. Batch p1b11 started.

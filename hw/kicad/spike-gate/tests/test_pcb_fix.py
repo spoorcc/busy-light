@@ -113,6 +113,15 @@ class RouteOneConnection(unittest.TestCase):
         self.assertTrue(any(a[0] == "via" for a in fx.added) or any(t[2] != "F.Cu" for t in tracks) or
                         any(abs(t[3][1] - cy) > 3.0 or abs(t[4][1] - cy) > 3.0 for t in tracks))
 
+    def test_grid_points_sit_on_the_session_grid(self):
+        """Batch p1b10 (2026-11-19): vias of the ring generator and the clean-up at y = ...8913 mm (the board centre is not
+        on the 0.1 um grid) came back from the router with off-centre track ends; the clean-up then ripped up ring stubs it
+        could not lay again. Grid points (vias, corners) sit on the Specctra grid, as the stitch vias do."""
+        fx = pcb_fix.Fixer(small_board(), 30.0)
+        for ix, iy in ((0, 0), (17, 33), (123, 4)):
+            for v in fx.xy(ix, iy):
+                self.assertEqual(pcbnew.FromMM(v) % 100, 0, v)          # nm; 100 nm = 0.1 um
+
     def test_no_path_when_the_target_is_walled_in(self):
         b = small_board()
         fx = pcb_fix.Fixer(b, 30.0)

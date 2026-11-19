@@ -63,6 +63,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- Spike clean-up grid router (`pcb_fix.py`, also used by the LED ring generator): grid points, and so its vias, sit on the
+  0.1 um Specctra grid like the stitch vias. Batch p1b10: ring vias at y = ...8913 mm came back from the router with
+  off-centre track ends and the clean-up broke ring stubs it could not lay again. Test
+  `test_grid_points_sit_on_the_session_grid` (HW-008).
 - Order script `scripts/fab_p1.sh`: `pcb_fabcheck` now runs with `--no-via-in-pad` (owner answer 9; before, a via in a pad
   was reported but did not fail the package), and the power check (drop and full-width path) is a gate. The stored-board
   test runs the power check too. Tests `scripts/tests/test_fab_p1_script.py` (fail on the old script),

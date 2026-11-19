@@ -98,7 +98,9 @@ class Fixer:
         return int(round((x - self.x0) / RES)), int(round((y - self.y0) / RES))
 
     def xy(self, ix, iy):
-        return self.x0 + ix * RES, self.y0 + iy * RES
+        """Grid cell centre in mm, on the 0.1 um Specctra grid (pcb_stitch.snap): the router's tracks end on the centre of
+        a via placed here (batch p1b10: off-centre ends made the clean-up rip up ring stubs)."""
+        return S.snap(self.x0 + ix * RES), S.snap(self.y0 + iy * RES)
 
     def stamp_rect(self, arr, x0, y0, x1, y1, val, grow=0.0):
         ix0 = max(0, int(math.floor((x0 - grow - self.x0) / RES)))
