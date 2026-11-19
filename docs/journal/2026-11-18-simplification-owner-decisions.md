@@ -277,3 +277,27 @@ y = ...8913 mm (the board centre is not on the 0.1 um grid); the router's In2 tr
 (`track_not_centered_on_via`), and the clean-up ripped up the stubs and could not lay them again (a via-to-track piece has
 no pad, so it got the 0.6 mm +5V width). The stitch vias had the same problem, fixed earlier tonight. **Fixed:** the grid
 router's points sit on the 0.1 um grid. Ring replay on two placements: all 47 links. Batch p1b11 started.
+
+## Batch p1b11 (2026-11-19, 03:39 to 04:25 UTC) and where the night ends
+Every fix, the four placements. Ring complete on all four runs (47 links). Open connections after clean-up 8, 3, 2, 6; power
+check FAIL 1, 2, 1, 1; no run clean. The open items differ from run to run (a +5V piece, /VDD_U15, /CC2 to J1, /GATE_OK_RB,
+U7 pin 6, a zone island); no systematic cause left that the assistant found. Batch p1b12 (new placements, seeds 65 to 128)
+started 04:26 UTC.
+
+Summary of the night (best run of each batch; open = unconnected after clean-up; power = full-width rule from p1b9 on):
+
+| Batch | Change | Best open | Best run power check |
+|---|---|---|---|
+| p1b4 | spares on the bottom, tab keep-outs | 3 | pass (thin-track rule not yet there) |
+| p1b5 | vias before routing | 5 | fail (shorts: stitcher did not see locked tracks) |
+| p1b6 | stitcher reads locked tracks | 3 | fail |
+| p1b7 | stitch vias on the 0.1 um grid, narrow GND retry | 1 | fail (+5V through 0.15 mm clean-up track) |
+| p1b8 | clean-up keeps supply widths | 1 | pass |
+| p1b9 | one placement routed four times | 1 | pass (D14-D15 open in all four) |
+| p1b10 | ring: data chain first | 2 | fail / pass |
+| p1b11 | clean-up grid points on the 0.1 um grid | 2 | fail |
+
+Defects found and fixed in the flow (each with a test that fails before the fix): the stitcher's copper reader skipped locked
+tracks; stitch vias off the router's grid; no stitch for 0.4 mm-pitch GND pads; clean-up re-routed supply nets at 0.15 mm; the
+power check could not see a thin supply path (new full-width rule); the ring generator closed four data gaps; clean-up grid
+points off the router's grid; the order script did not enforce no via in pad and did not run the power check.
