@@ -32,8 +32,8 @@ jobs:
       - name: Install test tools (pinned with sha256)
         run: |
           apt-get update && apt-get install -y --no-install-recommends ngspice python3-pip   # the image has no pip
-          pip install --break-system-packages --require-hashes -r scripts/requirements-fab.txt
-          pip install --break-system-packages --require-hashes -r scripts/requirements-fab-test.txt
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab.txt
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab-test.txt
       - name: Spike-gate, simulation and order-package tests
         shell: bash
         run: |
@@ -63,7 +63,7 @@ jobs:
       - name: Install KiKit (pinned with sha256)
         run: |
           apt-get update && apt-get install -y --no-install-recommends python3-pip   # the image has no pip
-          pip install --break-system-packages --require-hashes -r scripts/requirements-fab.txt
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab.txt
       - name: Build the order package
         id: pkg
         shell: bash

@@ -79,8 +79,9 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
   Placed after the texts, a fiducial took a designator's spot in each of three passes on the p1b13 board
   (`silk_over_copper`). Test `OnABoard.test_no_designator_on_a_fiducial` (HW-010).
 - CI workflows: the `kicad/kicad:10.0` image has no pip; the jobs of `fab-release.yml` and the `hardware` job of `ci.yml`
-  install `python3-pip` with apt before `pip install`. Found 2026-11-20; `fab-release.yml` has not run on GitHub yet.
-  Test `test_pip_comes_from_apt_before_it_is_used` (HW-008, HW-009).
+  install `python3-pip` with apt before `pip install`, and install the pins with `--ignore-installed` (CI run 44827760397:
+  pip could not uninstall Debian's `typing_extensions`). Found 2026-11-20; `fab-release.yml` has not run on GitHub yet.
+  Tests `test_pip_comes_from_apt_before_it_is_used`, `test_pip_leaves_the_debian_packages_alone` (HW-008, HW-009).
 - Spike clean-up grid router (`pcb_fix.py`, also used by the LED ring generator): grid points, and so its vias, sit on the
   0.1 um Specctra grid like the stitch vias. Batch p1b10: ring vias at y = ...8913 mm came back from the router with
   off-centre track ends and the clean-up broke ring stubs it could not lay again. Test

@@ -50,6 +50,8 @@ class CiHwBoardP1(unittest.TestCase):
         installs = [ln for ln in before.splitlines() if "pip install" in ln]
         self.assertTrue(installs)
         self.assertTrue(all("--require-hashes" in ln for ln in installs))
+        # CI run 44827760397: pip could not uninstall Debian's typing_extensions
+        self.assertTrue(all("--ignore-installed" in ln for ln in installs))
 
 
 if __name__ == "__main__":

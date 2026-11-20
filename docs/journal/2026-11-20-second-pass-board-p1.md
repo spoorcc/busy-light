@@ -48,7 +48,9 @@ Checks run on the stored files on 2026-11-20:
   `fab-release.yml` jobs called `pip install` directly, so they would have stopped at the first step. Both workflows now
   install `python3-pip` with apt first. **Not verified here:** apt in the container cannot reach a Debian mirror through
   this environment's proxy (plain HTTP refused with 405). The `ci.yml` change runs on the next push; `fab-release.yml` runs
-  only on `main`.
+  only on `main`. The first CI run with the change (44827760397) installed pip and then stopped: pip could not uninstall
+  Debian's `typing_extensions` 4.13.2 for the pinned 4.16.0 (`uninstall-no-record-file`). The installs now use
+  `--ignore-installed` (the pins go to `/usr/local`, first on the path); the same error would have hit `fab-release.yml`.
 
 ## Deviations and open points
 - Plan 08 step 8 lists DRC and ERC JSON and `chosen_run.txt` in the stored folder. Not stored: the reports are build

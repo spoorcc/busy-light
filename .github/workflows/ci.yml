@@ -54,7 +54,7 @@ jobs:
       - name: Python packages of the P1 power check (numpy, scipy; pinned with sha256)
         run: |
           apt-get update && apt-get install -y --no-install-recommends python3-pip   # the image has no pip
-          pip install --break-system-packages --require-hashes -r scripts/requirements-fab.txt -r scripts/requirements-fab-test.txt
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab.txt -r scripts/requirements-fab-test.txt
       - run: scripts/ci_hw.sh
         env: {HW_CI_OUT: hw-reports}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

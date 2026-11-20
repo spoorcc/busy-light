@@ -120,6 +120,15 @@ class FabReleaseWorkflow(unittest.TestCase):
             self.assertRegex(before, r"apt-get install[^\n]*python3-pip", name)
             self.assertLess(before.index("python3-pip"), before.index("pip install"), name)
 
+    def test_pip_leaves_the_debian_packages_alone(self) -> None:
+        """CI run 44827760397 (2026-11-20): pip tried to uninstall Debian's typing_extensions
+        4.13.2 for the pinned 4.16.0 and stopped (`uninstall-no-record-file`). Every install
+        uses --ignore-installed: the pins go to /usr/local, which comes first on sys.path."""
+        installs = [line for line in self.text.splitlines() if "pip install" in line]
+        self.assertTrue(installs)
+        for line in installs:
+            self.assertIn("--ignore-installed", line)
+
     def test_build_reports_not_run_without_a_board(self) -> None:
         run = next(s["run"] for s in self.jobs["build"]["steps"] if s.get("id") == "pkg")
         self.assertIn("NOT RUN", run)
