@@ -5,7 +5,7 @@
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
 #   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
-# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), PRESTITCH (default 0; 1 = stitch the plane pads before the router and lock the vias, reuse limit PRESTITCH_REUSE mm, default 1.6), FR_THREADS (default 4).
+# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), REPASS (default 1; 0 skips the second router pass of run_repass.sh when the clean-up leaves an unconnected item),KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), PRESTITCH (default 0; 1 = stitch the plane pads before the router and lock the vias, reuse limit PRESTITCH_REUSE mm, default 1.6), FR_THREADS (default 4).
 #      FREEROUTING_JAR  path of a Freerouting v2.5.0 jar, one of two pinned files (not part of the repository):
 #        sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7  freerouting-2.5.0.jar, official GitHub release
 #        sha256 7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976  freerouting-2.5.0-executable.jar, Maven Central
@@ -127,6 +127,12 @@ PYEOF
     for e in kicad_pcb kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/$FINAL.$e" "$A/final.$e"; done
     "$PY" "$HERE/src/kicad_strict.py" drc "$A/final.kicad_pcb" "stitched-${LAYERS}l" --out "$A/drc_final.json" || STATUS=1
     echo "M2 unconnected (final board after clean-up, from $FINAL): $("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")"
+    if [ "${REPASS:-1}" = 1 ] && [ "$("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")" != 0 ]; then
+      # second router pass over the cleaned board, all copper locked (run_repass.sh); it replaces final.* only when better
+      sh "$HERE/run_repass.sh" "$A" "$LAYERS" "$PLANES" 2>&1 | filter || true
+      "$PY" "$HERE/src/kicad_strict.py" drc "$A/final.kicad_pcb" "stitched-${LAYERS}l" --out "$A/drc_final.json" || STATUS=1
+      echo "M2 unconnected (final board after the second pass): $("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")"
+    fi
   fi
 fi
 exit $STATUS
