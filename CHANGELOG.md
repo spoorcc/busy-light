@@ -11,6 +11,18 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Stored P1 board `hw/kicad/spike-gate/board-p1/` (plan 08 section 5 step 8, ADR-0023): batch p1b8 run 3 completed by the
+  second router pass; every assembled part on the top. Strict ERC 0 findings, strict DRC only the tolerated U9 classes
+  (DEV-004), no unconnected item, no via in a pad, power check within 50 mV with full-width paths, `tests/test_board_p1.py`
+  6 passed, `scripts/fab_p1.sh` all gates passed. Not reviewed or approved; not ready to order (U5 source, R22 part, owner
+  review). README in the folder (HW-008, HW-010, HW-016, HW-017).
+- Spike routing flow: `run_repass.sh`, a second Freerouting pass over the cleaned-up board with every track and via locked,
+  then stitch, clean-up and strict DRC again; it replaces `final.*` only when fewer connections stay open. `run_pcb.sh` runs
+  it when the clean-up leaves an unconnected item (`REPASS=1`, the default). On p1b8 run 3 it closed the last open
+  connection (1 to 0). Tests `tests/test_run_repass.py` (HW-008).
+- `scripts/ci_hw.sh` runs `pcb_fabcheck --no-via-in-pad` and the power check on `board-p1/` (plan 08 asked for the fab
+  check; it was not there). The CI `hardware` job installs pip from apt and the pinned numpy and scipy for it. Test
+  `scripts/tests/test_ci_hw_script.py` (HW-008, HW-010).
 - Spike power check: `full_width_path` per supply case, the case solved again without tracks narrower than 0.75 x the net's
   current-based width; the board picker counts a failing case like a drop over target. It fails batch p1b7 run3 and the
   p1b3 board (+5V current through 0.15 mm clean-up track) and passes batch p1b8 run3. Tests `FullWidthPath` and
@@ -63,6 +75,12 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- Spike finishing (`pcb_finish.py`): fiducials are placed before the reference designators, and the designators avoid them.
+  Placed after the texts, a fiducial took a designator's spot in each of three passes on the p1b13 board
+  (`silk_over_copper`). Test `OnABoard.test_no_designator_on_a_fiducial` (HW-010).
+- CI workflows: the `kicad/kicad:10.0` image has no pip; the jobs of `fab-release.yml` and the `hardware` job of `ci.yml`
+  install `python3-pip` with apt before `pip install`. Found 2026-11-20; `fab-release.yml` has not run on GitHub yet.
+  Test `test_pip_comes_from_apt_before_it_is_used` (HW-008, HW-009).
 - Spike clean-up grid router (`pcb_fix.py`, also used by the LED ring generator): grid points, and so its vias, sit on the
   0.1 um Specctra grid like the stitch vias. Batch p1b10: ring vias at y = ...8913 mm came back from the router with
   off-centre track ends and the clean-up broke ring stubs it could not lay again. Test

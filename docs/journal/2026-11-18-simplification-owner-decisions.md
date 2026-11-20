@@ -313,3 +313,6 @@ Next levers (not tried):
 - Keep signals off the In2 +5V plane, or limit them: the router puts 100 to 200 mm of signal track on In2, which cuts the
   plane into 3 to 5 pieces (two runs had `Zone [+5V]` islands as open items).
 - More runs per batch: one run uses one core; the container has four.
+
+## 2026-11-20
+The first lever (second router pass) was tried and gave the first complete board: `2026-11-20-second-pass-board-p1.md`.

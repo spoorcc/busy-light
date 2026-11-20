@@ -1,0 +1,12 @@
+{
+ "created": "2026-11-20T22:02:57Z",
+ "dsn_sha256": "e642be474d08d23f6ffacf4930a2f4c56dc9bf00a13d865d1f34e546ae839b84",
+ "fr_passes": 60,
+ "fr_threads": 1,
+ "jar_sha256": "7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976",
+ "java_version": "openjdk version \"25.0.5.0.3\" 2026-10-24",
+ "kicad_version": "10.0.8",
+ "placed_board_sha256": "3ab2ea9205ebfd14d0aa8c302428db9ad157785769e3bfff50281454ec1c321a",
+ "planes": "inner",
+ "wall_time_s": 147.0
+}
