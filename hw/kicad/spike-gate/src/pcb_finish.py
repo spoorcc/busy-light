@@ -122,40 +122,8 @@ def main(argv: list[str]) -> int:
             out.append((q.GetLeft() / NM, q.GetTop() / NM, q.GetRight() / NM, q.GetBottom() / NM))
         return out
 
-    import json  # noqa: PLC0415
-    skip = refs_in_silk_findings(json.load(open(argv[2], encoding="utf-8"))) if len(argv) > 2 else set()
-    placed, missing = {"F": [], "B": []}, []
-    for f in sorted(fps, key=lambda f: -((part_box(f)[2] - part_box(f)[0]) * (part_box(f)[3] - part_box(f)[1]))):
-        side = "B" if f.GetLayerName() == "B.Cu" else "F"
-        ref = f.GetReference()
-        if f.GetAttributes() & pcbnew.FP_BOARD_ONLY:
-            continue
-        boxes = [x for g in fps if g is not f and (g.GetLayerName() == f.GetLayerName() or g.GetReference() == "J1") for x in obstacle_boxes(g)]
-        own = part_box(f) if max(part_box(f)[2] - part_box(f)[0], part_box(f)[3] - part_box(f)[1]) <= 8.0 else None
-        if own is None:
-            pads = obstacle_boxes(f)
-            own = (min(q[0] for q in pads), min(q[1] for q in pads), max(q[2] for q in pads), max(q[3] for q in pads))
-        pos = None
-        for h, t in (() if ref in skip else ((1.0, 0.15), (0.8, 0.12))):
-            pos = place_text(ref, own, boxes + placed[side], lambda r: in_board((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 0.0)
-                             and in_board(r[0], r[1], 0.5) and in_board(r[2], r[3], 0.5), h)
-            if pos:
-                break
-        t_ = f.Reference()
-        if pos is None:
-            missing.append(ref)
-            t_.SetVisible(False)
-            continue
-        placed[side].append(text_box(ref, pos, h))
-        t_.SetLayer(pcbnew.B_SilkS if side == "B" else pcbnew.F_SilkS)
-        t_.SetTextSize(pcbnew.VECTOR2I(int(h * NM), int(h * NM)))
-        t_.SetTextThickness(int(t * NM))
-        t_.SetKeepUpright(False)
-        t_.SetTextAngleDegrees(0)
-        t_.SetMirrored(side == "B")
-        t_.SetPosition(pcbnew.VECTOR2I(int(pos[0] * NM), int(pos[1] * NM)))
-        t_.SetVisible(True)
-
+    # fiducials first: their spots depend only on copper and the outline; the designators then avoid them (board p1b13:
+    # placed after the texts, a fiducial took the spot of a designator in each of three passes)
     bb = b.GetBoardEdgesBoundingBox()
     bounds = (bb.GetLeft() / NM, bb.GetTop() / NM, bb.GetRight() / NM, bb.GetBottom() / NM)
     keep_out = [part_box(g) for g in fps if g.GetReference() in ("U9", "J1")]
@@ -219,6 +187,41 @@ def main(argv: list[str]) -> int:
             ls.AddLayer(pcbnew.B_Mask if side == "B" else pcbnew.F_Mask)
             pad.SetLayerSet(ls)
             fid_count += 1
+    fps_all = list(b.GetFootprints())                     # the parts and the new fiducials: obstacles for the texts
+    import json  # noqa: PLC0415
+    skip = refs_in_silk_findings(json.load(open(argv[2], encoding="utf-8"))) if len(argv) > 2 else set()
+    placed, missing = {"F": [], "B": []}, []
+    for f in sorted(fps, key=lambda f: -((part_box(f)[2] - part_box(f)[0]) * (part_box(f)[3] - part_box(f)[1]))):
+        side = "B" if f.GetLayerName() == "B.Cu" else "F"
+        ref = f.GetReference()
+        if f.GetAttributes() & pcbnew.FP_BOARD_ONLY:
+            continue
+        boxes = [x for g in fps_all if g is not f and (g.GetLayerName() == f.GetLayerName() or g.GetReference() == "J1") for x in obstacle_boxes(g)]
+        own = part_box(f) if max(part_box(f)[2] - part_box(f)[0], part_box(f)[3] - part_box(f)[1]) <= 8.0 else None
+        if own is None:
+            pads = obstacle_boxes(f)
+            own = (min(q[0] for q in pads), min(q[1] for q in pads), max(q[2] for q in pads), max(q[3] for q in pads))
+        pos = None
+        for h, t in (() if ref in skip else ((1.0, 0.15), (0.8, 0.12))):
+            pos = place_text(ref, own, boxes + placed[side], lambda r: in_board((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 0.0)
+                             and in_board(r[0], r[1], 0.5) and in_board(r[2], r[3], 0.5), h)
+            if pos:
+                break
+        t_ = f.Reference()
+        if pos is None:
+            missing.append(ref)
+            t_.SetVisible(False)
+            continue
+        placed[side].append(text_box(ref, pos, h))
+        t_.SetLayer(pcbnew.B_SilkS if side == "B" else pcbnew.F_SilkS)
+        t_.SetTextSize(pcbnew.VECTOR2I(int(h * NM), int(h * NM)))
+        t_.SetTextThickness(int(t * NM))
+        t_.SetKeepUpright(False)
+        t_.SetTextAngleDegrees(0)
+        t_.SetMirrored(side == "B")
+        t_.SetPosition(pcbnew.VECTOR2I(int(pos[0] * NM), int(pos[1] * NM)))
+        t_.SetVisible(True)
+
     b.Save(argv[1])
     print("silkscreen designators: %d placed, %d without room %s; fiducials: %d" % (
         len(placed["F"]) + len(placed["B"]), len(missing), missing, fid_count))

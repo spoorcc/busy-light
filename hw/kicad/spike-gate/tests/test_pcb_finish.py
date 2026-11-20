@@ -1,11 +1,18 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Tests for the finishing geometry (pcb_finish.py): silkscreen designators and fiducial spots; no pcbnew."""
+"""Tests for the finishing geometry (pcb_finish.py): silkscreen designators and fiducial spots; the class `OnABoard` needs pcbnew."""
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import pcb_finish as F  # noqa: E402
+
+try:
+    import pcbnew
+except ImportError:      # pragma: no cover
+    pcbnew = None
 
 
 class Rects(unittest.TestCase):
@@ -70,6 +77,53 @@ class Fiducials(unittest.TestCase):
 
     def test_none_when_no_space(self):
         self.assertIsNone(F.free_spot([(5, 5, 20.0)], inside=lambda x, y: 0 <= x <= 10 and 0 <= y <= 10, clearance=1.0, step=1.0, far_from=[]))
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class OnABoard(unittest.TestCase):
+    """2026-11-20, board p1b13: the designators were placed first and the fiducials after them, avoiding copper only; each
+    of three passes left one designator (D4, R14, C26) on FID1 (`silk_over_copper`). The fixture puts a part at the top edge
+    near the corner: its designator fits only below it, where the first fiducial goes."""
+
+    def finish(self):
+        with tempfile.TemporaryDirectory() as t:
+            path = Path(t) / "b.kicad_pcb"
+            b = pcbnew.BOARD()
+            b.SetCopperLayerCount(4)
+            edge = pcbnew.PCB_SHAPE(b)
+            edge.SetShape(pcbnew.SHAPE_T_RECT)
+            edge.SetLayer(pcbnew.Edge_Cuts)
+            edge.SetStart(pcbnew.VECTOR2I(0, 0))
+            edge.SetEnd(pcbnew.VECTOR2I(pcbnew.FromMM(20), pcbnew.FromMM(20)))
+            edge.SetWidth(pcbnew.FromMM(0.1))
+            b.Add(edge)
+            fp = pcbnew.FOOTPRINT(b)
+            fp.SetReference("T1")
+            pad = pcbnew.PAD(fp)
+            pad.SetNumber("1")
+            pad.SetShape(pcbnew.PAD_SHAPE_RECT)
+            pad.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+            pad.SetLayerSet(pcbnew.PAD.SMDMask())
+            pad.SetSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.0), pcbnew.FromMM(1.0)))
+            fp.Add(pad)
+            b.Add(fp)
+            fp.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(2.95), pcbnew.FromMM(0.6)))   # at the top edge: text only below, on FID1
+            pcbnew.SaveBoard(str(path), b)
+            res = subprocess.run([sys.executable, str(Path(F.__file__)), str(path)], capture_output=True, text=True, check=False)
+            self.assertEqual(res.returncode, 0, res.stderr[-500:])
+            return pcbnew.LoadBoard(str(path))
+
+    def test_no_designator_on_a_fiducial(self):
+        b = self.finish()
+        fids = [f for f in b.GetFootprints() if f.GetReference().startswith("FID")]
+        texts = [f.Reference() for f in b.GetFootprints() if not f.GetReference().startswith("FID") and f.Reference().IsVisible()]
+        self.assertTrue(fids)
+        self.assertTrue(texts)                                   # T1 got a silkscreen designator
+        for t in texts:
+            for f in fids:
+                if f.IsFlipped() != (t.GetLayer() == pcbnew.B_SilkS):
+                    continue
+                self.assertFalse(t.GetBoundingBox().Intersects(f.GetBoundingBox()), (t.GetText(), f.GetReference()))
 
 
 if __name__ == "__main__":
