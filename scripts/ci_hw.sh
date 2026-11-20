@@ -31,6 +31,21 @@ for f in "${pcb[@]}"; do
   echo "== DRC $f"
   if is_spike_board "$f"; then
     SPIKE_ALLOW_KNOWN_OPEN=0 python3 "$STRICT" drc "$f" stitched-4l --out "$OUT/$(basename "$f").drc.json"
+    if [[ "$f" == hw/kicad/spike-gate/board-p1/* ]]; then   # plan 08: no via in an SMD pad (owner answer 9), supply paths
+      echo "== fab check and power check $f"
+      python3 hw/kicad/spike-gate/src/pcb_fabcheck.py --no-via-in-pad "$f" > "$OUT/$(basename "$f").fabcheck.json"
+      python3 hw/kicad/spike-gate/src/pcb_power_check.py "$f" "$OUT/$(basename "$f").power.json" > /dev/null
+      python3 - "$OUT/$(basename "$f").power.json" <<'PY'
+import json
+import sys
+
+nets = json.load(open(sys.argv[1], encoding="utf-8"))["nets"]
+bad = [n for n, v in sorted(nets.items()) if not v["within_50mv"] or v.get("full_width_path") is False]
+for n, v in sorted(nets.items()):
+    print("   %-8s %s mV, full-width path %s" % (n, v["drop_mv"], v.get("full_width_path")))
+sys.exit("power check FAILED: " + ", ".join(bad) if bad else 0)
+PY
+    fi
   else
     kicad-cli pcb drc --severity-all --exit-code-violations --schematic-parity \
       --output "$OUT/$(basename "$f").drc.rpt" "$f"

@@ -107,6 +107,19 @@ class FabReleaseWorkflow(unittest.TestCase):
             for r in pins:
                 self.assertRegex(r, r"^[A-Za-z0-9_.-]+==\S+ --hash=sha256:[0-9a-f]{64}$", (name, r))
 
+    def test_pip_comes_from_apt_before_it_is_used(self) -> None:
+        """The kicad/kicad:10.0 image has no pip (checked 2026-11-20: `pip: not found`,
+        `No module named pip`); a job that runs `pip install` first installs python3-pip
+        with apt."""
+        for name, job in self.jobs.items():
+            runs = [s.get("run", "") for s in job.get("steps", [])]
+            first_pip = next((i for i, r in enumerate(runs) if "pip install" in r), None)
+            if first_pip is None:
+                continue
+            before = "\n".join(runs[: first_pip + 1])
+            self.assertRegex(before, r"apt-get install[^\n]*python3-pip", name)
+            self.assertLess(before.index("python3-pip"), before.index("pip install"), name)
+
     def test_build_reports_not_run_without_a_board(self) -> None:
         run = next(s["run"] for s in self.jobs["build"]["steps"] if s.get("id") == "pkg")
         self.assertIn("NOT RUN", run)
