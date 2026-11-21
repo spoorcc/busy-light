@@ -6,7 +6,7 @@ Usage: python3 -I scripts/readme_facts.py [--root <repo>] [--json]
 
 Counts requirements and approvals per file, ADRs per status, review records, plan statuses, host
 test cases per ztest suite, and lists each README with its last commit date and the commits to
-docs/, hw/, mech/, sw/ and scripts/ since then. Also lists images in
+its own folder since then (root README: docs/, hw/, mech/, sw/, scripts/). Also lists images in
 docs/verification/reports/images that no Markdown file shows. It reads only; it changes nothing.
 The README text stays a human (or agent) decision: compare these numbers with it."""
 
@@ -24,6 +24,7 @@ REQ_HEAD = re.compile(r"^#{2,4} +((?:NEED|SYS|SW|HW|MECH)-\d+)\b.*$", re.M)
 STATUS = re.compile(r"^- \*\*Status:\*\* *(.+)$", re.M)
 ZTEST = re.compile(r"^ZTEST(?:_F)?\(\s*\w+\s*,\s*(\w+)\s*\)", re.M)
 IMAGE_EXT = (".png", ".svg", ".jpg")
+PRODUCT = ("docs", "hw", "mech", "sw", "scripts")
 SKIP = {".git", "modules", "zephyr", "node_modules", ".claude", "build", ".venv"}
 
 
@@ -122,15 +123,17 @@ def git(root: Path, *args: str) -> str:
 
 
 def readme_ages(root: Path) -> dict[str, Age]:
-    """Each tracked README: date of its last commit and the commits to the product folders since."""
+    """Each tracked README: date of its last commit and the commits since then to its own folder
+    (other files than the README); for the root README, to the product folders."""
     out: dict[str, Age] = {}
     for name in git(root, "ls-files", "README.md", "*/README.md").splitlines():
         last = git(root, "log", "-1", "--format=%h %cs", "--", name)
         if not last:
             continue
         sha, date = last.split()
-        dirs = ("docs", "hw", "mech", "sw", "scripts")
-        since = git(root, "rev-list", "--count", f"{sha}..HEAD", "--", *dirs)
+        folder = str(Path(name).parent)
+        dirs = PRODUCT if folder == "." else (folder,)
+        since = git(root, "rev-list", "--count", f"{sha}..HEAD", "--", *dirs, f":!{name}")
         out[name] = {"last_commit": date, "commits_since": int(since)}
     return out
 
@@ -179,7 +182,9 @@ def show(f: Facts) -> str:
     lines.append("Images in docs/verification/reports/images that no Markdown file shows:")
     lines += [f"  {n}" for n in f.unused_images] or ["  none"]
     if f.readmes:
-        lines.append("READMEs: last commit, commits to docs/hw/mech/sw/scripts since then:")
+        lines.append(
+            "READMEs: last commit, then commits to its folder since (root README: product folders):"
+        )
         lines += [f"  {k}: {v['last_commit']}, {v['commits_since']}" for k, v in f.readmes.items()]
     return "\n".join(lines)
 

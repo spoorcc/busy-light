@@ -7,6 +7,7 @@ board-p1/README.md show them. A renamed or missing file would leave a broken ima
 page without any other check failing."""
 
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -46,10 +47,19 @@ class ReadmeImages(unittest.TestCase):
         names = sorted(set(re.findall(r'"\$OUT/(p1-[a-z0-9-]+\.png)"', text)))
         self.assertEqual(len(names), 6, names)
         shown = {p.name for p in local_images(ROOT / "README.md")}
+        git = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files", "--", str(IMAGES)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        tracked = {Path(f).name for f in git.stdout.split()} if git.returncode == 0 else None
         for name in names:
             with self.subTest(image=name):
                 self.assertTrue((IMAGES / name).is_file())
                 self.assertIn(name, shown)
+                if tracked is not None:  # outside a git checkout only the file is checked
+                    self.assertIn(name, tracked, "not committed")
 
     def test_board_p1_readme_shows_the_panel(self) -> None:
         shown = {p.name for p in local_images(ROOT / "hw/kicad/spike-gate/board-p1/README.md")}

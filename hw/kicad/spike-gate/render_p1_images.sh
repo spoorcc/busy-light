@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: Apache-2.0
-# Export the README images of the stored P1 board and of its KiKit panel (plan 08; HW-008, HW-009).
+# Export the README images of the stored P1 board and of its KiKit panel (plan 08; HW-008).
 # Usage: render_p1_images.sh <board dir> <panel.kicad_pcb> <out dir>
 #   <board dir>         hw/kicad/spike-gate/board-p1 (busy_light_spike.kicad_pcb, .kicad_sch and .kicad_pro)
 #   <panel.kicad_pcb>   the panel of the order package: scripts/fab_p1.sh <board> <package dir> writes it

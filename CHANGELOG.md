@@ -15,8 +15,8 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
   up to date (count, decide what to re-render, P1 renders with the panel of the same board, look at each image, edit,
   check), wording rules and lessons. New `scripts/readme_facts.py` prints the counts the README quotes (requirements and
   approvals, ADRs per status, reviews, plan statuses, host test cases), images that no page shows, and the READMEs with
-  the commits since their last change; test `scripts/tests/test_readme_facts.py` (fixture tree; the own-Status rule
-  checked by mutation).
+  the commits to its folder since its last change; test `scripts/tests/test_readme_facts.py` (fixture tree; the
+  own-Status rule checked by mutation). Goldfish readiness review RV-015 (NO-GO on the first pass, findings resolved).
 - README images of the P1 board and its order panel (plan 08, HW-008, HW-009): new
   `hw/kicad/spike-gate/render_p1_images.sh` exports the schematic in two crops, the four copper layers, top and bottom 3D
   renders of `board-p1/` and a 3D render of the KiKit panel from `scripts/fab_p1.sh` into
@@ -72,7 +72,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ### Changed
 - README updated to the state of 2026-11-21: P1 board, panel and checks in the gallery instead of the frozen spike board;
-  status table with 105 requirements (21 approved), 23 ADRs (19 accepted, 2 proposed, 2 superseded), 14 reviews, the target
+  status table with 105 requirements (21 approved), 23 ADRs (19 accepted, 2 proposed, 2 superseded), 15 reviews, the target
   build of `sw/app` and the checks of `scripts/ci_hw.sh`; how to build the P1 order package. `board-p1/README.md` shows the
   renders. `hw/sim/`, `mech/analysis/` and `sw/app/tests/` READMEs list their files and how to run them.
 - P1 placement (plan 08, HW-016, HW-008): the do-not-populate spares C4 and C32 go on the bottom side (not assembled, so the
@@ -90,6 +90,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- `scripts/requirements-fab.txt` now pins scipy (moved from `requirements-fab-test.txt`): the power check of
+  `scripts/fab_p1.sh` imports it, and the fab-release build job installs only `requirements-fab.txt`, so that job would
+  have stopped at the power check. Found by RV-015. Test `test_fab_requirements_cover_what_fab_p1_runs` (fails before);
+  `fab_p1.sh` run on 2026-11-21 with only `requirements-fab.txt`: exit 0 (HW-008).
 - Spike finishing (`pcb_finish.py`): fiducials are placed before the reference designators, and the designators avoid them.
   Placed after the texts, a fiducial took a designator's spot in each of three passes on the p1b13 board
   (`silk_over_copper`). Test `OnABoard.test_no_designator_on_a_fiducial` (HW-010).

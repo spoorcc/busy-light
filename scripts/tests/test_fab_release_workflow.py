@@ -6,7 +6,9 @@ container and actionlint is not installed. This test checks the rules that the p
 workflow text: triggers, job order, least-privilege permissions, pinned actions and image,
 hash-pinned tools, and when a release is touched."""
 
+import ast
 import re
+import sys
 import unittest
 from pathlib import Path
 from typing import Any
@@ -106,6 +108,41 @@ class FabReleaseWorkflow(unittest.TestCase):
             self.assertTrue(pins, name)
             for r in pins:
                 self.assertRegex(r, r"^[A-Za-z0-9_.-]+==\S+ --hash=sha256:[0-9a-f]{64}$", (name, r))
+
+    def test_fab_requirements_cover_what_fab_p1_runs(self) -> None:
+        """The build job installs only requirements-fab.txt and runs scripts/fab_p1.sh. Every
+        third-party module that the Python files of fab_p1.sh import (and the local modules
+        they import) is pinned there, apart from pcbnew and PIL, which the kicad/kicad:10.0 image
+        has. Until 2026-11-21 scipy (pcb_power_check.py) was pinned only in
+        requirements-fab-test.txt, so the build job would have stopped at the power check."""
+        fab = (ROOT / "scripts" / "fab_p1.sh").read_text(encoding="utf-8")
+        paths = re.findall(r"\$ROOT/([\w/.-]+\.py)", fab) + re.findall(r"\b(scripts/\w+\.py)", fab)
+        todo = [ROOT / p for p in sorted(set(paths))]
+        self.assertGreaterEqual(len(todo), 6, todo)
+        seen: set[Path] = set()
+        third_party: set[str] = set()
+        while todo:
+            path = todo.pop()
+            if path in seen:
+                continue
+            seen.add(path)
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if isinstance(node, ast.Import):
+                    names = [a.name for a in node.names]
+                elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                    names = [node.module]
+                else:
+                    continue
+                for top in (n.split(".")[0] for n in names):
+                    local = path.parent / f"{top}.py"
+                    if local.is_file():
+                        todo.append(local)
+                    elif top not in sys.stdlib_module_names:
+                        third_party.add(top)
+        req = (ROOT / "scripts" / "requirements-fab.txt").read_text(encoding="utf-8")
+        pinned = {r.split("==")[0].lower() for r in req.splitlines() if "==" in r}
+        missing = sorted(third_party - {"pcbnew", "PIL"} - pinned)
+        self.assertEqual(missing, [])
 
     def test_pip_comes_from_apt_before_it_is_used(self) -> None:
         """The kicad/kicad:10.0 image has no pip (checked 2026-11-20: `pip: not found`,

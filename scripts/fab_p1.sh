@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Build the P1 order package from a board (plan 08 sections 4.5 and 4.6; HW-008, HW-009).
 #   scripts/fab_p1.sh <board.kicad_pcb> <out dir>
-# Needs: kicad-cli and KiCad's Python (pcbnew) 10.0.x, KiKit 1.8.1 (scripts/requirements-fab.txt), git.
+# Needs: kicad-cli and KiCad's Python (pcbnew) 10.0.x, KiKit 1.8.1, numpy and scipy (scripts/requirements-fab.txt), git.
 # The schematic <board>.kicad_sch must be next to the board (strict ERC, assembly BOM fields, full BOM).
 # Every step runs even when an earlier one fails, so the package shows all findings. Exit codes: 0 every gate
 # passed; 1 a gate failed (strict ERC or DRC, pcb_fabcheck with no via in SMD pads, power check, panel tab check,

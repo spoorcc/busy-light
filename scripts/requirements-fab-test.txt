@@ -1,4 +1,4 @@
-# Test tools for the fab-release CI test job (plan 08 section 4.6), pinned with sha256. numpy comes from requirements-fab.txt.
+# Test tools for the fab-release CI test job (plan 08 section 4.6), pinned with sha256. numpy and scipy come from requirements-fab.txt.
 # Generated 2026-11-18 by `pip download` for CPython 3.13 on x86_64 (the kicad/kicad:10.0 image).
 # Install after requirements-fab.txt: pip install --break-system-packages --require-hashes -r scripts/requirements-fab-test.txt
 flexcache==0.3 --hash=sha256:d43c9fea82336af6e0115e308d9d33a185390b8346a017564611f1466dcd2e32
@@ -12,5 +12,4 @@ pluggy==1.7.0 --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c4
 pygments==2.21.0 --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
 pytest==9.2.0 --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
 pyyaml==6.0.3 --hash=sha256:0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6
-scipy==1.18.1 --hash=sha256:fdaf5ea890a6183d0565f51a61799d67081bd5b1cf03c5f4b3fd3732108625c9
 typing-extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
