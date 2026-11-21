@@ -71,8 +71,9 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
-- The default `pytest` run (and so the `ci.yml` software job) includes the 54 analysis tests of `hw/sim/scripts`; before,
-  only the fab-release workflow on `main` ran them (HW-010, HW-013, HW-014).
+- The default `pytest` run (and so the `ci.yml` python-tools job) includes the 54 analysis tests of `hw/sim/scripts`;
+  before, only the fab-release workflow on `main` ran them. The job installs ngspice: without it the 16 surge tests
+  skip (CI run 44904291971: 167 passed, 16 skipped). Test `scripts/tests/test_ci_workflow.py` (HW-010, HW-013, HW-014).
 - Images without a page (found by `scripts/readme_facts.py`): the four spike-board images are shown in the frozen board's
   `hw/kicad/spike-gate/board/README.md`, the pipeline report links its render, and the housing concept image of
   2026-11-04 (replaced in the README by the generated housing model on 2026-11-07, named nowhere) is deleted; git keeps

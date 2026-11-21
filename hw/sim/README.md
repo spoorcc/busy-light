@@ -3,7 +3,8 @@
 - `spice/` -- ngspice netlists/models (with provenance and assumptions in a header comment). Empty: the power-up
   netlist of the gate is in `hw/kicad/spike-gate/sim/powerup.cir`.
 - `scripts/` -- Python analyses, each with a unit test (`test_<name>.py`). The default `pytest` run includes them
-  (`pyproject.toml` testpaths, since 2026-11-21), so `ci.yml` runs them on every push and pull request:
+  (`pyproject.toml` testpaths, since 2026-11-21), so `ci.yml` runs them on every push and pull request. The surge tests
+  need ngspice and skip without it; the `ci.yml` job installs it:
 
 | Script | Question | Requirement, decision |
 |--------|----------|-----------------------|
