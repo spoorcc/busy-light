@@ -11,6 +11,12 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Skill `readme-refresh` (`.claude/skills/readme-refresh/SKILL.md`): order of work to bring the READMEs and their images
+  up to date (count, decide what to re-render, P1 renders with the panel of the same board, look at each image, edit,
+  check), wording rules and lessons. New `scripts/readme_facts.py` prints the counts the README quotes (requirements and
+  approvals, ADRs per status, reviews, plan statuses, host test cases), images that no page shows, and the READMEs with
+  the commits since their last change; test `scripts/tests/test_readme_facts.py` (fixture tree; the own-Status rule
+  checked by mutation).
 - README images of the P1 board and its order panel (plan 08, HW-008, HW-009): new
   `hw/kicad/spike-gate/render_p1_images.sh` exports the schematic in two crops, the four copper layers, top and bottom 3D
   renders of `board-p1/` and a 3D render of the KiKit panel from `scripts/fab_p1.sh` into
