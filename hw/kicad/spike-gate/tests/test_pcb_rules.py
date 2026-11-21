@@ -134,21 +134,82 @@ class ViaRemoval(unittest.TestCase):
         self.assertFalse(R.joins_nothing(9.0, 9.0, [], [(8.0, 8.0, 10.0, 10.0)]))   # a pad is there
 
 
+class ViaInPad(unittest.TestCase):
+    """Plan 08 section 4.3 (HW-008, RV-014): no via may touch an SMD pad grown by 0.05 mm, whatever the net."""
+    PAD = (0.0, 0.0, 1.0, 0.5, True)            # a 1.0 x 0.5 mm SMD pad box
+
+    def test_grow_default_is_the_plan_value(self):
+        self.assertEqual(R.VIA_IN_PAD_GROW, 0.05)
+
+    def test_via_at_the_pad_centre_hits(self):
+        self.assertTrue(R.via_hits_smd_pad(0.5, 0.25, 0.6, [self.PAD]))
+
+    def test_via_partly_over_the_pad_edge_hits(self):
+        # centre 0.2 mm right of the pad: the 0.3 mm radius reaches 0.1 mm into the pad
+        self.assertTrue(R.via_hits_smd_pad(1.2, 0.25, 0.6, [self.PAD]))
+
+    def test_the_grow_margin_counts(self):
+        # edge gap 0.03 mm (centre 0.33 mm right of the pad): inside the 0.05 mm grow, so a hit; 0.07 mm gap is clear
+        self.assertTrue(R.via_hits_smd_pad(1.33, 0.25, 0.6, [self.PAD]))
+        self.assertFalse(R.via_hits_smd_pad(1.37, 0.25, 0.6, [self.PAD]))
+        # the same 0.03 mm gap with no grow is clear
+        self.assertFalse(R.via_hits_smd_pad(1.33, 0.25, 0.6, [self.PAD], grow=0.0))
+
+    def test_corner_uses_the_disc_not_a_square(self):
+        # centre diagonal from the grown corner (1.05, 0.55): 0.25 mm in x and y is 0.354 mm away, more than the radius 0.3
+        self.assertFalse(R.via_hits_smd_pad(1.30, 0.80, 0.6, [self.PAD]))
+        # 0.2 mm in x and y is 0.283 mm away: a hit
+        self.assertTrue(R.via_hits_smd_pad(1.25, 0.75, 0.6, [self.PAD]))
+
+    def test_via_diameter_sets_the_reach(self):
+        # centre 0.4 mm right of the pad, 0.35 mm from the grown box: the 0.6 mm via is clear, a 0.9 mm via is not
+        self.assertFalse(R.via_hits_smd_pad(1.4, 0.25, 0.6, [self.PAD]))
+        self.assertTrue(R.via_hits_smd_pad(1.4, 0.25, 0.9, [self.PAD]))
+
+    def test_pad_with_a_hole_is_ignored(self):
+        self.assertFalse(R.via_hits_smd_pad(0.5, 0.25, 0.6, [(0.0, 0.0, 1.0, 0.5, False)]))
+
+    def test_any_pad_of_the_list_counts_and_an_empty_list_never_hits(self):
+        pads = [(5.0, 5.0, 6.0, 6.0, True), (0.0, 0.0, 1.0, 0.5, False), self.PAD]
+        self.assertTrue(R.via_hits_smd_pad(0.5, 0.25, 0.6, pads))
+        self.assertFalse(R.via_hits_smd_pad(3.0, 3.0, 0.6, pads))
+        self.assertFalse(R.via_hits_smd_pad(0.5, 0.25, 0.6, []))
+
+    def test_touching_is_not_a_hit(self):
+        # no grow, centre exactly one radius from the right edge: the disc touches the pad only (values exact in binary)
+        self.assertFalse(R.via_hits_smd_pad(1.25, 0.25, 0.5, [self.PAD], grow=0.0))
+        self.assertTrue(R.via_hits_smd_pad(1.24, 0.25, 0.5, [self.PAD], grow=0.0))
+
+
 class MainPathSplit(unittest.TestCase):
     def test_main_path_pads(self):
-        self.assertTrue(R.is_main_path_pad("VBUS_IC", "J1", "A4"))
+        # HW-017 (plan 08): the 1.5 A path runs J1 -> VBUS -> R22 -> VBUS_IC -> U7 pin 1
+        self.assertTrue(R.is_main_path_pad("VBUS", "J1", "A4"))
+        self.assertTrue(R.is_main_path_pad("VBUS", "TVS1", "1"))
+        self.assertTrue(R.is_main_path_pad("VBUS", "R22", "1"))
+        self.assertFalse(R.is_main_path_pad("VBUS", "U6", "5"))           # ESD reference pin: microamps
+        self.assertTrue(R.is_main_path_pad("VBUS_IC", "R22", "2"))
         self.assertTrue(R.is_main_path_pad("VBUS_IC", "U7", "1"))
+        self.assertTrue(R.is_main_path_pad("VBUS_IC", "C2", "1"))
         self.assertFalse(R.is_main_path_pad("VBUS_IC", "U7", "3"))        # enable pin: microamps
         self.assertFalse(R.is_main_path_pad("VBUS_IC", "R1", "1"))
         self.assertTrue(R.is_main_path_pad("GND", "R1", "2"))             # other nets are not split
+
+    def test_both_main_path_nets_are_wide_outer_and_first(self):
+        for n in ("VBUS", "VBUS_IC"):
+            self.assertIn(n, R.MAIN_PATH_NETS)
+            self.assertIn(n, R.ROUTE_FIRST)
+            self.assertIn(n, R.OUTER_ONLY)
+            self.assertEqual(R.NET_WIDTH[n], 0.6)
 
     def test_branch_width_is_a_legal_narrow_track(self):
         self.assertGreaterEqual(R.BRANCH_WIDTH, R.MIN_TRACK)
         self.assertLess(R.BRANCH_WIDTH, R.NET_WIDTH["VBUS_IC"])
 
     def test_main_path_pins_exist_in_the_main_net_table(self):
-        self.assertEqual(R.MAIN_PATH_NET, "VBUS_IC")
-        self.assertIn("J1", R.MAIN_PATH_PADS)
+        self.assertEqual(R.MAIN_PATH_NETS, ("VBUS", "VBUS_IC"))
+        self.assertIn("J1", R.MAIN_PATH_PADS["VBUS"])
+        self.assertIn("U7", R.MAIN_PATH_PADS["VBUS_IC"])
 
 
 class RouteFirst(unittest.TestCase):
@@ -422,3 +483,41 @@ class FineProfile(unittest.TestCase):
         self.assertGreaterEqual(via, 0.25)                      # via diameter
         self.assertGreaterEqual((via - drill) / 2 + 1e-9, 0.15)  # annular ring absolute minimum
         self.assertGreaterEqual(ring, 0.15)
+
+
+class ReadSegments(unittest.TestCase):
+    """pcb_rules.read_segments (batch p1b5, 2026-11-18): every segment, locked or not, in any field order."""
+
+    TEXT = """
+\t(segment
+\t\t(start 1 2)
+\t\t(end 3 4.5)
+\t\t(width 0.25)
+\t\t(locked yes)
+\t\t(layer "F.Cu")
+\t\t(net "/LED_ROW2")
+\t\t(uuid "a")
+\t)
+\t(segment
+\t\t(start -1.5 2)
+\t\t(end 3 4)
+\t\t(width 0.15)
+\t\t(layer "In2.Cu")
+\t\t(net "+5V")
+\t\t(uuid "b")
+\t)
+\t(via
+\t\t(at 5 5)
+\t\t(size 0.6)
+\t\t(net "GND")
+\t\t(uuid "c")
+\t)
+"""
+
+    def test_locked_and_unlocked(self):
+        self.assertEqual(R.read_segments(self.TEXT), [(1.0, 2.0, 3.0, 4.5, 0.25, "F.Cu", "/LED_ROW2"),
+                                                       (-1.5, 2.0, 3.0, 4.0, 0.15, "In2.Cu", "+5V")])
+
+    def test_vias_and_arcs_are_not_segments(self):
+        arc = '(arc (start 0 0) (mid 1 1) (end 2 0) (width 0.2) (layer "F.Cu") (net "GND") (uuid "d"))'
+        self.assertEqual(R.read_segments(arc + self.TEXT.split("\t(segment", 1)[0]), [])

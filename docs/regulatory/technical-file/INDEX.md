@@ -27,6 +27,14 @@ after placing on the market *(verify per act; CRA: longer if support period is l
 | 08 | Records of corrective actions, field issues, vulnerability reports | `08-production-and-quality/` | Open |
 | 09 | EU Declaration of Conformity (per Decision 768/2008/EC annex III format), signed | `09-declaration-of-conformity/` | Open |
 
+## Change notes
+- **2026-11-18, P1 board changes (HW-017 link R22, HW-010 trim T1, one-sided JLCPCB Economic PCBA, HASL lead-free).**
+  Regulatory check: `../compliance-matrix.md`, section "Regulatory check of the P1 board changes (2026-11-18)". No
+  technical-file evidence was produced: nothing is built or measured, so every row above stays `Open`. Gaps for the product:
+  row 02, the P1 order files come from a tagged CI release, not a committed `hw/fabrication/<rev>/` (owner answer 17), so
+  the tag and manifest hashes must be recorded as the design baseline; row 07, no RoHS or REACH declaration exists for the
+  parts, the bare PCB (HASL lead-free) or the solder; row 04, no EMC, ESD, safety or thermal test record exists for the input path.
+
 ## Completeness gate
 Before CE marking: every row `Complete`, each evidence file has a version/date/revision-under-test, and the traceability
 check and compliance matrix show no gaps. Changes after release: assess whether re-testing/re-declaration is required (change impact record).

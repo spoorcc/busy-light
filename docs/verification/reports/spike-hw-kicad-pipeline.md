@@ -16,7 +16,7 @@ Show that the flow chosen in ADR-0012 works with the tools installed on 2026-11-
 | SKiDL generates a netlist and a `.kicad_sch` (16x SK6812MINI, 74AHCT1G125) using KiCad 10 libraries | Works. Needs `KICAD10_SYMBOL_DIR`. | run |
 | KiCad 10 opens the SKiDL schematic: `kicad-cli sch erc`, `export netlist`, `export bom`, `export pdf` | All work. | run |
 | ERC on the generated schematic | 50 violations without project library tables, 33 with them. Left: 17 `lib_symbol_mismatch`, 5 unconnected pins, 3 undriven input pins, 4 undriven power pins, 2 isolated labels. | run |
-| Python (`pcbnew`) builds a PCB from the netlist: 16 LEDs on a 20 mm radius ring, 46 mm round outline, nets assigned | Works (17 footprints, 24 nets). Render: `docs/verification/reports/images/spike-hw-kicad-render.png`. | run |
+| Python (`pcbnew`) builds a PCB from the netlist: 16 LEDs on a 20 mm radius ring, 46 mm round outline, nets assigned | Works (17 footprints, 24 nets). Render: [`images/spike-hw-kicad-render.png`](images/spike-hw-kicad-render.png). | run |
 | `kicad-cli pcb drc --schematic-parity` | Runs. 42 violations, 51 parity issues. Expected: no routing, silk and copper over the edge, footprint text differs from the symbol. | run |
 | Gerber, STEP, SVG and 3D render export | All work. | run |
 | ngspice | Installed (v47). No simulation was run in this spike. | not run |

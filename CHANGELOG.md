@@ -11,6 +11,50 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- Skill `readme-refresh` (`.claude/skills/readme-refresh/SKILL.md`): order of work to bring the READMEs and their images
+  up to date (count, decide what to re-render, P1 renders with the panel of the same board, look at each image, edit,
+  check), wording rules and lessons. New `scripts/readme_facts.py` prints the counts the README quotes (requirements and
+  approvals, ADRs per status, reviews, plan statuses, host test cases), images that no page shows, and the READMEs with
+  the commits to its folder since its last change; test `scripts/tests/test_readme_facts.py` (fixture tree; the
+  own-Status rule checked by mutation). Goldfish readiness review RV-015 (NO-GO on the first pass, findings resolved).
+- README images of the P1 board and its order panel (plan 08, HW-008, HW-009): new
+  `hw/kicad/spike-gate/render_p1_images.sh` exports the schematic in two crops, the four copper layers, top and bottom 3D
+  renders of `board-p1/` and a 3D render of the KiKit panel from `scripts/fab_p1.sh` into
+  `docs/verification/reports/images/p1-*.png`. Test `scripts/tests/test_readme_images.py`: every image a README shows
+  exists, and the six P1 images are committed and shown.
+- Stored P1 board `hw/kicad/spike-gate/board-p1/` (plan 08 section 5 step 8, ADR-0023): batch p1b8 run 3 completed by the
+  second router pass; every assembled part on the top. Strict ERC 0 findings, strict DRC only the tolerated U9 classes
+  (DEV-004), no unconnected item, no via in a pad, power check within 50 mV with full-width paths, `tests/test_board_p1.py`
+  6 passed, `scripts/fab_p1.sh` all gates passed. Not reviewed or approved; not ready to order (U5 source, R22 part, owner
+  review). README in the folder (HW-008, HW-010, HW-016, HW-017).
+- Spike routing flow: `run_repass.sh`, a second Freerouting pass over the cleaned-up board with every track and via locked,
+  then stitch, clean-up and strict DRC again; it replaces `final.*` only when fewer connections stay open. `run_pcb.sh` runs
+  it when the clean-up leaves an unconnected item (`REPASS=1`, the default). On p1b8 run 3 it closed the last open
+  connection (1 to 0). Tests `tests/test_run_repass.py` (HW-008).
+- `scripts/ci_hw.sh` runs `pcb_fabcheck --no-via-in-pad` and the power check on `board-p1/` (plan 08 asked for the fab
+  check; it was not there). The CI `hardware` job installs pip from apt and the pinned numpy and scipy for it. Test
+  `scripts/tests/test_ci_hw_script.py` (HW-008, HW-010).
+- Spike power check: `full_width_path` per supply case, the case solved again without tracks narrower than 0.75 x the net's
+  current-based width; the board picker counts a failing case like a drop over target. It fails batch p1b7 run3 and the
+  p1b3 board (+5V current through 0.15 mm clean-up track) and passes batch p1b8 run3. Tests `FullWidthPath` and
+  `test_power_fails_counts_a_path_through_thin_track` (HW-008, HW-010).
+- CI workflow `.github/workflows/fab-release.yml` (plan 08 section 4.6, owner answer 17): test, build and publish jobs; on a push
+  to `main` it refreshes the draft release `fab-latest` with the P1 order package, on a published release it attaches the files;
+  without a stored `board-p1/` it reports NOT RUN. Hash-pinned test tools `scripts/requirements-fab-test.txt`; structure test
+  `scripts/tests/test_fab_release_workflow.py`; proposed DEV-007 (release instead of a committed `hw/fabrication/<rev>/`). Not
+  run on GitHub yet (HW-008, HW-009).
+- Spike routing flow: `run_pcb.sh` switch `PRESTITCH=1` (default off) gives the plane pads their via before the router runs and
+  locks it (fan-out first); `pcb_stitch.py --reuse-max` limits the track to an existing via; the stitcher tries a track with one
+  corner when every straight escape is blocked (P1 batch of 2026-11-18; plan 08, HW-008).
+- P1 placement keeps the full ESP32-C3-MINI-1 courtyard (antenna keep-out included) free of movable parts (owner decision 2026-11-18), the module moves 5 mm towards the antenna-side edge (MOD_OFF -4.0 mm, owner decision 2026-11-18), and C7, C24, C25, C26, R_SU1, R_SU14, R_SU15, R8 are 0402 (JLCPCB basic parts by web lookup); surge test uses the 0402 power rating (ADR-0023, HW-005, HW-010).
+- Simplified schematic for one-sided placement (ADR-0023, owner decisions 2026-11-18): step 3 = both ILIM switches on with R_ILIM3 = 56.2 k (no switch state above the step 3 maximum; NOR gate U13 removed; replaces trim T1), TPS3840 RESET and TPS2553 FAULT wired on GATE_OK_RB with one 3V3 pull-up (U10 and R6 removed; a limiter fault now closes the gate), SOD-323 zeners, SC-70 logic, eleven 0402 resistors, button on the GPIO internal pull-up (R13 removed), 0805 spare footprints; package-aware sourcing with web-looked-up LCSC numbers; 97 parts instead of 101; strict ERC 0 findings (HW-010, HW-016, HW-007, SW-009).
+- Proposed ADR-0022 (how P1 gets its parts onto the board): the measured one-sided placement does not fit on 46 mm; proposed two-sided Standard PCBA for P1 and part reduction (switch with selectable current limit, fixed-delay supervisor) for the next revision; the owner decides (HW-008, MECH-001, HW-010).
+- Order package scripts for P1 (plan 08 section 4.5; not yet run on a P1 board): `scripts/fab_p1.sh`, `scripts/fab_package.py`, `scripts/fab_check.py` (BOM/CPL checks, missing-LCSC list policy, reproducibility compare), `scripts/panel_tabs.py` and `scripts/panel_p1.json` (KiKit 1 x 1 panel, tabs at chosen azimuths), `scripts/fab_missing_lcsc.txt`, hash-pinned `scripts/requirements-fab.txt`; 38 tests. The CI release workflow (plan 08 section 4.6) is not written yet (HW-008, HW-009).
+- Spike generator switch `P1=1` (off by default): every assembled part on the top side, LED capacitors beside their LEDs, movable radius 18.4 mm, top-side tab region, ring links on the capacitor's layer, sourcing fields and DNP marks on the board; 16 tests (plan 08 step 5, HW-008).
+- Power check of the spike board follows the HW-017 split: cases VBUS (J1 to R22) and VBUS_IC (R22 to the TPS2553 input), with a test (HW-010, HW-017, plan 08 step 3).
+- Evidence report `sw-target-build-2026-11-18.md`: `sw/app` builds for `esp32c3_devkitm` with Zephyr v4.5.0 and SDK 1.0.1 (FLASH 134 884 B, 3.22 %, 0 warnings; simple boot, no MCUboot); host tests 20 of 20 pass on `native_sim/native/64`. The gate logic is not linked into the target image; nothing flashed or run on hardware (plan 07, SW-005, SW-009).
+- Spike generator for the P1 board (plan 08): HW-017 damping link R22 (0 ohm 1206) between the connector-side net VBUS (J1, TVS1, U6) and VBUS_IC, with per-net main-path routing rules; trim T1 under the owner rule (R_ILIM3 27.7 k 0.1 % 0805 replaces 27.4 k + R20 301 ohm, windows recalculated). The stored two-sided board is not regenerated (HW-010, HW-017).
+- Owner decisions of 2026-11-17 for the prototype board P1 (journal `2026-11-17-p1-order-owner-decisions.md`): one-sided SMD assembly at JLCPCB Economic PCBA, 0.15 mm tracks, 4 layers HASL lead-free, own KiKit panel, CI draft release of the order files. HW-008 (amended: hand-soldered through-hole J1 allowed), HW-016 (spares within [10] mm), HW-017 and ADR-0021 approved or accepted by the owner; HW-010 gets an owner rule for part trims; ADR-0020 option B not accepted (HW-008, HW-010, HW-016, HW-017, ADR-0020, ADR-0021).
 - Spike board: real capacitor parts for C2 (4.7 uF 16 V), C3 (10 uF 25 V), C5 (2.2 uF 16 V), C6 (10 uF 10 V) with MPN and LCSC numbers, and a DC-bias bound script `hw/sim/scripts/dc_bias_caps.py` (Samsung DC-bias curves read for each part; HW-014, HW-015, HW-010). BOM references without MPN: 2 (J1, TVS2; closed by a later entry).
 - DC-bias analysis extended to the 100 nF X7R capacitors (CL10B104KB8NNN, retention 0.998 at 5.6 V) and to the room for the spares C4 and C32 (65 uF nominal together); protection-part capacitance bounded at 1 nF against 3.67 uF of room on VBUS_IC (snippets); a real spare value still open (HW-014, HW-015).
 - Spike board TVS1 chosen by the owner under surge option S1 (measure the real hot-plug surge first, RV-013 finding 9): Nexperia PESD5V0S1BA,115 (LCSC C19224) in the sourcing table; a plain 5 V TVS clamps at 10 to 14 V, so the 6 V and 7 V parts rely on the supply-pin resistors and zeners and on the TC-210 step 4 measurement (HW-010).
@@ -27,12 +71,69 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- The default `pytest` run (and so the `ci.yml` python-tools job) includes the 54 analysis tests of `hw/sim/scripts`;
+  before, only the fab-release workflow on `main` ran them. The job installs ngspice: without it the 16 surge tests
+  skip (CI run 44904291971: 167 passed, 16 skipped). Test `scripts/tests/test_ci_workflow.py` (HW-010, HW-013, HW-014).
+- Images without a page (found by `scripts/readme_facts.py`): the four spike-board images are shown in the frozen board's
+  `hw/kicad/spike-gate/board/README.md`, the pipeline report links its render, and the housing concept image of
+  2026-11-04 (replaced in the README by the generated housing model on 2026-11-07, named nowhere) is deleted; git keeps
+  it. Test `test_every_report_image_is_shown_somewhere` fails for an image that no Markdown file shows.
+- README updated to the state of 2026-11-21: P1 board, panel and checks in the gallery instead of the frozen spike board;
+  status table with 105 requirements (21 approved), 23 ADRs (19 accepted, 2 proposed, 2 superseded), 15 reviews, the target
+  build of `sw/app` and the checks of `scripts/ci_hw.sh`; how to build the P1 order package. `board-p1/README.md` shows the
+  renders. `hw/sim/`, `mech/analysis/` and `sw/app/tests/` READMEs list their files and how to run them.
+- P1 placement (plan 08, HW-016, HW-008): the do-not-populate spares C4 and C32 go on the bottom side (not assembled, so the
+  assembly stays one-sided) in 1206 again, held within 7.5 mm of U7 by a hard layout rule and pin ties (batch p1b3 put C4 24.8 mm
+  from U7 pin 6, against HW-016's [10] mm); the LED capacitors keep out of boxes around four panel tabs at 105, 217.5, 285 and
+  330 deg (`pcb_rules.P1_TAB_AZIMUTHS`, new `scripts/fab_p1.sh` default), so the 3 mm capacitor-to-tab rule can hold (it could
+  not before: best 2.42 mm). `run_meta.json` records the real router thread count. `scripts/ci_hw.sh` gates `board-p1/` with
+  the strict wrapper. New `src/pcb_sourcing.py` copies sourcing fields from the schematic to a stored board.
+- Sourcing: U6 USBLC6-2P6 has LCSC C15999 (web search 2026-11-18); `scripts/fab_missing_lcsc.txt` now lists only R22 (candidate
+  C190124, 20 mohm max against HW-017's [10] mohm) and U5 (no listing found) (HW-008, HW-017, HW-010).
+- Spike board tooling, no via-in-pad (plan 08 step 4, HW-008, RV-014): one rule `pcb_rules.via_hits_smd_pad` (any net, pad box grown by 0.05 mm) used by the stitcher (the U9 via-in-pad shortcut is removed; the via goes beside the pad with a short track) and by the grid router of `pcb_fix.py` (and so the LED ring cells of `pcb_ring.py`); `pcb_fabcheck.py` reports `via_in_smd_pad` and fails on it with `--no-via-in-pad`. The stored board `board/` has 35 such vias (32 in the LED ring cells, 2 at DZ15, 1 at C32; none at U9) and is not regenerated.
 - Strict waiver limits of the spike profile `stitched-4l` lowered to the observed counts (owner decision 2026-11-08): `net_conflict` 0, `footprint_symbol_mismatch` 2 (C3, C4 only), `courtyards_overlap` 14 (U9 only); test added (DEV-002, DEV-004).
 - Spike board: U1 and U9 schematic symbols carry the datasheet pad numbers (`layout_full.PAD`), `pcb_full.PADMAP` deleted, test points out of the BOM in the schematic; batch ring7 removes all 77 `net_conflict` findings (98 to 16 findings), no run passes the strict gate (HW-010, DEV-002).
 - README images and captions of the hardware spike regenerated from the best of 12 runs (HW-010).
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- `scripts/requirements-fab.txt` now pins scipy (moved from `requirements-fab-test.txt`): the power check of
+  `scripts/fab_p1.sh` imports it, and the fab-release build job installs only `requirements-fab.txt`, so that job would
+  have stopped at the power check. Found by RV-015. Test `test_fab_requirements_cover_what_fab_p1_runs` (fails before);
+  `fab_p1.sh` run on 2026-11-21 with only `requirements-fab.txt`: exit 0 (HW-008).
+- Spike finishing (`pcb_finish.py`): fiducials are placed before the reference designators, and the designators avoid them.
+  Placed after the texts, a fiducial took a designator's spot in each of three passes on the p1b13 board
+  (`silk_over_copper`). Test `OnABoard.test_no_designator_on_a_fiducial` (HW-010).
+- CI workflows: the `kicad/kicad:10.0` image has no pip; the jobs of `fab-release.yml` and the `hardware` job of `ci.yml`
+  install `python3-pip` with apt before `pip install`, and install the pins with `--ignore-installed` (CI run 44827760397:
+  pip could not uninstall Debian's `typing_extensions`). Found 2026-11-20; `fab-release.yml` has not run on GitHub yet.
+  Tests `test_pip_comes_from_apt_before_it_is_used`, `test_pip_leaves_the_debian_packages_alone` (HW-008, HW-009).
+- Spike clean-up grid router (`pcb_fix.py`, also used by the LED ring generator): grid points, and so its vias, sit on the
+  0.1 um Specctra grid like the stitch vias. Batch p1b10: ring vias at y = ...8913 mm came back from the router with
+  off-centre track ends and the clean-up broke ring stubs it could not lay again. Test
+  `test_grid_points_sit_on_the_session_grid` (HW-008).
+- Order script `scripts/fab_p1.sh`: `pcb_fabcheck` now runs with `--no-via-in-pad` (owner answer 9; before, a via in a pad
+  was reported but did not fail the package), and the power check (drop and full-width path) is a gate. The stored-board
+  test runs the power check too. Tests `scripts/tests/test_fab_p1_script.py` (fail on the old script),
+  `test_supply_drops_and_full_width_paths` (HW-008, HW-010).
+- Spike LED ring generator (`pcb_ring.py`): the data chain is laid before the power and ground stubs. With the stubs first,
+  the capacitors turned away from the panel tabs closed four data gaps; the router then left D14 to D15 open in all four
+  routings of one placement. Data first completes all 47 ring links on the four P1 placements. Test
+  `test_data_chain_is_laid_before_the_power_stubs` (plan 08 section 4.5, HW-008).
+- Spike clean-up (`pcb_fix.py`): pieces of the supply nets re-routed by the clean-up took the 0.15 mm default width; on batch
+  p1b7 run3 the TPS2553 output current ran through 0.15 mm track to the regulator. Supply nets now keep their current-based
+  width (`NET_WIDTH`); +5V pieces at LED ring cell pads keep the 0.25 mm ring stub width. Tests `CleanupWidths` (HW-008,
+  HW-010). Boards cleaned up before this change are not checked for thin supply tracks.
+- Spike stitcher: new stitch vias sit on the 0.1 um Specctra grid, so router tracks end on their centre (batch p1b6: 18 to 28
+  `track_not_centered_on_via` per run made the clean-up rip up good pre-route vias, among them the +5V via of U7 pin 6); a
+  plane net without a current rating (GND) is retried at the 0.15 mm default width, so the 0.4 mm-pitch GND pads of U1
+  (TUSB321) can be stitched. Regression tests `StitcherViaOnTheSessionGrid`, `StitcherFinePitchGround` (plan 08, HW-008).
+- Spike routing flow: the copper reader of the stitcher and of `pcb_check.layout_rules` skipped every locked track (KiCad 10
+  writes `(locked yes)` between `width` and `layer`). With `PRESTITCH=1` the pre-route stitch therefore put vias on locked LED
+  ring tracks (batch p1b5: shorts and crossing tracks). One reader `pcb_rules.read_segments` for both; regression tests
+  `StitcherSeesLockedTracks` and `ReadSegments` (plan 08 section 4.3, HW-008).
+- Spike schematic: the DNP spare capacitors C4 and C32 are excluded from the BOM on the symbol too, as on the P1 footprint
+  (strict DRC `footprint_symbol_mismatch`, HW-016).
 - Hardware spike PCB gate: wires under 0.15 mm (default track now 0.15 mm), dangling vias (removed), hole-to-hole of stitch vias, silk findings (waiver DEV-006, declined by the owner 2026-11-08, off by default); the stitcher joins pads to existing ground vias, layer by layer, in retry passes; 6 new tests. Antenna strip set to the 4.6 mm of the ESP32-C3-MINI-1 datasheet and the module pad area placed outside it (the 21 unconnected module ground pads are gone); 1 mm slot beside the antenna end with a copper keep-out. Placement: VBUS_IC weight and movable-part radius 17.3 mm; +3V3 track 0.3 mm; optional two-pass routing (`KEYFIRST`, `FR_THREADS` in `run_pcb.sh`). VBUS_IC main path (J1, TPS2553 input, C2, TVS1) routed first at 0.6 mm and locked, branches at 0.2 mm (`KEYFIRST=1`); via removal keeps layer changes. Post-route clean-up `src/pcb_fix.py` (grid router for the leftover connections, rip-up of clearance findings, stub removal), 6 tests: on run pl8 the final board has 1 unconnected item (/ILIM) and only the tolerated known findings; the Freerouting step still varies between runs, so the board is not complete and the full flow is not proven repeatable (HW-010, HW-005, ADR-0003, ADR-0012).
 - Hardware spike gate: ERC and DRC project files switch on the default-ignored checks (ignored-check maxima now 0); ERC has 0 findings; six repeat routing runs gave 2 complete boards (0 open items) and 4 with 1 to 3 open items; the LED stand-in footprint-filter finding is waived under DEV-002 (HW-010, ADR-0012, DEV-002).
 - Hardware spike board uses datasheet-based footprints: ESP32-C3-MINI-1 (figure 11-1 numbers tested), TUSB321 X2QFN-12 redrawn from the TI drawing (the old pattern was wrong), TLV75733P SOT-23-5 for the 3.3 V regulator (ADR-0019, enable tied to input), WS2812B-2020 LED symbol with matching pin numbers (the old pairing mismatched the pins). New: `run_best.sh` (best of N routing runs), `pcb_power_check.py` (voltage drop and plane cuts), router rule to keep VBUS_IC and +3V3 off the plane layers (`OUTER_ONLY`). With the real footprints no run passes the strict gate yet (best: 1 open item); the VBUS_IC path drops 85 mV at 1.5 A in the best run (HW-010, ADR-0004, ADR-0019, DEV-002).

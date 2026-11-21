@@ -24,6 +24,7 @@ import pcbnew
 
 import custom_fp
 import lib_tables
+import sourcing
 
 FP_ROOT = os.environ.get("KICAD_FOOTPRINT_DIR", "/usr/share/kicad/footprints/")
 _IO = pcbnew.PCB_IO_KICAD_SEXPR()      # one plugin object for the whole run (a temporary one breaks pcbnew.FootprintLoad)
@@ -43,7 +44,7 @@ GND = "GND"
 from pcb_rules import NET_TRACK   # noqa: E402  (signal nets at the 0.4 mm pitch pads of U1 use the minimum width)
 import pcb_rules                  # noqa: E402
 # Star nets: every pad is routed straight to the named pad, so the branch point is at that pad.
-# ADR-0016 layout rule: the step 3 switch control pin (U15 SEL) is the tap point of U13 pin 2, R3, R19 and the readback R15.
+# ADR-0016 layout rule: the step 3 switch control pin (U15 SEL) is the tap point of R3, R19 and the readback R15 (U13 removed, ADR-0023).
 STAR = {"/ILIM_STEP3_EN": ("U15", "4")}
 
 # ----------------------------------------------------------------------------- provisional substitutions
@@ -175,15 +176,62 @@ MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the c
 # ADR-0016 proximity rules (centre distance, mm); the placer rejects a seed that breaks one, the test checks the board
 LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R19", "U15", 6.0),
                 ("C24", "U14", 6.0), ("C25", "U15", 6.0),         # bypass capacitor at the switch supply pin
-                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0), ("R20", "U7", 15.0),
+                ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0),
                 ("C1", "U5", 8.0), ("C27", "U5", 12.0), ("C28", "U5", 14.0), ("C29", "U5", 14.0),
-                ("C30", "U5", 14.0), ("C31", "U5", 14.0))
+                ("C30", "U5", 14.0), ("C31", "U5", 14.0),
+                # HW-016 (Approved): spare pad centres within [10] mm of U7 pin 6. Part centres: 10 - 1.3 (U7 centre to pin 6,
+                # SOT-23-6) - 1.0 (0805 centre to pad centre) - 0.2 margin = 7.5 mm. Batch p1b3 without it: C4 at 24.8 mm.
+                ("C4", "U7", 7.5), ("C32", "U7", 7.5))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
+# Plan 08 section 4.2 (P1, HW-008): the LED bypass capacitors move beside their LED on the top side, which frees the ring
+# annulus; the LED courtyards start at about r 18.75, so movable parts may go out to 18.4 mm.
+R_MOVE_P1 = 18.4
+DNP_REFS_P1 = ("C4", "C32")   # HW-016 spare footprints: not assembled, not in the BOM (plan 08 RV-014 readiness B1)
+LED_CAP_STEP = 0.05           # mm: step of the tangential offset search of an LED capacitor (P1)
+LED_CAP_GAP = 0.02            # mm: courtyard gap that counts as clear (touching courtyards are not accepted)
 SA_ITERS = 160000
 STRICT_ICS = os.environ.get("PLACE_STRICT", "0") == "1"      # ring13: ICs of one kind match in rotation and side (no gain, off)
 _SEED0 = int(os.environ.get("PLACE_SEED_START", "1"))    # run_best.sh gives every run its own placement seeds
 SA_SEEDS = tuple(range(_SEED0, _SEED0 + 16))
+
+
+def p1_enabled(env=None):
+    """Plan 08 switch P1 (environment, read at build time): one-sided assembly, every assembled part on F.Cu."""
+    return (os.environ if env is None else env).get("P1", "0") == "1"
+
+
+def part_sides(ref, p1):
+    """Sides a movable part may take: test points on the bottom; with P1 the do-not-populate spares of HW-016 on the bottom
+    too (not assembled, so the assembly stays one-sided; the top around U7 has no room within [10] mm, batch p1b3 and
+    the placement check of 2026-11-18) and every other part on the top; without P1 both sides."""
+    if ref.startswith("TP") or (p1 and ref in DNP_REFS_P1):
+        return "B"
+    return "F" if p1 else "FB"
+
+
+def convex_clear(a, b, gap=0.0):
+    """True when the convex polygons a and b (lists of (x, y)) are at least `gap` apart along one of their edge normals
+    (separating axis test; a separation found this way is a true lower bound of the distance)."""
+    for poly in (a, b):
+        n = len(poly)
+        for i in range(n):
+            x0, y0 = poly[i]
+            x1, y1 = poly[(i + 1) % n]
+            nx, ny = y0 - y1, x1 - x0
+            ln = math.hypot(nx, ny)
+            if ln == 0.0:
+                continue
+            nx, ny = nx / ln, ny / ln
+            pa = [x * nx + y * ny for x, y in a]
+            pb = [x * nx + y * ny for x, y in b]
+            if max(pa) + gap <= min(pb) or max(pb) + gap <= min(pa):
+                return True
+    return False
+
+
+def rect_poly(x0, y0, x1, y1):
+    return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
 
 
 def part_families(comps, fixed=()):
@@ -235,6 +283,19 @@ def court_bbox_mm(fp):
     return pcbnew.ToMM(b.GetX()), pcbnew.ToMM(b.GetY()), pcbnew.ToMM(b.GetRight()), pcbnew.ToMM(b.GetBottom())
 
 
+def court_poly_mm(fp):
+    """Outline points (KiCad mm) of the courtyard on the footprint's own side; the bounding box when it is not a
+    4-point outline (the separating axis test needs a convex polygon)."""
+    layer = pcbnew.B_CrtYd if fp.GetLayer() == pcbnew.B_Cu else pcbnew.F_CrtYd
+    fp.BuildCourtyardCaches()
+    cy = fp.GetCourtyard(layer)
+    if cy.OutlineCount() == 1 and cy.Outline(0).PointCount() == 4:
+        o = cy.Outline(0)
+        return [(pcbnew.ToMM(o.CPoint(i).x), pcbnew.ToMM(o.CPoint(i).y)) for i in range(4)]
+    b = court_bbox_mm(fp) or pad_extent_mm(fp)
+    return rect_poly(*b)
+
+
 def pad_extent_mm(fp, margin=0.0):
     """Pads plus margin, widened to the courtyard (plan 06 G1: DRC counts courtyard overlaps). U9 is excluded:
     its library courtyard is the antenna keep-out, which the board treats as rule areas."""
@@ -284,6 +345,62 @@ def corner_points(az, r0, r1, half_w):
     return out
 
 
+def tab_keepouts():
+    """P1 (plan 08 section 4.5): one box per panel tab of pcb_rules.P1_TAB_AZIMUTHS, around the tab cut on the board edge:
+    tangential half width = half the tab width + P1_TAB_CAP_MM + margin, radial from R_PCB - (P1_TAB_CAP_MM + margin) to
+    R_PCB + 1 mm. An LED capacitor whose courtyard meets a box takes the other side of its LED. (name, polygon KiCad mm)."""
+    m = pcb_rules.P1_TAB_KEEPOUT_MARGIN
+    hw_ = pcb_rules.P1_TAB_WIDTH / 2 + pcb_rules.P1_TAB_CAP_MM + m
+    r0 = MO.R_PCB - (pcb_rules.P1_TAB_CAP_MM + m)
+    return [("tab_%g" % az, corner_points(az, r0, MO.R_PCB + 1.0, hw_)) for az in pcb_rules.P1_TAB_AZIMUTHS]
+
+
+def place_led_cap_top(d, c, az, obstacles):
+    """Plan 08 section 4.2 (P1, HW-008): put the bypass capacitor c of the ring LED d (azimuth az) on F.Cu in the gap beside
+    the LED, long axis radial, at the smallest tangential offset whose courtyard clears the LED courtyard. Both tangential
+    sides and the four rotations are tried (the rotations whose pad axis is not radial drop out); a candidate whose
+    courtyard meets an obstacle (name, convex polygon in KiCad mm) is rejected; the rest are ranked by the distance of the
+    equal-net pads (+5V: capacitor pad 1 to LED pad 4, GND: capacitor pad 2 to LED pad 2). Leaves c at the choice and
+    returns (cost mm, rotation, side +1 = counter-clockwise, offset mm); raises ValueError when every candidate is rejected."""
+    rot = MO.led_rotation_deg(az)
+    a = math.radians(az)
+    radial = (math.cos(a), -math.sin(a))              # KiCad axes (y down)
+    tang = (-math.sin(a), -math.cos(a))               # counter-clockwise tangent seen from above, KiCad axes
+    lx, ly = K(*MO.polar(MO.R_RING, az))
+    led_poly = court_poly_mm(d)
+    lpad = {q.GetNumber(): (pcbnew.ToMM(q.GetPosition().x), pcbnew.ToMM(q.GetPosition().y)) for q in d.Pads()}
+    n_max = int(round(4.0 / LED_CAP_STEP))           # the gap between two LED courtyards is about 4.6 mm
+    cands, rejected = [], []
+    for idx, tr in enumerate((rot, (rot + 180) % 360, (rot + 90) % 360, (rot + 270) % 360)):
+        c.SetPosition(vec(0, 0))
+        c.SetOrientationDegrees(tr)
+        pp = {q.GetNumber(): q.GetPosition() for q in c.Pads()}
+        vx, vy = pcbnew.ToMM(pp["1"].x - pp["2"].x), pcbnew.ToMM(pp["1"].y - pp["2"].y)
+        if abs(vx * radial[0] + vy * radial[1]) / (math.hypot(vx, vy) or 1.0) < 0.9:      # pad axis not radial
+            continue
+        for sgn in (1, -1):
+            for k in range(n_max + 1):
+                t = k * LED_CAP_STEP
+                centre_at(c, lx + sgn * t * tang[0], ly + sgn * t * tang[1], 0.0)
+                if convex_clear(court_poly_mm(c), led_poly, LED_CAP_GAP):
+                    break
+            else:
+                continue
+            poly = court_poly_mm(c)
+            hits = [name for name, ob in obstacles if not convex_clear(poly, ob, LED_CAP_GAP)]
+            cp = {q.GetNumber(): (pcbnew.ToMM(q.GetPosition().x), pcbnew.ToMM(q.GetPosition().y)) for q in c.Pads()}
+            cost = math.dist(cp["1"], lpad["4"]) + math.dist(cp["2"], lpad["2"])
+            # ranked on 0.01 mm: the mirror candidates tie in exact geometry, and float noise must not pick the side
+            (rejected if hits else cands).append((round(cost, 2), 2 * idx + (sgn < 0), tr, sgn, round(t, 3), hits, cost))
+    if not cands:
+        raise ValueError("no free place for %s beside %s: %s" % (c.GetReference(), d.GetReference(), rejected))
+    _, _, tr, sgn, t, _, cost = min(cands)
+    c.SetPosition(vec(0, 0))
+    c.SetOrientationDegrees(tr)
+    centre_at(c, lx + sgn * t * tang[0], ly + sgn * t * tang[1], 0.0)
+    return cost, tr, sgn, t
+
+
 # ----------------------------------------------------------------------------- build
 def add_rule_area(board, name, layers, pts, tracks=True, vias=True, pours=True, footprints=False):
     z = pcbnew.ZONE(board)
@@ -307,6 +424,30 @@ def add_rule_area(board, name, layers, pts, tracks=True, vias=True, pours=True, 
     return z
 
 
+class CourtyardMask:
+    """Raster (step mm) of a footprint's front courtyard in the SA frame (origin at CX, CY, KiCad axes). Owner decision
+    2026-11-18 (ADR-0023): with P1 the full U9 library courtyard, antenna keep-out included, is an obstacle for movable parts."""
+
+    def __init__(self, poly, step=0.25):
+        self.step = step
+        bb = poly.BBox()
+        self.x0, self.y0 = pcbnew.ToMM(bb.GetX()) - CX, pcbnew.ToMM(bb.GetY()) - CY
+        nx, ny = int(pcbnew.ToMM(bb.GetWidth()) / step) + 2, int(pcbnew.ToMM(bb.GetHeight()) / step) + 2
+        self.cells = {(i, j) for i in range(nx) for j in range(ny)
+                      if poly.Contains(pcbnew.VECTOR2I(pcbnew.FromMM(CX + self.x0 + i * step), pcbnew.FromMM(CY + self.y0 + j * step)))}
+
+    def hits(self, x, y):
+        return (int(round((x - self.x0) / self.step)), int(round((y - self.y0) / self.step))) in self.cells
+
+    def hits_rect(self, x0, y0, x1, y1, pitch=0.5):
+        n = max(2, int(max(x1 - x0, y1 - y0) / pitch) + 1)
+        return any(self.hits(x0 + (x1 - x0) * a / (n - 1), y0 + (y1 - y0) * c / (n - 1)) for a in range(n) for c in range(n))
+
+
+def u9_courtyard_mask(fp):
+    return CourtyardMask(fp.GetCourtyard(pcbnew.F_CrtYd))
+
+
 def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     global CUSTOM_DIR
     os.makedirs(outdir, exist_ok=True)
@@ -314,6 +455,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     custom_fp.write_library(outdir)
     derive_u9_footprint(outdir)
     comps, nets = read_netlist(netlist)
+    p1 = p1_enabled()
+    r_move = R_MOVE_P1 if p1 else R_MOVE
     board = pcbnew.BOARD()
     board.SetCopperLayerCount(layers)
     ds = board.GetDesignSettings()
@@ -382,6 +525,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         centre_at(d, x, y, 0.0)
         # centre on the LED body centre rather than the pad extent: pads are symmetric, so they coincide
         note_fixed(dref, "F")
+        if p1:                  # the capacitors go on the top side beside their LED once J1 is placed (below)
+            continue
         shift = MO.led_cap_shift_mm(i, az)
         r_cap = MO.R_RING
         a2 = az + math.degrees(shift / r_cap)
@@ -439,6 +584,24 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
     # through-hole shell pins also occupy the bottom side
     fixed_rects.append(("B",) + tuple(v - c for v, c in zip(pad_extent_mm(j1, 0.3), (CX, CY, CX, CY))))
 
+    # ---- P1 (plan 08 section 4.2): LED bypass capacitors on the top side beside their LED; obstacles are every LED
+    # courtyard, J1 (courtyard and its fixed extent), the hook keep-outs and the capacitors placed before
+    led_caps = {}
+    if p1:
+        obstacles = [(dref, court_poly_mm(fps[dref])) for dref, _, _ in led_ring_refs()]
+        obstacles += [("J1", court_poly_mm(j1)), ("J1 extent", rect_poly(*pad_extent_mm(j1, 0.3)))]
+        obstacles += [("hook_%d" % az, corner_points(az, r0, r1, hw_)) for az, r0, r1, hw_ in MO.hook_keepouts()]
+        obstacles += tab_keepouts()
+        for dref, cref, i in led_ring_refs():
+            c = fps[cref]
+            orient(c, MO.led_rotation_deg(MO.led_azimuths()[i]), "F")
+            cost, tr, sgn, t = place_led_cap_top(fps[dref], c, MO.led_azimuths()[i],
+                                                 [o for o in obstacles if o[0] != dref])
+            note_fixed(cref, "F")
+            obstacles.append((cref, court_poly_mm(c)))
+            led_caps[cref] = {"rot": round(tr, 2), "side": "ccw" if sgn > 0 else "cw", "offset_mm": t,
+                              "pad_cost_mm": round(cost, 3)}
+
     # ---- module (top, centre of the PCB, antenna end towards -X)
     u9 = fps["U9"]
     u9.SetPosition(vec(0, 0))
@@ -489,8 +652,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         for p in fp.Pads():
             pads.setdefault(p.GetNumber(), (pcbnew.ToMM(p.GetPosition().x) - ox, pcbnew.ToMM(p.GetPosition().y) - oy))
         parts[ref] = {"w": x1 - x0 - 2 * MARGIN_EXT, "h": y1 - y0 - 2 * MARGIN_EXT, "pads": pads}
-        if ref.startswith("TP"):
-            parts[ref]["sides"] = "B"
+        if part_sides(ref, p1) != "FB":
+            parts[ref]["sides"] = part_sides(ref, p1)
     sa_nets = {}
     for n, nodes in nets.items():
         if n == GND or n.startswith("unconnected-"):
@@ -505,8 +668,12 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
             sa_nets[tie] = [a, b]
             weights[tie] = w
 
+    u9_mask = u9_courtyard_mask(fps["U9"]) if p1 else None
+
     def region_ok(side, x0, y0, x1, y1):       # SA frame (y down) -> mechanical frame (y up)
-        return MO.region_rect_ok(side, x0, -y1, x1, -y0, R_MOVE, tab_r)
+        if u9_mask is not None and side == "F" and u9_mask.hits_rect(x0, y0, x1, y1):
+            return False
+        return MO.region_rect_ok(side, x0, -y1, x1, -y0, r_move, tab_r, top_tab=p1)
 
     def layout_rules_ok(st):
         return all(math.hypot(st[a][0] - st[b][0], st[a][1] - st[b][1]) <= lim
@@ -525,7 +692,10 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         fp.SetPosition(vec(0, 0))
         orient(fp, rot, side)
         centre_at(fp, CX + x, CY + y)
-    placement_info = {"seed": seed, "hpwl_mm": round(wl, 1), "overlap_mm2": round(ov, 3)}
+    placement_info = {"seed": seed, "hpwl_mm": round(wl, 1), "overlap_mm2": round(ov, 3), "p1": p1, "r_move": r_move}
+    if p1:
+        placement_info["led_caps"] = led_caps
+        set_p1_fields(fps, comps)
 
     # ---- outline (mechanical V1 envelope)
     for i, seg in enumerate(MO.outline_segments(tab_r)):
@@ -611,6 +781,22 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         json.dump(dict(placement_info, sa_iters=sa_iters or SA_ITERS, cx=CX, cy=CY, j1_mouth_r=round(mouth_r, 2), tab_r=round(tab_r, 2), largest_dim_mm=round(MO.check_largest_dim(mouth_r), 2)), f, indent=1, sort_keys=True)
         f.write("\n")
     return pcb
+
+
+def set_p1_fields(fps, comps):
+    """Plan 08 RV-014 readiness B1 (HW-008, HW-016): the sourcing fields MPN, Manufacturer and LCSC of every part
+    (sourcing.sourcing_fields of its value, the same table the schematic generator uses) on its footprint, hidden on the
+    Fab layer of its side; C4 and C32 are do-not-populate and excluded from the BOM."""
+    for ref, fp in fps.items():
+        for k, v in sourcing.sourcing_fields(comps[ref][0], comps[ref][1]).items():
+            fp.SetField(k, v)
+            fld = fp.GetField(k)
+            fld.SetVisible(False)                   # a new field is visible on the silkscreen by default
+            fld.SetLayer(pcbnew.B_Fab if fp.IsFlipped() else pcbnew.F_Fab)
+    for ref in DNP_REFS_P1:
+        if ref in fps:
+            fps[ref].SetDNP(True)
+            fps[ref].SetExcludedFromBOM(True)
 
 
 _NS = uuid.UUID("5b0c2f0e-0000-4000-8000-00000000b051")

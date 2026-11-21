@@ -50,14 +50,16 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "branchwidth":
         import re
         txt = open(sys.argv[2], encoding="utf-8").read()
-        name = pcb_rules.net_class_name(pcb_rules.MAIN_PATH_NET)
-        i = txt.index("(class %s " % name)
-        j = txt.find("(class ", i + 1)
-        j = len(txt) if j < 0 else j
-        blk, n = re.subn(r"\(width \d+\)", "(width %d)" % round(pcb_rules.BRANCH_WIDTH * 1000), txt[i:j], count=1)
-        assert n == 1, "no width rule in the class block"
-        open(sys.argv[3], "w", encoding="utf-8").write(txt[:i] + blk + txt[j:])
-        print("branch width", pcb_rules.BRANCH_WIDTH, "mm for class", name)
+        for mp in pcb_rules.MAIN_PATH_NETS:
+            name = pcb_rules.net_class_name(mp)
+            i = txt.index("(class %s " % name)
+            j = txt.find("(class ", i + 1)
+            j = len(txt) if j < 0 else j
+            blk, n = re.subn(r"\(width \d+\)", "(width %d)" % round(pcb_rules.BRANCH_WIDTH * 1000), txt[i:j], count=1)
+            assert n == 1, "no width rule in the class block"
+            txt = txt[:i] + blk + txt[j:]
+            print("branch width", pcb_rules.BRANCH_WIDTH, "mm for class", name)
+        open(sys.argv[3], "w", encoding="utf-8").write(txt)
         sys.exit(0)
     if len(sys.argv) >= 4 and sys.argv[1] == "outer":
         txt = open(sys.argv[2], encoding="utf-8").read()

@@ -13,11 +13,11 @@ OUT="${HW_CI_OUT:-$(mktemp -d)}"; mkdir -p "$OUT"
 shopt -s nullglob globstar
 sch=(hw/kicad/**/*.kicad_sch); pcb=(hw/kicad/**/*.kicad_pcb)
 ((${#sch[@]} + ${#pcb[@]})) || { echo "hw: NOT RUN - no .kicad_sch or .kicad_pcb file in hw/kicad"; exit 0; }
-# The generated spike board (hw/kicad/spike-gate/board) has known, waived findings: the antenna keep-out overlaps (DEV-004,
+# The generated spike boards (hw/kicad/spike-gate/board and board-p1) have known, waived findings: the antenna keep-out overlaps (DEV-004,
 # ADR-0003). Its checks go through the strict wrapper, which fails on every
 # finding outside the waiver list (hw/kicad/spike-gate/known-open-violations.json). Every other file keeps the raw check.
 STRICT=hw/kicad/spike-gate/src/kicad_strict.py
-is_spike_board() { [[ "$1" == hw/kicad/spike-gate/board/* ]]; }
+is_spike_board() { [[ "$1" == hw/kicad/spike-gate/board/* || "$1" == hw/kicad/spike-gate/board-p1/* ]]; }   # board-p1: plan 08
 for f in "${sch[@]}"; do
   echo "== ERC $f"
   if is_spike_board "$f"; then
@@ -31,6 +31,21 @@ for f in "${pcb[@]}"; do
   echo "== DRC $f"
   if is_spike_board "$f"; then
     SPIKE_ALLOW_KNOWN_OPEN=0 python3 "$STRICT" drc "$f" stitched-4l --out "$OUT/$(basename "$f").drc.json"
+    if [[ "$f" == hw/kicad/spike-gate/board-p1/* ]]; then   # plan 08: no via in an SMD pad (owner answer 9), supply paths
+      echo "== fab check and power check $f"
+      python3 hw/kicad/spike-gate/src/pcb_fabcheck.py --no-via-in-pad "$f" > "$OUT/$(basename "$f").fabcheck.json"
+      python3 hw/kicad/spike-gate/src/pcb_power_check.py "$f" "$OUT/$(basename "$f").power.json" > /dev/null
+      python3 - "$OUT/$(basename "$f").power.json" <<'PY'
+import json
+import sys
+
+nets = json.load(open(sys.argv[1], encoding="utf-8"))["nets"]
+bad = [n for n, v in sorted(nets.items()) if not v["within_50mv"] or v.get("full_width_path") is False]
+for n, v in sorted(nets.items()):
+    print("   %-8s %s mV, full-width path %s" % (n, v["drop_mv"], v.get("full_width_path")))
+sys.exit("power check FAILED: " + ", ".join(bad) if bad else 0)
+PY
+    fi
   else
     kicad-cli pcb drc --severity-all --exit-code-violations --schematic-parity \
       --output "$OUT/$(basename "$f").drc.rpt" "$f"

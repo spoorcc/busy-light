@@ -4,7 +4,8 @@ stitcher, with a small deterministic A* grid router on four layers.
 
 Each pair is routed on its own: obstacles are the copper of other nets (pads, tracks, vias, board edge, slot, rule areas)
 grown by the clearance plus half the track width; the copper of the same net is free. Vias are through vias and keep the
-hole-to-hole distance. New copper is added to the obstacle maps before the next pair. No random numbers; pairs in report
+hole-to-hole distance; no via touches an SMD pad of any net, the same net included (pcb_rules.via_hits_smd_pad; plan 08
+section 4.3, HW-008). New copper is added to the obstacle maps before the next pair. No random numbers; pairs in report
 order. The result is checked by `kicad-cli pcb drc`, which this script does not replace.
 
 Usage: python3 pcb_fix.py <in.kicad_pcb> <drc.json> <out.kicad_pcb>            route the unconnected pairs
@@ -25,6 +26,7 @@ from scipy import ndimage
 import mech_outline as MO
 import pcb_full as P
 import pcb_rules as R
+import pcb_stitch as S
 
 RES = 0.05                    # grid step, mm
 SIGHT = 0.06                  # extra margin against grid rounding and diagonal moves, mm (about 1.2 grid steps)
@@ -86,15 +88,19 @@ class Fixer:
         self.via_pts = []
         self.segs = []                                    # (layer, x0, y0, x1, y1, w, net)
         self.pads = {}
+        self.pad_boxes = []                               # (x0, y0, x1, y1, is_smd): input of pcb_rules.via_hits_smd_pad
         self.added = []
         self._load()
+        self.via_in_pad = self.via_in_pad_mask()          # cells where a via centre would touch an SMD pad (any net)
 
     # ----------------------------------------------------------------- raster
     def cell(self, x, y):
         return int(round((x - self.x0) / RES)), int(round((y - self.y0) / RES))
 
     def xy(self, ix, iy):
-        return self.x0 + ix * RES, self.y0 + iy * RES
+        """Grid cell centre in mm, on the 0.1 um Specctra grid (pcb_stitch.snap): the router's tracks end on the centre of
+        a via placed here (batch p1b10: off-centre ends made the clean-up rip up ring stubs)."""
+        return S.snap(self.x0 + ix * RES), S.snap(self.y0 + iy * RES)
 
     def stamp_rect(self, arr, x0, y0, x1, y1, val, grow=0.0):
         ix0 = max(0, int(math.floor((x0 - grow - self.x0) / RES)))
@@ -141,6 +147,7 @@ class Fixer:
                     self.stamp_rect(self.cu[L], x0, y0, x1, y1, -1 if npth else nid)
                 pos = p.GetPosition()
                 self.pads[(f.GetReference(), p.GetNumber())] = (mmf(pos.x), mmf(pos.y), nm)
+                self.pad_boxes.append((x0, y0, x1, y1, S.is_smd_pad(p)))
         tr = b.Tracks()
         for it in [tr[i] for i in range(tr.size())]:
             nid = self.nets.get(it.GetNetname(), 0) or -1
@@ -161,6 +168,23 @@ class Fixer:
                 for L in LAYERS:
                     if z.IsOnLayer(LAYER_ID[L]):
                         self.stamp_rect(self.hard[L], mmf(bb.GetX()), mmf(bb.GetY()), mmf(bb.GetRight()), mmf(bb.GetBottom()), True)
+
+    def via_in_pad_mask(self):
+        """Boolean map: True where a via (R.VIA_DIA) centred on the cell would touch an SMD pad of any net, by
+        pcb_rules.via_hits_smd_pad itself, evaluated at the cell centre (the point where commit places the via).
+        Only the cells near each pad are evaluated; the rest stay False."""
+        mask = np.zeros((self.ny, self.nx), dtype=bool)
+        reach = R.VIA_DIA / 2 + R.VIA_IN_PAD_GROW + RES
+        for box in self.pad_boxes:
+            if not box[4]:
+                continue
+            ix0, iy0 = self.cell(box[0] - reach, box[1] - reach)
+            ix1, iy1 = self.cell(box[2] + reach, box[3] + reach)
+            for iy in range(max(0, iy0), min(self.ny - 1, iy1) + 1):
+                for ix in range(max(0, ix0), min(self.nx - 1, ix1) + 1):
+                    if not mask[iy, ix] and R.via_hits_smd_pad(*self.xy(ix, iy), R.VIA_DIA, (box,)):
+                        mask[iy, ix] = True
+        return mask
 
     def inside_mask(self, margin):
         """Boolean map: cell centre inside the PCB outline (circle, tab, minus the slot), `margin` from the edge."""
@@ -201,8 +225,11 @@ class Fixer:
         for vx, vy in self.via_pts:                            # hole-to-hole: centre distance
             self.stamp_disc(hole, vx, vy, R.VIA_DRILL + R.HOLE_TO_HOLE + sight, True)
         via_ok &= ~hole
+        via_ok &= ~self.via_in_pad                             # no via-in-pad, any net (plan 08 section 4.3)
         s = self.cell(*p0) + (LAYERS.index(l0),)
         g = self.cell(*p1) + (LAYERS.index(l1),)
+        if R.via_hits_smd_pad(p0[0], p0[1], R.VIA_DIA, self.pad_boxes):
+            via_ok[s[1], s[0]] = False                         # a via on the start cell sits at p0 itself (commit)
         for lay in (s, g):                                     # the end points are on same-net copper: always free
             ok[LAYERS[lay[2]]][lay[1], lay[0]] = True
         wx0, wx1 = sorted((s[0], g[0]))
@@ -266,6 +293,8 @@ class Fixer:
         while i < len(pts) - 1:
             (a, la), (c, lb) = pts[i], pts[i + 1]
             if la != lb:                                       # layer change at the same point: a via
+                if R.via_hits_smd_pad(a[0], a[1], R.VIA_DIA, self.pad_boxes):     # guard: route() keeps vias off pads
+                    raise ValueError("via in an SMD pad at (%.3f, %.3f) on net %s" % (a[0], a[1], net))
                 v = pcbnew.PCB_VIA(self.b)
                 v.SetPosition(P.vec(*a))
                 v.SetViaType(pcbnew.VIATYPE_THROUGH)
@@ -469,7 +498,7 @@ def blockers(board, net, pairs, fx, margin=2.5, limit=5):
     cx, cy = (lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2
     near = {}
     for L, x0, y0, x1, y1, w, n in fx.segs:
-        if n == net or n in R.PLANE_NETS or n == R.MAIN_PATH_NET or not n:
+        if n == net or n in R.PLANE_NETS or n in R.MAIN_PATH_NETS or not n:
             continue
         if min(x0, x1) - margin <= hi[0] and max(x0, x1) + margin >= lo[0] and min(y0, y1) - margin <= hi[1] and max(y0, y1) + margin >= lo[1]:
             d = math.hypot((x0 + x1) / 2 - cx, (y0 + y1) / 2 - cy)
@@ -661,9 +690,25 @@ def auto(folder, stem="stitched", profile="stitched-4l", rounds=5):
     return cur
 
 
+def pair_refs(v):
+    """References of the pads among the two items of a DRC `unconnected_items` entry."""
+    return {k[1] for k in (parse_item(i["description"]) for i in v["items"]) if k and k[0] == "pad"}
+
+
 def width_for(net, refs):
-    if net == R.MAIN_PATH_NET:
+    """Width of a clean-up track: the branch width on the split main-path nets (their main path is routed and locked in
+    stage 1); for the other supply nets the current-based width (NET_WIDTH; batch p1b7: +5V re-routed at 0.15 mm carried
+    the TPS2553 output), except a +5V piece whose pads (`refs`) are all LED ring cell parts, which keeps the ring stub width
+    (pcb_ring.STUB: the In2 plane carries the ring current); else the net's own width or the default."""
+    if net in R.MAIN_PATH_NETS:
         return R.BRANCH_WIDTH
+    if net in R.NET_WIDTH:
+        if net == "+5V" and refs:
+            import pcb_ring  # noqa: PLC0415
+            ring = {r for d, c in pcb_ring.cells() for r in (d, c)}
+            if set(refs) <= ring:
+                return pcb_ring.STUB
+        return R.NET_WIDTH[net]
     return R.NET_TRACK.get(net, R.TRACK)
 
 
@@ -686,7 +731,7 @@ def main(src, drc, dst, tab_r=None):
         if a[1] is None or b[1] is None:                   # a via end takes the layer of the other end
             a = (a[0], a[1] or b[1] or "F.Cu", a[2])
             b = (b[0], b[1] or a[1], b[2])
-        w = width_for(net, None)
+        w = width_for(net, pair_refs(v))
         path = fx.route(net, a[0], a[1], b[0], b[1], w)
         if path is None:                                   # second try: wider window, same clearance margin
             path = fx.route(net, a[0], a[1], b[0], b[1], w, window=2 * WINDOW)

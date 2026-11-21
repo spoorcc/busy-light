@@ -53,6 +53,11 @@ class SchematicFieldsTest(unittest.TestCase):
         self.assertEqual(f["LCSC"].value, "C2673506")
         self.assertTrue(f["MPN"].effects.hide)
 
+    def test_esd_part_has_its_lcsc_number(self):
+        """2026-11-18: U6 USBLC6-2P6 found as LCSC C15999 (web search); U5 TPS3840DL40DBVR still has none."""
+        self.assertEqual(self.fields("U6")["LCSC"].value, "C15999")
+        self.assertEqual(self.fields("U5")["LCSC"].value, "")
+
     def test_every_reference_has_an_mpn_and_the_missing_check_reports_an_empty_one(self):
         # J1 (GCT USB4085-GF-A) and TVS1, TVS2 (PESD parts) are listed since 2026-11-09
         for ref, mpn in (("J1", "USB4085-GF-A"), ("TVS1", "PESD5V0S1BA,115"), ("TVS2", "PESD3V3L1BA,115")):
@@ -67,7 +72,10 @@ class SchematicFieldsTest(unittest.TestCase):
             self.assertEqual(self.fields(ref)["MPN"].value, mpn, ref)
 
     def test_passive_carries_fields(self):
-        self.assertEqual(self.fields("R1")["MPN"].value, "0603WAF1003T5E")
+        self.assertEqual(self.fields("R1")["MPN"].value, "0402WGF1003TCE")      # 0402 since ADR-0023
+        self.assertEqual(self.fields("R2")["MPN"].value, "0402WGF1002TCE")      # 10k in 0402
+        self.assertEqual(self.fields("R21")["MPN"].value, "0603WAF8873T5E")     # stays 0603
+        self.assertEqual(self.fields("C24")["MPN"].value, "CL05B104KO5NNNC")    # 100n in 0402 (ADR-0023)
         self.assertEqual(self.fields("R_ILIM1")["MPN"].value, "TD03G4702BT")
         self.assertEqual(self.fields("U9")["MPN"].value, "ESP32-C3-MINI-1-N4")
 

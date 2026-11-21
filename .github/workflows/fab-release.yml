@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: Apache-2.0
+# P1 order package (plan 08 section 4.6; HW-008, HW-009; owner answer 17 of 2026-11-17).
+#   push to main        test, build, then refresh the draft release `fab-latest` with the package files
+#   release published   test, build, then attach the package files to that release (not for the tag fab-latest)
+#   workflow_dispatch   test and build only (workflow artifact, no release)
+# The owner orders only from a published, tagged release (plan 08 order step O0). A draft is never an order source.
+# Without a stored P1 board (BOARD) the build job reports NOT RUN and nothing is published.
+name: fab-release
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fab-release-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BOARD: hw/kicad/spike-gate/board-p1/busy_light_spike.kicad_pcb
+# The container image is kicad/kicad:10.0 by digest (the image the local runs used, 2026-11-18); keep the three jobs equal.
+jobs:
+  test:
+    if: github.event_name != 'release' || github.event.release.tag_name != 'fab-latest'
+    runs-on: ubuntu-24.04
+    container:
+      image: kicad/kicad@sha256:3f4a01786dfbe803a65f345c3342b765db9add913f5e9448f8356793714ddc34
+      options: --user root
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install test tools (pinned with sha256)
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends ngspice python3-pip   # the image has no pip
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab.txt
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab-test.txt
+      - name: Spike-gate, simulation and order-package tests
+        shell: bash
+        run: |
+          set -o pipefail
+          rc=0
+          (cd hw/kicad/spike-gate && GATE_NET=tests/data/gate.net python3 -m pytest -q -rs tests) | tee pytest-spike.txt || rc=1
+          python3 -m pytest -q -rs hw/sim/scripts scripts/tests | tee pytest-sim-fab.txt || rc=1
+          {
+            echo "## Tests"
+            for f in pytest-spike.txt pytest-sim-fab.txt; do echo "- $f: $(tail -1 "$f")"; done
+            echo "### Not run (skipped)"
+            grep -h '^SKIPPED' pytest-spike.txt pytest-sim-fab.txt | sed 's/^/- /' || echo "- none"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+  build:
+    needs: test
+    runs-on: ubuntu-24.04
+    container:
+      image: kicad/kicad@sha256:3f4a01786dfbe803a65f345c3342b765db9add913f5e9448f8356793714ddc34
+      options: --user root
+    outputs:
+      has_board: ${{ steps.pkg.outputs.has_board }}
+      gates_ok: ${{ steps.pkg.outputs.gates_ok }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: {fetch-depth: 0}     # fab_p1.sh records `git describe` in the manifest
+      - name: Install KiKit (pinned with sha256)
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends python3-pip   # the image has no pip
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab.txt
+      - name: Build the order package
+        id: pkg
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          if [[ ! -f "$BOARD" ]]; then
+            echo "has_board=false" >> "$GITHUB_OUTPUT"
+            echo "## Order package: NOT RUN - no stored P1 board at $BOARD" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "has_board=true" >> "$GITHUB_OUTPUT"
+          rc=0
+          scripts/fab_p1.sh "$BOARD" p1-fab || rc=$?
+          echo "gates_ok=$([[ $rc == 0 ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Order package"
+            echo "- fab_p1.sh exit code: $rc (0 every gate passed, 1 a gate failed, 2 a tool or input missing)"
+            [[ -f p1-fab/manifest.json ]] && echo "- manifest: p1-fab/manifest.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [[ $rc == 2 ]]; then exit 2; fi        # gate failures still upload the package for diagnosis
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: steps.pkg.outputs.has_board == 'true'
+        with: {name: p1-fab, path: p1-fab, if-no-files-found: error}
+  publish:
+    needs: build
+    if: >-
+      needs.build.outputs.has_board == 'true' && needs.build.outputs.gates_ok == 'true' &&
+      github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write     # gh release create/edit/upload
+      actions: read       # gh run download of this run's artifact
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download the order package of this run
+        run: gh run download "$GITHUB_RUN_ID" --name p1-fab --dir p1-fab
+      - name: Refresh the draft release fab-latest (push to main)
+        if: github.event_name == 'push'
+        run: |
+          notes="P1 order package built from main at $GITHUB_SHA by run $GITHUB_RUN_ID. Draft: not an order source (plan 08 O0)."
+          if gh release view fab-latest > /dev/null 2>&1; then
+            gh release edit fab-latest --draft --target "$GITHUB_SHA" --notes "$notes"
+          else
+            gh release create fab-latest --draft --target "$GITHUB_SHA" --title "P1 order package (latest main, draft)" --notes "$notes"
+          fi
+          gh release upload fab-latest p1-fab/* --clobber
+      - name: Attach the package to the published release
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" p1-fab/* --clobber

@@ -5,9 +5,12 @@
 # Usage: run_pcb.sh <dir written by run_full.sh> <out dir> [layers 2|4] [planes]
 #   layers  2 (default) or 4
 #   planes  what the router sees as GND pour: 2 layers: B (default), FB or none; 4 layers: none (default) or inner (only the In1 GND plane is visible to the router, plan 06 A-8)
-# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), FR_THREADS (default 4).
-#      FREEROUTING_JAR  path of freerouting-2.5.0.jar (v2.5.0, sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7, a pinned release downloaded
-#      from the official GitHub releases; not part of the repository). Without it the board is built and checked
+# Env: RING (default 1; 0 leaves the LED ring to the router), OUTER_ONLY (default 1; 0 lets VBUS_IC and +3V3 use the inner layers), CLEANUP (default 1; 0 skips the post-route clean-up of src/pcb_fix.py), REPASS (default 1; 0 skips the second router pass of run_repass.sh when the clean-up leaves an unconnected item),KEYFIRST (default 0; 1 = route the nets of pcb_rules.ROUTE_FIRST first, lock them, then the rest), PRESTITCH (default 0; 1 = stitch the plane pads before the router and lock the vias, reuse limit PRESTITCH_REUSE mm, default 1.6), FR_THREADS (default 4).
+#      FREEROUTING_JAR  path of a Freerouting v2.5.0 jar, one of two pinned files (not part of the repository):
+#        sha256 f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7  freerouting-2.5.0.jar, official GitHub release
+#        sha256 7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976  freerouting-2.5.0-executable.jar, Maven Central
+#          (repo1.maven.org/maven2/app/freerouting/freerouting/2.5.0/; owner answer 8 of 2026-11-17).
+#      run_meta.json records the hash of the jar that ran. Without it the board is built and checked
 #      unrouted. PCB_PYTHON (default python3) must have KiCad's pcbnew module (KiCad 10). FR_PASSES (default 60).
 # The outputs (.kicad_pcb, .kicad_pro, DSN, SES, reports) stay in <out dir> and are not committed.
 # src/route_grid.py (the earlier own grid router) is not run here: it knows only the old rectangular board.
@@ -20,10 +23,10 @@ export PYTHONPATH="$HERE/src"
 NET="$IN/kicad.net"
 [ -f "$NET" ] || { echo "no $NET (run run_full.sh first)"; exit 1; }
 if [ -n "$FREEROUTING_JAR" ]; then      # pinned release; a missing or different file stops the run (plan 06 T5)
-  JAR_SHA=f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7
+  JAR_SHAS="f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7 7f8c62471f46ccd165bd0e1d20096404602d56d0480af2da59f31b8c5224a976"
   [ -f "$FREEROUTING_JAR" ] || { echo "FREEROUTING_JAR: no such file: $FREEROUTING_JAR"; exit 1; }
-  [ "$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)" = "$JAR_SHA" ] \
-    || { echo "FREEROUTING_JAR: sha256 is not the pinned $JAR_SHA"; exit 1; }
+  JAR_HAVE=$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)
+  case " $JAR_SHAS " in *" $JAR_HAVE "*) ;; *) echo "FREEROUTING_JAR: sha256 is not the pinned $JAR_SHAS"; exit 1;; esac
 fi
 filter() { grep -v 'PROPERTY_ENUM' || true; }
 if [ -z "$PLANES" ]; then [ "$LAYERS" = 4 ] && PLANES=none || PLANES=B; fi
@@ -57,6 +60,14 @@ if [ -n "$FREEROUTING_JAR" ]; then
     "$PY" "$HERE/src/pcb_dsn.py" lock "$A/ring.kicad_pcb" "$A/ring_locked.kicad_pcb" 2>&1 | filter
     for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/ring_locked.$e"; done
     BASE="$A/ring_locked.kicad_pcb"
+  fi
+  if [ "${PRESTITCH:-0}" = 1 ]; then  # fan-out first (P1 batch of 2026-11-18): the plane pads get their via before the router runs, locked
+    "$PY" "$HERE/src/kicad_strict.py" drc "$BASE" "placed-${LAYERS}l" --out "$A/drc_prestitch_in.json" > /dev/null 2>&1 || true
+    "$PY" "$HERE/src/pcb_stitch.py" "$BASE" "$A/drc_prestitch_in.json" "$A/prestitch.kicad_pcb" --reuse-max="${PRESTITCH_REUSE:-1.6}" 2>&1 \
+      | filter | grep -E '^\{' || echo "pre-route stitch: report missing"
+    "$PY" "$HERE/src/pcb_dsn.py" lock "$A/prestitch.kicad_pcb" "$A/prestitch_locked.kicad_pcb" 2>&1 | filter
+    for e in kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/busy_light_spike.$e" "$A/prestitch_locked.$e"; done
+    BASE="$A/prestitch_locked.kicad_pcb"
   fi
   if [ "${KEYFIRST:-0}" = 1 ]; then
     # stage 1: only the nets of pcb_rules.ROUTE_FIRST are routed (the other pads are obstacles); the tracks are then locked
@@ -93,7 +104,7 @@ if [ -n "$FREEROUTING_JAR" ]; then
   echo "wrote $A/check_routed.json"
   echo "M1 unrouted (routed board, plane nets excluded): $("$PY" "$HERE/src/pcb_check.py" m1 "$A/drc_routed.json")"
   "$PY" - "$A/run_meta.json" "$PLACED_SHA" "$(sha256sum "$A/b.dsn" | cut -d' ' -f1)" "$(kicad-cli version)" \
-    "$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)" "${FR_PASSES:-60}" 4 "$(java -version 2>&1 | head -1)" "$WALL" "$PLANES" <<'PYEOF'
+    "$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)" "${FR_PASSES:-60}" "${FR_THREADS:-4}" "$(java -version 2>&1 | head -1)" "$WALL" "$PLANES" <<'PYEOF'
 import sys
 import pcb_replay
 a = sys.argv[1:]
@@ -116,6 +127,12 @@ PYEOF
     for e in kicad_pcb kicad_pro kicad_dru kicad_sch placement.json; do \cp -f "$A/$FINAL.$e" "$A/final.$e"; done
     "$PY" "$HERE/src/kicad_strict.py" drc "$A/final.kicad_pcb" "stitched-${LAYERS}l" --out "$A/drc_final.json" || STATUS=1
     echo "M2 unconnected (final board after clean-up, from $FINAL): $("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")"
+    if [ "${REPASS:-1}" = 1 ] && [ "$("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")" != 0 ]; then
+      # second router pass over the cleaned board, all copper locked (run_repass.sh); it replaces final.* only when better
+      sh "$HERE/run_repass.sh" "$A" "$LAYERS" "$PLANES" 2>&1 | filter || true
+      "$PY" "$HERE/src/kicad_strict.py" drc "$A/final.kicad_pcb" "stitched-${LAYERS}l" --out "$A/drc_final.json" || STATUS=1
+      echo "M2 unconnected (final board after the second pass): $("$PY" "$HERE/src/pcb_check.py" m2 "$A/drc_final.json")"
+    fi
   fi
 fi
 exit $STATUS

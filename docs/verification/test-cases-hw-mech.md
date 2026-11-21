@@ -69,10 +69,17 @@
 
 - **Verifies:** HW-008
 - **Level:** Inspection
-- **Procedure:** TBD
-- **Expected result / pass criteria:** see acceptance criteria of HW-008
-- **Automated:** TBD
-- **Evidence:** TBD
+- **Procedure (drafted 2026-11-17 for P1, plan 08; not run):**
+  1. Build the order package with `scripts/fab_p1.sh` from the tagged release commit (or take it from the published release).
+  2. Run `scripts/fab_check.py` on the package. Record every finding (empty LCSC lines, refs not on the top side).
+  3. Count the parts per side in the CPL. Expected: every assembled part on the top side; J1 is the only through-hole part.
+  4. Upload the Gerbers to the shop's design check (DFM viewer). Record its findings and the date.
+  5. Upload BOM and CPL to the shop. Record the stock, the price and basic or extended per BOM line.
+  6. Count the extended part types and write the number in the BOM record.
+  7. Check the module part number names chip revision v0.3 or later (module datasheet).
+- **Expected result / pass criteria:** see acceptance criteria of HW-008; step 4 has no error; step 5 shows stock for every line.
+- **Automated:** steps 1 to 3 (`fab_check.py`, CI); steps 4 to 7 manual at the shop
+- **Evidence:** none yet
 
 ### TC-209 Design checks
 
@@ -216,16 +223,32 @@
 
 - **Verifies:** HW-016
 - **Level:** Inspection
-- **Procedure:** TBD (board file inspection and DRC)
-- **Expected result / pass criteria:** see acceptance criteria of HW-016
-- **Automated:** no
+- **Procedure (drafted 2026-11-17, plan 08):** run `tests/test_board_p1.py` in `hw/kicad/spike-gate` on the stored P1 board. It
+  measures the distance from the pad centres of C4 and C32 to U7 pad 6, checks their nets (+5V, GND) and that both are
+  do-not-populate in the BOM. Run the strict DRC on the same board.
+- **Expected result / pass criteria:** see acceptance criteria of HW-016 ([10] mm, owner 2026-11-17)
+- **Automated:** yes (pytest, board inspection)
 - **Evidence:** none yet
 
 ### TC-217 Damping footprint and hot-plug surge record on the prototype
 
 - **Verifies:** HW-017
 - **Level:** Inspection, then prototype
-- **Procedure:** TBD. Inspection of the board file and DRC for the footprint. Bench part (surge option S1, ADR-0021): lab supply with a current limit and a short cable first, then a USB-C source; scope on VBUS_IC, +5V and the supply pin of each 6 V part at plug-in, repeated at least [20] times, with the 0 ohm link fitted and then with a ferrite or resistor fitted; record the peak voltage at each point.
+- **Procedure (drafted 2026-11-17, plan 08; not run):**
+  - Board part (automated): `tests/test_board_p1.py` checks R22 pin 1 on VBUS and pin 2 on VBUS_IC, TVS1 and U6 on the VBUS side,
+    and every track of the J1-R22-U7 main path at least as wide as the path before R22 (0.6 mm). `src/pcb_power_check.py` reports
+    the drop of VBUS (J1 to R22) and VBUS_IC (R22 to U7). Add the jumper's datasheet resistance at 1.5 A and compare with [10] mohm.
+  - Bench part (surge option S1, ADR-0021). Probe points: VBUS at TVS1 pin 1, VBUS_IC at C2 pin 1, +5V at TP1, supply pins at
+    C26 pin 1 (U1), C24 pin 1 (U14), C25 pin 1 (U15); ground at TP3 or the nearest GND pad with a short ground spring.
+    > **CAUTION:** Use a current-limited lab supply and a short cable for the first plug-ins. A surge above the part ratings can damage U1, U7, U8, U14 or U15.
+    1. Set the lab supply to 5.0 V and 0.7 A.
+    2. Connect the scope to VBUS and VBUS_IC. Trigger on VBUS rising, single shot.
+    3. Plug the cable into J1. Record the peak and the ringing time on both channels.
+    4. Repeat step 3 [20] times. Record the highest peak of each channel.
+    5. Move the probes to +5V and each supply pin in turn. Repeat steps 3 and 4.
+    6. Repeat steps 2 to 5 with a USB-C source and its own cable.
+    7. Replace R22 with the ferrite or resistor that ADR-0021 names. Repeat steps 2 to 6.
+- **Expected result / pass criteria:** board part: see acceptance criteria of HW-017. Bench part: the record itself is the result; peaks above 6 V (7 V at the TPS2553) trigger the revisit of ADR-0021.
 - **Expected result / pass criteria:** see acceptance criteria of HW-017; for the bench part the record itself is the result: peaks above 6 V (7 V at the TPS2553) trigger the revisit of ADR-0021.
 - **Automated:** no
 - **Evidence:** none yet

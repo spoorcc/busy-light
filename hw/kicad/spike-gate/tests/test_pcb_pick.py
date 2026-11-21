@@ -48,6 +48,11 @@ class Power(unittest.TestCase):
         self.assertEqual(K.power_fails_from(out), 1)
         self.assertEqual(K.power_fails_from("no json"), 99)       # not measured: ranks last among equals
 
+    def test_power_fails_counts_a_path_through_thin_track(self):
+        """Batch p1b7: the drop was within target at a fine grid but the current ran through 0.15 mm track."""
+        out = '{"nets": {"a": {"within_50mv": true, "full_width_path": false}, "b": {"within_50mv": true}}}'
+        self.assertEqual(K.power_fails_from(out), 1)
+
 
 class Pick(unittest.TestCase):
     def test_score_counts_kinds(self):
