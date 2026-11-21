@@ -65,7 +65,8 @@ All commands run from the repository root. Keep packages and temporary files in 
    still right. For each number, know its source. Alt texts describe what the image shows, not what it should show.
 7. **Check and record.**
    - `python3 -m pytest -q scripts/tests/test_readme_images.py scripts/tests/test_readme_facts.py`: every image a README
-     shows exists; the six P1 images are tracked by git (in a git checkout) and shown. Before the commit,
+     shows exists; the six P1 images are tracked by git (in a git checkout) and shown; every report image is shown by
+     some Markdown file (see the wording rules for one that is not). Before the commit,
      `git status --short docs/verification/reports/images` lists the new images; add them.
    - `python3 -I scripts/check_traceability.py` and `ruff check .`; `scripts/build_diagrams.sh --check` if diagrams
      changed.
@@ -79,8 +80,10 @@ All commands run from the repository root. Keep packages and temporary files in 
 - Never set or imply `Approved` or `Accepted` yourself. Open owner decisions are listed as open.
 - A number has a date and a source. Analyst assumptions (the 50 mV target, the currents of the power check) are named
   as assumptions.
-- Images that no page shows any more: list them in the report and ask the owner before deleting one. A report or a
-  frozen script may still name it.
+- An image that no page shows fails `test_every_report_image_is_shown_somewhere`. Decide per image, with
+  `git grep <name>` and `git log --diff-filter=A -- <path>`: evidence named by a report gets a link there; an image of
+  a frozen item (the spike board) goes into that item's README; an image that is superseded and named nowhere is
+  deleted (git keeps it). Say which in the report. Never delete an image that a report or script still names.
 
 ## Lessons (each cost time once)
 - KiCad's image has no SVG rasteriser (no rsvg-convert): the P1 script exports PDF and uses pdftoppm.

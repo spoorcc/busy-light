@@ -11,6 +11,8 @@ import subprocess
 import unittest
 from pathlib import Path
 
+import readme_facts
+
 ROOT = Path(__file__).resolve().parents[2]
 READMES = [
     ROOT / "README.md",
@@ -60,6 +62,13 @@ class ReadmeImages(unittest.TestCase):
                 self.assertIn(name, shown)
                 if tracked is not None:  # outside a git checkout only the file is checked
                     self.assertIn(name, tracked, "not committed")
+
+    def test_every_report_image_is_shown_somewhere(self) -> None:
+        """An image in docs/verification/reports/images that no Markdown file links to is either
+        evidence that lost its link or a leftover. On 2026-11-21 six were found this way: four
+        spike-board images moved to the frozen board's README, one report path became a link,
+        and a superseded housing concept image was deleted."""
+        self.assertEqual(readme_facts.unused_images(ROOT), [])
 
     def test_board_p1_readme_shows_the_panel(self) -> None:
         shown = {p.name for p in local_images(ROOT / "hw/kicad/spike-gate/board-p1/README.md")}

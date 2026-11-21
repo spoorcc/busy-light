@@ -3,6 +3,16 @@
 The routed 4-layer spike board: ring14 run 9, picked from 12 runs (Freerouting 2.5.0 is not deterministic, so this is one run, not a recipe).
 Made by `run_best.sh` with `SPIKE_PROFILE=fine`, `PLACE_GRID=1.0`, `PLACE_ANT_KEEPOUT=1`, `PLACE_BLOCKS=3`, `PLACE_ORIENT=1.5`, `SEED_OFFSET=200`, input netlist `full8` (not in the repo; regenerate with `run_full.sh`). Report: `docs/verification/reports/spike-pcb-placement-routing.md`.
 
+## Images (rendered 2026-11-08 from these files)
+| Top (3D render) | All copper layers and silkscreen |
+|---|---|
+| <img src="../../../../docs/verification/reports/images/spike-pcb-4layer-top3d.png" alt="Round green spike board with a ring of 16 LED footprints, the ESP32 module, a button and the USB-C tab on the right" width="380"> | <img src="../../../../docs/verification/reports/images/spike-pcb-4layer-layers.png" alt="All copper layers and the silkscreen of the spike board in colour: ground pours, tracks and vias" width="380"> |
+
+Schematic in two crops: [`spike-schematic-gate-power.png`](../../../../docs/verification/reports/images/spike-schematic-gate-power.png)
+and [`spike-schematic-mcu-leds.png`](../../../../docs/verification/reports/images/spike-schematic-mcu-leds.png). Made by
+`../render_readme_images.sh`. They were the README gallery until 2026-11-21, when the P1 board (`../board-p1/`) replaced
+them. The 3D render has no component models for most parts and is not a fit check.
+
 Files: `busy_light_spike.kicad_pcb`, `.kicad_pro`, `.kicad_sch`, `.kicad_dru` (rules), `.placement.json`, `fp-lib-table` and `CUSTOM.pretty` (open the board next to them). Script output, never edited by hand.
 
 Finishing (2026-11-08): the seven unannotated parts were renamed (`src/pcb_rename.py`: C1B to C1F are now C27 to C31, R_ILIM3B is R20, R_VD is R21), and silkscreen designators and four fiducials were added (`src/pcb_finish.py`; 27 parts have no free place for a designator). Routing did not change.

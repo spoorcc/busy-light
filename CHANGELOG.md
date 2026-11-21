@@ -71,6 +71,12 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- The default `pytest` run (and so the `ci.yml` software job) includes the 54 analysis tests of `hw/sim/scripts`; before,
+  only the fab-release workflow on `main` ran them (HW-010, HW-013, HW-014).
+- Images without a page (found by `scripts/readme_facts.py`): the four spike-board images are shown in the frozen board's
+  `hw/kicad/spike-gate/board/README.md`, the pipeline report links its render, and the housing concept image of
+  2026-11-04 (replaced in the README by the generated housing model on 2026-11-07, named nowhere) is deleted; git keeps
+  it. Test `test_every_report_image_is_shown_somewhere` fails for an image that no Markdown file shows.
 - README updated to the state of 2026-11-21: P1 board, panel and checks in the gallery instead of the frozen spike board;
   status table with 105 requirements (21 approved), 23 ADRs (19 accepted, 2 proposed, 2 superseded), 15 reviews, the target
   build of `sw/app` and the checks of `scripts/ci_hw.sh`; how to build the P1 order package. `board-p1/README.md` shows the
