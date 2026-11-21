@@ -5,6 +5,18 @@ of `run_repass.sh` (2026-11-20). Freerouting 2.5.0 is not deterministic across p
 recipe. Script output, never edited by hand. Not reviewed or approved; not "DFx approved", not "fully functional", **not ready
 to order** (see Open).
 
+## Images
+| Top (3D render) | Bottom (3D render) | Order panel (3D render) |
+|---|---|---|
+| <img src="../../../../docs/verification/reports/images/p1-pcb-top3d.png" alt="P1 board from the top: LED ring, ESP32-C3 module on the left, USB-C tab on the right" width="260"> | <img src="../../../../docs/verification/reports/images/p1-pcb-bottom3d.png" alt="P1 board from the bottom: test points TP1 to TP6, spares C4 and C32, three fiducials" width="260"> | <img src="../../../../docs/verification/reports/images/p1-panel-top3d.png" alt="P1 board in the KiKit panel with two rails and four mouse-bite tabs" width="240"> |
+
+Copper layers: [`p1-pcb-layers.png`](../../../../docs/verification/reports/images/p1-pcb-layers.png); schematic:
+[`p1-schematic-gate-power.png`](../../../../docs/verification/reports/images/p1-schematic-gate-power.png) and
+[`p1-schematic-mcu-leds.png`](../../../../docs/verification/reports/images/p1-schematic-mcu-leds.png). Made on 2026-11-21 by
+`render_p1_images.sh board-p1 <package>/panel.kicad_pcb docs/verification/reports/images`, with the panel of a
+`scripts/fab_p1.sh` package of this board (input sha256 `cc2457c7...7da6`). The renders have no component models for
+most parts and are not a fit check.
+
 ## How it was made
 - Schematic: `run_full.sh` from the generator after ADR-0023 (97 parts). Regenerated on 2026-11-20 from the source of commit
   `5785f0e`: the schematic is byte-identical to the one the batch used, the netlist equal apart from its date and tool lines.

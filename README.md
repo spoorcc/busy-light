@@ -28,7 +28,8 @@ Sixteen RGB LEDs that show your Jenkins build status or any other level, with no
 ---
 
 > **Honest status:** busy-light is in the **design phase**. There is no released firmware, no manufactured
-> hardware and no approved requirement set yet. Everything below describes the **intended** product and
+> hardware and no approved requirement set yet. A first prototype board (P1) is routed and checked by script,
+> but it is not reviewed and **not ordered**. Everything below describes the **intended** product and
 > what the project has already proved with desk studies, PC prototypes and CAD experiments.
 > Nothing here is certified, and no conformity with any regulation is claimed.
 
@@ -80,18 +81,18 @@ flowchart LR
 
 ## What exists today
 
-The project has done a lot of thinking and some experiments, but **no product code or hardware yet**.
+The project has done a lot of thinking and some experiments, but **no product code or manufactured hardware yet**.
 
 | Area | State |
 |------|-------|
-| Requirements | Written for needs, system, software, hardware and mechanics (101 entries). **18 are approved by the owner** (all 9 mechanical, 5 software, 3 hardware including the current-limit gate HW-010, 1 system); the rest are drafts. |
-| Architecture decisions | 19 decision records. **17 are accepted** by the owner (ADR-0011, the housing, only for the prototype); 2 are superseded. Recent decisions: first antenna layout (ADR-0003), annular back bayonet (ADR-0014), AND gate for the fault readback (ADR-0018) and a standard-package regulator with a firmware current limit (ADR-0019). |
+| Requirements | Written for needs, system, software, hardware and mechanics (105 entries). **21 are approved by the owner** (all 9 mechanical, 6 hardware including the current-limit gate HW-010 and the shop rules HW-008, 5 software, 1 system); the rest are drafts. |
+| Architecture decisions | 23 decision records. **19 are accepted** by the owner (ADR-0011, the housing, only for the prototype; ADR-0023 for its decisions, its text not yet read by the owner), 2 are proposed (ADR-0020 fabrication rules, ADR-0022 how P1 gets its parts onto the board) and 2 are superseded. Recent decisions: measure the hot-plug surge on the prototype first (ADR-0021) and a simpler current-limit gate with smaller packages, so that every assembled part fits on one side (ADR-0023). |
 | Risk register | Open. Each risk has a mitigation and a verification link. |
-| Reviews | Independent "goldfish" reviews recorded for the system design, the first spike plan and the hardware flow decision ([`docs/reviews/`](docs/reviews/)). |
-| Software | Zephyr 4.5.0 workspace pinned. The input-current gate logic (`sw/app/src/gate.c`) has **20 host unit tests that pass** on `native_sim`; nothing runs on a board. A mapping extractor and an LED current limiter were tried as PC-only prototypes (results in the reports, code not in `sw/`). |
-| Hardware | A scripted KiCad flow produces a **spike** full-board schematic (USB-C input, current-limit gate, hold-off, AND-gate fault readback, supply-pin surge protection, ESP32-C3 module, 16 LEDs) and a 4-layer board on the mechanical-spike outline, routed with Freerouting. The board is routed with **0 unconnected items** and passes the strict check apart from tolerated antenna and stand-in findings, but nothing is reviewed. Part datasheet evidence is recorded in a schema, **none verified**. The surge on the 5 V side is still to be **measured** on a built board. **No product schematic or layout yet.** |
-| Mechanics | FreeCAD scripts generate the housing (base with USB-C window, button hole, PCB posts and snap hooks, annular back bayonet with lock lips and a mating accessory ring, lid with snap bumps), print coupons for the diffuser and the bayonet, and a tolerance check with tests. **Nothing printed or fit-tested**; the tolerances are assumptions. |
-| Regulatory | Applicability analysis and compliance matrix started. No evidence collected, no declaration made. |
+| Reviews | 14 independent "goldfish" reviews ([`docs/reviews/`](docs/reviews/)), from the system design to the P1 board plan (RV-014). |
+| Software | Zephyr 4.5.0 workspace pinned. The input-current gate logic (`sw/app/src/gate.c`) has **20 host unit tests that pass** on `native_sim`. The application **builds** for the ESP32-C3 dev kit without warnings, but the gate logic is not in that image yet and **nothing was flashed or run on a board**. A mapping extractor and an LED current limiter were tried as PC-only prototypes (results in the reports, code not in `sw/`). |
+| Hardware | A scripted KiCad flow makes the full schematic (USB-C input, CC detection, current-limit gate, hold-off, ESP32-C3 module, 16 LEDs) and the **P1 prototype board**: 46 mm, 4 layers, every assembled part on the top side ([`board-p1/`](hw/kicad/spike-gate/board-p1/README.md)). Script checks pass: strict ERC and DRC with **0 unconnected items** (only the tolerated antenna findings), no via in a pad, supply drops of 7 to 44 mV. The order package (KiKit panel, JLCPCB files) builds, but the board is **not reviewed and not ordered**: the hold-off IC (U5) has no shop listing, and the candidate for the damping link R22 has up to 20 mΩ against the 10 mΩ of HW-017. Part datasheet evidence is recorded in a schema, **none verified**. The surge on the 5 V side is still to be **measured** on a built board. |
+| Mechanics | FreeCAD scripts generate the housing (base with USB-C window, button hole, PCB posts and snap hooks, annular back bayonet with lock lips and a mating accessory ring, lid with snap bumps), print coupons for the diffuser and the bayonet, and a tolerance check with tests. **Nothing printed or fit-tested**; the tolerances are assumptions. The fit of the P1 board in the housing is **not checked**. |
+| Regulatory | Applicability analysis and compliance matrix started; the P1 board changes have a regulatory check. No test evidence collected, no declaration made. |
 
 The reports behind these lines are in [`docs/verification/reports/`](docs/verification/reports/).
 
@@ -103,23 +104,28 @@ All images are generated from text sources or tool exports; none is hand-drawn. 
 
 ![Proposed software blocks: Jenkins and a phone browser talk to the device; inside the device source adapters, mapping, display engine, network manager, web server and settings store](docs/diagrams/generated/plantuml/arch-system-blocks.svg)
 
-**Hardware spike (KiCad 10, generated by script, not reviewed, not the product design):**
+**Prototype board P1 (KiCad 10, generated by script, checked by script, not reviewed, not ordered):**
 
-| Schematic (spike), part 1: USB-C input, CC detection, current-step gate, hold-off, regulator |
+| Schematic (P1), part 1: USB-C input, CC detection, current-step gate, hold-off, current limit, regulator |
 |---|
-| <a href="docs/verification/reports/images/spike-schematic-gate-power.png"><img src="docs/verification/reports/images/spike-schematic-gate-power.png" alt="Left part of the spike schematic: USB-C receptacle, TUSB321, 74LVC1G gates, two TMUX1101 switches for the current-limit steps, TPS2553 current limit, TPS3840 hold-off timer, 3.3 V regulator box, and the supply-pin protection (resistor, 100 nF, 5.1 V zener)" width="900"></a> |
+| <a href="docs/verification/reports/images/p1-schematic-gate-power.png"><img src="docs/verification/reports/images/p1-schematic-gate-power.png" alt="Upper part of the P1 schematic: USB-C receptacle with TVS and USBLC6, TUSB321 CC detection with an inverter, two 74LVC1G11 AND gates that drive two TMUX1101 switches for the current-limit steps, TPS2553 current limit, TPS3840 hold-off timer, 3.3 V regulator, supply-pin protection and the R22 link" width="900"></a> |
 
-| Schematic (spike), part 2: ESP32-C3 module, button, AND-gate fault readback, LED buffer, 16 LEDs |
+| Schematic (P1), part 2: ESP32-C3 module, button, LED buffer, 16 LEDs |
 |---|
-| <a href="docs/verification/reports/images/spike-schematic-mcu-leds.png"><img src="docs/verification/reports/images/spike-schematic-mcu-leds.png" alt="Lower part of the spike schematic: ESP32-C3-MINI-1 module, button, the AND gate that combines HOLD_OK and FAULT_N, the LED data buffer and a chain of 16 LEDs in two rows of eight" width="900"></a> |
-| Two crops of one single-sheet schematic, exported with `kicad-cli`; click an image for full size. Some labels overlap (for example C1 and C27) and part values are open (`tbd`). The schematic is a spike under ADR-0012 (Proposed), not reviewed and not approved. |
+| <a href="docs/verification/reports/images/p1-schematic-mcu-leds.png"><img src="docs/verification/reports/images/p1-schematic-mcu-leds.png" alt="Lower part of the P1 schematic: ESP32-C3-MINI-1 module, button with ESD diode, the 74AHCT1G125 LED data buffer and a chain of 16 LEDs in two rows of eight, with the two spare capacitors crossed out as not fitted" width="900"></a> |
+| Two crops of one single-sheet schematic, exported with `kicad-cli`; click an image for full size. After ADR-0023 the hold-off output and the current-limit fault share one open-drain line (GATE_OK_RB). Some labels overlap (for example the values of C1 and C27 to C31, and TP6, R16 and R17 at the module) and one note runs past the sheet edge. Not reviewed, not approved. |
 
-| Board, 4 layers, top view (3D render) | Board, all copper layers and silkscreen |
+| P1 top (3D render) | P1 bottom (3D render) |
 |---|---|
-| <img src="docs/verification/reports/images/spike-pcb-4layer-top3d.png" alt="Round green board with a ring of 16 square LED footprints, an ESP32 module, a button and a USB-C receptacle tab on the right" width="420"> | <img src="docs/verification/reports/images/spike-pcb-4layer-layers.png" alt="Copper layers of the round board in colour: ground pours, tracks and vias" width="420"> |
-| Generated by script from the schematic netlist on the outline of the mechanical spike. The 16 LED cells (one 2020 LED with its capacitor) are placed and routed as a symmetric ring by script; the rest is routed with Freerouting v2.5.0 (fine rules, 0.1 mm tracks, see ADR-0020, Proposed). | One run (ring14 run 9), picked as the best of 12 (routing is not deterministic); the board is stored in [`hw/kicad/spike-gate/board/`](hw/kicad/spike-gate/board/). **0 unconnected items, 0 hard findings.** The strict check lists 11 findings, all in the classes that the waiver list tolerates: 8 courtyard overlaps and 1 item inside the rule area (ESP32 antenna keep-out), 2 symbol mismatches (C3, C4). Power paths (analyst assumptions of 1.5, 1.0 and 0.5 A): 13.5, 18.0 and 22.7 mV drop. The fabricator-minimum check passes for the JLCPCB numbers of ADR-0020 (Proposed), with the via ring at the 0.15 mm minimum. Not run: antenna/RF, thermal, full fab review, bench. A spike result, **not** a reviewed board. |
+| <img src="docs/verification/reports/images/p1-pcb-top3d.png" alt="Round green 46 mm board seen from the top: 16 LED footprints in a ring near the edge, the ESP32-C3 module on the left, the gate, current-limit and regulator parts in the middle and the USB-C receptacle on a tab on the right" width="420"> | <img src="docs/verification/reports/images/p1-pcb-bottom3d.png" alt="Bottom of the board: six round test points TP1 to TP6, two empty spare capacitor footprints C4 and C32, three fiducials and the pads of the USB-C receptacle" width="420"> |
+| Every assembled part is on the top. Placement by script (seed 47, the best of 16 seeds), routing with Freerouting 2.5.0 and a second router pass that closed the last open connection. | On the bottom: test points TP1 to TP6, the spares C4 and C32 (not fitted, HW-016) and three fiducials. |
 
-Regenerate with [`hw/kicad/spike-gate/render_readme_images.sh`](hw/kicad/spike-gate/render_readme_images.sh). The 3D render has no component models for most parts and is not a fit check. See [`spike-pcb-placement-routing.md`](docs/verification/reports/spike-pcb-placement-routing.md).
+| P1 copper layers (seen from the top) | P1 order panel (3D render) |
+|---|---|
+| <a href="docs/verification/reports/images/p1-pcb-layers.png"><img src="docs/verification/reports/images/p1-pcb-layers.png" alt="Four copper layers of the P1 board in a 2 by 2 grid: F.Cu with most tracks, In1.Cu as a ground plane, In2.Cu as a +5 V plane with some signal tracks, B.Cu with a few tracks and vias" width="420"></a> | <img src="docs/verification/reports/images/p1-panel-top3d.png" alt="The P1 board in a panel of about 54 by 60 mm: a 5 mm rail above and below with two tooling holes on each rail and three fiducials, and four tabs with mouse bites that hold the round board" width="420"> |
+| In1 is the GND plane; In2 is the +5V plane with 305 mm of signal track (still one piece). 174 vias, none in a pad. Strict DRC: **0 unconnected items**, only the 15 tolerated findings at the ESP32 module (DEV-004). Supply drops (analyst currents): +3V3 7.3, +5V 10.0, VBUS 23.9, VBUS_IC 44.1 mV. | One board per panel with 5 mm rails, four tooling holes, three panel fiducials and four mouse-bite tabs at 105, 217.5, 285 and 330 degrees (KiKit 1.8.1, [`scripts/panel_p1.json`](scripts/panel_p1.json)). Made by [`scripts/fab_p1.sh`](scripts/fab_p1.sh), which also writes the JLCPCB Gerbers, BOM and placement file. |
+
+Regenerate with [`hw/kicad/spike-gate/render_p1_images.sh`](hw/kicad/spike-gate/render_p1_images.sh) (the panel comes from `scripts/fab_p1.sh`). The 3D renders have no component models for most parts and are not a fit check. Not run: housing fit, antenna range, thermal, JLCPCB DFM check and price, bench tests. Details: [`board-p1/README.md`](hw/kicad/spike-gate/board-p1/README.md). The earlier spike board (frozen 2026-11-18) is in [`hw/kicad/spike-gate/board/`](hw/kicad/spike-gate/board/README.md).
 
 | Housing model (FreeCAD script), exploded | Back of the base |
 |---|---|
@@ -132,7 +138,7 @@ Regenerate with [`hw/kicad/spike-gate/render_readme_images.sh`](hw/kicad/spike-g
 |-------|------|-------|
 | **0. Foundation** | Process, requirements, decisions, risks, regulatory outline, CI | in progress |
 | **1. Spikes** | Prove the risky parts on a dev kit: Wi-Fi access point, web page, LED drive, power budget, secure boot | planned, waiting for approval of the spike plan |
-| **2. Prototype** | 10 internal prototypes: schematic, board, housing, first firmware | planned |
+| **2. Prototype** | 10 internal prototypes: schematic, board, housing, first firmware | started: P1 board routed and checked by script, not reviewed or ordered (plan 08, in review) |
 | **3. Verify** | Test cases against approved requirements, pre-compliance tests | planned |
 | **4. Release candidate** | Signed firmware, documentation, technical file | planned |
 
@@ -183,7 +189,16 @@ scripts/build_diagrams.sh --check            # diagrams are up to date
 ```
 
 **Hardware and mechanical checks** run in CI through `scripts/ci_hw.sh` (KiCad 10) and `scripts/ci_mech.sh` (FreeCAD).
-They report **NOT RUN** until product sources exist, so a skipped check is never mistaken for a pass.
+`ci_hw.sh` runs the strict ERC and DRC on the stored boards, and on the P1 board also the no-via-in-pad check and the
+power check. `ci_mech.sh` generates the housing models and runs the tolerance check. A check without input reports
+**NOT RUN** (for example the regeneration check, which has no generator file yet), so a skipped check is never mistaken
+for a pass.
+
+**P1 order package** (needs KiCad 10 with its Python and KiKit 1.8.1 from `scripts/requirements-fab.txt`):
+
+```sh
+scripts/fab_p1.sh hw/kicad/spike-gate/board-p1/busy_light_spike.kicad_pcb build/p1-fab   # gates, panel, JLCPCB files
+```
 
 ## Contributing
 

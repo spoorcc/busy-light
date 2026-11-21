@@ -11,6 +11,11 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- README images of the P1 board and its order panel (plan 08, HW-008, HW-009): new
+  `hw/kicad/spike-gate/render_p1_images.sh` exports the schematic in two crops, the four copper layers, top and bottom 3D
+  renders of `board-p1/` and a 3D render of the KiKit panel from `scripts/fab_p1.sh` into
+  `docs/verification/reports/images/p1-*.png`. Test `scripts/tests/test_readme_images.py`: every image a README shows
+  exists, and the six P1 images are committed and shown.
 - Stored P1 board `hw/kicad/spike-gate/board-p1/` (plan 08 section 5 step 8, ADR-0023): batch p1b8 run 3 completed by the
   second router pass; every assembled part on the top. Strict ERC 0 findings, strict DRC only the tolerated U9 classes
   (DEV-004), no unconnected item, no via in a pad, power check within 50 mV with full-width paths, `tests/test_board_p1.py`
@@ -60,6 +65,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- README updated to the state of 2026-11-21: P1 board, panel and checks in the gallery instead of the frozen spike board;
+  status table with 105 requirements (21 approved), 23 ADRs (19 accepted, 2 proposed, 2 superseded), 14 reviews, the target
+  build of `sw/app` and the checks of `scripts/ci_hw.sh`; how to build the P1 order package. `board-p1/README.md` shows the
+  renders. `hw/sim/`, `mech/analysis/` and `sw/app/tests/` READMEs list their files and how to run them.
 - P1 placement (plan 08, HW-016, HW-008): the do-not-populate spares C4 and C32 go on the bottom side (not assembled, so the
   assembly stays one-sided) in 1206 again, held within 7.5 mm of U7 by a hard layout rule and pin ties (batch p1b3 put C4 24.8 mm
   from U7 pin 6, against HW-016's [10] mm); the LED capacitors keep out of boxes around four panel tabs at 105, 217.5, 285 and
