@@ -11,7 +11,8 @@
   HW-003 (Approved: rating of the input path, recalculated for R22 and the new path), HW-009 (Draft: ERC/DRC reports stored with the revision), HW-001, HW-005, HW-006 (Draft, unchanged ring geometry, antenna
   keep-out with DEV-004, test points). ADR-0021 (Accepted 2026-11-17). ADR-0020 stays Proposed: its fab numbers are used as
   **unaccepted inputs** (dated 2026-11-08), and P1 uses the owner's 0.15 mm answer, not ADR-0020 option B.
-- **EGM review record:** RV-014 (comprehension / antagonistic / readiness)
+- **EGM review record:** RV-014 (comprehension / antagonistic / readiness); RV-016 (revision 5 and the stored board: not
+  ready to order)
 - **Superseding question (2026-11-18):** the measured one-sided placement does not fit on 46 mm; ADR-0022 (Proposed) asks the owner
   to choose between two-sided P1 (recommended), part reduction, board growth or giving up the keep-out. Steps 1 to 5 and the order-package
   scripts are implemented; routing of P1 waits for that decision. *(Revision 5: answered on 2026-11-18 by the "fewer parts"
@@ -56,9 +57,9 @@ confirms or rejects this plan and its result together.
 - G2 met with tolerated classes only: strict ERC 0 findings; strict DRC `courtyards_overlap` 14 (maximum 14) and
   `items_not_allowed` 1, both U9 (DEV-004, Proposed).
 - G3 met: 0 of 174 vias in an SMD pad.
-- G4 met for the board files: R22 between `VBUS` and `VBUS_IC`; C4 and C32 within 10 mm of U7 pin 6 (`test_board_p1.py`).
-  R22 has no part that meets HW-017's [10] mohm (A8).
-- G5 met locally: `fab_p1.sh` builds the package; the CI build is not run.
+- G4 partly met: R22 between `VBUS` and `VBUS_IC`; C4 and C32 within 10 mm of U7 pin 6 (`test_board_p1.py`). R22 has no part
+  that meets HW-017's [10] mohm and no MPN in the BOM (A8); the main path is not >= 0.6 mm wide (RV-016 row 13).
+- G5 not met: `fab_p1.sh` builds the package locally (2026-11-21); the CI build has not run.
 - Supply drops (analyst currents, 50 mV analyst target): `VBUS` 23.9 mV and `VBUS_IC` 44.1 mV at 1.5 A, 68.0 mV from J1 to U7
   in copper. The jumper is not in the power check: the R22 candidate (up to 20 mohm) adds up to 30 mV at 1.5 A.
 
@@ -72,6 +73,40 @@ confirms or rejects this plan and its result together.
 - Order steps O0 to O8 of section 6 are unchanged.
 - Not run: housing fit, antenna range with the module 5 mm closer to the edge (TC-205), thermal, `fab-release.yml` on GitHub,
   JLCPCB DFM and price, bench.
+
+### 0.5 Review RV-016 (2026-11-22): not ready to order
+`docs/reviews/RV-016-p1-plan-rev5-as-built-goldfish.md` (45 rows; readiness pass not run). This list applies over 0.2 to 0.4.
+- **Gate safety after ADR-0023** (rows 1 to 6): a missing U5 makes the gate fail open (R8 holds GATE_OK_RB high), and the order
+  check lets U5 be missing; GPIO6 sits directly on GATE_OK_RB, so firmware can hold the gate open; the pull-up went from VBUS_IC
+  (150 kohm) to 3V3 (10 kohm) against the read TPS3840 evidence; the owner's CC-pin protection (P3, 2026-11-07) is not on the
+  board; the BZT52C5V1S zeners have no datasheet evidence; ADR-0023 has had no goldfish review.
+- **Placement and copper** (rows 11 to 15): 5 of the 15 implemented `LAYOUT_RULES` are missed too (the placer keeps its best
+  placement without a message); the input-path rules (0.2 step 5 (a)); the main path has 0.45 mm segments and two 0.3 mm vias,
+  not >= 0.6 mm; no tool sums the J1-to-U7 drop; the bottom silkscreen map of 4.4 (answer 13) and U1's F.Fab text are missing.
+- **Order files** (rows 16 to 18, 28, 29): the full BOM leaves out C4 and C32; their pads have bottom paste; no board text or
+  revision; `fab_check` checks "0.1%", not the ILIM values.
+- **Housing and parts** (rows 22 to 24): MECH-001 (Approved, 58 mm) is exceeded (`largest_dim_mm` 59.24, as for the spike
+  board); the LED and U9 footprints are not compared with manufacturer drawings; SW1 does not match the housing button.
+- **Evidence** (rows 26, 30, 33, 34): PR CI does not run `hw/kicad/spike-gate/tests`, so the test evidence of 0.2 is from local
+  runs; no ERC or DRC report is stored (HW-009) and DEV-004 is scoped "spike only"; steps 5 to 12 ran after a readiness NO-GO
+  and partly before Approved text (a DEV entry is to be written); the regulatory check predates ADR-0023.
+- **Consequence** (row 45): rows 2 to 5 change the schematic and rows 11 to 13 need a new placement, so P1 is placed and routed
+  again after the owner's decisions, with the tool fixes first.
+
+Superseded statements of sections 1 to 8 (RV-016 row 37):
+- Header: "HW-010 (... trim T1 ...)": ADR-0023 amendment. "HW-003 (... recalculated for R22 and the new path)": not done
+  (row 13). "HW-009 (Draft: ERC/DRC reports stored with the revision)": not stored (row 30).
+- A5: the pin map is unchanged, but plan 07 firmware cannot reach step 3 on P1 (`gate.c` forces both selects off; with ADR-0023
+  select 3 alone gives the step-2 current), row 25.
+- A8 and R9: the missing LCSC numbers are R22 and U5 only (`scripts/fab_missing_lcsc.txt`).
+- 4.1 items 1 to 3: R_ILIM3 is 56.2 k 0.1 % (ADR-0023), not 27.7 k.
+- 4.3: the U9 front courtyard measures 43.3 x 31.9 mm on board-p1, not 43 x 20 mm (43 x 20 mm was the vendor keep-out zone).
+- 4.4: fiducials FID1 (top) and FID4 to FID6 (bottom): `pcb_finish.py` found room for one on the top and numbers the bottom ones
+  from 4; JLCPCB uses the three on the panel rails.
+- 4.5: the ILIM values belong to `ilim_steps.candidate_both_on()`; `fab_check` checks "0.1%" only (row 28).
+- 4.6: the build job installs the Python tools with pip from `scripts/requirements-fab.txt`, not with apt.
+- Section 6 bench table: HOLD_OK and FAULT_N no longer exist; both are the node GATE_OK_RB (R8 pin 2, U5 pin 1, U7 pin 4); R6
+  is removed. O2: "the 27.7 k 0805" is replaced by the 56.2 k 0.1 % parts; O7 and O8 are to be rewritten (row 9).
 
 ## 1. Problem definition
 The owner wants to order a first prototype board (P1): 5 bare PCBs, 2 of them assembled by JLCPCB with the **Economic**

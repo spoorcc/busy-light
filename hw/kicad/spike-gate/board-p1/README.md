@@ -58,6 +58,9 @@ most parts and are not a fit check.
   allowed by `scripts/fab_missing_lcsc.txt`). The package is build output and is not committed.
 
 ## Open (owner)
+- Review RV-016 (2026-11-22, `docs/reviews/RV-016-p1-plan-rev5-as-built-goldfish.md`): **not ready to order**. Gate safety
+  after ADR-0023, missed placement rules, a main path below 0.6 mm, the full BOM without C4 and C32, MECH-001 and unverified
+  footprints; the board is to be placed and routed again after the owner's decisions (plan 08 section 0.5).
 - U5 TPS3840DL40DBVR has no LCSC or JLCPCB listing (the hold-off of HW-010 needs it); R22 candidate up to 20 mohm against
   HW-017 [10] mohm.
 - The assistant's picks: spares on the bottom in 1206; tab azimuths; the 0.75 full-width rule and the 50 mV target.

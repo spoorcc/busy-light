@@ -71,6 +71,13 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Plan 08 revision 5 (section 0: the state after the build) and goldfish review RV-016 of the plan and the stored P1 board:
+  **not ready to order** (45 findings; readiness pass not run). Blocking: a missing U5 makes the gate fail open and the order
+  check allows it; GPIO6 sits directly on the gate node; the hold-off pull-up moved to 3V3 against the TPS3840 evidence; the
+  CC-pin protection chosen on 2026-11-07 is not on the board; 5 of 15 placement rules and the 4 input-path rules are missed;
+  the main path has 0.45 mm segments; the full BOM leaves out C4 and C32; MECH-001 is exceeded; PR CI does not run the
+  spike-gate tests. The README and `board-p1/README.md` now say "not ready to order" (HW-003, HW-008, HW-009, HW-010,
+  HW-016, HW-017, MECH-001, ADR-0023, RV-016).
 - The default `pytest` run (and so the `ci.yml` python-tools job) includes the 54 analysis tests of `hw/sim/scripts`;
   before, only the fab-release workflow on `main` ran them. The job installs ngspice: without it the 16 surge tests
   skip (CI run 44904291971: 167 passed, 16 skipped). Test `scripts/tests/test_ci_workflow.py` (HW-010, HW-013, HW-014).
