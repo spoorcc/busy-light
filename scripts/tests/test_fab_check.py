@@ -65,7 +65,7 @@ M02*
 PARTS = [
     footprint("R_ILIM1", "47.0k 0.1%"),
     footprint("R_ILIM2", "56.2k 0.1%"),
-    footprint("R_ILIM3", "27.7k 0.1%"),
+    footprint("R_ILIM3", "56.2k 0.1%"),
     footprint("C1", "100n", "Capacitor_SMD:C_0603_1608Metric"),
     footprint("U5", "TPS3840DL40", "Package_TO_SOT_SMD:SOT-23-5"),
     footprint("J1", "USB-C receptacle", "CUSTOM:USB_C", attrs="through_hole"),
@@ -85,7 +85,7 @@ PARTS = [
 BOM_ROWS = [
     ("47.0k 0.1%", "R_ILIM1", "R_0603", "C667109"),
     ("56.2k 0.1%", "R_ILIM2", "R_0603", "C667119"),
-    ("27.7k 0.1%", "R_ILIM3", "R_0603", "C865349"),
+    ("56.2k 0.1%", "R_ILIM3", "R_0603", "C667119"),
     ("100n", "C1", "C_0603", "C1591"),
     ("TPS3840DL40", "U5", "SOT-23-5", ""),
 ]
@@ -118,12 +118,14 @@ def write_board(path: Path, parts: list[str] | None = None) -> Path:
     return path
 
 
-def check(
+def check(  # noqa: PLR0913, PLR0917 - mirrors run_checks
     tmp_path: Path,
     bom: list[tuple[str, str, str, str]] | None = None,
     cpl: list[tuple[str, float, float, str]] | None = None,
     parts: list[str] | None = None,
     allowed: dict[str, str] | None = None,
+    waivers: dict[str, str] | None = None,
+    bottom_paste: str | None = None,
 ) -> tuple[dict[str, fc.Result], list[str]]:
     out = write_package(tmp_path / "pkg", bom, cpl)
     board = write_board(tmp_path / "b.kicad_pcb", parts)
@@ -133,6 +135,8 @@ def check(
         fc.read_footprints(board),
         fc.edge_cuts_from_zip(out / fc.GERBER_ZIP),
         {"U5": "listed"} if allowed is None else allowed,
+        {"U5": "owner hand-fits it (test)"} if waivers is None else waivers,
+        bottom_paste,
     )
     return {r.name: r for r in results}, lines
 
@@ -228,7 +232,7 @@ def test_gerber_inch_units_and_missing_format() -> None:
 def test_good_package_passes_every_check(tmp_path: Path) -> None:
     res, lines = check(tmp_path)
     assert all(r.ok for r in res.values()), [r for r in res.values() if not r.ok]
-    assert lines == ["  U5: allowed (listed)"]
+    assert lines == ["  U5: must-place part, OWNER WAIVER (owner hand-fits it (test))"]
 
 
 def test_bottom_layer_row_fails(tmp_path: Path) -> None:
@@ -276,20 +280,71 @@ def test_ref_that_is_not_on_the_board_fails(tmp_path: Path) -> None:
     assert "not on the board: R99" in res["assembled_refs_once"].detail
 
 
-def test_ilim_resistors_need_0p1_percent(tmp_path: Path) -> None:
-    bom = [("27.7k 1%", *BOM_ROWS[2][1:]) if r[1] == "R_ILIM3" else r for r in BOM_ROWS]
-    res, _ = check(tmp_path, bom=bom)
-    assert not res["ilim_0p1_percent"].ok
-    assert "R_ILIM3='27.7k 1%'" in res["ilim_0p1_percent"].detail
+def test_ilim_resistors_need_the_exact_values(tmp_path: Path) -> None:
+    """RV-016 row 28: "27.7k 0.1%" (the superseded trim T1) passed the old substring test."""
+    for wrong in ("56.2k 1%", "27.7k 0.1%"):
+        bom = [(wrong, *BOM_ROWS[2][1:]) if r[1] == "R_ILIM3" else r for r in BOM_ROWS]
+        res, _ = check(tmp_path, bom=bom)
+        assert not res["ilim_values"].ok, wrong
+        assert f"R_ILIM3={wrong!r} (expected '56.2k 0.1%')" in res["ilim_values"].detail
+
+
+def test_ilim_values_equal_the_generator_and_the_model() -> None:
+    model = load("ilim_steps", SPIKE / "sim" / "ilim_steps.py").candidate_both_on()
+    assert [fc.ILIM_VALUES[r] for r in fc.ILIM_REFS] == [f"{v:.1f}k 0.1%" for v in model]
+    text = (SPIKE / "src" / "layout_full.py").read_text(encoding="utf-8")
+    for ref, value in fc.ILIM_VALUES.items():
+        assert f'"{ref}": (*R, "{value}")' in text, ref
 
 
 def test_missing_lcsc_fails_unless_allowed(tmp_path: Path) -> None:
-    res, lines = check(tmp_path, allowed={})
+    bom = [*BOM_ROWS, ("330", "R10", "R_0402", "")]
+    parts = [*PARTS, footprint("R10", "330")]
+    cpl = [*CPL_ROWS, ("R10", 20.0, 10.0, "T")]
+    res, lines = check(tmp_path, bom=bom, cpl=cpl, parts=parts, allowed={"U5": "listed"})
     assert not res["lcsc_numbers"].ok
-    assert lines == ["  U5: NOT ALLOWED"]
-    res, lines = check(tmp_path, allowed={"U5": "listed", "R22": "not on this board"})
+    assert "  R10: NOT ALLOWED" in lines
+    allowed = {"U5": "listed", "R10": "listed", "R22": "not on this board"}
+    res, lines = check(tmp_path, bom=bom, cpl=cpl, parts=parts, allowed=allowed)
     assert res["lcsc_numbers"].ok
+    assert "  R10: allowed (listed)" in lines
     assert "  note: R22 is allowed but has no missing LCSC number here" in lines
+
+
+def test_must_place_part_fails_even_when_listed(tmp_path: Path) -> None:
+    """RV-016 row 1: U5 on the missing list let the package pass; without U5 the gate fails open."""
+    res, lines = check(tmp_path, allowed={"U5": "listed"}, waivers={})
+    assert not res["lcsc_numbers"].ok
+    assert lines == [
+        "  U5: listed (listed), but a must-place part (HW-010 gate or HW-017 path): NOT ALLOWED"
+    ]
+    res, lines = check(tmp_path, allowed={}, waivers={"U5": "owner hand-fits it"})
+    assert res["lcsc_numbers"].ok
+    assert lines == ["  U5: must-place part, OWNER WAIVER (owner hand-fits it)"]
+    assert {"U5", "R22", "R8", "U7", "R_ILIM3", "C1"} <= fc.MUST_PLACE
+
+
+def test_must_place_parts_are_on_board_p1() -> None:
+    p1 = SPIKE / "board-p1" / "busy_light_spike.kicad_pcb"
+    if not p1.exists():
+        pytest.skip("no board-p1")
+    refs = {f.ref for f in fc.read_footprints(p1)}
+    assert sorted(fc.MUST_PLACE - refs) == []
+
+
+def test_bottom_paste_must_be_empty(tmp_path: Path) -> None:
+    """RV-016 row 17: paste on the do-not-populate spares made the bottom paste Gerber non-empty."""
+    empty = "%FSLAX46Y46*%\n%MOMM*%\nG04 no pads*\nM02*\n"
+    full = "%FSLAX46Y46*%\n%MOMM*%\n%ADD10R,1.0X1.0*%\nD10*\nX1000000Y1000000D03*\nM02*\n"
+    assert check(tmp_path, bottom_paste=empty)[0]["bottom_paste_empty"].ok
+    assert check(tmp_path, bottom_paste=None)[0]["bottom_paste_empty"].ok
+    res = check(tmp_path, bottom_paste=full)[0]["bottom_paste_empty"]
+    assert not res.ok
+    assert res.detail == "1 flash or draw operation(s) on the bottom paste layer"
+    out = write_package(tmp_path / "z")
+    with zipfile.ZipFile(out / fc.GERBER_ZIP, "a") as zf:
+        zf.writestr("gerber/panel-B_Paste.gbp", full)
+    assert fc.bottom_paste_from_zip(out / fc.GERBER_ZIP) == full
 
 
 # -------------------------------------------------------------------------------- missing-LCSC list
@@ -382,9 +437,12 @@ def test_cli_exit_codes(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> N
     board = write_board(tmp_path / "b.kicad_pcb")
     lst = tmp_path / "list.txt"
     lst.write_text("U5 no number yet\n", encoding="utf-8")
-    assert fc.main([str(out), str(board), "--missing-lcsc-file", str(lst)]) == 0
+    waiver = tmp_path / "waiver.txt"
+    waiver.write_text("U5 owner hand-fits it\n", encoding="utf-8")
+    assert fc.main([str(out), str(board), "--owner-waiver-file", str(waiver)]) == 0
     assert "RESULT: PASS" in capsys.readouterr().out
-    assert fc.main([str(out), str(board), "--allow-missing-lcsc", "U5"]) == 0
+    assert fc.main([str(out), str(board), "--missing-lcsc-file", str(lst)]) == 1
+    assert fc.main([str(out), str(board), "--allow-missing-lcsc", "U5"]) == 1
     assert fc.main([str(out), str(board)]) == 1
     assert "RESULT: FAIL (lcsc_numbers)" in capsys.readouterr().out
     (out / fc.CPL_FILE).unlink()

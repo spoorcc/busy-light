@@ -71,6 +71,21 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Order and board gates after review RV-016 (rows 1, 11, 12, 13, 17, 19, 20, 26, 28, 41, 43). `scripts/fab_check.py`: the
+  ILIM resistors must have exactly the ADR-0023 values (`ILIM_VALUES`; "27.7k 0.1%" passed the old "0.1%" test); a
+  must-place part (the HW-010 gate parts and the HW-017 link R22, `MUST_PLACE`) without an LCSC number fails even when
+  `fab_missing_lcsc.txt` lists it, unless the new owner file `scripts/fab_owner_waivers.txt` names it (no waiver given);
+  the bottom paste Gerber must be empty. New `hw/kicad/spike-gate/src/pcb_layout_check.py` measures the ADR-0016
+  proximity rules and the plan 08 input-path rules on a board file (board-p1: 9 rules missed); `scripts/fab_p1.sh` runs it
+  as a gate, so the order script now fails on board-p1 (placement rules, and fab_check on U5 and R22). The placer records
+  the rules it misses in `placement.json` and prints them (`pcb_full.rule_misses`); the HW-016 rule is 7.0 mm (7.5 mm
+  allowed 10.455 mm). `tests/test_board_p1.py`: the U9 courtyard overlaps must be exactly the 14 fixed ring parts; only
+  C4 and C32 may be DNP parts on the bottom; two tests record the known defects of board-p1 as expected failures (the
+  placement rules; the main path at 0.6 mm, which has 0.45 mm segments). The `ci.yml` hardware job runs the 430 spike-gate
+  tests on every push and pull request (before: only `fab-release.yml` on `main`), with ngspice, in the image pinned by the
+  digest that `fab-release.yml` uses. Tests: `test_pcb_layout_check.py`, `test_fab_check.py`, `test_fab_p1_script.py`,
+  `test_ci_workflow.py`, `test_pcb_full.py::RuleMisses` (each new test failed on the old code where it checks a change)
+  (HW-008, HW-010, HW-016, HW-017, ADR-0016, ADR-0023, RV-016).
 - Plan 08 revision 5 (section 0: the state after the build) and goldfish review RV-016 of the plan and the stored P1 board:
   **not ready to order** (45 findings; readiness pass not run). Blocking: a missing U5 makes the gate fail open and the order
   check allows it; GPIO6 sits directly on the gate node; the hold-off pull-up moved to 3V3 against the TPS3840 evidence; the

@@ -3,7 +3,7 @@
 
 Usage:
   fab_check.py <out dir> <board.kicad_pcb> [--allow-missing-lcsc REF,...]
-               [--missing-lcsc-file FILE]
+               [--missing-lcsc-file FILE] [--owner-waiver-file FILE]
   fab_check.py --compare <dir1> <dir2>
 
 Package files read from <out dir>: jlcpcb_bom.csv and jlcpcb_cpl.csv (`kikit fab jlcpcb
@@ -18,11 +18,16 @@ Checks (each failure is listed):
   4. Every CPL point is inside the panel outline (Edge.Cuts Gerber; same origin and y direction as
      the CPL).
   5. No excluded ref (see `exclusion_reason`) is in the BOM or the CPL.
-  6. R_ILIM1, R_ILIM2 and R_ILIM3 are in the BOM and their value has "0.1%" (HW-010).
+  6. R_ILIM1, R_ILIM2 and R_ILIM3 are in the BOM with exactly the values of `ILIM_VALUES`
+     (HW-010, ADR-0023; RV-016 row 28: a "0.1%" substring test let a wrong value pass).
   7. Every BOM line with an empty LCSC number is listed. It fails unless each of its refs is named
      by --allow-missing-lcsc or by the list file (one ref per line, then the reason; `#` starts a
      comment). Policy (plan 08 B2 fix): CI passes scripts/fab_missing_lcsc.txt and the release
-     notes print it.
+     notes print it. A ref in `MUST_PLACE` (the HW-010 gate and the HW-017 power path) fails even
+     when listed, unless the owner waiver file names it (RV-016 row 1: without U5 the gate fails
+     open; without R22 the board has no power). Same file format.
+  8. The bottom paste layer of the Gerbers is empty: the order is one-sided (HW-008; RV-016 row 17:
+     the do-not-populate spares on the bottom had paste).
 Exit codes: 0 all checks pass, 1 a check fails, 2 an input is missing or cannot be read.
 
 --compare: both directories have the same files, and every file has the same content after the
@@ -52,6 +57,19 @@ BOM_FILE = "jlcpcb_bom.csv"
 CPL_FILE = "jlcpcb_cpl.csv"
 GERBER_ZIP = "gerbers.zip"
 ILIM_REFS = ("R_ILIM1", "R_ILIM2", "R_ILIM3")
+# HW-010 as amended by ADR-0023: step 3 = both switches, R_ILIM3 equals R_ILIM2. The test
+# test_ilim_values_equal_the_generator_and_the_model keeps this equal to
+# ilim_steps.candidate_both_on() and to the generator (layout_full.PARTS).
+ILIM_VALUES = {"R_ILIM1": "47.0k 0.1%", "R_ILIM2": "56.2k 0.1%", "R_ILIM3": "56.2k 0.1%"}
+# Parts whose absence leaves the HW-010 gate open or undefined, or the board without power: the CC
+# IC and its inverter and pull-up, both ANDs, the supervisor and its delay capacitors, the
+# gate-node pull-up, the limiter, both select switches, the ILIM resistors, the HW-017 link
+# (ADR-0016, ADR-0023, HW-017). The fail-direction table of RV-016 row 7 may add parts.
+MUST_PLACE = frozenset(
+    {"U1", "U2", "R1", "U3", "U4", "U5", "C1", "C27", "C28", "C29", "C30", "C31", "R8", "U7"}
+    | {"U14", "U15", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22"}
+)
+BOTTOM_PASTE = re.compile(r"(B_Paste|BPaste|\.gbp$)", re.IGNORECASE)
 TOP_LAYERS = ("T", "TOP")
 
 # Lines with a date that KiCad 10 writes: Gerber and Excellon headers, the Gerber job file, the
@@ -358,12 +376,14 @@ def _ref_key(ref: str) -> tuple[str, int]:
     return m.group(1), int(m.group(2) or 0)
 
 
-def run_checks(
+def run_checks(  # noqa: PLR0913, PLR0917 - one argument per package input, as read by _check_main
     bom: Sequence[BomLine],
     cpl: Sequence[CplRow],
     footprints: Sequence[Footprint],
     outline: Sequence[Segment],
     allowed_missing: dict[str, str],
+    owner_waivers: dict[str, str] | None = None,
+    bottom_paste: str | None = None,
 ) -> tuple[list[Result], list[str]]:
     """All checks of the module docstring. Returns the results and the missing-LCSC report lines."""
     res: list[Result] = []
@@ -412,20 +432,30 @@ def run_checks(
     )
 
     values = {r: line.value for line in bom for r in line.refs}
-    bad_ilim = [r for r in ILIM_REFS if "0.1%" not in values.get(r, "")]
+    bad_ilim = [r for r in ILIM_REFS if values.get(r) != ILIM_VALUES[r]]
     res.append(
         Result(
-            "ilim_0p1_percent",
+            "ilim_values",
             not bad_ilim,
-            "; ".join(f"{r}={values.get(r, 'not in the BOM')!r}" for r in ILIM_REFS),
+            "; ".join(
+                f"{r}={values.get(r, 'not in the BOM')!r} (expected {ILIM_VALUES[r]!r})"
+                for r in ILIM_REFS
+            ),
         )
     )
 
+    waivers = owner_waivers or {}
     missing = sorted({r for line in bom if not line.lcsc for r in line.refs}, key=_ref_key)
     lines: list[str] = []
     not_allowed = []
     for r in missing:
-        if r in allowed_missing:
+        if r in MUST_PLACE and r in waivers:
+            lines.append(f"  {r}: must-place part, OWNER WAIVER ({waivers[r]})")
+        elif r in MUST_PLACE:
+            why = f"listed ({allowed_missing[r]}), but " if r in allowed_missing else ""
+            lines.append(f"  {r}: {why}a must-place part (HW-010 gate or HW-017 path): NOT ALLOWED")
+            not_allowed.append(r)
+        elif r in allowed_missing:
             lines.append(f"  {r}: allowed ({allowed_missing[r]})")
         else:
             lines.append(f"  {r}: NOT ALLOWED")
@@ -439,7 +469,33 @@ def run_checks(
             f"{len(missing)} ref(s) without an LCSC number, not allowed: {_refs(not_allowed)}",
         )
     )
+
+    paste_ops = gerber_operations(bottom_paste) if bottom_paste is not None else 0
+    res.append(
+        Result(
+            "bottom_paste_empty",
+            paste_ops == 0,
+            "no bottom paste file"
+            if bottom_paste is None
+            else f"{paste_ops} flash or draw operation(s) on the bottom paste layer",
+        )
+    )
     return res, lines
+
+
+def gerber_operations(text: str) -> int:
+    """Number of flash (D03) and draw (D01) operations in a Gerber file."""
+    return len(re.findall(r"D0?[13]\*", text))
+
+
+def bottom_paste_from_zip(path: Path) -> str | None:
+    """Text of the bottom paste Gerber in the zip, or None when the zip has none."""
+    try:
+        with zipfile.ZipFile(path) as zf:
+            names = [n for n in zf.namelist() if BOTTOM_PASTE.search(n)]
+            return zf.read(names[0]).decode("ascii", "replace") if names else None
+    except (OSError, zipfile.BadZipFile) as exc:
+        raise InputError(f"cannot read {path}: {exc}") from exc
 
 
 # ------------------------------------------------------------------------------------------ compare
@@ -506,12 +562,15 @@ def _check_main(args: argparse.Namespace) -> int:
         allowed.update(read_missing_list(Path(args.missing_lcsc_file)))
     for ref in filter(None, (r.strip() for r in args.allow_missing_lcsc.split(","))):
         allowed.setdefault(ref, "--allow-missing-lcsc")
+    waivers = read_missing_list(Path(args.owner_waiver_file)) if args.owner_waiver_file else {}
     results, lcsc_lines = run_checks(
         read_bom(out_dir / BOM_FILE),
         read_cpl(out_dir / CPL_FILE),
         read_footprints(board),
         edge_cuts_from_zip(out_dir / GERBER_ZIP),
         allowed,
+        waivers,
+        bottom_paste_from_zip(out_dir / GERBER_ZIP),
     )
     print(
         f"fab_check: board {board}"
@@ -531,6 +590,7 @@ def main(argv: Sequence[str]) -> int:
     p.add_argument("board", nargs="?")
     p.add_argument("--allow-missing-lcsc", default="", metavar="REF,...")
     p.add_argument("--missing-lcsc-file", default=None, metavar="FILE")
+    p.add_argument("--owner-waiver-file", default=None, metavar="FILE")
     p.add_argument("--compare", nargs=2, metavar=("DIR1", "DIR2"))
     args = p.parse_args(argv)
     try:

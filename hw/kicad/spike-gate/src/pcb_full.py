@@ -179,9 +179,14 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
                 ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0),
                 ("C1", "U5", 8.0), ("C27", "U5", 12.0), ("C28", "U5", 14.0), ("C29", "U5", 14.0),
                 ("C30", "U5", 14.0), ("C31", "U5", 14.0),
-                # HW-016 (Approved): spare pad centres within [10] mm of U7 pin 6. Part centres: 10 - 1.3 (U7 centre to pin 6,
-                # SOT-23-6) - 1.0 (0805 centre to pad centre) - 0.2 margin = 7.5 mm. Batch p1b3 without it: C4 at 24.8 mm.
-                ("C4", "U7", 7.5), ("C32", "U7", 7.5))
+                # HW-016 (Approved): spare pad centres within [10] mm of U7 pin 6. Part centres: 7.0 + 1.48 (U7 pad 6 from the
+                # SOT-23-6 origin) + 1.475 (1206 centre to pad centre) = 9.955 mm (plan 08 section 4.2; RV-016 row 19: 7.5 mm
+                # allowed 10.455 mm). Batch p1b3 without a rule: C4 at 24.8 mm.
+                ("C4", "U7", 7.0), ("C32", "U7", 7.0))
+# Plan 08 section 4.2 input path (HW-003, HW-017): the protection parts near the connector, the damping link between J1 and
+# U7. "J1:VBUS" is the nearest J1 pad centre on net VBUS (J1 is fixed). Measured on every board by pcb_layout_check.py
+# (RV-016 row 12: not implemented in the placer for board-p1, all four missed).
+INPUT_PATH_RULES = (("TVS1", "J1:VBUS", 6.0), ("U6", "J1:VBUS", 8.0), ("R22", "J1:VBUS", 8.0), ("R22", "U7", 6.0))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 # Plan 08 section 4.2 (P1, HW-008): the LED bypass capacitors move beside their LED on the top side, which frees the ring
@@ -194,6 +199,19 @@ SA_ITERS = 160000
 STRICT_ICS = os.environ.get("PLACE_STRICT", "0") == "1"      # ring13: ICs of one kind match in rotation and side (no gain, off)
 _SEED0 = int(os.environ.get("PLACE_SEED_START", "1"))    # run_best.sh gives every run its own placement seeds
 SA_SEEDS = tuple(range(_SEED0, _SEED0 + 16))
+
+
+def rule_misses(state, rules):
+    """[a, b, limit, distance] for each (a, b, limit mm) rule whose part centres in `state` ({ref: (x, y, ...)}) are farther
+    apart than the limit; rules with a part not in `state` are left out (a fixed partner is checked on the board by
+    pcb_layout_check.py)."""
+    out = []
+    for a, b, lim in rules:
+        if a in state and b in state:
+            d = math.hypot(state[a][0] - state[b][0], state[a][1] - state[b][1])
+            if d > lim:
+                out.append([a, b, lim, round(d, 2)])
+    return out
 
 
 def p1_enabled(env=None):
@@ -676,8 +694,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         return MO.region_rect_ok(side, x0, -y1, x1, -y0, r_move, tab_r, top_tab=p1)
 
     def layout_rules_ok(st):
-        return all(math.hypot(st[a][0] - st[b][0], st[a][1] - st[b][1]) <= lim
-                   for a, b, lim in LAYOUT_RULES if a in st and b in st)
+        return not rule_misses(st, LAYOUT_RULES)
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
                                           seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
@@ -692,7 +709,10 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         fp.SetPosition(vec(0, 0))
         orient(fp, rot, side)
         centre_at(fp, CX + x, CY + y)
-    placement_info = {"seed": seed, "hpwl_mm": round(wl, 1), "overlap_mm2": round(ov, 3), "p1": p1, "r_move": r_move}
+    placement_info = {"seed": seed, "hpwl_mm": round(wl, 1), "overlap_mm2": round(ov, 3), "p1": p1, "r_move": r_move,
+                      "layout_rule_misses": rule_misses(state, LAYOUT_RULES)}
+    for a, b, lim, d in placement_info["layout_rule_misses"]:      # RV-016 row 11: the placer keeps its best seed anyway
+        print("PLACEMENT RULE MISSED: %s to %s %.2f mm (rule %.1f mm)" % (a, b, d, lim), file=sys.stderr)
     if p1:
         placement_info["led_caps"] = led_caps
         set_p1_fields(fps, comps)

@@ -23,5 +23,29 @@ class PythonToolsJob(unittest.TestCase):
         self.assertLess(installs[0], pytest_step)
 
 
+class HardwareJob(unittest.TestCase):
+    """RV-016 row 26: pull requests run the spike-gate tests (board, placement rules, sourcing),
+    not only fab-release.yml on main."""
+
+    def setUp(self) -> None:
+        self.job = yaml.safe_load(WF.read_text(encoding="utf-8"))["jobs"]["hardware"]
+        self.runs = [s.get("run", "") for s in self.job["steps"]]
+
+    def test_spike_gate_suite_runs(self) -> None:
+        hit = [r for r in self.runs if "pytest" in r and "spike-gate" in r and " tests" in r]
+        self.assertTrue(hit, self.runs)
+
+    def test_ngspice_and_test_pins_installed_first(self) -> None:
+        suite = next(i for i, r in enumerate(self.runs) if "pytest" in r and "spike-gate" in r)
+        inst = next(i for i, r in enumerate(self.runs) if "requirements-fab-test.txt" in r)
+        self.assertIn("ngspice", self.runs[inst])
+        self.assertLess(inst, suite)
+
+    def test_image_pinned_by_digest_like_fab_release(self) -> None:
+        fab = yaml.safe_load((WF.parent / "fab-release.yml").read_text(encoding="utf-8"))
+        self.assertIn("@sha256:", self.job["container"]["image"])
+        self.assertEqual(self.job["container"]["image"], fab["jobs"]["build"]["container"]["image"])
+
+
 if __name__ == "__main__":
     unittest.main()

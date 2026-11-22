@@ -41,6 +41,21 @@ class Rules(unittest.TestCase):
         self.assertGreaterEqual(pcb_rules.NET_WIDTH["+5V"], need)
 
 
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class RuleMisses(unittest.TestCase):
+    """RV-016 row 11: the placer keeps its best seed when no seed meets the rules; pcb_full records the misses."""
+    def test_a_miss_is_listed_with_its_distance(self):
+        st = {"C1": (0.0, 0.0, 0, "F"), "U5": (6.0, 8.0, 0, "F"), "R2": (0.0, 0.0, 0, "F"), "U14": (3.0, 0.0, 0, "F")}
+        self.assertEqual(pcb_full.rule_misses(st, (("C1", "U5", 8.0), ("R2", "U14", 6.0), ("X9", "U5", 1.0))),
+                         [["C1", "U5", 8.0, 10.0]])
+
+    def test_hw016_rule_keeps_the_spare_pads_within_10_mm(self):
+        """7.0 mm part centres + 1.48 mm (U7 pad 6 from its origin) + 1.475 mm (1206 pad centre) <= 10 mm (HW-016)."""
+        lim = {(a, b): v for a, b, v in pcb_full.LAYOUT_RULES}
+        for ref in ("C4", "C32"):
+            self.assertLessEqual(lim[(ref, "U7")] + 1.48 + 1.475, 10.0)
+
+
 class PlacementWeights(unittest.TestCase):
     """The gate and bypass rules are enforced by weights in the annealer, not left to chance."""
 
@@ -427,12 +442,12 @@ class P1Board(unittest.TestCase):
         self.assertTrue(all(self.fps[r].IsDNP() for r in pcb_full.DNP_REFS_P1))
 
     def test_spares_are_1206_on_the_rule_that_keeps_them_at_u7(self):
-        """HW-016 (Approved): two 1206 footprints; the placer rule keeps their centres within 7.5 mm of U7 (pad centres
-        then within [10] mm of pin 6). The reduced annealing run of this test is not asserted to meet the rule; the
-        batch board is (tests/test_board_p1.py)."""
+        """HW-016 (Approved): two 1206 footprints; the placer rule keeps their centres within 7.0 mm of U7 (pad centres
+        then within [10] mm of pin 6; RV-016 row 19). The reduced annealing run of this test is not asserted to meet the
+        rule; the batch board is (tests/test_board_p1.py)."""
         for ref in pcb_full.DNP_REFS_P1:
             self.assertEqual(str(self.fps[ref].GetFPID().GetLibItemName()), "C_1206_3216Metric", ref)
-            self.assertIn((ref, "U7", 7.5), pcb_full.LAYOUT_RULES)
+            self.assertIn((ref, "U7", 7.0), pcb_full.LAYOUT_RULES)
 
     def test_led_capacitors_keep_out_of_the_tab_boxes(self):
         """Plan 08 section 4.5: no LED capacitor courtyard meets the box around a P1 panel tab cut."""

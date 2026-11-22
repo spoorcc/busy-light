@@ -5,16 +5,19 @@
 # Needs: kicad-cli and KiCad's Python (pcbnew) 10.0.x, KiKit 1.8.1, numpy and scipy (scripts/requirements-fab.txt), git.
 # The schematic <board>.kicad_sch must be next to the board (strict ERC, assembly BOM fields, full BOM).
 # Every step runs even when an earlier one fails, so the package shows all findings. Exit codes: 0 every gate
-# passed; 1 a gate failed (strict ERC or DRC, pcb_fabcheck with no via in SMD pads, power check, panel tab check,
-# fab_check); 2 a tool or an
+# passed; 1 a gate failed (strict ERC or DRC, pcb_fabcheck with no via in SMD pads, power check, placement rules,
+# panel tab check, fab_check); 2 a tool or an
 # input is missing, or the panel or the order files could not be made. The out dir must be empty or new.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STRICT="$ROOT/hw/kicad/spike-gate/src/kicad_strict.py"
 FABCHECK="$ROOT/hw/kicad/spike-gate/src/pcb_fabcheck.py"
 POWER="$ROOT/hw/kicad/spike-gate/src/pcb_power_check.py"
+LAYOUT="$ROOT/hw/kicad/spike-gate/src/pcb_layout_check.py"
 PRESET="$ROOT/scripts/panel_p1.json"
 MISSING_LCSC="$ROOT/scripts/fab_missing_lcsc.txt"
+# Owner waivers for must-place parts without an LCSC number (fab_check MUST_PLACE; RV-016 row 1). Only the owner adds lines.
+OWNER_WAIVERS="$ROOT/scripts/fab_owner_waivers.txt"
 # Mechanical azimuths of the panel tabs (scripts/panel_tabs.py explains the choice and the checks).
 # P1: equal to hw/kicad/spike-gate/src/pcb_rules.py P1_TAB_AZIMUTHS (the placer keeps the LED capacitors away from these).
 TAB_AZIMUTHS="${TAB_AZIMUTHS:-105,217.5,285,330}"
@@ -86,6 +89,14 @@ for n, v in sorted(nets.items()):
 sys.exit(1 if bad else 0)
 PY
 
+# Placement rules on the board (ADR-0016 proximity, plan 08 input path; RV-016 rows 11 and 12: the placer can keep a seed
+# that misses a rule).
+echo "== placement rules"
+rc=0
+python3 "$LAYOUT" "$board_rel" --json "$out/layout_rules.json" >/dev/null || rc=$?
+((rc == 2)) && die "placement rule check could not measure every rule (exit 2)"
+((rc == 0)) || { echo "   -> placement rules: exit $rc"; failed+=("placement rules"); }
+
 # 2. Panel: tab annotations on a copy of the board, then KiKit (scripts/panel_p1.json).
 mkdir -p "$work/tabbed" "$work/panel" "$work/fab"
 for ext in kicad_pro kicad_dru; do
@@ -131,18 +142,20 @@ else
   blocked+=("full BOM")
 fi
 
-# 5. Order checks (missing LCSC numbers: the committed list, printed in the release notes).
+# 5. Order checks (missing LCSC numbers: the committed list, printed in the release notes; owner waivers for
+#    must-place parts, also printed).
 cp "$MISSING_LCSC" "$out/fab_missing_lcsc.txt"
+cp "$OWNER_WAIVERS" "$out/fab_owner_waivers.txt"
 if [[ -f "$out/jlcpcb_bom.csv" ]]; then
   run "fab_check" "$out/fab_check.txt" python3 scripts/fab_check.py "$out" "$board_rel" \
-    --missing-lcsc-file "$(rel "$MISSING_LCSC")" || true
+    --missing-lcsc-file "$(rel "$MISSING_LCSC")" --owner-waiver-file "$(rel "$OWNER_WAIVERS")" || true
 fi
 
 # 6. Manifest last: it hashes every file of the package.
 python3 scripts/fab_package.py manifest "$out" --git-describe "$git_describe" \
   --tool "kicad=$kicad_version" --tool "kikit=$kikit_version" \
   --input "board=$board_rel" --input "schematic=$sch_rel" --input "panel_json=$(rel "$PRESET")" \
-  --input "missing_lcsc_list=$(rel "$MISSING_LCSC")"
+  --input "missing_lcsc_list=$(rel "$MISSING_LCSC")" --input "owner_waivers=$(rel "$OWNER_WAIVERS")"
 
 echo "== fab_p1 summary: package in $out"
 if ((${#blocked[@]})); then

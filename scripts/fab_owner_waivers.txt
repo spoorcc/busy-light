@@ -1,0 +1,7 @@
+# Owner waivers for P1 must-place parts that have no LCSC number (scripts/fab_check.py MUST_PLACE; RV-016 row 1).
+# A must-place part sets or enables the HW-010 gate or carries the HW-017 power path. Without the part the gate can fail
+# open (U5) or the board has no power (R22). fab_check fails on such a part even when fab_missing_lcsc.txt lists it,
+# unless a line below names it. Only the owner adds a line, with the plan for the part (for example "hand-fit after
+# delivery, part bought from <distributor>, fitted before the first power-up of step O7").
+# Format: one ref per line, then the reason. A "#" starts a comment, so reasons do not use it.
+# No waiver is given (2026-11-22).
