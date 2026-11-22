@@ -5,6 +5,10 @@
   `docs/journal/2026-11-18-simplification-owner-decisions.md`). The text below was written after the answers and has not been
   read by the owner; no goldfish review. Amends ADR-0016 (gate logic) and ADR-0018 (FAULT_N handling). Answers the
   "fewer parts" option of ADR-0022.
+- **Review:** goldfish review RV-017 (2026-11-22, `docs/reviews/RV-017-adr0023-gate-simplification-goldfish.md`):
+  rejected as written. Decision 1 holds up apart from its margin; decision 2 brings regressions (GPIO6 on the gate node,
+  the 3V3 pull-up, a reset loop with SW-007, a latch at step 1) and needs its own alternatives. The owner decides; the status
+  above is unchanged.
 - **Date:** 2026-11-18
 - **Deciders / reviewers:** owner (Ben Spoor)
 - **Related:** HW-010, HW-008, HW-016, HW-007, SW-005, SW-009, SYS-020, SYS-022, ADR-0010, ADR-0016, ADR-0018, ADR-0022, plan 08

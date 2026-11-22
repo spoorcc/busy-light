@@ -71,6 +71,13 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Goldfish review RV-017 of ADR-0023 (asked for by RV-016 row 6): **rejected as written**. Decision 1 (step 3 = both
+  switches) holds up, but its 2.8 mA lower margin is inside the model error; decision 2 (FAULT and RESET on one node pulled
+  up to 3V3) puts GPIO6 directly on the gate node, breaks the read TPS3840 pull-up rule, gives a reset loop that SW-007 does
+  not count and latches at step 1 under overload; the firmware maps select 3 alone to the top step, which is the step-2
+  current on P1; no test models the as-built gate (`test_gate_logic.py` models the old one). ADR-0023 gets a review line,
+  its status is unchanged; the owner decides rows 1, 2, 6 and 12 (HW-010, SW-005, SW-007, SW-009, SYS-020, ADR-0018,
+  ADR-0023, RV-017).
 - Order package and release workflow after review RV-016 (rows 1, 16, 27). `scripts/fab_package.py full-bom --schematic`
   adds the schematic symbols that kicad-cli 10 leaves out of the BOM: the full BOM of board-p1 now lists C4 and C32 as DNP
   (HW-016, TC-216) and the test points as "excluded from BOM". `fab-release.yml`: runs test and build on pull requests
