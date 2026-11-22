@@ -1,6 +1,6 @@
 # ADR-0022: How the prototype board P1 gets its parts onto the board
 
-- **Status:** Proposed (written by the assistant, 2026-11-18; the owner decides)
+- **Status:** Superseded (owner, Ben Spoor, 2026-11-22, decision 11 in the working session; recorded by the assistant): answered by the "fewer parts" direction of ADR-0023 and its rework after RV-017; P1 stays one-sided. Earlier: Proposed (written by the assistant, 2026-11-18)
 - **Date:** 2026-11-18
 - **Deciders / reviewers:** owner (Ben Spoor); no goldfish review of this ADR yet
 - **Related:** HW-008, HW-010, HW-005, HW-016, HW-017, MECH-001, SYS-020, SYS-021, SYS-022, ADR-0003, ADR-0010, ADR-0016,

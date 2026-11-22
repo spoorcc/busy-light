@@ -30,6 +30,8 @@ class FabP1Gates(unittest.TestCase):
         self.assertIn('failed+=("power check")', self.text)
         self.assertIn('v.get("full_width_path") is False', self.text)
         self.assertIn("within_50mv", self.text)
+        # HW-017 J1-to-U7 budget (owner, 2026-11-22)
+        self.assertIn('if not ip["within_budget"]:', self.text)
 
     def test_placement_rules_are_a_gate(self) -> None:
         """RV-016 rows 11 and 12: board-p1 missed 9 placement rules and the order script passed."""

@@ -50,12 +50,13 @@ CASES = {
 
 INPUT_PATH = ("VBUS", "VBUS_IC")      # J1 -> R22 -> U7 pin 1, in series (HW-017)
 JUMPER_MOHM = (10.0, 20.0)            # HW-017 [10] mohm; the candidate part has up to 20 mohm (fab_missing_lcsc.txt)
+INPUT_BUDGET_MV = 100.0               # HW-017 amendment (owner, 2026-11-22): J1 to U7 pin 1 at 1.5 A, the link at [10] mohm
 
 
 def input_path(nets):
     """Drop from J1 to the TPS2553 input (RV-016 row 14: each case was gated alone, the sum by nothing): the copper drop
-    of the two series cases, and with the 0 ohm link R22 at HW-017's [10] mohm and at the candidate's 20 mohm. Report only:
-    the budget is an owner decision (HW-017 refers to an HW-010 budget that HW-010 does not define)."""
+    of the two series cases, and with the link R22 at HW-017's [10] mohm and at 20 mohm. `within_budget`: the drop with
+    the link at its [10] mohm maximum is at most INPUT_BUDGET_MV (HW-017 amendment of 2026-11-22, owner decision 7)."""
     cases = [nets.get(n) for n in INPUT_PATH]
     if any(c is None or c.get("drop_mv") is None for c in cases):
         return None
@@ -64,6 +65,8 @@ def input_path(nets):
     out = {"nets": list(INPUT_PATH), "current_a": amps, "copper_drop_mv": copper}
     for mohm in JUMPER_MOHM:
         out["drop_with_r22_%g_mohm_mv" % mohm] = round(copper + mohm * amps, 1)
+    out["budget_mv"] = INPUT_BUDGET_MV
+    out["within_budget"] = out["drop_with_r22_%g_mohm_mv" % JUMPER_MOHM[0]] <= INPUT_BUDGET_MV
     return out
 
 

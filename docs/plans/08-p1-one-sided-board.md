@@ -85,7 +85,7 @@ confirms or rejects this plan and its result together.
   not >= 0.6 mm; no tool sums the J1-to-U7 drop; the bottom silkscreen map of 4.4 (answer 13) and U1's F.Fab text are missing.
 - **Order files** (rows 16 to 18, 28, 29): the full BOM leaves out C4 and C32; their pads have bottom paste; no board text or
   revision; `fab_check` checks "0.1%", not the ILIM values.
-- **Housing and parts** (rows 22 to 24): MECH-001 (Approved, 58 mm) is exceeded (`largest_dim_mm` 59.24, as for the spike
+- **Housing and parts** (rows 22 to 24): MECH-001 (Approved, 58 mm; amended to 60 mm by the owner on 2026-11-22, now met) was exceeded (`largest_dim_mm` 59.24, as for the spike
   board); the LED and U9 footprints are not compared with manufacturer drawings; SW1 does not match the housing button.
 - **Evidence** (rows 26, 30, 33, 34): PR CI does not run `hw/kicad/spike-gate/tests`, so the test evidence of 0.2 is from local
   runs; no ERC or DRC report is stored (HW-009) and DEV-004 is scoped "spike only"; steps 5 to 12 ran after a readiness NO-GO

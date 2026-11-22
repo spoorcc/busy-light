@@ -71,6 +71,14 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Owner decisions of 2026-11-22 on the P1 rework (journal `2026-11-22-owner-decisions-p1-rework.md`): restore U10 and R6
+  in the gate, a 10 k resistor on GPIO0, add the P3 CC-pin protection, another supervisor part instead of U5, keep R_ILIM3
+  at 56.2 k until the model includes drift and ageing, R22 as a 1206 shunt of 2 to 5 mohm, the whole centre of the ring as
+  the button, enforce the input-path rules. Recorded now: MECH-001 upper limit 60 mm (approved amendment; placer limit
+  `MAX_DIM_MECH001` 60.0; board test against it, board-p1 59.24 mm); HW-017 amendment: J1 to U7 at most [100] mV at
+  1.5 A with the link at [10] mohm, gated by `pcb_power_check.py` `input_path.within_budget`, `fab_p1.sh` and
+  `test_board_p1.py` (board-p1: 83.0 mV); ADR-0022 Superseded; DEV-004 approved for the spike and P1; DEV-007 approved;
+  DEV-008 accepted as a record (HW-017, MECH-001, ADR-0022, DEV-004, DEV-007, DEV-008).
 - Placement and finishing tools for the next P1 board (RV-016 rows 12, 14, 15, 18). The placer enforces the plan 08
   input-path rules with P1 (TVS1, U6 and R22 to the nearest J1 VBUS pad; R22 to U7): a rule to a fixed part costs per mm
   beyond the limit to the nearest of its points (`pcb_place.Placer`, `pcb_full.resolve_rules`); the two-sided default

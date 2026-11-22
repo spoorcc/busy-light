@@ -87,9 +87,11 @@ for n, v in sorted(nets.items()):
     if not v["within_50mv"] or v.get("full_width_path") is False:
         bad.append(n)
 ip = json.load(open(sys.argv[1], encoding="utf-8")).get("input_path")
-if ip:  # report only (RV-016 row 14): the J1-to-U7 budget is an owner decision
-    print("   J1 to U7: %s mV copper; with R22 10 mohm %s mV, 20 mohm %s mV (not gated)"
-          % (ip["copper_drop_mv"], ip["drop_with_r22_10_mohm_mv"], ip["drop_with_r22_20_mohm_mv"]))
+if ip:  # HW-017 amendment 2026-11-22: J1 to U7 at most budget_mv at 1.5 A with R22 at its 10 mohm maximum
+    print("   J1 to U7: %s mV copper; with R22 10 mohm %s mV (budget %s mV), 20 mohm %s mV"
+          % (ip["copper_drop_mv"], ip["drop_with_r22_10_mohm_mv"], ip["budget_mv"], ip["drop_with_r22_20_mohm_mv"]))
+    if not ip["within_budget"]:
+        bad.append("J1 to U7")
 sys.exit(1 if bad else 0)
 PY
 

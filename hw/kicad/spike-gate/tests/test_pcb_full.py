@@ -281,7 +281,7 @@ class Board(unittest.TestCase):
         self.assertGreaterEqual(self.info["j1_mouth_r"], pcb_full.J1_MOUTH_R)
 
     def test_mouth_against_the_mech_limit_is_recorded(self):
-        """Plan 06 D2: the limit MAX_DIM_MECH001 (58 mm) is reported; the spike limit is the old 59.8 mm."""
+        """Plan 06 D2: the limit MAX_DIM_MECH001 (60 mm since 2026-11-22) is reported; the spike limit is the old 59.8 mm."""
         self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
 
     def test_antenna_strip_is_free(self):

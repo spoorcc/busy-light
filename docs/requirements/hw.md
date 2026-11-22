@@ -273,4 +273,5 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Approved (owner, Ben Spoor, 2026-11-17, in the working session, together with ADR-0021; recorded by the assistant, `docs/journal/2026-11-17-p1-order-owner-decisions.md`)
+- **Approved amendment (owner, Ben Spoor, 2026-11-22, decisions 6 and 7 in the working session; recorded by the assistant, `docs/journal/2026-11-22-owner-decisions-p1-rework.md`):** "the HW-010 budget" (not defined in HW-010; RV-016 row 14) is replaced by: the voltage drop from the J1 VBUS pins to the TPS2553 input (U7 pin 1), the link included at its maximum resistance, is at most [100] mV at 1.5 A in the power check (`pcb_power_check.py` `input_path`). The fitted link is a 1206 low-ohm current-sense resistor of 2 to 5 mohm rated for at least [3] A (part to be chosen with datasheet evidence), so the [10] mohm criterion stays as approved; the 0 ohm jumper candidate CRCW12060000Z0EA (up to 20 mohm) is not used.
 

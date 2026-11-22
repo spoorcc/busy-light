@@ -75,6 +75,8 @@ class BoardP1(unittest.TestCase):
         for net, v in nets.items():
             self.assertTrue(v["within_50mv"], (net, v["drop_mv"]))
             self.assertIs(v["full_width_path"], True, net)
+        ip = json.loads(res.stdout[res.stdout.index("{"):])["input_path"]
+        self.assertIs(ip["within_budget"], True, ip)              # HW-017: J1 to U7 <= 100 mV at 1.5 A, R22 at 10 mohm
 
     def test_panel_tabs_keep_3_mm_from_every_capacitor(self):
         """Plan 08 section 4.5: scripts/panel_tabs.py with the P1 tab azimuths (the order script default) passes."""
@@ -86,6 +88,12 @@ class BoardP1(unittest.TestCase):
                                  capture_output=True, text=True, check=False)
         doc = json.loads(res.stdout[res.stdout.index("{"):])
         self.assertEqual((res.returncode, doc["failures"]), (0, []))
+
+    def test_housing_size_within_mech001(self):
+        """MECH-001 (amended 2026-11-22 to 60 mm; RV-016 row 22: the 59.24 mm was not reported against the limit)."""
+        import mech_outline
+        self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.m("MAX_DIM_MECH001"))
+        self.assertEqual(mech_outline.m("MAX_DIM_MECH001"), 60.0)
 
     def test_known_u9_courtyard_overlaps_only(self):
         """The strict DRC tolerates 14 courtyard overlaps with U9 (DEV-004) and checks only that U9 takes part. The owner

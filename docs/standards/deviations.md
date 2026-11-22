@@ -41,8 +41,8 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Location:** `hw/kicad/spike-gate/known-open-violations.json`, profile `stitched-4l`, `strict_allow`, classes `courtyards_overlap` (max 14 since the owner decision of 2026-11-08; was 16) and `items_not_allowed` (max 1), only findings that include U9
 - **Justification:** the library courtyard of ESP32-C6-MINI-1 is the antenna keep-out; the mech design puts ring LEDs and other parts inside it. The courtyard is not shrunk.
 - **Risk assessment:** the antenna environment is not acceptable as it stands; no statement on antenna performance is made. Open items for the owner: board cutout, separate antenna board, U.FL variant or module at the edge (mech or HW-005 decision).
-- **Scope & duration:** spike only, until the owner decides the antenna arrangement.
-- **Approved by / date:** proposed 2026-11-05; not approved (owner approval pending)
+- **Scope & duration:** spike only, until the owner decides the antenna arrangement. Extended to the P1 prototype board (owner, 2026-11-22): 14 fixed parts (D6 to D12, C13 to C18, SW1) in the module courtyard; antenna range still to be measured (TC-205).
+- **Approved by / date:** owner, Ben Spoor, 2026-11-22 (decision 11 in the working session, for the spike and P1; recorded by the assistant, `docs/journal/2026-11-22-owner-decisions-p1-rework.md`); proposed 2026-11-05
 
 ### DEV-005 ADR-0016 accepted before its own goldfish review
 
@@ -66,7 +66,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 
 ### DEV-007 P1 order files in a GitHub release instead of a committed `hw/fabrication/<rev>/`
 
-- **Status:** Proposed (written by the assistant 2026-11-18 from the owner's answer 17 of 2026-11-17; the owner approves)
+- **Status:** Approved (owner, 2026-11-22; written by the assistant 2026-11-18 from the owner's answer 17 of 2026-11-17)
 - **Rule / requirement deviated from:** `docs/process/README.md` (hardware releases: tagged, with Gerbers/BOM/PnP in
   `hw/fabrication/<rev>/` plus ERC/DRC reports); CLAUDE.md rule 12 (do not commit build output). Plan 08 section 4.6.
 - **Location:** `.github/workflows/fab-release.yml`, `scripts/fab_p1.sh`; release tags of the repository (`fab-latest` draft and
@@ -82,12 +82,12 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
   are no longer replaced (no `--clobber`; a release that already has files is refused); only the draft `fab-latest` is
   refreshed. The test and build jobs now also run on pull requests (run 44989926250 on 2026-11-22, the first run on GitHub).
 - **Scope & duration:** P1 prototype order; revisit before any production release.
-- **Approved by / date:** not approved (Proposed 2026-11-18)
+- **Approved by / date:** owner, Ben Spoor, 2026-11-22 (decision 11 in the working session; recorded by the assistant); Proposed 2026-11-18
 
 ### DEV-008 P1 built before the readiness GO and partly before the requirement texts were approved
 
-- **Status:** Proposed (written by the assistant 2026-11-22 after RV-016 row 33 and RV-017 row 10; the owner approves or
-  rejects)
+- **Status:** Accepted as a record (owner, 2026-11-22; written by the assistant 2026-11-22 after RV-016 row 33 and RV-017
+  row 10); open until its closing condition is met
 - **Rule / requirement deviated from:** CLAUDE.md rule 0 (plan with EGM: implementation after the readiness GO) and rule 1 (no
   `hw/` change without an Approved requirement); owner answer 16 of 2026-11-17 (implementation pre-approved after a readiness GO).
 - **Location:** plan 08 steps 5 to 12 (placement, routing, finishing, the stored `hw/kicad/spike-gate/board-p1/`, the order
@@ -103,4 +103,4 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
   must-place parts); RV-016 and RV-017 list every open point.
 - **Scope & duration:** board-p1 and ADR-0023 as of 2026-11-22; closed when the owner has decided the open rows, the requirement
   texts are approved or reverted, and the reworked plan has a readiness GO.
-- **Approved by / date:** not approved (Proposed 2026-11-22)
+- **Approved by / date:** accepted as a record by the owner, Ben Spoor, 2026-11-22 (decision 11 in the working session; recorded by the assistant); stays open until its closing condition above is met

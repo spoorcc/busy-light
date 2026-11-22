@@ -41,6 +41,9 @@ class VbusSplit(unittest.TestCase):
         self.assertEqual(doc["copper_drop_mv"], 68.0)
         self.assertEqual(doc["drop_with_r22_10_mohm_mv"], 83.0)
         self.assertEqual(doc["drop_with_r22_20_mohm_mv"], 98.0)
+        self.assertIs(doc["within_budget"], True)                 # 83.0 mV <= 100 mV (HW-017 amendment 2026-11-22)
+        over = PC.input_path({"VBUS": {"drop_mv": 50.0, "current_a": 1.5}, "VBUS_IC": {"drop_mv": 40.0, "current_a": 1.5}})
+        self.assertIs(over["within_budget"], False)               # 90 + 15 = 105 mV
         self.assertIsNone(PC.input_path({"VBUS": {"drop_mv": None, "current_a": 1.5}}))
 
     def test_case_pads_are_on_the_case_net(self):
