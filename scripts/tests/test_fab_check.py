@@ -462,6 +462,35 @@ def test_full_bom_gets_the_library_column(tmp_path: Path) -> None:
     assert rows[1] == ["C4,C32", "DNP spare", "DNP", "not known"]
 
 
+def test_full_bom_keeps_the_dnp_spares_of_the_schematic(tmp_path: Path) -> None:
+    """RV-016 row 16: kicad-cli 10 leaves symbols excluded from the BOM out, so the full BOM of
+    board-p1 had no C4 and C32 (HW-016, TC-216). The kicad-cli rows below are the header and two
+    lines of its real output for the board-p1 schematic (2026-11-22)."""
+    sch = SPIKE / "board-p1" / "busy_light_spike.kicad_sch"
+    if not sch.exists():
+        pytest.skip("no board-p1")
+    src = tmp_path / "raw.csv"
+    src.write_text(
+        '"Refs","Value","Footprint","DNP","MPN","Manufacturer","LCSC","Qty"\n'
+        '"R22","0","Resistor_SMD:R_1206_3216Metric","","","","","1"\n'
+        '"U5","TPS3840DL40","Package_TO_SOT_SMD:SOT-23-5","","TPS3840DL40DBVR",'
+        '"Texas Instruments","","1"\n',
+        encoding="utf-8",
+    )
+    n = fp.full_bom(src, tmp_path / "out.csv", sch)
+    rows = list(csv.DictReader(io.StringIO((tmp_path / "out.csv").read_text(encoding="utf-8"))))
+    assert n == len(rows)
+    spares = [r for r in rows if r["Refs"] == "C4,C32"]
+    assert len(spares) == 1
+    assert (spares[0]["DNP"], spares[0]["Qty"], spares[0]["Value"]) == ("DNP", "2", "DNP spare")
+    assert spares[0]["Footprint"] == "Capacitor_SMD:C_1206_3216Metric"
+    tps = [r for r in rows if r["Refs"].startswith("TP")]
+    assert tps
+    assert all(r["DNP"] == "excluded from BOM" for r in tps)
+    assert not [r for r in rows if r["Refs"].startswith("#")]
+    assert [r["Refs"] for r in rows[:2]] == ["R22", "U5"]
+
+
 def test_ignore_refs_leave_pos_excluded_footprints_to_kikit(tmp_path: Path) -> None:
     refs, reasons = fp.ignore_refs(write_board(tmp_path / "b.kicad_pcb"))
     assert refs == ["C4", "H1", "J1"]

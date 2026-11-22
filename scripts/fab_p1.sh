@@ -137,7 +137,7 @@ if run "full BOM" "$work/bom.log" kicad-cli sch export bom -o "$work/bom_full_ra
   --fields 'Reference,Value,Footprint,${DNP},MPN,Manufacturer,LCSC,${QUANTITY}' \
   --labels 'Refs,Value,Footprint,DNP,MPN,Manufacturer,LCSC,Qty' \
   --group-by 'Value,Footprint,${DNP},MPN,Manufacturer,LCSC' --ref-range-delimiter '' "$sch_rel"; then
-  python3 scripts/fab_package.py full-bom "$work/bom_full_raw.csv" "$out/bom_full.csv"
+  python3 scripts/fab_package.py full-bom "$work/bom_full_raw.csv" "$out/bom_full.csv" --schematic "$sch_rel"
 else
   blocked+=("full BOM")
 fi

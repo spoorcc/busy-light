@@ -125,12 +125,15 @@ def parse_sexpr(text: str) -> list[Sexpr]:
     return stack[0]
 
 
-def _children(node: list[Sexpr], head: str) -> list[list[Sexpr]]:
+def sexpr_children(node: list[Sexpr], head: str) -> list[list[Sexpr]]:
     return [c for c in node[1:] if isinstance(c, list) and c and c[0] == head]
 
 
-def _atoms(node: list[Sexpr]) -> list[str]:
+def sexpr_atoms(node: list[Sexpr]) -> list[str]:
     return [c for c in node[1:] if isinstance(c, str)]
+
+
+_children, _atoms = sexpr_children, sexpr_atoms
 
 
 def read_footprints(board: Path) -> list[Footprint]:
@@ -370,10 +373,14 @@ def _refs(refs: Iterable[str]) -> str:
     return ", ".join(sorted(refs, key=_ref_key)) or "-"
 
 
-def _ref_key(ref: str) -> tuple[str, int]:
+def ref_key(ref: str) -> tuple[str, int]:
+    """Sort key that puts C4 before C32."""
     m = re.match(r"(.*?)(\d*)$", ref)
     assert m is not None  # the pattern always matches
     return m.group(1), int(m.group(2) or 0)
+
+
+_ref_key = ref_key
 
 
 def run_checks(  # noqa: PLR0913, PLR0917 - one argument per package input, as read by _check_main

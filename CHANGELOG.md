@@ -71,6 +71,17 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Order package and release workflow after review RV-016 (rows 1, 16, 27). `scripts/fab_package.py full-bom --schematic`
+  adds the schematic symbols that kicad-cli 10 leaves out of the BOM: the full BOM of board-p1 now lists C4 and C32 as DNP
+  (HW-016, TC-216) and the test points as "excluded from BOM". `fab-release.yml`: runs test and build on pull requests
+  (never publish); the build job fails after the upload when a gate failed (before: green, publish skipped silently); new
+  `scripts/fab_release_notes.sh` writes the fab_check result, the missing-LCSC list and the owner waivers into the job
+  summary and the release notes (plan 08 4.5 promised the list; the notes were a fixed text); the notes are made in the
+  build job, so the publish job still runs only `gh`; a published release that already has files is not overwritten (no
+  `--clobber`). The pin test of `requirements-fab.txt` counts only imports that run at load time (an import inside a
+  function, kiutils in `lib_tables.py`, is not needed; `pcb_layout_check.py` ran without kiutils) and still fails without
+  scipy. Tests: `test_fab_check.py::test_full_bom_keeps_the_dnp_spares_of_the_schematic` (real board-p1 schematic),
+  `test_fab_release_workflow.py` (HW-008, HW-009, HW-016, RV-016).
 - Order and board gates after review RV-016 (rows 1, 11, 12, 13, 17, 19, 20, 26, 28, 41, 43). `scripts/fab_check.py`: the
   ILIM resistors must have exactly the ADR-0023 values (`ILIM_VALUES`; "27.7k 0.1%" passed the old "0.1%" test); a
   must-place part (the HW-010 gate parts and the HW-017 link R22, `MUST_PLACE`) without an LCSC number fails even when

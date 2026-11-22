@@ -11,9 +11,12 @@ Usage:
       Reason: KiKit 1.8.1 on KiCad 10.0.8 stops with "'SwigPyObject' object has no attribute
       'SetOutputDirectory'" when --ignore removes 9 or more footprints (seen 2026-11-18 on the
       stand-in board; 2 to 5 refs worked). scripts/fab_check.py checks the result either way.
-  fab_package.py full-bom <kicad-cli bom.csv> <out.csv>
+  fab_package.py full-bom <kicad-cli bom.csv> <out.csv> [--schematic <board.kicad_sch>]
       Copy the full BOM that kicad-cli wrote and add the column "JLCPCB library" with the value
-      "not known" (basic or extended is not read from JLCPCB; plan 08 section 4.5).
+      "not known" (basic or extended is not read from JLCPCB; plan 08 section 4.5). With the
+      schematic, add a row for each symbol that is excluded from the BOM (kicad-cli 10 leaves them
+      out): the do-not-populate spares C4 and C32 (HW-016, TC-216: "do-not-populate in the BOM")
+      and the test points, with DNP "DNP" or "excluded from BOM" (RV-016 row 16).
   fab_package.py manifest <out dir> --input NAME=PATH ... --tool NAME=VERSION ...
                  --git-describe TEXT
       Write <out dir>/manifest.json: sha256 of every file in <out dir> (raw, and without the KiCad
@@ -32,7 +35,16 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from fab_check import InputError, classify, digest_without_dates, read_footprints
+from fab_check import (
+    InputError,
+    classify,
+    digest_without_dates,
+    parse_sexpr,
+    read_footprints,
+    ref_key,
+    sexpr_atoms,
+    sexpr_children,
+)
 
 LIBRARY_COLUMN = "JLCPCB library"
 LIBRARY_VALUE = "not known"
@@ -47,14 +59,62 @@ def ignore_refs(board: Path) -> tuple[list[str], dict[str, str]]:
     return sorted(set(excluded) - pos_excluded), excluded
 
 
-def full_bom(src: Path, dst: Path) -> int:
-    """Add the library column to a kicad-cli BOM. Returns the number of data rows."""
+def excluded_symbols(sch: Path) -> list[dict[str, str]]:
+    """Fields of the schematic symbols that are excluded from the BOM (power symbols left out), with
+    "DNP" set to "DNP" for a do-not-populate symbol and "excluded from BOM" otherwise."""
+    try:
+        tree = parse_sexpr(sch.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise InputError(f"cannot read schematic {sch}: {exc}") from exc
+    if not tree or not isinstance(tree[0], list) or tree[0][:1] != ["kicad_sch"]:
+        raise InputError(f"{sch} is not a kicad_sch file")
+    out = []
+    for sym in sexpr_children(tree[0], "symbol"):
+        flags = {n[0]: (sexpr_atoms(n) or [""])[0] for n in sym[1:] if isinstance(n, list) and n}
+        if flags.get("in_bom") != "no":
+            continue
+        fields = {}
+        for prop in sexpr_children(sym, "property"):
+            atoms = sexpr_atoms(prop)
+            if len(atoms) >= 2:  # noqa: PLR2004
+                fields[atoms[0]] = atoms[1]
+        if fields.get("Reference", "#").startswith("#"):
+            continue
+        fields["DNP"] = "DNP" if flags.get("dnp") == "yes" else "excluded from BOM"
+        out.append(fields)
+    return out
+
+
+def full_bom(src: Path, dst: Path, schematic: Path | None = None) -> int:
+    """Add the library column to a kicad-cli BOM, and with the schematic a row per symbol excluded
+    from the BOM. Returns the number of data rows."""
     rows = list(csv.reader(io.StringIO(src.read_text(encoding="utf-8-sig"))))
     if not rows:
         raise InputError(f"{src} is empty")
+    header = rows[0]
+    if schematic is not None:
+        have = {r.strip() for row in rows[1:] for r in row[header.index("Refs")].split(",")}
+        groups: dict[tuple[str, ...], list[str]] = {}
+        names = {"Refs": "Reference", "Qty": None}
+        for f in excluded_symbols(schematic):
+            if f["Reference"] in have:
+                continue
+            key = tuple(f.get(names.get(h) or h, "") for h in header if h not in names)
+            groups.setdefault(key, []).append(f["Reference"])
+        for key, refs in sorted(groups.items(), key=lambda kv: ref_key(min(kv[1], key=ref_key))):
+            vals = iter(key)
+            row = []
+            for h in header:
+                if h == "Refs":
+                    row.append(",".join(sorted(refs, key=ref_key)))
+                elif h == "Qty":
+                    row.append(str(len(refs)))
+                else:
+                    row.append(next(vals))
+            rows.append(row)
     buf = io.StringIO()
     writer = csv.writer(buf, lineterminator="\n")
-    writer.writerow([*rows[0], LIBRARY_COLUMN])
+    writer.writerow([*header, LIBRARY_COLUMN])
     for row in rows[1:]:
         writer.writerow([*row, LIBRARY_VALUE])
     dst.write_text(buf.getvalue(), encoding="utf-8")
@@ -110,6 +170,7 @@ def main(argv: Sequence[str]) -> int:
     s = sub.add_parser("full-bom")
     s.add_argument("src")
     s.add_argument("dst")
+    s.add_argument("--schematic", default=None)
     s = sub.add_parser("manifest")
     s.add_argument("out_dir")
     s.add_argument("--input", action="append", default=[], metavar="NAME=PATH")
@@ -124,7 +185,8 @@ def main(argv: Sequence[str]) -> int:
                 print(f"not assembled: {r} ({reasons[r]}; {how})", file=sys.stderr)
             print(",".join(refs))
         elif args.cmd == "full-bom":
-            n = full_bom(Path(args.src), Path(args.dst))
+            sch = Path(args.schematic) if args.schematic else None
+            n = full_bom(Path(args.src), Path(args.dst), sch)
             print(f"full BOM: {n} lines -> {args.dst}")
         else:
             inputs = {k: Path(v) for k, v in _pairs(args.input, "--input").items()}

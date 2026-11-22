@@ -10,6 +10,7 @@ import ast
 import re
 import sys
 import unittest
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,16 @@ def load() -> dict[Any, Any]:
     # PyYAML reads the bare key `on` as the boolean True (YAML 1.1)
     doc["on"] = doc.pop(True, doc.get("on"))
     return doc
+
+
+def module_level(tree: ast.AST) -> Iterator[ast.AST]:
+    """Nodes that run when the module is loaded: every node except the bodies of functions."""
+    todo = [tree]
+    while todo:
+        node = todo.pop()
+        yield node
+        if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+            todo.extend(ast.iter_child_nodes(node))
 
 
 class FabReleaseWorkflow(unittest.TestCase):
@@ -42,6 +53,9 @@ class FabReleaseWorkflow(unittest.TestCase):
         self.assertEqual(on["push"]["branches"], ["main"])
         self.assertEqual(on["release"]["types"], ["published"])
         self.assertIn("workflow_dispatch", on)
+        # RV-016 row 27: the build path runs on pull requests too (never publish, see below)
+        self.assertIn(".github/workflows/fab-release.yml", on["pull_request"]["paths"])
+        self.assertIn("hw/kicad/spike-gate/**", on["pull_request"]["paths"])
 
     def test_job_order(self) -> None:
         self.assertEqual(set(self.jobs), {"test", "build", "publish"})
@@ -61,6 +75,35 @@ class FabReleaseWorkflow(unittest.TestCase):
         self.assertIn("needs.build.outputs.has_board == 'true'", cond)
         self.assertIn("needs.build.outputs.gates_ok == 'true'", cond)
         self.assertIn("github.event_name != 'workflow_dispatch'", cond)
+        self.assertIn("github.event_name != 'pull_request'", cond)
+
+    def test_build_fails_after_the_upload_when_a_gate_failed(self) -> None:
+        """RV-016 row 27: exit 1 of fab_p1.sh left the build green and skipped publish silently."""
+        steps = self.jobs["build"]["steps"]
+        names = [s.get("name", s.get("uses", "")) for s in steps]
+        fail = names.index("Fail when a gate failed (the package above is for diagnosis only)")
+        uploads = [i for i, s in enumerate(steps) if "upload-artifact" in s.get("uses", "")]
+        self.assertTrue(uploads)
+        self.assertLess(max(uploads), fail)
+        self.assertIn("gates_ok != 'true'", steps[fail]["if"])
+        self.assertIn("exit 1", steps[fail]["run"])
+
+    def test_release_notes_list_missing_parts_and_waivers(self) -> None:
+        """RV-014 readiness B2 and RV-016 row 1: the notes print the missing-LCSC list and the
+        owner waivers; they are made in the build job (no write token)."""
+        build = "\n".join(s.get("run", "") for s in self.jobs["build"]["steps"])
+        self.assertIn("scripts/fab_release_notes.sh p1-fab", build)
+        notes = (ROOT / "scripts" / "fab_release_notes.sh").read_text(encoding="utf-8")
+        for name in ("fab_missing_lcsc.txt", "fab_owner_waivers.txt", "fab_check.txt"):
+            self.assertIn(name, notes)
+        publish = "\n".join(s["run"] for s in self.jobs["publish"]["steps"])
+        self.assertEqual(publish.count("p1-fab-notes/notes.md"), 2)
+
+    def test_a_published_release_is_never_overwritten(self) -> None:
+        steps = {s["name"]: s for s in self.jobs["publish"]["steps"]}
+        run = steps["Attach the package to the published release"]["run"]
+        self.assertNotIn("--clobber", run)
+        self.assertIn("--json assets", run)
 
     def test_publish_runs_no_repository_code(self) -> None:
         """The job with write access only downloads this run's artifact and calls gh release.
@@ -68,11 +111,14 @@ class FabReleaseWorkflow(unittest.TestCase):
         No checkout, no repository script."""
         steps = self.jobs["publish"]["steps"]
         self.assertFalse(any("uses" in s for s in steps))
+        shell = ("#", "n=", "if ", "else", "fi", "{ echo", "gh ")
         for s in steps:
             for line in s["run"].splitlines():
                 cmd = line.strip()
-                if cmd and not cmd.startswith(("notes=", "if ", "else", "fi")):
-                    self.assertTrue(cmd.startswith("gh "), cmd)
+                if cmd:
+                    self.assertTrue(cmd.startswith(shell), cmd)
+                    self.assertNotIn("scripts/", cmd)
+                    self.assertNotIn("python", cmd)
 
     def test_draft_only_for_push_and_fab_latest_release_is_ignored(self) -> None:
         steps = {s["name"]: s for s in self.jobs["publish"]["steps"]}
@@ -114,7 +160,10 @@ class FabReleaseWorkflow(unittest.TestCase):
         third-party module that the Python files of fab_p1.sh import (and the local modules
         they import) is pinned there, apart from pcbnew and PIL, which the kicad/kicad:10.0 image
         has. Until 2026-11-21 scipy (pcb_power_check.py) was pinned only in
-        requirements-fab-test.txt, so the build job would have stopped at the power check."""
+        requirements-fab-test.txt, so the build job would have stopped at the power check.
+        Only imports that run when a module is loaded count: an import inside a function (kiutils
+        in lib_tables.py, "not needed by the board side") is not executed by these scripts
+        (pcb_layout_check.py ran without kiutils in the image on 2026-11-22)."""
         fab = (ROOT / "scripts" / "fab_p1.sh").read_text(encoding="utf-8")
         paths = re.findall(r"\$ROOT/([\w/.-]+\.py)", fab) + re.findall(r"\b(scripts/\w+\.py)", fab)
         todo = [ROOT / p for p in sorted(set(paths))]
@@ -126,7 +175,7 @@ class FabReleaseWorkflow(unittest.TestCase):
             if path in seen:
                 continue
             seen.add(path)
-            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            for node in module_level(ast.parse(path.read_text(encoding="utf-8"))):
                 if isinstance(node, ast.Import):
                     names = [a.name for a in node.names]
                 elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
