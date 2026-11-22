@@ -1,6 +1,7 @@
 # 08 -- Prototype board P1: one-sided assembly for JLCPCB Economic PCBA (design doc)
 
-- **Status:** In Review (revision 4 after the RV-014 readiness review: NO-GO overall, steps 1 to 4 ready; blocking gaps B1 to B3 fixed in this revision, not re-reviewed). The owner pre-approved implementation after a GO from the
+- **Status:** In Review (revision 5 of 2026-11-22: section 0 records the state after the build; goldfish review RV-016.
+  Revision 4: after the RV-014 readiness review: NO-GO overall, steps 1 to 4 ready; blocking gaps B1 to B3 fixed in that revision). The owner pre-approved implementation after a GO from the
   readiness review (answer 16 of 2026-11-17, `docs/journal/2026-11-17-p1-order-owner-decisions.md`). The owner confirms or
   rejects this plan and its result together.
 - **Date:** 2026-11-17  **Owner:** Ben Spoor (author: assistant)
@@ -13,7 +14,64 @@
 - **EGM review record:** RV-014 (comprehension / antagonistic / readiness)
 - **Superseding question (2026-11-18):** the measured one-sided placement does not fit on 46 mm; ADR-0022 (Proposed) asks the owner
   to choose between two-sided P1 (recommended), part reduction, board growth or giving up the keep-out. Steps 1 to 5 and the order-package
-  scripts are implemented; routing of P1 waits for that decision.
+  scripts are implemented; routing of P1 waits for that decision. *(Revision 5: answered on 2026-11-18 by the "fewer parts"
+  decisions of ADR-0023; ADR-0022 itself is still Proposed. See section 0.)*
+
+## 0. Revision 5: state after the build (2026-11-22)
+Where this section and sections 1 to 8 differ, this section applies. Sections 1 to 8 are the revision 4 text of 2026-11-18,
+kept as RV-014 reviewed it. Sources: `docs/journal/2026-11-18-overnight.md`,
+`docs/journal/2026-11-18-simplification-owner-decisions.md`, `docs/journal/2026-11-20-second-pass-board-p1.md`,
+`hw/kicad/spike-gate/board-p1/README.md`. The work ran before a readiness GO (RV-014 finding 5, recorded there); the owner
+confirms or rejects this plan and its result together.
+
+### 0.1 What changed the plan after revision 4
+- One side did not fit on 46 mm (ADR-0022, Proposed: best overlap 25.1 mm2). On 2026-11-18 the owner took the "fewer parts"
+  direction (ADR-0023, Accepted for the decisions): step 3 = both ILIM switches with R_ILIM3 = 56.2 k (this replaces trim T1 and
+  removes U13); the limiter FAULT and the TPS3840 RESET share the node GATE_OK_RB (U10 and R6 removed); smaller packages
+  (implemented in `94ce2cf`, `8573614`). ADR-0022 stays Proposed until the owner closes it.
+- Owner answers of 2026-11-18: the U9 library courtyard stays a placer obstacle; the module moves 5 mm towards the antenna edge;
+  eight more parts in 0402 (`28f924d`).
+- R1 did not happen: after ADR-0023, one side routed at 0.15 mm on 46 mm. The 0.1 mm comparison (b3, option A') was not run.
+- HW-016 spares: on the bottom side in 1206, do-not-populate, so the assembly stays one-sided; the proposed 0805 change of
+  HW-016 is withdrawn (HW-016 entry, `bbfa73d`).
+
+### 0.2 Step status (section 5)
+| Step | State | Evidence | Deviation from revision 4 |
+|---|---|---|---|
+| 1 Tooling | Done (`a58ef4a`) | `run_pcb.sh` hash test | none |
+| 2 T1 | Done, then replaced by ADR-0023 | `test_ilim_steps.py::TrimT1`, `::BothOnStep3` | HW-010 amendment "ADR-0023" replaces amendment T1; the owner confirms both texts |
+| 3 HW-017 split | Done (`706ba3e` for the power check) | `test_layout_full.py::DampingLink`, `test_pcb_rules.py::MainPathSplit`; power check cases VBUS and VBUS_IC | none |
+| 4 No via-in-pad | Done (2026-11-18); a gate of the order script (`5146d53`) | `test_pcb_fabcheck.py`; board-p1: 0 of 174 vias in an SMD pad | none |
+| 5 Placement | Done | `test_pcb_full.py` (P1 subprocess); placement overlap 0.0 mm2 | (a) **The four input-path rules of 4.2 were not implemented** (`LAYOUT_RULES` in `src/pcb_full.py` has none of them). Measured on board-p1 on 2026-11-22 (pcbnew, part centre to the nearest J1 `VBUS` pad centre): TVS1 7.55 mm (rule 6.0), U6 13.75 mm (8.0), R22 10.68 mm (8.0); R22 centre to U7 centre 12.53 mm (6.0). All four are missed. (b) HW-016 rule 7.5 mm, spares on the bottom (its code comment still says 0805). (c) LED capacitors keep 3 mm from the panel tab sectors. |
+| 6 Batches | Done in another form | journals of 2026-11-18 and 2026-11-20 | Batches p1b1 to p1b12 (one change each) and a second router pass `run_repass.sh` (a new tool) replaced b1 to b3. Stored: p1b8 run 3 after the second pass (`7a26366`, `23aa36c`). Router, stitcher and clean-up defects found on the way were fixed with tests that fail before the fix (journals). |
+| 7 Finishing | Done | `test_pcb_finish.py` | Fiducials: FID1 on the top and FID4 to FID6 on the bottom (revision 4: three on the top only); the panel rails add three. 50 designators on the silkscreen, 47 parts without room. |
+| 8 Store | Done (`23aa36c`); `ci_hw.sh` checks board-p1 (`d4f01a3`, CI hardware job) | CI run 44904594328 | DRC and ERC JSON and `chosen_run.txt` are not stored: they are build output that the scripts write again; the README records the numbers and the run. The owner confirms. |
+| 9 Board tests | Done, 6 tests | `tests/test_board_p1.py` | No test lists the pairs that overlap U9; only the DRC count (14, the waiver maximum) checks them. |
+| 10 Order package | Done | `scripts/tests/test_fab_check.py`, `test_fab_p1_script.py`; `fab_p1.sh` exit 0 in the KiCad 10 image (2026-11-21) | scipy was missing from `requirements-fab.txt` until 2026-11-21 (fixed with a regression test) |
+| 11 CI workflow | Written (`c7ef1ee`) | `scripts/tests/test_fab_release_workflow.py` | Not run on GitHub: it runs on `main` only. |
+| 12 Records | Partly | DEV-007 (Proposed); TC-208, TC-216, TC-217 procedures (drafted); CHANGELOG; regulatory check of 2026-11-18 | **Not written:** the report `docs/verification/reports/p1-board.md` (its numbers are in `board-p1/README.md`); RISK entries for R2 (HASL on U1), R7 (jumper rating) and R9 (missing LCSC numbers): none in the register. The P1 section of `docs/regulatory/compliance-matrix.md` still says that P1 is not placed or routed. |
+
+### 0.3 Result against the goals (section 1)
+- G1 met: every assembled part on the top. On the bottom: TP1 to TP6, the DNP spares C4 and C32, FID4 to FID6.
+- G2 met with tolerated classes only: strict ERC 0 findings; strict DRC `courtyards_overlap` 14 (maximum 14) and
+  `items_not_allowed` 1, both U9 (DEV-004, Proposed).
+- G3 met: 0 of 174 vias in an SMD pad.
+- G4 met for the board files: R22 between `VBUS` and `VBUS_IC`; C4 and C32 within 10 mm of U7 pin 6 (`test_board_p1.py`).
+  R22 has no part that meets HW-017's [10] mohm (A8).
+- G5 met locally: `fab_p1.sh` builds the package; the CI build is not run.
+- Supply drops (analyst currents, 50 mV analyst target): `VBUS` 23.9 mV and `VBUS_IC` 44.1 mV at 1.5 A, 68.0 mV from J1 to U7
+  in copper. The jumper is not in the power check: the R22 candidate (up to 20 mohm) adds up to 30 mV at 1.5 A.
+
+### 0.4 Open before an order
+- Owner: approval of this plan with its result; closing ADR-0022; ADR-0023 text and the HW-010, SW-009 and HW-016 amendments;
+  DEV-004 and DEV-007 (Proposed); the deviations in the table of 0.2 (step 5 (a), step 8).
+- Owner: U5 TPS3840DL40DBVR has no LCSC or JLCPCB listing (without it the HW-010 hold-off does not work); the R22 candidate
+  has up to 20 mohm against [10] mohm.
+- Owner: the assistant's picks (spares on the bottom in 1206, tab azimuths, the 0.75 full-width rule, the 50 mV target).
+- Assistant, after review: the records of step 12.
+- Order steps O0 to O8 of section 6 are unchanged.
+- Not run: housing fit, antenna range with the module 5 mm closer to the edge (TC-205), thermal, `fab-release.yml` on GitHub,
+  JLCPCB DFM and price, bench.
 
 ## 1. Problem definition
 The owner wants to order a first prototype board (P1): 5 bare PCBs, 2 of them assembled by JLCPCB with the **Economic**
