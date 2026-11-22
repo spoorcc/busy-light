@@ -71,6 +71,13 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Records after RV-016 and RV-017: RISK-047 to RISK-053 (U5 missing makes the gate fail open; firmware can hold the gate
+  open through GPIO6; gate node reads "OK" with VBUS gone and 3V3 up; reset loop under overload; HASL at the 0.4 mm-pitch
+  U1; R22 resistance or not placed; part availability) and RISK-044 updated; DEV-008 (Proposed: P1 built before the
+  readiness GO and partly before the requirement texts were approved); DEV-007 updated (no `--clobber` on a published
+  release); journal `2026-11-22-reviews-and-gates-board-p1.md` with the CI run IDs and results. The P1 placer gives the DNP
+  spares no solder paste, so the bottom paste layer of the next board is empty (test `test_dnp_spares_have_no_solder_paste`,
+  failed before) (HW-008, HW-010, HW-017, SW-007, SW-009, SYS-020, RV-016, RV-017).
 - Goldfish review RV-017 of ADR-0023 (asked for by RV-016 row 6): **rejected as written**. Decision 1 (step 3 = both
   switches) holds up, but its 2.8 mA lower margin is inside the model error; decision 2 (FAULT and RESET on one node pulled
   up to 3V3) puts GPIO6 directly on the gate node, breaks the read TPS3840 pull-up rule, gives a reset loop that SW-007 does

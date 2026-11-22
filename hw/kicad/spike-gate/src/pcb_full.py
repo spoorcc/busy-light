@@ -806,7 +806,8 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 def set_p1_fields(fps, comps):
     """Plan 08 RV-014 readiness B1 (HW-008, HW-016): the sourcing fields MPN, Manufacturer and LCSC of every part
     (sourcing.sourcing_fields of its value, the same table the schematic generator uses) on its footprint, hidden on the
-    Fab layer of its side; C4 and C32 are do-not-populate and excluded from the BOM."""
+    Fab layer of its side; C4 and C32 are do-not-populate and excluded from the BOM, and their pads get no solder paste,
+    so the bottom paste layer stays empty and the order stays one-sided (HW-008; RV-016 row 17)."""
     for ref, fp in fps.items():
         for k, v in sourcing.sourcing_fields(comps[ref][0], comps[ref][1]).items():
             fp.SetField(k, v)
@@ -817,6 +818,11 @@ def set_p1_fields(fps, comps):
         if ref in fps:
             fps[ref].SetDNP(True)
             fps[ref].SetExcludedFromBOM(True)
+            for pad in fps[ref].Pads():
+                ls = pad.GetLayerSet()
+                ls.RemoveLayer(pcbnew.F_Paste)
+                ls.RemoveLayer(pcbnew.B_Paste)
+                pad.SetLayerSet(ls)
 
 
 _NS = uuid.UUID("5b0c2f0e-0000-4000-8000-00000000b051")

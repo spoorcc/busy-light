@@ -441,6 +441,14 @@ class P1Board(unittest.TestCase):
         self.assertEqual(len([r for r in self.fps if r.startswith("TP")]), 6)
         self.assertTrue(all(self.fps[r].IsDNP() for r in pcb_full.DNP_REFS_P1))
 
+    def test_dnp_spares_have_no_solder_paste(self):
+        """RV-016 row 17: paste on the DNP spares on the bottom made the bottom paste Gerber non-empty (HW-008)."""
+        for ref in pcb_full.DNP_REFS_P1:
+            for pad in self.fps[ref].Pads():
+                layers = pad.GetLayerSet()
+                self.assertFalse(layers.Contains(pcbnew.B_Paste) or layers.Contains(pcbnew.F_Paste), (ref, pad.GetNumber()))
+                self.assertTrue(layers.Contains(pcbnew.B_Cu), (ref, pad.GetNumber()))
+
     def test_spares_are_1206_on_the_rule_that_keeps_them_at_u7(self):
         """HW-016 (Approved): two 1206 footprints; the placer rule keeps their centres within 7.0 mm of U7 (pad centres
         then within [10] mm of pin 6; RV-016 row 19). The reduced annealing run of this test is not asserted to meet the
