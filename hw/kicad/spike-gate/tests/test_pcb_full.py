@@ -49,6 +49,23 @@ class RuleMisses(unittest.TestCase):
         self.assertEqual(pcb_full.rule_misses(st, (("C1", "U5", 8.0), ("R2", "U14", 6.0), ("X9", "U5", 1.0))),
                          [["C1", "U5", 8.0, 10.0]])
 
+    def test_a_fixed_partner_counts_its_nearest_point(self):
+        st = {"TVS1": (5.0, 3.0, 0, "F")}
+        pts = ((0.0, 0.0), (20.0, 0.0))
+        self.assertEqual(pcb_full.rule_misses(st, (("TVS1", pts, 6.0),)), [])
+        self.assertEqual(pcb_full.rule_misses(st, (("TVS1", pts, 5.0),)), [["TVS1", "fixed", 5.0, 5.83]])
+
+    def test_input_path_rules_resolve_to_the_j1_vbus_pads(self):
+        """RV-016 row 12: the plan 08 input-path rules reach the placer; "J1:VBUS" becomes J1's VBUS pad points."""
+        nets = {"VBUS": [("J1", "A4"), ("J1", "B9"), ("TVS1", "1"), ("R22", "1")], "GND": [("J1", "A1")]}
+        fixed_pins = {("J1", "A4"): (1.0, 2.0), ("J1", "B9"): (3.0, 4.0), ("J1", "A1"): (9.0, 9.0)}
+        comps = {r: None for r in ("J1", "TVS1", "U6", "R22", "U7")}
+        rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, comps)
+        self.assertIn(("TVS1", ((1.0, 2.0), (3.0, 4.0)), 6.0), rules)
+        self.assertIn(("R22", "U7", 6.0), rules)
+        self.assertEqual(len(rules), 4)
+        self.assertEqual(pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, {"J1": None}), [])
+
     def test_hw016_rule_keeps_the_spare_pads_within_10_mm(self):
         """7.0 mm part centres + 1.48 mm (U7 pad 6 from its origin) + 1.475 mm (1206 pad centre) <= 10 mm (HW-016)."""
         lim = {(a, b): v for a, b, v in pcb_full.LAYOUT_RULES}

@@ -86,6 +86,10 @@ for n, v in sorted(nets.items()):
     print("   %-8s %s mV, full-width path %s" % (n, v["drop_mv"], v.get("full_width_path")))
     if not v["within_50mv"] or v.get("full_width_path") is False:
         bad.append(n)
+ip = json.load(open(sys.argv[1], encoding="utf-8")).get("input_path")
+if ip:  # report only (RV-016 row 14): the J1-to-U7 budget is an owner decision
+    print("   J1 to U7: %s mV copper; with R22 10 mohm %s mV, 20 mohm %s mV (not gated)"
+          % (ip["copper_drop_mv"], ip["drop_with_r22_10_mohm_mv"], ip["drop_with_r22_20_mohm_mv"]))
 sys.exit(1 if bad else 0)
 PY
 

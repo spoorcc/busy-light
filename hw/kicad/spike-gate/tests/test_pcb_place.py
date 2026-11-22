@@ -80,6 +80,18 @@ class Blocks(unittest.TestCase):
         self.assertEqual(pl.cost_of("N", pl.state["N"], 1.0), 0.0)
 
 
+class FixedPartnerRules(unittest.TestCase):
+    """Plan 08 section 4.2 input path (RV-016 row 12): a rule to a fixed part costs RULE_PEN per mm beyond the limit,
+    measured to the nearest of the fixed points (J1's VBUS pads)."""
+
+    def test_cost_uses_the_nearest_fixed_point(self):
+        parts = {"T": {"w": 1.0, "h": 1.0, "pads": {"1": (0.0, 0.0)}, "sides": "F"}}
+        pts = ((0.0, 0.0), (20.0, 0.0))
+        pl = P.Placer(parts, {}, {}, [], lambda *a: True, rules=(("T", pts, 6.0),))
+        self.assertEqual(pl.cost_of("T", (19.0, 3.0, 0, "F"), 1.0), 0.0)               # 3.16 mm from (20, 0)
+        self.assertAlmostEqual(pl.cost_of("T", (10.0, 0.0, 0, "F"), 1.0), P.RULE_PEN * 4.0)   # 10 mm from either
+
+
 class Orientation(unittest.TestCase):
     """Like parts share one orientation (ORIENT_W per member that differs); twins must match exactly."""
 

@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import tempfile
+import math
 import unittest
 from pathlib import Path
 
@@ -51,6 +52,32 @@ class Texts(unittest.TestCase):
 
 
 class Findings(unittest.TestCase):
+    def test_map_text_stays_at_the_part_when_free(self):
+        """Owner answer 13 (RV-016 row 15): the bottom map text sits at the top part's position when nothing is there."""
+        self.assertEqual(F.map_spot("C1", (10.0, 10.0), [], lambda r: True, 1.0), (10.0, 10.0))
+
+    def test_map_text_moves_in_steps_up_to_the_reach(self):
+        pad = (9.0, 9.5, 11.0, 10.5)                     # a bottom pad under the part
+        pos = F.map_spot("C1", (10.0, 10.0), [pad], lambda r: True, 1.0)
+        self.assertIsNotNone(pos)
+        self.assertLessEqual(math.hypot(pos[0] - 10.0, pos[1] - 10.0), 2.0 + 1e-9)
+        self.assertFalse(F.overlap(F.text_box("C1", pos, 1.0), pad, F.MARGIN))
+        self.assertAlmostEqual((pos[0] * 2) % 1.0, 0.0)  # on the 0.5 mm grid around the part
+        wall = (0.0, 0.0, 20.0, 20.0)
+        self.assertIsNone(F.map_spot("C1", (10.0, 10.0), [wall], lambda r: True, 1.0))
+
+    def test_identification_text_takes_the_first_free_place(self):
+        pos = F.first_free_box("busy-light P1 abc1234", 1.0, [(0.0, 0.0, 30.0, 5.0)], lambda r: r[0] >= 0 and r[1] >= 0,
+                               (0.0, 0.0, 40.0, 40.0))
+        self.assertIsNotNone(pos)
+        self.assertFalse(F.overlap(F.text_box("busy-light P1 abc1234", pos, 1.0), (0.0, 0.0, 30.0, 5.0), F.MARGIN))
+
+    def test_box_points_cover_the_inside_of_a_box(self):
+        pts = F.box_points((0.0, 0.0, 2.0, 1.0))
+        self.assertIn((1.0, 0.5), pts)                     # a slot through the middle would be found
+        self.assertIn((0.0, 0.0), pts)
+        self.assertIn((2.0, 1.0), pts)
+
     def test_refs_named_in_silkscreen_findings(self):
         drc = {"violations": [
             {"type": "silk_overlap", "items": [{"description": "Segment of U9 on F.Silkscreen"}, {"description": "Reference field of C4"}]},

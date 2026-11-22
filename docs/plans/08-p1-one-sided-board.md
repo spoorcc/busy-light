@@ -93,6 +93,14 @@ confirms or rejects this plan and its result together.
 - **Consequence** (row 45): rows 2 to 5 change the schematic and rows 11 to 13 need a new placement, so P1 is placed and routed
   again after the owner's decisions, with the tool fixes first.
 
+Done after RV-016 without an owner decision (2026-11-22; journal `2026-11-22-reviews-and-gates-board-p1.md`): the order
+script fails on board-p1 (placement rules; must-place parts U5 and R22; bottom paste); `pcb_layout_check.py`; exact ILIM
+values; the full BOM with the DNP parts; release notes with the missing list and owner waivers; the release workflow on
+pull requests and red on a failed gate (run 44989926250: as intended); the spike-gate tests in the `ci.yml` hardware job;
+the placer records rule misses, enforces the input-path rules with P1 and gives the DNP spares no paste; HW-016 rule
+7.0 mm; the J1-to-U7 drop reported; the bottom silkscreen map and an identification text in `pcb_finish.py`; RV-017 on
+ADR-0023 (rejected as written); RISK-047 to RISK-053; DEV-008. Board-p1 is unchanged.
+
 Superseded statements of sections 1 to 8 (RV-016 row 37):
 - Header: "HW-010 (... trim T1 ...)": ADR-0023 amendment. "HW-003 (... recalculated for R22 and the new path)": not done
   (row 13). "HW-009 (Draft: ERC/DRC reports stored with the revision)": not stored (row 30).

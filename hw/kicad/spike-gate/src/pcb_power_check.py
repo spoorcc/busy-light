@@ -48,6 +48,25 @@ CASES = {
 }
 
 
+INPUT_PATH = ("VBUS", "VBUS_IC")      # J1 -> R22 -> U7 pin 1, in series (HW-017)
+JUMPER_MOHM = (10.0, 20.0)            # HW-017 [10] mohm; the candidate part has up to 20 mohm (fab_missing_lcsc.txt)
+
+
+def input_path(nets):
+    """Drop from J1 to the TPS2553 input (RV-016 row 14: each case was gated alone, the sum by nothing): the copper drop
+    of the two series cases, and with the 0 ohm link R22 at HW-017's [10] mohm and at the candidate's 20 mohm. Report only:
+    the budget is an owner decision (HW-017 refers to an HW-010 budget that HW-010 does not define)."""
+    cases = [nets.get(n) for n in INPUT_PATH]
+    if any(c is None or c.get("drop_mv") is None for c in cases):
+        return None
+    amps = cases[0]["current_a"]
+    copper = round(sum(c["drop_mv"] for c in cases), 1)
+    out = {"nets": list(INPUT_PATH), "current_a": amps, "copper_drop_mv": copper}
+    for mohm in JUMPER_MOHM:
+        out["drop_with_r22_%g_mohm_mv" % mohm] = round(copper + mohm * amps, 1)
+    return out
+
+
 def via_width(t, lid):
     try:
         return t.GetWidth(lid)
@@ -235,6 +254,7 @@ def main(path, out=None):
                             "within_50mv": None if r is None else r * amps <= TARGET_V,
                             "full_width_path": None if rw is None else rw != float("inf"),
                             "min_path_width_mm": round(min_path_width(net), 3)}
+    res["input_path"] = input_path(res["nets"])
     for net, layer in (("GND", "In1.Cu"), ("+5V", "In2.Cu")):
         c = plane_cuts(board, net, layer)
         res["planes"][layer] = {"net": net, "pieces": None if c is None else c[0],

@@ -58,7 +58,7 @@ class Placer:
         self.parts, self.nets, self.fixed_pins = parts, nets, fixed_pins
         self.fixed_rects, self.region_ok, self.margin = fixed_rects, region_ok, margin
         self.rng = random.Random(seed)
-        self.rules = tuple(rules)       # (ref, ref, limit mm): cost RULE_PEN per mm of centre distance beyond the limit
+        self.rules = tuple(rules)       # (ref, ref or ((x, y), ...) of a fixed part, limit mm): cost RULE_PEN per mm beyond
         self.weights = weights or {}     # net name -> factor on the half-perimeter wire length (default 1)
         self.blocks = tuple(blocks)     # (anchor, member, radius mm)
         self.families = tuple(tuple(f) for f in families)      # tuples of refs that should share one orientation
@@ -134,6 +134,10 @@ class Placer:
         for n in self.net_of.get(ref, ()):
             c += self.weights.get(n, 1.0) * self.net_hpwl(n)
         for a, b, lim in self.rules:
+            if isinstance(b, tuple):                # fixed partner: the nearest of its points (plan 08 input path)
+                if ref == a:
+                    c += RULE_PEN * max(0.0, min(math.hypot(st[0] - px, st[1] - py) for px, py in b) - lim)
+                continue
             if ref not in (a, b):
                 continue
             o = self.state.get(b if ref == a else a)

@@ -35,6 +35,14 @@ class VbusSplit(unittest.TestCase):
         self.assertEqual(PC.CASES["VBUS_IC"][1], ("U7", "1"))
         self.assertEqual(PC.CASES["VBUS"][2], PC.CASES["VBUS_IC"][2])          # the same current flows through both
 
+    def test_input_path_sum_with_the_jumper(self):
+        """RV-016 row 14: board-p1 numbers of 2026-11-20 (VBUS 23.9 mV, VBUS_IC 44.1 mV at 1.5 A)."""
+        doc = PC.input_path({"VBUS": {"drop_mv": 23.9, "current_a": 1.5}, "VBUS_IC": {"drop_mv": 44.1, "current_a": 1.5}})
+        self.assertEqual(doc["copper_drop_mv"], 68.0)
+        self.assertEqual(doc["drop_with_r22_10_mohm_mv"], 83.0)
+        self.assertEqual(doc["drop_with_r22_20_mohm_mv"], 98.0)
+        self.assertIsNone(PC.input_path({"VBUS": {"drop_mv": None, "current_a": 1.5}}))
+
     def test_case_pads_are_on_the_case_net(self):
         for net, (src, dst, _amps, _basis) in PC.CASES.items():
             for ref, pad in (src, dst):

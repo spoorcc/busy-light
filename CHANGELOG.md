@@ -71,6 +71,18 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- Placement and finishing tools for the next P1 board (RV-016 rows 12, 14, 15, 18). The placer enforces the plan 08
+  input-path rules with P1 (TVS1, U6 and R22 to the nearest J1 VBUS pad; R22 to U7): a rule to a fixed part costs per mm
+  beyond the limit to the nearest of its points (`pcb_place.Placer`, `pcb_full.resolve_rules`); the two-sided default
+  build keeps its old rules. `pcb_power_check.py` reports the J1-to-U7 drop (`input_path`: board-p1 68.0 mV in copper,
+  83.0 mV with R22 at 10 mohm, 98.0 mV at 20 mohm, at 1.5 A); report only, the budget is an owner decision; `fab_p1.sh`
+  prints it. `pcb_finish.py` writes the bottom silkscreen map of owner answer 13 (each top part's reference mirrored on
+  B.SilkS, moved up to 2 mm to clear bottom pads, vias, the edge and other texts; a later pass replaces the earlier texts)
+  and an identification text "busy-light P1 <commit>", or "P1 <commit>" at 0.8 mm when that is all that fits (two passes on
+  a copy of board-p1: 65 of 89 top parts mapped, "P1 5550e96" placed, no silkscreen finding from the new texts; board-p1
+  itself is unchanged). Tests:
+  `test_pcb_place.py::FixedPartnerRules`, `test_pcb_full.py::RuleMisses`, `test_pcb_power_check.py`,
+  `test_pcb_finish.py` (HW-003, HW-008, HW-017, RV-016).
 - Records after RV-016 and RV-017: RISK-047 to RISK-053 (U5 missing makes the gate fail open; firmware can hold the gate
   open through GPIO6; gate node reads "OK" with VBUS gone and 3V3 up; reset loop under overload; HASL at the 0.4 mm-pitch
   U1; R22 resistance or not placed; part availability) and RISK-044 updated; DEV-008 (Proposed: P1 built before the

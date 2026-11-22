@@ -235,9 +235,13 @@
 - **Verifies:** HW-017
 - **Level:** Inspection, then prototype
 - **Procedure (drafted 2026-11-17, plan 08; not run):**
-  - Board part (automated): `tests/test_board_p1.py` checks R22 pin 1 on VBUS and pin 2 on VBUS_IC, TVS1 and U6 on the VBUS side,
-    and every track of the J1-R22-U7 main path at least as wide as the path before R22 (0.6 mm). `src/pcb_power_check.py` reports
-    the drop of VBUS (J1 to R22) and VBUS_IC (R22 to U7). Add the jumper's datasheet resistance at 1.5 A and compare with [10] mohm.
+  - Board part (automated; corrected 2026-11-22 after RV-016 row 37 to what the tests check): `tests/test_board_p1.py`
+    checks R22 pin 1 on VBUS and pin 2 on VBUS_IC, its 1206 footprint and its side
+    (`test_hw017_link_between_vbus_and_vbus_ic`); `test_main_path_is_0_6_mm_wide` checks a copper path of tracks at least
+    0.6 mm wide on both nets (expected failure on board-p1: 0.45 mm segments, RV-016 row 13). TVS1 and U6 on the VBUS side
+    are checked in the netlist (`tests/test_layout_full.py::DampingLink`), their distance to J1 by `src/pcb_layout_check.py`.
+    `src/pcb_power_check.py` reports the drop of VBUS (J1 to R22), VBUS_IC (R22 to U7) and their sum with R22 at 10 and
+    20 mohm (`input_path`). Add the jumper's datasheet resistance at 1.5 A and compare with [10] mohm.
   - Bench part (surge option S1, ADR-0021). Probe points: VBUS at TVS1 pin 1, VBUS_IC at C2 pin 1, +5V at TP1, supply pins at
     C26 pin 1 (U1), C24 pin 1 (U14), C25 pin 1 (U15); ground at TP3 or the nearest GND pad with a short ground spring.
     > **CAUTION:** Use a current-limited lab supply and a short cable for the first plug-ins. A surge above the part ratings can damage U1, U7, U8, U14 or U15.
@@ -247,9 +251,9 @@
     4. Repeat step 3 [20] times. Record the highest peak of each channel.
     5. Move the probes to +5V and each supply pin in turn. Repeat steps 3 and 4.
     6. Repeat steps 2 to 5 with a USB-C source and its own cable.
-    7. Replace R22 with the ferrite or resistor that ADR-0021 names. Repeat steps 2 to 6.
+    7. Replace R22 with the ferrite or resistor that ADR-0021 option S3 describes, once the owner has chosen the part (ADR-0021
+       names none; RV-016 row 14: the part lowers VBUS_IC at step 3). Repeat steps 2 to 6.
 - **Expected result / pass criteria:** board part: see acceptance criteria of HW-017. Bench part: the record itself is the result; peaks above 6 V (7 V at the TPS2553) trigger the revisit of ADR-0021.
-- **Expected result / pass criteria:** see acceptance criteria of HW-017; for the bench part the record itself is the result: peaks above 6 V (7 V at the TPS2553) trigger the revisit of ADR-0021.
 - **Automated:** no
 - **Evidence:** none yet
 

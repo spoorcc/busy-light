@@ -203,14 +203,35 @@ SA_SEEDS = tuple(range(_SEED0, _SEED0 + 16))
 
 def rule_misses(state, rules):
     """[a, b, limit, distance] for each (a, b, limit mm) rule whose part centres in `state` ({ref: (x, y, ...)}) are farther
-    apart than the limit; rules with a part not in `state` are left out (a fixed partner is checked on the board by
-    pcb_layout_check.py)."""
+    apart than the limit. b may be a tuple of fixed points ((x, y), ...): the nearest one counts, reported as "fixed".
+    Rules with a part not in `state` are left out (pcb_layout_check.py measures every rule on the board)."""
     out = []
     for a, b, lim in rules:
-        if a in state and b in state:
-            d = math.hypot(state[a][0] - state[b][0], state[a][1] - state[b][1])
-            if d > lim:
-                out.append([a, b, lim, round(d, 2)])
+        if a not in state:
+            continue
+        if isinstance(b, tuple):
+            d, name = min(math.hypot(state[a][0] - x, state[a][1] - y) for x, y in b), "fixed"
+        elif b in state:
+            d, name = math.hypot(state[a][0] - state[b][0], state[a][1] - state[b][1]), b
+        else:
+            continue
+        if d > lim:
+            out.append([a, name, lim, round(d, 2)])
+    return out
+
+
+def resolve_rules(rules, nets, fixed_pins, comps):
+    """Placer form of rules: a partner "REF:NET" becomes the tuple of the SA-frame points of REF's pads on NET (fixed
+    parts only, from fixed_pins); rules with a part that is not on the board are left out."""
+    out = []
+    for a, b, lim in rules:
+        if ":" in b:
+            ref, net = b.split(":", 1)
+            pts = tuple(fixed_pins[(r, pad)] for r, pad in nets.get(net, ()) if r == ref and (r, pad) in fixed_pins)
+            if a in comps and pts:
+                out.append((a, pts, lim))
+        elif a in comps and b in comps:
+            out.append((a, b, lim))
     return out
 
 
@@ -693,12 +714,16 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
             return False
         return MO.region_rect_ok(side, x0, -y1, x1, -y0, r_move, tab_r, top_tab=p1)
 
+    # ADR-0016 proximity rules, and with P1 the plan 08 input-path rules (RV-016 row 12: they were not in the placer; the
+    # two-sided default build keeps its old rule set, so its seeds and test times stay as they were)
+    rules = resolve_rules(tuple(LAYOUT_RULES) + (tuple(INPUT_PATH_RULES) if p1 else ()), nets, fixed_pins, comps)
+
     def layout_rules_ok(st):
-        return not rule_misses(st, LAYOUT_RULES)
+        return not rule_misses(st, rules)
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
                                           seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
-                                          accept=layout_rules_ok, weights=weights, rules=LAYOUT_RULES,
+                                          accept=layout_rules_ok, weights=weights, rules=rules,
                                           blocks=[b for b in pcb_rules.BLOCKS if b[0] in comps and b[1] in comps],
                                           families=orientation_families(comps, fixed, STRICT_ICS)[0],
                                           strict_families=orientation_families(comps, fixed, STRICT_ICS)[1],
@@ -710,7 +735,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
         orient(fp, rot, side)
         centre_at(fp, CX + x, CY + y)
     placement_info = {"seed": seed, "hpwl_mm": round(wl, 1), "overlap_mm2": round(ov, 3), "p1": p1, "r_move": r_move,
-                      "layout_rule_misses": rule_misses(state, LAYOUT_RULES)}
+                      "layout_rule_misses": rule_misses(state, rules)}
     for a, b, lim, d in placement_info["layout_rule_misses"]:      # RV-016 row 11: the placer keeps its best seed anyway
         print("PLACEMENT RULE MISSED: %s to %s %.2f mm (rule %.1f mm)" % (a, b, d, lim), file=sys.stderr)
     if p1:
