@@ -1,7 +1,7 @@
 # 09 -- Centre-of-ring button (design doc)
 
-- **Status:** Draft (revision 3 of 2026-11-23: revision 2 plus the resolutions of the readiness NO-GO, RV-018 rows R1 to R6;
-  a second readiness pass follows)
+- **Status:** Draft (revision 4 of 2026-11-23: revision 3 plus the resolutions of the second readiness NO-GO, RV-018 rows R9 to R12.
+  A third readiness pass runs after the owner has answered section 7, because the answers change the scope of steps 0 and 1)
 - **Date:** 2026-11-23  **Owner:** Ben Spoor (author: assistant)
 - **Area:** mech (with hw and sw consequences)
 - **Requirements addressed:** SYS-017 (Draft; amendment proposed), HW-007 (Draft; change proposed), MECH-004 (Approved; change
@@ -84,10 +84,12 @@ definitions); the scripts are **not in the repository, so not yet evidence**. St
 
 ### 3.2 Switch place by support concept (feasibility matrix)
 Model: rigid disc, linear supports, displacement w = a + bx + cy; switch spring = 1.6 N / 0.25 mm = 6.4 N/mm (nominal force, **assumed
-travel**, bilateral); load F at any of 648 points inside R_use (600 from `random.Random(7)` uniform in the disc plus 48 equally spaced on
-the boundary). F is the load at which the plunger travel reaches 0.25 mm; "travel" is the largest press-point travel at that load. The switch
+travel**, bilateral); load F at any of
+650 or more points inside R_use: 600 from `random.Random(7)` (per point `u = rng.random()`, then `v = rng.random()`; radius R sqrt(u), angle 2 pi v),
+plus the centre, plus every switch position, plus 48 equally spaced on the boundary starting at angle 0. The table below was made with a numpy
+sampler (`default_rng(7)`) that did not include the centre; the stdlib rebuild in step 1 replaces the numbers, which are indicative to about 5 %. F is the load at which the plunger travel reaches 0.25 mm; "travel" is the largest press-point travel at that load. The switch
 tolerance of +-0.49 N adds +-0.49 N to every F below. S1 = switch 7 mm off the centre (rear of the module); supports "centred on the
-switch" are at azimuth 0 and +-78.5 degrees on r = 15 (centroid at x = 7); "symmetric" supports are at 90, 210, 330 degrees on r = 14;
+switch" are at azimuth 0 and +-acos(0.2) = +-78.463 degrees on r = 15 (centroid at x = 7); "symmetric" supports are at 90, 210, 330 degrees on r = 14;
 S2 = switch at the centre with supports at 90, 210, 330 degrees on r = 14; M3 = three switches at r = 11 at 90, 210, 330 degrees.
 
 | Concept | Support stiffness | F min / max (N) | Travel (mm) | Verdict |
@@ -98,7 +100,7 @@ S2 = switch at the centre with supports at 90, 210, 330 degrees on r = 14; M3 = 
 | | 4 | 4.60 / 4.60 | 0.91 | force fails |
 | S1 + bridges centred on the switch (centroid rule) | 1 / 3 / 10 / 30 | 2.35 / 3.85 / 9.1 / 24.1 | 10.0 / 5.6 / 4.0 / 3.6 | fails |
 | S1 + bridges symmetric on the disc | 1 / 3 / 10 | 1.6 to 44 / 2.4 to 65 / 5.1 to 139 | 40 / 20 / 13 | fails |
-| M3: three switches at r = 11, rigid disc, no bridges | switches only | 1.43 / 4.37 | 0.43 | works mechanically; 1.4 N is below the 2 N lower bound |
+| M3: three switches at r = 11, rigid disc, no bridges | switches only | 1.43 / **4.80** (centre; the sample of revision 3 missed it and said 4.37) | 0.43 | works mechanically; 1.4 N is below the 2 N lower bound, and the centre needs 4.8 N nominal and about 5.3 N with +50 gf on a switch, above the [5] N window |
 
 Findings:
 1. The centroid rule makes the plunger travel position-independent, but with the plunger 7 mm off the centre the three supports must sit
@@ -107,11 +109,13 @@ Findings:
 2. The centred switch with three bridges passes only in a narrow band of bridge stiffness (about 2.5 to 3.2 N/mm). Arm stiffness follows
    w t^3: with w and t both off by +-0.3 mm on a 1.2 x 1.2 mm arm it spreads by 0.32x to 2.4x (0.42x to 1.95x for t alone), so the band is
    not reachable without per-unit tuning.
-3. Three switches give the stiffness and the tilt restraint from the switches and are insensitive to FDM tolerance; the module stays where
-   it is. With the real 6.4 x 5.2 mm body and the 8.5 x 6.0 mm courtyard the switches at r = 11 touch the module body and sit about 3 mm
-   from the antenna strip, and two more courtyards add about 102 mm2 to plan 08 A3's 430 of 650 mm2 (66 % becomes about 82 %; about 96 %
-   with the vendor antenna keep-out; the plan 08 figures are quoted, not recomputed). A closed contact on any of three switches is a
-   stuck-closed fault path (4.5).
+3. Three switches give the stiffness and the tilt restraint from the switches and are insensitive to FDM tolerance, but **they do not fit
+   around the stored module at r = 11**. A goldfish scan (triplet rotation 0 to 119 degrees in 1 degree steps, four switch orientations, both module
+   models; step 1 reproduces it) finds that with the real 6.4 x 5.2 mm body only 7 of 480 configurations clear the module (best gap 0.33 mm to the body and
+   0.34 mm to the antenna strip), and with the 8.5 x 6.0 mm courtyard none; with the azimuths 90, 210, 330 degrees of the table the 210 degree switch lies inside the
+   module. A larger r changes the force window, a smaller switch relieves it. Two more courtyards also add about 102 mm2 to plan 08 A3's 430 of 650 mm2
+   (quoted figures: (430 + 102) / 650 = 82 %, about 96 % with the vendor antenna keep-out). A closed contact on any of three switches is a stuck-closed
+   fault path (4.5).
 4. Unequal supports and a parallel-motion linkage (scissor or double lever, print-in-place hinges) are not analysed.
 
 Concepts: **M1** compliant bridges (viable only with S2, narrow band; arm stress about 40 MPa at 1.0 mm travel against the assumed
@@ -124,11 +128,11 @@ pivot post: only S2 has room, and the switch is then not at the centre; dropped 
 | Option | Idea | Finding |
 |---|---|---|
 | S1 Switch off the centre, one switch | Module stays | Not workable with simple supports (3.2) |
-| **S2** Module moves, switch at the centre | Symmetric disc | Search: module body 13.2 x 16.6 mm, translation +-14 mm in 0.5 mm steps, rotation 0 to 177 degrees in 3 degree steps (enough: the ring has 16 LEDs and the switch is a rectangle, both 180-degree symmetric; the antenna end is tried on both sides), LEDs 2.0 mm squares oriented radially at R 20 mm, phase 3.75 degrees, clearance 0.5 mm to LEDs, module corners within R 19.5 mm. **With the real switch (6.4 x 5.2 mm body at the centre, 1.0 mm clearance): 10 poses, best distance from the antenna strip to the nearest LED centre 2.51 mm, 50 % of today's 5.06 mm. With the 8.5 x 6.0 mm courtyard and no extra clearance: 58 poses, 3.04 mm (60 %).** Revision 2's 320 poses and 3.6 mm used the wrong body (4.5 x 3.5 mm) and are withdrawn; a switch of that size would give 324 poses and 3.64 mm (72 %), which is why step 0 looks for a smaller switch. S2 also reverses the owner decision of 2026-11-18 (module toward the antenna-side edge, slot) and reopens ADR-0003 and DEV-004 |
-| **S3** Three switches around the module (with M3) | Module as stored | Antenna strip to LED unchanged at 5.06 mm; two more switches and courtyards (area, finding 3 of 3.2); metal about 3 mm from the antenna strip |
+| **S2** Module moves, switch at the centre | Symmetric disc | Search (pose counts cover rotation 0 to 177 degrees; the full circle doubles them): module body 13.2 x 16.6 mm, translation +-14 mm in 0.5 mm steps, rotation 0 to 177 degrees in 3 degree steps (enough: the ring has 16 LEDs and the switch is a rectangle, both 180-degree symmetric; the antenna end is tried on both sides), LEDs 2.0 mm squares oriented radially at R 20 mm, phase 3.75 degrees, clearance 0.5 mm to LEDs, module corners within R 19.5 mm. **With the real switch (6.4 x 5.2 mm body at the centre, 1.0 mm clearance): 10 poses, best distance from the antenna strip to the nearest LED centre 2.51 mm, 50 % of today's 5.06 mm. With the 8.5 x 6.0 mm courtyard and no extra clearance: 58 poses, 3.04 mm (60 %).** Revision 2's 320 poses and 3.6 mm used the wrong body (4.5 x 3.5 mm) and are withdrawn; a switch of that size would give 324 poses and 3.64 mm (72 %), which is why step 0 looks for a smaller switch. S2 also reverses the owner decision of 2026-11-18 (module toward the antenna-side edge, slot) and reopens ADR-0003 and DEV-004 |
+| **S3** Three switches around the module (with M3) | Module as stored | Antenna strip to LED unchanged at 5.06 mm, but the switches are not placeable at r = 11 around the stored module with the real switch (finding 3 of 3.2); two more courtyards and metal next to the antenna strip if they are placed |
 | S4 Switch under the board | Plunger through the board | Breaks HW-008; rejected |
 
-No lean until the matrix is reproduced by tested scripts (step 1). With the real switch both S2 (antenna margin halves) and S3 (area and metal
+No lean until the matrix is reproduced by tested scripts (step 1). With the real switch both S2 (antenna margin halves) and S3 (does not fit at r = 11; area and metal
 beside the antenna) are strained; a smaller switch (step 0) relieves both, and a scissor linkage with one switch would remove the support
 problem. The owner decides in ADR-0026.
 
@@ -233,18 +237,26 @@ and class on those pages need a second source, which step 0 states per part.
 
 ## 5. Detailed implementation plan
 **Rule 1 and the order of work.** Steps 0 and 1 are analysis and evidence under the Approved requirements MECH-004, MECH-002, MECH-003 and
-HW-008 (they check the owner's decision 9 against them) and change no CAD, board or requirement text; they add new documents and update one
-evidence file. **They start only after the owner confirms this reading** (section 7, question 6); until then the plan is not ready to run.
+HW-008 (they check the owner's decision 9 against them) and change no CAD, board or requirement text; they add two new evidence files, one updated evidence file, about five new Python files with tests, one changed script
+(`check_tolerance.py` with its test), one allow-list line in `check_license_map.py`, three new documents (stock-check report, analysis report, ADR-0026) and a README
+row. **They start only after the owner confirms this reading and this change set** (section 7, question 6); until then the plan is not ready to run.
 Requirement texts, `housing_params.py`, the FreeCAD model and the board follow ADR-0026 and the approval.
 
 **Step 0 (evidence)**
-- Files: `hw/evidence/parts/sw-tl3342.yaml` (updated: `pin_count: 4`, body 5.2 x 5.2 mm, 6.4 mm over the terminals, height 1.54 mm, actuator
-  about 2.0 mm, 160 +-50 gf, 100 000 cycles, each with a quote checked by `scripts/check_part_evidence.py`), `hw/evidence/parts/sw-<mpn>.yaml`
-  for each of the two alternatives, `docs/verification/reports/stock-check-button-switches.md` (stock, class, price and the second source per
-  part, with the date).
+- Files: `hw/evidence/parts/sw-tl3342.yaml` (updated; `mpn: TL3342F160QG`, `manufacturer: E-Switch`, `selection: chosen` as the P1 placeholder, LCSC C2886898 read
+  from the product page, `url` and `retrieved_on` of the PDF), `hw/evidence/parts/sw-<mpn>.yaml` for each of the two alternatives,
+  `docs/verification/reports/stock-check-button-switches.md` (stock, class, price and the second source per part, with the date; a single read of
+  2026-11-23 showed LCSC stock 1 and JLCPCB stock 0, extended, for the TL3342F160QG). `scripts/check_license_map.py` gets the new yaml files in its ALLOW list.
+- **Recording rule** (the checker needs a quote for every claim and the number must occur in the quote): the E-Switch sheet is one page and its dimensions are
+  only in the drawing graphic, so (a) force is a claim `typ: 160` gf with the quote "160+- 50 gf" and a separate claim for the tolerance of 50 gf, the newton values go into
+  `notes`; (b) life is a statement-only claim ("100,000 cycles typical", no number field); (c) "no travel and no force-travel curve" is a `source-missing` claim with
+  notes; (d) body, height and actuator dimensions are **not machine-checked**: they are carried in `notes` and in the stock-check report, marked "from the drawing,
+  not text-checked", and cross-checked against the stored footprint (6.4 x 5.2 mm). The same rule applies to alternatives whose PDFs lack a text layer.
+  "0 errors" from `check_part_evidence.py` then means: schema valid, hashes and text quotes of the claims above pass; geometry is unchecked.
 - Verification: `python3 -I scripts/check_part_evidence.py` with `BUSY_LIGHT_DATASHEETS` pointing to a scratch folder holding the PDFs (the owner's
-  datasheet folder is not in the container; the hash and quote checks are reported as run or not run).
-- Output: the numbers that step 1 needs (body, height, force and tolerance, travel if published).
+  datasheet folder is not in the container; the hash and quote checks are reported as run or not run); `check_license_map.py`; `reuse lint`.
+- Output: the numbers that step 1 needs (body, height, force and tolerance, travel if published). If no alternative meets all criteria of 4.9, the report names
+  the best two and the criteria they fail; alternatives enter the S2 and S3 analysis by body size only.
 
 **Step 1 (analysis; Python standard library only, no numpy; SPDX Apache-2.0 headers; `reuse lint` clean)**
 - `mech/analysis/button_disc.py` (linted):
@@ -252,40 +264,52 @@ Requirement texts, `housing_params.py`, the FreeCAD model and the board follow A
   - `solve_plane(supports: Sequence[Support], load_xy: tuple[float, float], force_n: float) -> Plane`: solves sum_i k_i v_i v_i^T [a b c]^T = F [1 x y]^T
     with v_i = [1, x_i, y_i] by Cramer's rule; raises `ValueError` if singular.
   - `displacement(plane: Plane, point: tuple[float, float]) -> float`.
-  - `sample_points(radius_mm: float, n_random: int, n_boundary: int, seed: int) -> list[tuple[float, float]]` using `random.Random(seed)`, r = R sqrt(u).
+  - `sample_points(radius_mm: float, n_random: int, n_boundary: int, seed: int, extra: Sequence[tuple[float, float]] = ()) -> list[tuple[float, float]]`: the
+    `n_random` points as in 3.2 (u first, then v, from `random.Random(seed)`), then `extra` (the centre and the switch positions), then `n_boundary` points from angle 0.
   - `PressMetrics` (frozen dataclass: `force_min_n`, `force_max_n`, `travel_max_mm`, `lift_points: int`) and `press_metrics(supports:
     Sequence[Support], switches: Sequence[tuple[float, float, float]], click_travel_mm: float, points: Sequence[tuple[float, float]]) -> PressMetrics`
     where a switch is (x mm, y mm, stiffness N/mm) and is added to the supports; the click is the first switch whose travel reaches `click_travel_mm`;
     a point whose plunger travel is not positive counts in `lift_points`.
+  - `main() -> None` prints the matrix of 3.2 for the report.
   - `guided_beam_stiffness(E_mpa, w_mm, t_mm, L_mm) -> float` = E w t^3 / L^3 (fixed-guided beam, N/mm); `arm_stress(E_mpa, t_mm, L_mm, stroke_mm) -> float`
     = 3 E t stroke / L^2 (MPa); `guide_jam_length(e_mm, mu) -> float` = 2 mu e (mm); `plate_deflection(radius_mm, thickness_mm, E_mpa, nu, force_n,
-    edge: Literal["simply_supported", "clamped"]) -> float` for a **central** load (P R^2 (3 + nu) / (16 pi D (1 + nu)) and P R^2 / (16 pi D) with
+    edge: Literal["simply_supported", "clamped"]) -> float` (carries `# noqa: PLR0913, PLR0917` as `check_part_evidence.py` does) for a **central** load (P R^2 (3 + nu) / (16 pi D (1 + nu)) and P R^2 / (16 pi D) with
     D = E t^3 / (12 (1 - nu^2))); edge presses are left to the coupon (step 3).
 - `mech/analysis/button_light.py` (linted): `ring_irradiance(r_mm: float, height_mm: float = 8.0, ring_r_mm: float = 20.0, n: int = 16) -> float`,
   Lambertian ring sum relative to the value above an LED.
 - `mech/analysis/check_tolerance.py` (changed, informational): `button_vertical_chain(tolerances: Mapping[str, float]) -> dict[str, float]` returning
-  `{"wc": ..., "rss": ...}` and `button_lateral_chain(...)` likewise; the inputs are a local dict of working values (named datums: PCB top, post
-  height, ledge, lid plate, plunger, switch height), not `housing_params.py`; neither is called by `run()`.
+  `{"wc": ..., "rss": ...}` and `button_lateral_chain(tolerances: Mapping[str, float]) -> dict[str, float]` likewise (keys: `pcb_wall_gap`, `spigot_play`, `tilt_walk`, `plunger_tip`); the vertical keys are `pcb_post`, `lid_ledge`, `lid_plate`,
+  `disc_plunger`, `switch_height`, `switch_actuation`. The inputs are a local dict of working values (the switch-height tolerance is not published, so it is an assumption), not
+  `housing_params.py`; neither function is called by `run()`; a third function `recess_worst_case(nominal_recess_mm, tolerances) -> float` gives the worst-case recess that the report quotes.
 - Tests (root pytest, `pyproject.toml` testpaths): `mech/analysis/test_button_disc.py` (residual of the three equilibrium equations below 1e-9;
-  three equal supports at 120 degrees with the load at the centroid give F/(3k); the centroid-rule case gives equal plunger travel at the 648 points
-  to 1e-9; beam 0.199 N/mm for E = 1500, 1.2 x 1.2, L = 25; plate 0.042 mm/N for R = 15, t = 1.2, E = 1500, nu = 0.4; the matrix rows of 3.2 within 0.02 N and
-  0.02 mm), `test_button_light.py` (value 0.18 to 0.20 at r = 0 relative to the ring value at r = 20 by the same function), additions to
-  `test_check_tolerance.py` (hand values for worst case and RSS).
+  three equal supports at 120 degrees with the load at the centroid give F/(3k); the centroid-rule case with the exact angle acos(0.2) gives equal plunger travel at all sample points
+  to 1e-9; the S2 rows are position-independent and equal the analytic F = 0.25 (3 k + k_switch) within 1e-9; the M3 maximum is the analytic 4.80 N at the centre; beam 0.199 N/mm for
+  E = 1500, 1.2 x 1.2, L = 25; plate 0.042 mm/N for R = 15, t = 1.2, E = 1500, nu = 0.4; analytic values of `arm_stress`, `guide_jam_length` and the clamped plate; a singular
+  support set raises `ValueError`; `sample_points` is deterministic for a seed and holds the extra points; the sampled matrix rows of 3.2 within 5 %), `test_button_light.py` (value 0.18 to 0.20 at r = 0 relative to the ring value at r = 20 by the same function), additions to
+  `test_check_tolerance.py` (hand values for worst case and RSS and for `recess_worst_case`), tests for `led_squares` and `antenna_strip` in `test_button_zone.py`.
 - `hw/kicad/spike-gate/src/button_zone.py` (outside ruff while in spike-gate, as `pyproject.toml` already excludes that folder; the exception is
   recorded in the report) with `tests/test_button_zone.py`:
-  - `read_footprint_outline(pcb_text: str, ref: str, layer: str = "F.Fab") -> list[tuple[float, float]]` (stdlib regex parse of the `.kicad_pcb`, rotation and
-    origin applied, board centre subtracted; `pcbnew` is not needed and the tests are not skipped);
+  - `read_footprint_outline(pcb_text: str, ref: str, layer: str = "F.Fab", board_centre: tuple[float, float] = (40.0, 40.0)) -> list[tuple[float, float]]` (stdlib regex parse of
+    the `.kicad_pcb` of board-p1; the y axis stays KiCad's, pointing down; the rotation is KiCad's, X = x + lx cos t + ly sin t and Y = y - lx sin t + ly cos t for the footprint
+    angle t; the outline is the bounding rectangle of the layer's lines; `pcbnew` is not needed and the tests are not skipped);
   - `led_squares(r_mm: float = 20.0, n: int = 16, phase_deg: float = 3.75, size_mm: float = 2.0) -> list[list[tuple[float, float]]]`;
-  - `antenna_strip(body: Sequence[tuple[float, float]], strip_mm: float = 4.6, end: str = "min_x") -> list[tuple[float, float]]`;
+  - `antenna_strip(body: Sequence[tuple[float, float]], strip_mm: float = 4.6, end: str = "min_x") -> list[tuple[float, float]]` (4.6 mm from the stated end of the bounding rectangle; the interior
+    F.Fab line at 5.4 mm is ignored);
   - `nearest_led_distance(strip, leds) -> float` (to the LED centre);
-  - `s2_poses(module_size, switch_size, switch_gap_mm, led_gap_mm, extent_mm, step_mm, step_deg) -> list[Pose]` and `best_antenna_distance(poses) -> float`;
-  - `s3_conflicts(switch_centres, courtyard_size, module_body, leds) -> list[str]`.
-  - Tests of physical properties: baseline 5.06 mm within 0.1 mm for the stored footprint and 6.07 mm for `mech_outline`; no pose overlaps an LED
-    or the switch; the best S2 distance is below the baseline; the pose count and the best distance are printed in the report, not asserted.
+  - `Pose = tuple[float, float, float, bool]` (x mm, y mm, angle degrees, antenna end flipped); `s2_poses(module_size: tuple[float, float], switch_size: tuple[float, float], switch_gap_mm: float,
+    led_gap_mm: float, corner_radius_mm: float, extent_mm: float, step_mm: float, step_deg: float) -> list[Pose]` (report values: 19.5, 14.0, 0.5, 3.0; the corner radius is material:
+    without it the result is 58 poses and 2.86 mm for the courtyard case) and `best_antenna_distance(poses) -> float`;
+  - `s3_conflicts(switch_centres: Sequence[tuple[float, float]], switch_size: tuple[float, float], switch_rotation_deg: float, module_body, antenna_strip, leds, clearance_mm: float) -> list[str]` returns one
+    string per overlap ("SW<i> overlaps module", "SW<i> overlaps LED<j>") and the gaps to the body and the strip; `s3_scan(r_mm: float, switch_size, clearance_mm: float, module_body, antenna_strip, leds) ->
+    tuple[int, int, float, float]` scans triplet rotations 0 to 119 degrees in 1 degree steps and the four switch orientations and returns (feasible, total, best gap to the body, best gap to the strip);
+  - `main() -> None` prints the S2 and S3 results for the report.
+  - Tests: the SW1 outline is 6.4 x 5.2 mm and its courtyard 8.5 x 6.0 mm in board-p1; baseline 5.06 mm within 0.1 mm for the stored footprint and 6.07 mm for `mech_outline`; no pose overlaps an LED
+    or the switch; the best S2 distance is below the baseline; `s3_scan` finds at most 20 of 480 feasible for the 6.4 x 5.2 body and none for the courtyard (the goldfish scan found 7 and 0; the
+    test asserts "small", not the exact count); the pose count and the best distances are printed in the report, not asserted.
 - Documents: `docs/verification/reports/analysis-button-disc.md` (results, the capacity estimate of 4.6, the reconciliation of the two module models and
   of `POST_AZ` 30/150/270 in `mech_outline.py` against `POST_DEG` 60/180/300 in `housing_params.py` as a list of issues with no file change),
   `mech/analysis/README.md` (rows for the new files), `docs/decisions/ADR-0026-centre-button-concept.md` (Proposed). Verification of step 1: the new
-  tests, `check_traceability.py`, `check_docs_style.py`, the spike-gate suite for `button_zone.py`.
+  tests, `check_traceability.py`, `ruff check .`, `ruff format --check .`, `reuse lint`, `check_license_map.py`, the root pytest and the spike-gate suite for `button_zone.py`; a `CHANGELOG.md` entry.
 
 **Step 2** The owner decides ADR-0026 and the questions of section 7; `regulatory-check`; the requirement texts of 4.7 enter the requirement files as proposals and
 the owner approves; ESD, overload, life and click procedures are written (TC-207, TC-302, TC-304, TC-311, TC-314 are stubs or new).
@@ -331,9 +355,9 @@ Not run now: everything above. The numbers of section 3 come from scratch script
 
 ## 7. Risks and open questions
 Risks (entered in the register after the owner reads this revision):
-1. "Press anywhere" fails (3.2): only S2 + M1 in a narrow band, or S3 + M3, pass the model; a rocking or binding disc; a mushy click from the stack.
+1. "Press anywhere" fails (3.2): only S2 + M1 in a narrow band, or S3 + M3 (not placeable at r = 11 with the real switch), pass the model; a rocking or binding disc; a mushy click from the stack.
 2. A hand over the antenna during a 3 s or 10 s press; S2 cuts the antenna margin to 50 to 60 % of today's 5.06 mm with the real switch; S3 puts metal
-   about 3 mm from the strip.
+   next to the strip if it can be placed at all.
 3. Light: the disc is lit by spill; a gap line is likely (4.4).
 4. Unintended or stuck press (4.5); three parallel switches triple the stuck-closed chance.
 5. PETG creep and fatigue of arms or tabs at 50 degC (A2); FDM tolerance against a switch travel that is not yet known (3.4).
@@ -345,8 +369,8 @@ are the assistant's working proposals without a standard behind them; step 0 rep
 
 Open questions for the owner (they change what is built):
 1. **Light:** accept a softly lit disc (19 % to 80 % of the ring brightness), or an opaque mask or a smaller disc?
-2. **Direction:** with the real switch, S2 (module moves; antenna margin 2.5 to 3.0 mm against 5.06 mm today) and S3 (three switches; area up to 82 to 96 %,
-   metal beside the antenna) are both strained. Run step 0 first to look for a smaller switch, and add a scissor-linkage study?
+2. **Direction:** with the real switch, S2 (module moves; antenna margin 2.5 to 3.0 mm against 5.06 mm today) and S3 (three switches; they do not fit around the stored module at r = 11,
+   area up to 82 to 96 %) are both strained. Run step 0 first to look for a smaller switch, and add a scissor-linkage study?
 3. **Hand over the antenna:** is a loss of up to [6] dB with a hand on the disc acceptable (A6)?
 4. **Stuck press:** accept the rules of 4.5 (no start after a stuck press; reset needs a second deliberate action)?
 5. **Life** in presses ([20 000]) and the force window [2] to [5] N.

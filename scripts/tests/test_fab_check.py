@@ -363,9 +363,11 @@ def test_missing_list_format(tmp_path: Path) -> None:
 
 
 def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
-    """Every listed ref is on the board, and its value has an MPN but no LCSC number in sourcing.py: a
-    number added there makes this test ask for the list update. The board is board-p1 when it exists.
-    R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225)."""
+    """Every listed ref is on the board, and its value has an MPN but no LCSC number in sourcing.py.
+
+    A number added there makes this test ask for the list update. The board is board-p1 when it
+    exists. R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225).
+    """
     listed = fc.read_missing_list(ROOT / "scripts" / "fab_missing_lcsc.txt")
     # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers
     assert set(listed) == {"U5"}
@@ -373,7 +375,7 @@ def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
     board = p1 if p1.exists() else SPIKE / "board" / "busy_light_spike.kicad_pcb"
     values = {f.ref: f.value for f in fc.read_footprints(board)}
     sourcing = load("sourcing", SPIKE / "src" / "sourcing.py").SOURCING
-    assert sourcing["5m 1% 1W"]["LCSC"] == "C316225"   # R22 (HW-017 amendment 2026-11-22)
+    assert sourcing["5m 1% 1W"]["LCSC"] == "C316225"  # R22 (HW-017 amendment 2026-11-22)
     for ref in listed:
         entry = sourcing[values[ref]]
         assert entry["MPN"], ref
