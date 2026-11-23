@@ -22,3 +22,10 @@ recorded by the assistant). Nothing was set to Approved.
 ## Not done
 No model, no datasheet read (TL3342 force and travel are assumptions), no coupon, no goldfish review of plan 09 yet. The
 scratch numbers use E = 1.5 GPa for PETG (assumption) and a switch of 1.6 N over 0.25 mm (assumption).
+
+## Correction (same day, after the goldfish review RV-018)
+- The module body is not centred on its footprint origin: the stored board gives 5.06 mm from the antenna strip to the nearest LED centre, not 7.6 mm.
+- The TL3342 body is 6.4 x 5.2 mm (courtyard 8.5 x 6.0 mm), not 4.5 x 3.5 mm. With the real switch at the centre the module fits at only 10 poses
+  (2.51 mm, 50 % of the margin) or 58 poses (3.04 mm, 60 %) in the assistant's search.
+- A press-position sweep restricted to the usable radius shows that one off-centre switch on soft supports fails, a centred switch with three bridges
+  passes only in a narrow stiffness band, and three switches work mechanically. Plan 09 revision 3 carries all of this.

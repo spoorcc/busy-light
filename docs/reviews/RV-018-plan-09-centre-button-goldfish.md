@@ -63,5 +63,21 @@ Reviewer numbers are kept (C1 to C20, T1 to T26, M1 to M26, I1 to I22); related 
 Approved with actions (the review outcome only; plan 09 stays Draft and only the owner approves it): revision 2 resolves every row above except M23 (step 1) and the owner questions. The implementation-readiness pass (R) is
 recorded below once it has run.
 
-## Implementation readiness (R)
-(pending)
+## Implementation readiness (R), first pass on revision 2: NO-GO for steps 0 and 1 as written
+The goldfish confirmed the facts of revision 2 (files, Z chain, ring, 5.06 and 6.07 mm baselines, U9 and SW1 positions, statuses, the S2 and M3 matrix rows,
+324 poses and 3.64 mm in its own search, `pytest mech/analysis` 10 passed, traceability 281 items 0 errors, `check_part_evidence.py` 27 files 0 errors) and
+returned six blocking gaps. The assistant checked the switch geometry in the stored board (`SW_SPST_TL3342`: F.Fab 6.4 x 5.2 mm, courtyard 8.5 x 6.0 mm, four
+pads) and re-ran the pose search with the real switch: 10 poses and 2.51 mm (body, 1.0 mm clearance), 58 poses and 3.04 mm (courtyard, no clearance); with a
+5.2 x 5.2 mm body 36 poses and 2.51 mm.
+| # | Severity | Finding | Resolution | Status |
+|---|---|---|---|---|
+| R1 | Blocking | No recorded owner approval for steps 0 and 1 (rule 1) | Not a plan defect: the plan says the owner confirms (question 6) and now states that steps 0 and 1 start only after that | Open: owner |
+| R2 | Blocking | The switch body is 6.4 x 5.2 mm (5.2 x 5.2 body), not 4.5 x 3.5 mm; the S2 search, the 71 % claim, the 2.5 mm column and the S3 distance depend on it; the evidence file has `pin_count: 2` | Confirmed. Plan 2, 3.2, 3.3 rewritten: S2 keeps 50 to 60 % of the margin with the real switch; the revision 2 figures are withdrawn; step 0 corrects the evidence file | Fixed (revision 3) |
+| R3 | Blocking | Step 1 code is not specified exactly (signatures, return types, formulas, board reader, seed generator, matrix inputs, M3 azimuths, informational chain, numpy) | Section 5 now gives typed signatures, formulas, the stdlib `random.Random(7)`, the matrix definitions in 3.2, a stdlib `.kicad_pcb` reader, and states that the chains are informational and not in `run()` | Fixed |
+| R4 | Blocking | Step 0 inputs and outputs undefined; the TL3342 datasheet has no travel and no curve; the force tolerance (+-50 gf) is not in the model | Selection criteria and file names given (4.9, 5); the travel and the click drop are measured in TC-310; the window becomes [2] to [5] N and the matrix notes the +-0.49 N; the snap dome is excluded (HW-008) | Fixed |
+| R5 | Blocking | Deliverables without a test, a location or with a circular dependency (light, scissor, coupon gate, area check, POST_AZ reconciliation, step 0 verification) | `button_light.py` and its test added; the scissor study only if the owner asks; the coupon gate moves to step 3; the area check is a capacity estimate in step 1 and the placer run in step 4; the reconciliation is a report item with no file change; step 0 runs `check_part_evidence.py` | Fixed |
+| R6 | Blocking | Traceability trap: ADR-0026 naming proposed IDs fails the checker | 4.8: ADR-0026's Related field names only existing IDs | Fixed |
+| R7 | Low | Arm stiffness spread arithmetic; M3 "works" against the 2 N bound; ruff exception location; SPDX and `reuse lint`; README rows; the rotation range valid by symmetry | Corrected or stated in 3.2, 3.3 and 5 (the spread is 0.32x to 2.4x with w and t both +-0.3 mm, 0.42x to 1.95x for t alone) | Fixed |
+| R8 | Info | Missing for later steps: the probe definition for "within 13 mm", the stand-in board script, coupon path (`mech/freecad/coupons.py`), PETG brand and print settings, rig and sample sizes, failed-gate action, `SW1_POS` structure, area criterion, test equipment | Probe defined as a 4 mm pad on the force resultant; steps 3 to 5 list the rest; the area criterion stays open until plan 08 revision 6 | Fixed or open (step 4) |
+
+The plan is in revision 3. A second readiness pass follows; its result is recorded below.
