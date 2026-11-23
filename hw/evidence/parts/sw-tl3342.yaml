@@ -1,38 +1,78 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-# Evidence placeholder for the tactile switch SW1 (footprint SW_SPST_TL3342). No datasheet in the folder.
+# Evidence for the tactile switch SW1 (footprint SW_SPST_TL3342), P1 placeholder part E-Switch TL3342F160QG (sourcing.py names it; the
+# force variant is an assumption there). Read for plan 09 step 0 (centre-of-ring button) on 2026-11-23. The E-Switch sheet is one page;
+# its dimensions are only in the drawing graphic, so they are NOT text-checked (see notes). See README.md.
 schema_version: 1
 part:
   key: SW-TL3342
-  mpn: not chosen (footprint TL3342)
-  manufacturer: not chosen
-  description: SMD tactile switch, boot/user button
-  selection: placeholder
+  mpn: TL3342F160QG
+  manufacturer: E-Switch
+  description: SMD tactile switch, 160 gf variant, silver contacts, gull-wing terminals; boot/user button
+  selection: chosen
   package:
     code: TL3342
     name: SW_SPST_TL3342
-    pin_count: 2
+    pin_count: 4
   used_in:
   - SW1
   schematic_symbol: Switch:SW_Push
-documents: []
+documents:
+- id: tl3342-ds
+  title: Series TL 3342 tact switches SMT (E-Switch one-page sheet, copy hosted by LCSC)
+  revision_date: Specifications subject to change without notice 11.8.2018
+  origin: distributor
+  url: https://datasheet.lcsc.com/datasheet/pdf/353355a957a341cf3267b86a7b417f7f.pdf?productCode=C2886898
+  file: sw-tl3342f160qg.pdf
+  sha256: 417970875850c881b84247e4ccab4d3004be718894711c651565e97bddd15a44
+  pages: 1
+  retrieved_on: '2026-11-23'
+  notes: The sheet has no force-travel curve and no travel value. The page was fetched from a LCSC product page (C2886898), not from the E-Switch site.
 defaults:
+  source_document: tl3342-ds
   method: extracted
   extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
-  extracted_on: '2026-11-05'
-  status: source-missing
+  extracted_on: '2026-11-23'
+  status: unverified
 claims:
 - id: SW-TL3342.mpn
-  parameter: 'Part number: footprint SW_SPST_TL3342 only'
+  parameter: Variant of the series for this part number
   category: other
-  status: source-missing
-  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+  statement: 'The ordering key TL _ 3342_ F160_ Q_ G selects F160 (160 gf), Q (silver contacts) and G (gull wing).'
+  source: {page: 1, locator: How to order, quote: 'TL _ 3342_ F160_ Q_ G'}
+- id: SW-TL3342.actuation_force
+  parameter: Actuation force of the F160 variant
+  category: mechanical
+  typ: 160
+  unit: gf
+  notes: 160 gf is about 1.57 N. The sheet lists the F160 and the F260 variant in one line; the F160 value is the first.
+  source: {page: 1, locator: Specifications, quote: 'Actuation Force: 160± 50 gf, 260± 50 gf'}
+- id: SW-TL3342.actuation_force_tolerance
+  parameter: Tolerance of the actuation force (plus and minus)
+  category: mechanical
+  typ: 50
+  unit: gf
+  notes: 50 gf is about 0.49 N, so the F160 variant clicks at 1.08 N to 2.06 N.
+  source: {page: 1, locator: Specifications, quote: 'Actuation Force: 160± 50 gf, 260± 50 gf'}
 - id: SW-TL3342.contact_rating
-  parameter: Contact rating and bounce time
+  parameter: Contact rating
   category: electrical
-  status: source-missing
-  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+  statement: 50 mA at 12 VDC; contact resistance 20 mohm maximum initial.
+  source: {page: 1, locator: Specifications, quote: 'Contact Rating: 50mA @ 12 VDC'}
 - id: SW-TL3342.lifetime
   parameter: Mechanical life
-  category: other
+  category: mechanical
+  statement: 100,000 cycles typical. The sheet gives no force or travel change over life.
+  source: {page: 1, locator: Specifications, quote: 'Life Expectancy: 100,000 cycles typical'}
+- id: SW-TL3342.travel
+  parameter: Operating travel, total travel and force-travel curve
+  category: mechanical
   status: source-missing
-  notes: No datasheet for this part is in the datasheets folder (part not chosen). No value is entered.
+  method: extracted
+  notes: The sheet gives no travel and no curve. Plan 09 assumes 0.25 mm to the click; this is an assumption until a coupon or a vendor drawing gives it.
+- id: SW-TL3342.geometry
+  parameter: Body, height and actuator size (from the drawing, not text-checked)
+  category: mechanical
+  status: source-missing
+  method: extracted
+  notes: 'Not machine-checked: the dimensions are in the drawing graphic only. The stored footprint holds a body of 5.2 x 5.2 mm and 6.4 mm over the terminals (F.Fab 6.4 x 5.2 mm,
+    courtyard 8.5 x 6.0 mm). LCSC and JLCPCB list 5.2 x 5.2 mm and a height of 1.54 mm (product pages read 2026-11-23, see docs/verification/reports/stock-check-button-switches.md).'

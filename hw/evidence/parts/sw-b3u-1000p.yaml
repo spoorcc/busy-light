@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the Omron B3U-1000P ultra-small tactile switch, small-body candidate for the centre-of-ring button (plan 09 step 0, alternative 1).
+# Not used on any board. The catalogue is the Chinese Omron sheet hosted by LCSC; the dimension drawings are graphics and are NOT text-checked.
+# See README.md.
+schema_version: 1
+part:
+  key: SW-B3U-1000P
+  mpn: B3U-1000P
+  manufacturer: Omron
+  description: Ultra-small SMT tactile switch, vertical operation, 3.0 x 2.5 mm body, 1.5 N, no ground terminal
+  selection: candidate
+  package:
+    code: B3U-1000P
+    name: SW_SPST_B3U
+    pin_count: 2
+  used_in: []
+documents:
+- id: b3u-ds
+  title: B3U ultra-small tactile switch (Omron China catalogue, Chinese text, copy hosted by LCSC)
+  doc_number: A162-CN1-04
+  revision_date: November 2022
+  origin: distributor
+  url: https://datasheet.lcsc.com/datasheet/pdf/5613ec928e7c35b77f993ac0df056a32.pdf?productCode=C231329
+  file: sw-b3u-1000p.pdf
+  sha256: abb75a2524e2457df42b3d197b2a7d8a04307ee0d4c85e3c70852c75c505b44a
+  pages: 4
+  retrieved_on: '2026-11-23'
+  notes: The text is Chinese. The assistant read the table values; the claims below keep the number and the Chinese quote.
+defaults:
+  source_document: b3u-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-23'
+  status: unverified
+claims:
+- id: SW-B3U-1000P.operating_force
+  parameter: Operating force (OF), vertical operation (B3U-1000 series)
+  category: mechanical
+  typ: 1.5
+  unit: N
+  notes: The second value in the row (1.59 N) is the lateral B3U-3000 series.
+  source: {page: 1, locator: Operating characteristics table, quote: '动作力(OF) 1.50±0.49 N 1.59±0.49 N'}
+- id: SW-B3U-1000P.operating_force_tolerance
+  parameter: Tolerance of the operating force (plus and minus)
+  category: mechanical
+  typ: 0.49
+  unit: N
+  notes: So the click is at 1.01 N to 1.99 N.
+  source: {page: 1, locator: Operating characteristics table, quote: '动作力(OF) 1.50±0.49 N 1.59±0.49 N'}
+- id: SW-B3U-1000P.pretravel
+  parameter: Pre-travel (PT) to the click, vertical operation
+  category: mechanical
+  typ: 0.15
+  unit: mm
+  notes: 'The PDF text shows 0.15 +- 0.1 with a stray 0.2 on the next line; the assistant reads PT as 0.15 +0.2/-0.1 mm from the typeset table (tolerance not text-checked).
+    No total travel, no over-travel and no force-travel curve are in this catalogue.'
+  source: {page: 1, locator: Operating characteristics table, quote: '预行程(PT) 0.15 +- 0.1'}
+- id: SW-B3U-1000P.lifetime
+  parameter: Mechanical life, vertical operation
+  category: mechanical
+  statement: 200,000 operations or more for the B3U-1000 series (100,000 or more for the lateral B3U-3000 series).
+  source: {page: 1, locator: Ratings and performance table, quote: '寿命 200,000次以上'}
+- id: SW-B3U-1000P.headline_size
+  parameter: Size named in the catalogue headline
+  category: mechanical
+  statement: 'Headline: height 1.2 mm, width 3 mm, depth 2.5 mm. The type table of the same sheet gives a height of 1.6 mm (the LCSC and JLCPCB pages also list 1.6 mm). The assistant reads 1.2 mm as the body and 1.6 mm as the top of the plunger; the drawing decides.'
+  source: {page: 1, locator: Headline, quote: '(高度:1.2mm×宽度:3mm×纵深:2.5mm)'}
+- id: SW-B3U-1000P.geometry
+  parameter: Footprint, pad layout and plunger diameter (from the drawing, not text-checked)
+  category: mechanical
+  status: source-missing
+  method: extracted
+  notes: Not machine-checked. The land pattern and the plunger size are in the drawing only; step 1 needs them for the courtyard of the S2 and S3 searches.

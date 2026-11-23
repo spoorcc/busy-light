@@ -28,6 +28,8 @@ ALLOW: set[str] = {
     "hw/evidence/parts/capacitors.yaml",
     "hw/evidence/parts/ilim-resistors.yaml",
     "hw/evidence/parts/rlm12.yaml",
+    "hw/evidence/parts/sw-b3u-1000p.yaml",
+    "hw/evidence/parts/sw-ksc221.yaml",
     "hw/evidence/parts/tps3808g01.yaml",
     "hw/evidence/parts/esp32-c3-mini-1.yaml",
     "hw/evidence/parts/pesd3v3l1ba.yaml",

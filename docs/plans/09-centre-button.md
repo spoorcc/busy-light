@@ -1,7 +1,7 @@
 # 09 -- Centre-of-ring button (design doc)
 
-- **Status:** Draft (revision 4 of 2026-11-23: revision 3 plus the resolutions of the second readiness NO-GO, RV-018 rows R9 to R12.
-  A third readiness pass runs after the owner has answered section 7, because the answers change the scope of steps 0 and 1)
+- **Status:** Draft (revision 5 of 2026-11-23: revision 4 plus the result of step 0 (section 4.9, `stock-check-button-switches.md`); the owner said "Continue" after
+  the status report and the assistant read that as a go-ahead for step 0 only. A third readiness pass runs after the owner has answered section 7, because the answers change the scope of step 1)
 - **Date:** 2026-11-23  **Owner:** Ben Spoor (author: assistant)
 - **Area:** mech (with hw and sw consequences)
 - **Requirements addressed:** SYS-017 (Draft; amendment proposed), HW-007 (Draft; change proposed), MECH-004 (Approved; change
@@ -235,6 +235,13 @@ excluded (HW-008, manual assembly). The method is the one of the earlier stock c
 LCSC-hosted datasheets (reachable from the `busy-light` environment); the earlier precedent `stock-check-ilim-holdoff.md` records that stock
 and class on those pages need a second source, which step 0 states per part.
 
+**Step 0 result (2026-11-23; `docs/verification/reports/stock-check-button-switches.md`, evidence files `sw-tl3342.yaml`, `sw-b3u-1000p.yaml`, `sw-ksc221.yaml`).**
+No listed part meets all criteria above; no part publishes a force-travel curve. Alternative 1 is the **Omron B3U-1000P** (LCSC C231329, JLCPCB Extended, LCSC stock 49,545):
+body 3.0 x 2.5 mm, 1.50 +- 0.49 N, pre-travel 0.15 mm, life 200,000 or more. Alternative 2 is the **C&K KSC221JLFS** (C221726, Extended, stock 15,080): 6.2 x 6.2 mm, 2 +- 0.5 N, travel 0.35 +0.3/-0.1 mm,
+life 500,000, IP67. The TL3342F160QG has LCSC stock 1 and publishes no travel. First-order values (assistant's scratch scripts, not evidence until step 1): with the B3U body, S2 keeps 3.90 mm (77 % of 5.06 mm)
+at 1,322 module poses (TL3342 body: 2.51 mm, 10 poses); the bridge stiffness band for the pass rule of 4.1 widens from 2.83 to 3.92 N/mm (ratio 1.4, TL3342 with the assumed 0.25 mm) to 2.20 to 6.69 N/mm (ratio 3.0, B3U);
+the B3U pre-travel tolerance is not yet in that band and breaks the force window at its extremes. Step 1 must rerun the matrix, the stack and the antenna search with these values; step 3 must measure click travel.
+
 ## 5. Detailed implementation plan
 **Rule 1 and the order of work.** Steps 0 and 1 are analysis and evidence under the Approved requirements MECH-004, MECH-002, MECH-003 and
 HW-008 (they check the owner's decision 9 against them) and change no CAD, board or requirement text; they add two new evidence files, one updated evidence file, about five new Python files with tests, one changed script
@@ -369,8 +376,9 @@ are the assistant's working proposals without a standard behind them; step 0 rep
 
 Open questions for the owner (they change what is built):
 1. **Light:** accept a softly lit disc (19 % to 80 % of the ring brightness), or an opaque mask or a smaller disc?
-2. **Direction:** with the real switch, S2 (module moves; antenna margin 2.5 to 3.0 mm against 5.06 mm today) and S3 (three switches; they do not fit around the stored module at r = 11,
-   area up to 82 to 96 %) are both strained. Run step 0 first to look for a smaller switch, and add a scissor-linkage study?
+2. **Direction:** with the TL3342 body, S2 (module moves; antenna margin 2.5 to 3.0 mm against 5.06 mm today) and S3 (three switches; they do not fit around the stored module at r = 11,
+   area up to 82 to 96 %) are both strained. Step 0 found the Omron B3U-1000P (3.0 x 2.5 mm): S2 then keeps 3.9 mm (77 %) on paper. Choose S2 with the B3U as the direction for step 1,
+   keep S3 as a fallback, or still add a scissor-linkage study?
 3. **Hand over the antenna:** is a loss of up to [6] dB with a hand on the disc acceptable (A6)?
 4. **Stuck press:** accept the rules of 4.5 (no start after a stuck press; reset needs a second deliberate action)?
 5. **Life** in presses ([20 000]) and the force window [2] to [5] N.

@@ -29,3 +29,11 @@ scratch numbers use E = 1.5 GPa for PETG (assumption) and a switch of 1.6 N over
   (2.51 mm, 50 % of the margin) or 58 poses (3.04 mm, 60 %) in the assistant's search.
 - A press-position sweep restricted to the usable radius shows that one off-centre switch on soft supports fails, a centred switch with three bridges
   passes only in a narrow stiffness band, and three switches work mechanically. Plan 09 revision 3 carries all of this.
+
+## Step 0 (same day, after "Continue")
+The owner said "Continue" after the status report; the assistant read that as a go-ahead for step 0 of plan 09 only (reading datasheets and stock; no requirement, ADR, CAD or board change).
+The other questions of plan 09 section 7 are still open and were not answered by "Continue".
+- Result: `docs/verification/reports/stock-check-button-switches.md`. No listed part meets all criteria of plan 09 section 4.9; none publishes a force-travel curve.
+- Omron B3U-1000P (3.0 x 2.5 mm, 1.50 +- 0.49 N, pre-travel 0.15 mm, LCSC stock 49,545, Extended) is the best small-body candidate; with its body S2 keeps 3.90 mm of the antenna margin (77 %) in the assistant's search.
+- The TL3342F160QG has LCSC stock 1 and publishes no travel; the 0.25 mm in the plan is still an assumption.
+- The WebFetch helper agents could not resolve lcsc.com and jlcpcb.com (DNS error); `curl` from the container worked, both hosts are allowed in the environment. The JLCPCB page holds the class but not the part's own stock.
