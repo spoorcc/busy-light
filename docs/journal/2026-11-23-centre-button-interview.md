@@ -1,0 +1,24 @@
+# Centre-of-ring button: owner interview and first-order checks (2026-11-23)
+
+Asked by the owner on 2026-11-22 (decision 9): the whole centre of the ring becomes the button. The assistant interviewed
+the owner on 2026-11-23 (EGM planning); answers are in `docs/plans/09-centre-button.md` section 0 (in the working session;
+recorded by the assistant). Nothing was set to Approved.
+
+## Answers
+1. Pressed part: a separate centre disc inside the LED ring (recommended option).
+2. Switch place: "study both in the plan" (switch off the centre, or the module moved so that the switch is at the centre).
+3. Feel and look: a clear click, translucent disc like the lid, centre not lit on its own.
+4. Timing: concept first, then plan 08 revision 6 and the re-placement of P1; P1 is not ordered before that.
+
+## First-order checks (assistant's scratch scripts, not in the repository, so not evidence)
+- Module ESP32-C3-MINI-1 at its stored board-p1 place: nearest LED centre to the antenna area 7.6 mm.
+- Switch (4.5 x 3.5 mm) at the exact centre: the module fits inside the ring at 320 grid positions (0.5 mm and 3 degree steps,
+  0.5 mm to LEDs, 1.0 mm to the switch); the best distance antenna area to nearest LED centre is 3.6 mm.
+- Rigid disc on three equal supports: plunger travel is the same for every press point if the support centroid lies under the
+  plunger. Supports centred on the disc with an off-centre switch: the plunger can lift on a far-side press.
+- Compliant bridges (0.2 N/mm each), switch at the centre, edge press: the press point moves 7.9 mm at the click force of 1.75 N.
+  The disc needs a tilt guide, or three switches under a rigid disc.
+
+## Not done
+No model, no datasheet read (TL3342 force and travel are assumptions), no coupon, no goldfish review of plan 09 yet. The
+scratch numbers use E = 1.5 GPa for PETG (assumption) and a switch of 1.6 N over 0.25 mm (assumption).
