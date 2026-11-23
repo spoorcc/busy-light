@@ -11,6 +11,10 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 ## [Unreleased]
 
 ### Added
+- ADR-0024 (Proposed): gate rework after RV-017 (owner decisions 1, 2 and 4 of 2026-11-22): the hold-off AND gate U10 with R6 on VBUS_IC and R8 on FAULT_N is restored (ADR-0018 option E), GPIO0 gets a 10 kohm resistor (R23), each CC line gets an ESD diode and a 100 ohm resistor (TVS3, TVS4, R24, R25), FAULT_N gets a test pad (TP7). The schematic generator draws it (57 nets, strict ERC 0 findings); the stored board-p1 is stale until the re-placement (plan 08 revision 6). New tests: `test_gate_logic_full.py` (truth table and single faults on the generated netlist), `test_gate_rework_levels.py`, layout tests for the gate and the CC protection (HW-010, HW-003, HW-006, SW-009 proposals in the requirement files).
+- ADR-0025 (Proposed): stocked replacement for the supervisor U5; recommended TPS3808G01 with a 931 k / 100 k divider and one 68 nF C0G (hold-off 221.8 to 572.7 ms); `sim/supervisor_options.py`, `holdoff_cap.py` TPS3808 window, evidence `tps3808g01.yaml`.
+- `docs/verification/reports/analysis-ilim-drift.md` and `sim/ilim_steps.py`: SLVS841G table anchor and resistor TCR, soldering and life drift; with step 3 = both switches R_ILIM3 = 56.2 k has a drift budget of 0.17 % (below tolerance + TCR 0.25 %), 54.9 k has 0.91 %; the owner decides the value. Evidence `ilim-resistors.yaml` (Yageo RT and AT, Vishay MCT).
+- HW-017: R22 is the TA-I Tech RLM12FTCMR005 5 mohm 1206 current-sense resistor (LCSC C316225, evidence `rlm12.yaml`); the owner confirms.
 - Skill `readme-refresh` (`.claude/skills/readme-refresh/SKILL.md`): order of work to bring the READMEs and their images
   up to date (count, decide what to re-render, P1 renders with the panel of the same board, look at each image, edit,
   check), wording rules and lessons. New `scripts/readme_facts.py` prints the counts the README quotes (requirements and
@@ -71,6 +75,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- The BOM names the Yageo RT0603BRD0747KL (C326725) and RT0603BRD0756K2L (C705784) for the ILIM resistors of the approved HW-010 table; the FH TD03G parts had 0 stock on 2026-11-22. `scripts/fab_missing_lcsc.txt` no longer lists R22. `tests/data/full.net` refreshed (105 components).
 - Owner decisions of 2026-11-22 on the P1 rework (journal `2026-11-22-owner-decisions-p1-rework.md`): restore U10 and R6
   in the gate, a 10 k resistor on GPIO0, add the P3 CC-pin protection, another supervisor part instead of U5, keep R_ILIM3
   at 56.2 k until the model includes drift and ageing, R22 as a 1206 shunt of 2 to 5 mohm, the whole centre of the ring as

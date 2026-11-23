@@ -61,3 +61,17 @@ def report():
 
 if __name__ == "__main__":
     report()
+
+
+# ---- ADR-0025 option B (2026-11-22): TPS3808G01 with one CT capacitor. TI SBVS050N (revised August 2026), section 6.6:
+# td at CT = 180 nF is 0.62 / 1.03 / 1.44 s (TJ -40 to 125 degC); figure 7-2 (c): Delay (s) = CT (nF) / 175 + 0.5e-3.
+# Assumption: the min/typ and max/typ ratios of the 180 nF row hold at other CT values (the delay is proportional to CT;
+# the spread comes from the internal current and threshold). Not a datasheet statement for 68 nF.
+TPS3808_RATIO = (0.62 / 1.03, 1.44 / 1.03)
+
+
+def tps3808_window(c_nf, tol, temp=None):
+    """(td_min, td_max) in seconds for one C0G capacitor of c_nf nF with tolerance tol on the TPS3808 CT pin."""
+    tf = temp_frac() if temp is None else temp
+    typ = lambda c: c / 175.0 + 0.5e-3   # noqa: E731
+    return typ(c_nf * (1 - tol - tf)) * TPS3808_RATIO[0], typ(c_nf * (1 + tol + tf)) * TPS3808_RATIO[1]

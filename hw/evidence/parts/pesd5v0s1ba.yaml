@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-# Evidence for TVS1 on VBUS_IC of the spike board: Nexperia PESD5V0S1BA,115 (owner choice 2026-11-09, surge option S1, ADR-0021 Proposed). See hw/evidence/README.md.
+# Evidence for TVS1 on VBUS_IC of the spike board (also TVS3 and TVS4 on CC1 and CC2, ADR-0024): Nexperia PESD5V0S1BA,115 (owner choice 2026-11-09, surge option S1, ADR-0021 Proposed). See hw/evidence/README.md.
 # Source: Nexperia product data sheet of 26 April 2024, copy hosted by LCSC (the Nexperia server refused the download with HTTP 403). The values are those of a clamp that does NOT keep a 6 V pin below 6 V: see ADR-0021.
 schema_version: 1
 part:
@@ -14,6 +14,8 @@ part:
     pin_count: 2
   used_in:
   - TVS1
+  - TVS3
+  - TVS4
   schematic_symbol: Device:D_TVS
 documents:
 - id: pesd5v0s1ba-ds

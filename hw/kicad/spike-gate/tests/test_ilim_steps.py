@@ -189,5 +189,82 @@ class Generator(unittest.TestCase):
         self.assertLessEqual(max(v[1] for v in w.values()), il.STEP3_MAX_MA)
 
 
+class TableAnchor(unittest.TestCase):
+    """RV-017 row 6: the equation minimum lies above the SLVS841G table at 15 and 20 kohm; the anchored limits take the
+    conservative side of both."""
+
+    def test_interpolation_hits_the_table_points(self):
+        for r, lo, nom, hi in il.IOS_TABLE:
+            self.assertAlmostEqual(il.table_interp(r, 1), lo, places=6)
+            self.assertAlmostEqual(il.table_interp(r, 2), nom, places=6)
+            self.assertAlmostEqual(il.table_interp(r, 3), hi, places=6)
+
+    def test_outside_the_table_is_none(self):
+        self.assertIsNone(il.table_interp(14.9, 1))
+        self.assertIsNone(il.table_interp(232.0, 3))
+
+    def test_anchored_minimum_is_the_lower_of_both(self):
+        for r in (15.0, 17.61, 20.0, 30.0, 49.9, 100.0):
+            self.assertLessEqual(il.ios_min_anchored(r), il.ios_min(r))
+            self.assertLessEqual(il.ios_min_anchored(r), il.table_interp(r, 1))
+            self.assertGreaterEqual(il.ios_max_anchored(r), il.ios_max(r))
+            self.assertGreaterEqual(il.ios_max_anchored(r), il.table_interp(r, 3))
+
+    def test_reviewer_figure_at_the_step_3_resistance(self):
+        # RV-017 row 6: log-log interpolation of the table minima at 17.61 k gives 1367.0 mA (reviewer, rounded)
+        self.assertAlmostEqual(il.table_interp(17.61, 1), 1366.6, delta=0.5)
+
+    def test_anchoring_off_by_default(self):
+        kw = dict(leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
+        self.assertEqual(il.both_on_windows(47.0, 56.2, 56.2, il.TOL_01PCT, **kw),
+                         il.both_on_windows(47.0, 56.2, 56.2, il.TOL_01PCT, anchored=False, **kw))
+
+
+class DriftBudget(unittest.TestCase):
+    """Owner decision 3 of 2026-11-22: resistor TCR, soldering and life drift in the model before R_ILIM3 is decided."""
+    KW = dict(leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM, anchored=True)
+
+    def test_stack_of_each_drift_set(self):
+        self.assertAlmostEqual(il.tol_eff(**il.DRIFT_SETS["tolerance_only"]), 0.001, places=9)
+        self.assertAlmostEqual(il.tol_eff(**il.DRIFT_SETS["yageo_rt_guaranteed"]), 0.0125, places=9)   # 0.1 + 0.15 + 0.5 + 0.5 %
+        self.assertAlmostEqual(il.tol_eff(**il.DRIFT_SETS["vishay_mct_class025"]), 0.0040, places=9)   # 0.1 + 0.15 + 0.05 + 0.1 %
+        self.assertAlmostEqual(il.tol_eff(0.001, 25.0, 0.0, 0.0), 0.0025, places=9)                    # tolerance + TCR over 60 K
+
+    def test_budget_is_the_edge_of_the_margins(self):
+        b = il.drift_budget(47.0, 56.2, 54.9, **self.KW)
+        self.assertGreaterEqual(min(il.both_on_margins(47.0, 56.2, 54.9, b, **self.KW).values()), 0.0)
+        self.assertLess(min(il.both_on_margins(47.0, 56.2, 54.9, b * 1.001, **self.KW).values()), 0.0)
+
+    def test_56k2_fails_with_tolerance_and_tcr_alone(self):
+        b = il.drift_budget(47.0, 56.2, 56.2, **self.KW)
+        self.assertAlmostEqual(b, 0.00171, delta=0.00002)
+        self.assertLess(b, il.tol_eff(0.001, 25.0, 0.0, 0.0))
+
+    def test_54k9_holds_up_to_the_step_1_budget(self):
+        b3 = il.drift_budget(47.0, 56.2, 54.9, keys=("s3_min", "s3_max"), **self.KW)
+        b1 = il.drift_budget(47.0, 56.2, 54.9, keys=("s1_min", "s1_max"), **self.KW)
+        self.assertAlmostEqual(b3, 0.00913, delta=0.00002)
+        self.assertAlmostEqual(b1, 0.00931, delta=0.00002)
+        self.assertGreater(b3, il.tol_eff(**il.DRIFT_SETS["vishay_mct_class025"]))
+
+    def test_guaranteed_rt_drift_exceeds_every_budget(self):
+        # the in-stock Yageo RT parts: the datasheet limits do not prove HW-010 for any R_ILIM3 value, nor step 1
+        stack = il.tol_eff(**il.DRIFT_SETS["yageo_rt_guaranteed"])
+        for r3 in (56.2, 54.9):
+            self.assertLess(il.drift_budget(47.0, 56.2, r3, **self.KW), stack)
+
+    def test_54k9_is_the_best_e192_value(self):
+        r3, b = il.best_r3_for_budget(47.0, 56.2, **self.KW)
+        self.assertEqual(r3, 54.9)
+        self.assertAlmostEqual(b, 0.00913, delta=0.00002)
+
+    def test_margins_of_both_values_with_anchoring(self):
+        m56 = il.both_on_margins(47.0, 56.2, 56.2, il.TOL_01PCT, **self.KW)
+        m549 = il.both_on_margins(47.0, 56.2, 54.9, il.TOL_01PCT, **self.KW)
+        self.assertAlmostEqual(m56["s3_min"], 1.0, delta=0.1)
+        self.assertAlmostEqual(m549["s3_min"], 11.3, delta=0.1)
+        self.assertAlmostEqual(m549["s3_max"], 12.7, delta=0.1)
+
+
 if __name__ == "__main__":
     unittest.main()

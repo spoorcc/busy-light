@@ -83,9 +83,9 @@ PARTS = [
     footprint("H1", "MountingHole", "MountingHole:MountingHole_2.2mm_M2", attrs=""),
 ]
 BOM_ROWS = [
-    ("47.0k 0.1%", "R_ILIM1", "R_0603", "C667109"),
-    ("56.2k 0.1%", "R_ILIM2", "R_0603", "C667119"),
-    ("56.2k 0.1%", "R_ILIM3", "R_0603", "C667119"),
+    ("47.0k 0.1%", "R_ILIM1", "R_0603", "C326725"),
+    ("56.2k 0.1%", "R_ILIM2", "R_0603", "C705784"),
+    ("56.2k 0.1%", "R_ILIM3", "R_0603", "C705784"),
     ("100n", "C1", "C_0603", "C1591"),
     ("TPS3840DL40", "U5", "SOT-23-5", ""),
 ]
@@ -363,19 +363,18 @@ def test_missing_list_format(tmp_path: Path) -> None:
 
 
 def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
-    """Every listed ref (except R22, which has no recorded part yet) is on the board, and its value
-    has an MPN but no LCSC number in sourcing.py: a number added there makes this test ask for the
-    list update. The board is board-p1 when it exists."""
+    """Every listed ref is on the board, and its value has an MPN but no LCSC number in sourcing.py: a
+    number added there makes this test ask for the list update. The board is board-p1 when it exists.
+    R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225)."""
     listed = fc.read_missing_list(ROOT / "scripts" / "fab_missing_lcsc.txt")
     # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers
-    assert set(listed) == {"R22", "U5"}
+    assert set(listed) == {"U5"}
     p1 = SPIKE / "board-p1" / "busy_light_spike.kicad_pcb"
     board = p1 if p1.exists() else SPIKE / "board" / "busy_light_spike.kicad_pcb"
     values = {f.ref: f.value for f in fc.read_footprints(board)}
     sourcing = load("sourcing", SPIKE / "src" / "sourcing.py").SOURCING
-    if p1.exists():  # HW-017: R22 is on the P1 board; no part is recorded for it (owner decides)
-        assert "R22" in values
-    for ref in set(listed) - {"R22"}:
+    assert sourcing["5m 1% 1W"]["LCSC"] == "C316225"   # R22 (HW-017 amendment 2026-11-22)
+    for ref in listed:
         entry = sourcing[values[ref]]
         assert entry["MPN"], ref
         assert entry["LCSC"] == "", ref

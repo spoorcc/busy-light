@@ -1,0 +1,123 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the drift of the 0.1 % ILIM resistors (R_ILIM1 to R_ILIM3; HW-010, owner decision 3 of 2026-11-22, RV-017 row 6).
+# Three thin-film series: Yageo RT (the in-stock parts named in the approved HW-010 table), Yageo AT (automotive) and Vishay MCT
+# (precision; not on the BOM). Copies hosted by LCSC, linked from the product pages of C705784 and C855900, read 2026-11-22.
+# Guaranteed test limits are used, not typical values. Used by hw/kicad/spike-gate/sim/ilim_steps.py DRIFT_SETS.
+schema_version: 1
+part:
+  key: ILIM-RESISTORS
+  mpn: family (0603 thin film 0.1 percent, 25 ppm/degC)
+  manufacturer: Yageo; Vishay Beyschlag
+  description: 0603 thin-film chip resistors, 0.1 percent, 25 ppm/degC, for the TPS2553 ILIM network
+  selection: candidate
+  package:
+    code: '0603'
+    name: R_0603_1608Metric
+    pin_count: 2
+  used_in:
+  - R_ILIM1
+  - R_ILIM2
+  - R_ILIM3
+  schematic_symbol: Device:R
+documents:
+- id: yageo-rt-ds
+  title: Thin film chip resistors, high precision - high stability, RT series 0.01 % to 1 %, TCR 5 to 50
+  doc_number: Yageo product specification RT series V.16
+  revision_date: May 06, 2025
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/46d7760c582640714d605308a25a220a.pdf
+  file: yageo-rt-series-v16-2025-05-06.pdf
+  sha256: 0a729d144519a7021c82a0ef242b064e467c70d44afcf9eabd6c7ffdc4b673a3
+  pages: 10
+  retrieved_on: '2026-11-22'
+  notes: Copy hosted by LCSC, linked from the product page of C705784 (RT0603BRD0756K2L). Not compared with the file on the Yageo server.
+- id: yageo-at-ds
+  title: Thin film chip resistors, automotive grade, AT series 0.01 % to 1 %, TC5 to TC50
+  doc_number: Yageo product specification AT series V.6
+  revision_date: April 15, 2021
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/837b5ba54f8063c3882b949c35751654.pdf
+  file: yageo-at-series-v6-2021-04-15.pdf
+  sha256: ecaee04724171c34458cc7e9b7dfeebe06fc28760a8e181423f0e30960369a91
+  pages: 9
+  retrieved_on: '2026-11-22'
+  notes: Copy hosted by LCSC, linked from the product page of C855900 (AT0603BRD0754K9L).
+- id: vishay-mct-ds
+  title: MCS 0402, MCT 0603, MCU 0805, MCA 1206 - Precision, precision thin film chip resistors
+  doc_number: Vishay document 28700
+  revision_date: 16-Aug-16
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/52ef88b172436162fe4fa38976701adb.pdf
+  file: vishay-mct-precision-28700-2016-08-16.pdf
+  sha256: c6c11bc9c3c2e05effd7466a336b67d3e18e843c416e2a59a2c1bf418bc55437
+  pages: 11
+  retrieved_on: '2026-11-22'
+  notes: Copy hosted by LCSC, linked from the product page of C705784. No MCT part with an LCSC number was found for the three values.
+defaults:
+  source_document: yageo-rt-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-opus-5.5/extractor}
+  extracted_on: '2026-11-22'
+  status: unverified
+  package: '0603'
+claims:
+- id: ILIM-RESISTORS.rt.tcr_code_d
+  parameter: TCR of the RT ordering code letter D (RT0603BRD07...)
+  category: electrical
+  max: 25
+  unit: ppm/degC
+  source: {page: 2, locator: Ordering information (4) Temperature coefficient of resistance, quote: 'D = 25 ppm/°C'}
+- id: ILIM-RESISTORS.rt.life_70c_1000h
+  parameter: Resistance change after life/endurance, 70 degC, 1000 h, rated voltage
+  category: electrical
+  max: 0.5
+  unit: percent
+  notes: The limit is plus or minus (0.5 % + 0.05 ohm); the absolute term is below 1e-6 of 47 kohm.
+  source: {page: 7, locator: Table 4 Life/Endurance, quote: 'At 70± 5 °C for 1,000 hours, rated voltage applied ± (0.5%+0.05 Ω)'}
+- id: ILIM-RESISTORS.rt.soldering_heat
+  parameter: Resistance change after resistance to soldering heat, 260 degC, 10 s
+  category: electrical
+  max: 0.5
+  unit: percent
+  source: {page: 8, locator: Table 4 Resistance to Soldering Heat, quote: 'Condition B, no pre-heat of samples. ± (0.5%+0.05 Ω)'}
+  notes: IEC 60115-1 4.18, lead-free solder 260 degC for 10 s; the absolute term is below 1e-6 of 47 kohm.
+- id: ILIM-RESISTORS.at.tcr_code_d
+  parameter: TCR of the AT ordering code letter D (AT0603BRD07...)
+  category: electrical
+  max: 25
+  unit: ppm/degC
+  source: {document: yageo-at-ds, page: 2, locator: Ordering information (4) Temperature coefficient of resistance, quote: 'D = ± 25 ppm/°C'}
+- id: ILIM-RESISTORS.at.operational_life_70c
+  parameter: Resistance change after operational life, 70 degC, 1000 h, RCWV
+  category: electrical
+  max: 0.1
+  unit: percent
+  notes: The limit is plus or minus (0.1 % + 0.05 ohm).
+  source: {document: yageo-at-ds, page: 6, locator: Table 4 Operational Life, quote: 'AEC-Q200 Test 8 1,000 hours at 70± 5 °C, RCWV applied for 1.5 ± (0.1%+0.05Ω)'}
+- id: ILIM-RESISTORS.at.soldering_heat
+  parameter: Resistance change after resistance to soldering heat, 260 degC, 10 s
+  category: electrical
+  max: 0.05
+  unit: percent
+  notes: The limit is plus or minus (0.05 % + 0.05 ohm).
+  source: {document: yageo-at-ds, page: 6, locator: Table 4 Resistance to Soldering Heat, quote: 'AEC-Q200 Test 15 Condition B, no pre-heat of samples ± (0.05%+0.05Ω)'}
+- id: ILIM-RESISTORS.mct.stability_class_above_10k
+  parameter: Stability class of MCT 0603 above 10 kohm
+  category: other
+  statement: Stability class 0.25 applies to MCT 0603 above 10 kohm (class 0.1 only from 100 ohm to 10 kohm).
+  source: {document: vishay-mct-ds, page: 6, locator: Test procedures and requirements, quote: 'to 511 k'}
+  notes: The quoted range is the class 0.25 column of the MCT 0603 row; class 0.1 covers 100 ohm to 10 kohm.
+- id: ILIM-RESISTORS.mct.endurance_standard_class025
+  parameter: Resistance change after endurance at 70 degC, 1000 h, standard operation mode, stability class 0.25
+  category: electrical
+  max: 0.1
+  unit: percent
+  source: {document: vishay-mct-ds, page: 6, locator: Clause 4.25.1 standard operation mode, quote: '70 °C; 1000 h ± (0.1 % R + 0.02'}
+  notes: Standard operation mode row of the class 0.25 column; the precision mode row gives 0.05 % R.
+- id: ILIM-RESISTORS.mct.soldering_heat
+  parameter: Resistance change after resistance to soldering heat, 260 degC, 10 s
+  category: electrical
+  max: 0.05
+  unit: percent
+  source: {document: vishay-mct-ds, page: 8, locator: Clause 4.18 Resistance to soldering heat, quote: '(0.05 % R + 0.01'}
+  notes: Row 4.18 resistance to soldering heat, solder bath (260 ± 5) degC for (10 ± 1) s.

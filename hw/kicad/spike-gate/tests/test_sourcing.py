@@ -76,7 +76,7 @@ class SchematicFieldsTest(unittest.TestCase):
         self.assertEqual(self.fields("R2")["MPN"].value, "0402WGF1002TCE")      # 10k in 0402
         self.assertEqual(self.fields("R21")["MPN"].value, "0603WAF8873T5E")     # stays 0603
         self.assertEqual(self.fields("C24")["MPN"].value, "CL05B104KO5NNNC")    # 100n in 0402 (ADR-0023)
-        self.assertEqual(self.fields("R_ILIM1")["MPN"].value, "TD03G4702BT")
+        self.assertEqual(self.fields("R_ILIM1")["MPN"].value, "RT0603BRD0747KL")   # HW-010 table; FH out of stock 2026-11-22
         self.assertEqual(self.fields("U9")["MPN"].value, "ESP32-C3-MINI-1-N4")
 
     def test_power_symbols_have_no_fields(self):

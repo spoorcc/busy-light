@@ -189,12 +189,12 @@ P1_TAB_KEEPOUT_MARGIN = 0.3
 # guess from the part sizes, not a derived value.
 BLOCKS = tuple((anchor, m, rad) for anchor, rad, members in (
     ("U8", 6.0, ("C3", "C5", "C6")),                                              # 5 V to 3.3 V regulator (C4 moved: HW-016)
-    ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R8")),                # supervisor, timing capacitors, GATE_OK_RB pull-up
+    ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R6")),                # supervisor, timing capacitors, HOLD_OK pull-up (ADR-0024)
     ("U14", 7.0, ("C24", "DZ14", "R_SU14", "R2", "R18", "R14")),                  # current-limit step 2 switch
     ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch                  # current-limit step 3 switch
-    ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1")),                           # USB-C CC detect
-    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22", "C4", "C32")),   # VBUS switch, protection, ILIM, HW-016 spares
-    ("U9", 12.0, ("R9", "C7", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts (R13 removed, ADR-0023)
+    ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1", "R24", "R25")),             # USB-C CC detect, CC series resistors (ADR-0024)
+    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22", "C4", "C32", "R8")),   # VBUS switch, protection, ILIM, HW-016 spares, FAULT_N pull-up (ADR-0024)
+    ("U9", 12.0, ("R9", "C7", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11", "R23", "U10")),   # module support parts (R13 removed, ADR-0023; GPIO0 resistor and GATE_OK_RB AND gate, ADR-0024)
 ) for m in members)
 # Twins: the parts of the two identical switch circuits. They take the same rotation and side, so the circuits look alike.
 TWINS = (("U14", "U15"), ("C24", "C25"), ("DZ14", "DZ15"), ("R_SU14", "R_SU15"), ("R2", "R3"), ("R18", "R19"))

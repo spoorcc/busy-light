@@ -9,6 +9,7 @@
   rejected as written. Decision 1 holds up apart from its margin; decision 2 brings regressions (GPIO6 on the gate node,
   the 3V3 pull-up, a reset loop with SW-007, a latch at step 1) and needs its own alternatives. The owner decides; the status
   above is unchanged.
+- **Amended by:** ADR-0024 (2026-11-22, Proposed) withdraws decision 2 (FAULT and RESET on one node, GPIO6 on the node) and restores ADR-0018 option E; ADR-0025 (Proposed) replaces U5. Decision 1 (step 3 = both switches) and decision 3 (packages) stand. The "Update" sections below describe the board of 2026-11-18, not the schematic of 2026-11-22.
 - **Date:** 2026-11-18
 - **Deciders / reviewers:** owner (Ben Spoor)
 - **Related:** HW-010, HW-008, HW-016, HW-007, SW-005, SW-009, SYS-020, SYS-022, ADR-0010, ADR-0016, ADR-0018, ADR-0022, plan 08

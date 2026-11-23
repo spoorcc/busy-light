@@ -66,6 +66,16 @@ class RuleMisses(unittest.TestCase):
         self.assertEqual(len(rules), 4)
         self.assertEqual(pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, {"J1": None}), [])
 
+    def test_cc_protection_rules_resolve_to_the_j1_cc_pads(self):
+        """ADR-0024 (owner decision 4, P3): the CC ESD diodes sit within 6 mm of the connector pad of their line."""
+        nets = {"CC1": [("J1", "A5"), ("TVS3", "1"), ("R24", "1")], "CC2": [("J1", "B5"), ("TVS4", "1"), ("R25", "1")]}
+        fixed_pins = {("J1", "A5"): (1.0, 2.0), ("J1", "B5"): (1.0, 4.5)}
+        comps = {r: None for r in ("J1", "TVS3", "TVS4")}
+        rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, comps)
+        self.assertIn(("TVS3", ((1.0, 2.0),), 6.0), rules)
+        self.assertIn(("TVS4", ((1.0, 4.5),), 6.0), rules)
+        self.assertEqual(len(rules), 2)
+
     def test_hw016_rule_keeps_the_spare_pads_within_10_mm(self):
         """7.0 mm part centres + 1.48 mm (U7 pad 6 from its origin) + 1.475 mm (1206 pad centre) <= 10 mm (HW-016)."""
         lim = {(a, b): v for a, b, v in pcb_full.LAYOUT_RULES}
@@ -126,7 +136,7 @@ class PlacementWeights(unittest.TestCase):
         self.assertTrue(all(len({comps[r][1] for r in f}) == 1 for f in ics))
         row = pcb_full.test_point_row(comps, fixed)
         self.assertEqual(len(row), 1)
-        self.assertEqual(len(row[0]), 6)                      # TP1 to TP6
+        self.assertEqual(len(row[0]), 7)                      # TP1 to TP7 (TP7 = FAULT_N, ADR-0024)
         self.assertEqual(pcb_full.test_point_row({"TP1": ("", "")}), [])
 
     def test_strict_ic_rule_is_a_switch_and_ics_stay_in_the_soft_families_without_it(self):
@@ -167,12 +177,14 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 97)      # ADR-0023: U13, U10, R6, R13 out
-        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 52)
+        self.assertEqual(len(self.comps), 105)     # ADR-0024: +U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (97 after ADR-0023)
+        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 57)
         for ref in ("C27", "C28", "C29", "C30", "C31", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
                     "C32"):
             self.assertIn(ref, self.comps)
-        for ref in ("Q2", "Q3", "R20", "U13", "U10", "R6", "R13"):
+        for ref in ("U10", "R6", "R23", "R24", "R25", "TVS3", "TVS4", "TP7"):    # ADR-0024
+            self.assertIn(ref, self.comps)
+        for ref in ("Q2", "Q3", "R20", "U13", "R13"):
             self.assertNotIn(ref, self.comps)
 
     def test_board_matches_netlist(self):
@@ -181,7 +193,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 52)        # ADR-0023: -CC_OK_NOT_S3, -HOLD_OK, -FAULT_N (wired into GATE_OK_RB)
+        self.assertEqual(res["nets_named"], 57)        # ADR-0024: 52 after ADR-0023, +HOLD_OK, FAULT_N, CC_OK_RB, CC1_IC, CC2_IC
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")
@@ -455,7 +467,7 @@ class P1Board(unittest.TestCase):
         bottom = lambda r: r.startswith("TP") or r in pcb_full.DNP_REFS_P1      # noqa: E731
         bad = [r for r, f in self.fps.items() if f.GetLayer() != (pcbnew.B_Cu if bottom(r) else pcbnew.F_Cu)]
         self.assertEqual(bad, [])
-        self.assertEqual(len([r for r in self.fps if r.startswith("TP")]), 6)
+        self.assertEqual(len([r for r in self.fps if r.startswith("TP")]), 7)
         self.assertTrue(all(self.fps[r].IsDNP() for r in pcb_full.DNP_REFS_P1))
 
     def test_dnp_spares_have_no_solder_paste(self):

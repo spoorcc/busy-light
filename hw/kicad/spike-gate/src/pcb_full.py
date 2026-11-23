@@ -186,7 +186,9 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
 # Plan 08 section 4.2 input path (HW-003, HW-017): the protection parts near the connector, the damping link between J1 and
 # U7. "J1:VBUS" is the nearest J1 pad centre on net VBUS (J1 is fixed). Measured on every board by pcb_layout_check.py
 # (RV-016 row 12: not implemented in the placer for board-p1, all four missed).
-INPUT_PATH_RULES = (("TVS1", "J1:VBUS", 6.0), ("U6", "J1:VBUS", 8.0), ("R22", "J1:VBUS", 8.0), ("R22", "U7", 6.0))
+INPUT_PATH_RULES = (("TVS1", "J1:VBUS", 6.0), ("U6", "J1:VBUS", 8.0), ("R22", "J1:VBUS", 8.0), ("R22", "U7", 6.0),
+                    # ADR-0024 (owner decision 4, P3): the CC ESD diodes at the connector pads of CC1 and CC2
+                    ("TVS3", "J1:CC1", 6.0), ("TVS4", "J1:CC2", 6.0))
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 # Plan 08 section 4.2 (P1, HW-008): the LED bypass capacitors move beside their LED on the top side, which frees the ring

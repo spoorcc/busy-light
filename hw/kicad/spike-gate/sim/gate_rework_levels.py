@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+"""ADR-0024 (owner decisions 1, 2, 4 of 2026-11-22): logic levels of the restored HOLD_OK pull-up, the GPIO0 series resistor
+and the CC series resistors. Analysis, not a measurement. Run: python3 -I gate_rework_levels.py
+
+Sources: SN74LVC1G08 SCES217AA (VIH 2 V and VIL 0.8 V at VCC 3 to 3.6 V, II +-5 uA, Ioff +-10 uA; the LVC1G11 is taken
+as equal, not re-read); TPS3840 SNVSB03E (tps3840dl40.yaml: open-drain leakage 90 nA, VOL 0.2 V at 2 mA, VPOR 0.95 V at
+5.6 uA); TUSB321 SLLSEO6C (RCC_D 4.6 to 5.6 kohm); ESP32-C3 (readback_margin.py: VIL 0.25 VDD, VIH 0.75 VDD, internal
+pull-up 30 to 70 kohm).
+"""
+LVC_VIH, LVC_VIL, LVC_II = 2.0, 0.8, 5e-6          # V, V, A at VCC 3.0 to 3.6 V
+TPS3840_ILKG, TPS3840_VPOR, TPS3840_I_POR = 90e-9, 0.95, 5.6e-6
+RD_MIN, RD_MAX = 4.6e3, 5.6e3                       # ohm, TUSB321 RCC_D
+
+
+def hold_ok_high(vbus, r6=150e3, n_inputs=3):
+    """Worst-case HOLD_OK level with U5 released: every LVC input (U3, U4, U10) sinks II and U5 leaks."""
+    return vbus - r6 * (n_inputs * LVC_II + TPS3840_ILKG)
+
+
+def hold_ok_r6_min(vol=0.2):
+    """Smallest pull-up to VBUS_IC that keeps a valid low at VPOR (datasheet-evidence-supervisor.md, A10)."""
+    return (TPS3840_VPOR - vol) / TPS3840_I_POR
+
+
+def gpio0_pin_with_pullup(r_series=10e3, vdd=3.0, rpu=30e3, vnet=0.0):
+    """GPIO0 pin voltage when U2 drives CC_OK_1A5 low and the firmware left the internal pull-up on (smallest pull-up)."""
+    return vnet + (vdd - vnet) * r_series / (r_series + rpu)
+
+
+def gpio0_drive_current(r_series=10e3, voh=3.6):
+    """Current from a GPIO0 driven high into the U2 output low, through the series resistor (A)."""
+    return voh / r_series
+
+
+def cc_shift(rp, r_series=100.0, rd=RD_MIN):
+    """Relative change of the CC voltage the TUSB321 sees with a series resistor, for a resistor Rp to the source rail
+    (a current-source Rp gives no change). Negative: lower."""
+    return (rp + rd) / (rp + rd + r_series) - 1.0
+
+
+def rd_seen_by_source(r_series=100.0):
+    """(min, max) ohm of the sink pull-down that the source sees at the connector."""
+    return RD_MIN + r_series, RD_MAX + r_series
+
+
+def main():
+    for v in (4.3, 4.5, 4.75):
+        print(f"HOLD_OK high, VBUS_IC {v} V, R6 150k, worst leakage: {hold_ok_high(v):.2f} V (VIH {LVC_VIH} V)")
+    print(f"R6 minimum for a valid low at VPOR: {hold_ok_r6_min() / 1e3:.0f} kohm")
+    print(f"GPIO0 with the 10 k resistor, U2 low, internal pull-up 30 k on: {gpio0_pin_with_pullup():.2f} V (VIL 0.75 V at 3.0 V)")
+    print(f"GPIO0 driven high into U2 low: {gpio0_drive_current() * 1e3:.2f} mA")
+    for rp in (10e3, 22e3, 56e3):
+        print(f"CC series 100 ohm, resistor Rp {rp / 1e3:g} k: {cc_shift(rp) * 100:.2f} % at the TUSB321")
+    lo, hi = rd_seen_by_source()
+    print(f"Rd seen by the source: {lo / 1e3:.2f} to {hi / 1e3:.2f} kohm")
+
+
+if __name__ == "__main__":
+    main()

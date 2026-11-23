@@ -66,6 +66,13 @@ SOURCING.update(
             "LCSC": "C8207",
             "Evidence": "LCSC/JLCPCB/distributor listing, web search 2026-11-18 (snippets; datasheet and shop pages not opened from this container)" + "; SC-70-5 (DCK), ADR-0023",
         },
+        "74LVC1G08": {
+            "MPN": "SN74LVC1G08DCKR",
+            "Manufacturer": "Texas Instruments",
+            "LCSC": "C7832",
+            "Evidence": "JLCPCB part page 2026-11-22: 207,023 in stock, extended; SN74LVC1G08 SCES217AA read 2026-11-22 "
+            "(hw/evidence/parts/sn74lvc1g08.yaml; DCK pin table: 1 A, 2 B, 3 GND, 4 Y, 5 VCC); SC-70-5 (DCK), ADR-0024",
+        },
         "74LVC1G11": {
             "MPN": "SN74LVC1G11DCKR",
             "Manufacturer": "Texas Instruments",
@@ -126,17 +133,19 @@ SOURCING.update(
         "470": _uni("0603WAF4700T5E", "C23179"),
         "150k": _uni("0603WAF1503T5E", "C22807", "; LCSC product page not seen, number from the JLCPCB page"),
         "887k": _uni("0603WAF8873T5E", "C23259", "; listing showed 0 stock, check at order time"),
+        # HW-010 approved table (2026-11-07): Yageo RT 0.1 % 25 ppm. The FH TD03G parts of 2026-11-08 showed 0 stock at LCSC and
+        # JLCPCB on 2026-11-22 (analysis-ilim-drift.md); drift limits in hw/evidence/parts/ilim-resistors.yaml.
         "47.0k 0.1%": {
-            "MPN": "TD03G4702BT",
-            "Manufacturer": "FH (Guangdong Fenghua)",
-            "LCSC": "C667109",
-            "Evidence": "JLCPCB listing, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm, extended part",
+            "MPN": "RT0603BRD0747KL",
+            "Manufacturer": "Yageo",
+            "LCSC": "C326725",
+            "Evidence": "JLCPCB part page 2026-11-22: 17,723 in stock, extended; LCSC page 0; thin film 0603 0.1% 25 ppm (HW-010 table)",
         },
         "56.2k 0.1%": {
-            "MPN": "TD03G5622BT",
-            "Manufacturer": "FH (Guangdong Fenghua)",
-            "LCSC": "C667119",
-            "Evidence": "LCSC datasheet file name and listing text, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm",
+            "MPN": "RT0603BRD0756K2L",
+            "Manufacturer": "Yageo",
+            "LCSC": "C705784",
+            "Evidence": "JLCPCB part page 2026-11-22: 5,618 in stock, extended; LCSC page 5,600; thin film 0603 0.1% 25 ppm (HW-010 table)",
         },
         "27.7k 0.1%": {
             "MPN": "RT0805BRD0727K7L",
@@ -145,6 +154,15 @@ SOURCING.update(
             "Evidence": (
                 "JLCPCB library mirror query recorded in docs/verification/reports/stock-check-ilim-holdoff.md (27.7 k row: "
                 "0.1 % exists in 0805 only, C865349 RT0805BRD0727K7L); stock not confirmed; plan 08 trim T1, 2026-11-17"
+            ),
+        },
+        "5m 1% 1W": {   # R22, HW-017 approved amendment 2026-11-22 (2 to 5 mohm 1206 current-sense link, >= 3 A)
+            "MPN": "RLM12FTCMR005",
+            "Manufacturer": "TA-I Tech",
+            "LCSC": "C316225",
+            "Evidence": (
+                "JLCPCB part page 2026-11-22: 125,869 in stock, extended; LCSC 125,860; datasheet TRLM-120S032E: metal alloy, "
+                "1 W, +-1 %, +-50 ppm/degC, AEC-Q200 (hw/evidence/parts/rlm12.yaml); second source Prosemi LMS12CF1P0R005 C5121708"
             ),
         },
         "100n": {
@@ -233,6 +251,11 @@ SOURCING_BY_FP = {
     ("470", "R_0402_1005Metric"): {"MPN": "0402WGF4700TCE", "Manufacturer": _U04, "LCSC": "C25117", "Evidence": _U04E},
     ("100n", "C_0402_1005Metric"): {"MPN": "CL05B104KO5NNNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C1525",
                                     "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 100 nF 16 V X7R 10%; ADR-0023"},
+    # ADR-0024 (2026-11-22): R6 150k, R24 and R25 100 ohm. LCSC and JLCPCB part pages read 2026-11-22 (class: JLCPCB list).
+    ("150k", "R_0402_1005Metric"): {"MPN": "0402WGF1503TCE", "Manufacturer": _U04, "LCSC": "C25755",
+                                    "Evidence": "JLCPCB part page 2026-11-22: 962,571 in stock, extended; 0402 thick film 1% 62.5 mW 50 V; ADR-0024"},
+    ("100", "R_0402_1005Metric"): {"MPN": "0402WGF1000TCE", "Manufacturer": _U04, "LCSC": "C25076",
+                                   "Evidence": "JLCPCB part page 2026-11-22: 9,893,219 in stock, basic; 0402 thick film 1% 62.5 mW 50 V; ADR-0024"},
     ("1u", "C_0402_1005Metric"): {"MPN": "CL05A105KA5NQNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C52923",
                                   "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 1 uF 25 V X5R 10%; ADR-0023"},
     ("330", "R_0402_1005Metric"): {"MPN": "0402WGF3300TCE", "Manufacturer": _U04, "LCSC": "C25104",
