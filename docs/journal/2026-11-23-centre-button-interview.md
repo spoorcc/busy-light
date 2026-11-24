@@ -37,3 +37,10 @@ The other questions of plan 09 section 7 are still open and were not answered by
 - Omron B3U-1000P (3.0 x 2.5 mm, 1.50 +- 0.49 N, pre-travel 0.15 mm, LCSC stock 49,545, Extended) is the best small-body candidate; with its body S2 keeps 3.90 mm of the antenna margin (77 %) in the assistant's search.
 - The TL3342F160QG has LCSC stock 1 and publishes no travel; the 0.25 mm in the plan is still an assumption.
 - The WebFetch helper agents could not resolve lcsc.com and jlcpcb.com (DNS error); `curl` from the container worked, both hosts are allowed in the environment. The JLCPCB page holds the class but not the part's own stock.
+
+## Owner decisions of 2026-11-24 (in the working session; recorded by the assistant)
+After the step 0 report the owner said "Do your recommendations". Recorded as decisions D1 to D3 of plan 09 section 0 and nothing else:
+- D1: direction S2 (module moved, switch at the centre) with the Omron B3U-1000P; S3 stays as fallback; no scissor-linkage study.
+- D2: steps 0 and 1 run as analysis under the Approved requirements.
+- D3: the extended-part class of the B3U-1000P is noted; the order-day part and stock check stays in the gate.
+Light, hand over the antenna, stuck press, life and force window, disc size and ingress had no recommendation in the report and stay open. Plan 09 is at revision 6; a third readiness pass is running.

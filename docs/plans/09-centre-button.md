@@ -1,7 +1,7 @@
 # 09 -- Centre-of-ring button (design doc)
 
-- **Status:** Draft (revision 5 of 2026-11-23: revision 4 plus the result of step 0 (section 4.9, `stock-check-button-switches.md`); the owner said "Continue" after
-  the status report and the assistant read that as a go-ahead for step 0 only. A third readiness pass runs after the owner has answered section 7, because the answers change the scope of step 1)
+- **Status:** Draft (revision 6 of 2026-11-24: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
+  step 1 rescoped to the B3U values. Step 0 ran on 2026-11-23 (section 4.9). The third readiness pass runs on this revision; the other questions of section 7 stay open)
 - **Date:** 2026-11-23  **Owner:** Ben Spoor (author: assistant)
 - **Area:** mech (with hw and sw consequences)
 - **Requirements addressed:** SYS-017 (Draft; amendment proposed), HW-007 (Draft; change proposed), MECH-004 (Approved; change
@@ -20,6 +20,14 @@ button choice and mechanics etc to accommodate this" (`docs/journal/2026-11-22-o
 | 2 | Where the switch sits (the module is at the ring centre) | "Study both in the plan": a switch off the centre, and the module moved so that the switch is at the centre |
 | 3 | Look and feel | A clear click, disc in the same translucent PETG as the lid, centre not lit on its own (see 4.4: spill lights the disc) |
 | 4 | Timing | Settle the concept first, then re-place P1 (plan 08 revision 6). P1 is not ordered before that |
+
+### Owner decisions of 2026-11-24 (in the working session; recorded by the assistant)
+After the step 0 report the owner said "Do your recommendations". The recommendations in that report were the following; they are recorded as decisions D1 to D3 and nothing else:
+- **D1 Direction:** S2 (module moved, switch at the centre) with the Omron B3U-1000P as the working switch; S3 (three switches) stays as the fallback; **no scissor-linkage study**.
+  ADR-0026 (Proposed) records this and the alternatives; the owner still accepts the ADR.
+- **D2 Process (question 6):** steps 0 and 1 run as analysis under the Approved requirements with the change set of section 5. Step 0 ran on 2026-11-23.
+- **D3 Part class:** the B3U-1000P is an Extended part and the TL3342F160QG is Extended too with LCSC stock 1; the owner did not object to the extended-part fee. This is noted only: the order-day part and stock check stays in the gate.
+Not decided by "Do your recommendations", because the report made no recommendation for them: light (question 1), hand over the antenna (3), stuck press (4), life and force window (5), disc size (7) and ingress (8). Step 1 uses the working values in brackets for them.
 
 ## 1. Problem definition
 SYS-017 and NEED-008 give the device one button. Today SW1 is a TL3342-family tact switch (E-Switch TL3342F160QG, C2886898)
@@ -132,9 +140,9 @@ pivot post: only S2 has room, and the switch is then not at the centre; dropped 
 | **S3** Three switches around the module (with M3) | Module as stored | Antenna strip to LED unchanged at 5.06 mm, but the switches are not placeable at r = 11 around the stored module with the real switch (finding 3 of 3.2); two more courtyards and metal next to the antenna strip if they are placed |
 | S4 Switch under the board | Plunger through the board | Breaks HW-008; rejected |
 
-No lean until the matrix is reproduced by tested scripts (step 1). With the real switch both S2 (antenna margin halves) and S3 (does not fit at r = 11; area and metal
-beside the antenna) are strained; a smaller switch (step 0) relieves both, and a scissor linkage with one switch would remove the support
-problem. The owner decides in ADR-0026.
+Direction (owner decision D1 of 2026-11-24): **S2 with the Omron B3U-1000P** (body 3.0 x 2.5 mm; section 4.9). With the TL3342 body S2 halves the antenna margin (2.51 mm); with the B3U body
+it keeps 3.90 mm (77 %) in the assistant's scratch search (1,322 poses), which step 1 reproduces by a tested script. S3 stays as the fallback (it does not fit at r = 11 with the TL3342 body; the B3U body
+is smaller and step 1 rescans it). No scissor study. ADR-0026 records the choice and the owner accepts it.
 
 ### 3.4 Stack tolerance (the click cannot be designed without closing it)
 Vertical chain: PCB on its posts, posts, lid ledge, lid plate and disc, plunger, switch height, switch actuation point. The existing
@@ -222,8 +230,8 @@ Parent of all: SYS-017, NEED-008, owner decision 9.
 ### 4.8 ADR-0026 criteria (weights 1 to 5)
 Actuation force and travel inside the window at every point (5); robustness to FDM tolerance and to the stack (5); antenna margin and metal near
 the antenna (5); no unintended or stuck actuation (4); part count, area and cost (3); light and look (3); printability (3); change to approved
-texts (2). Alternatives: S2 + M1, S3 + M3, a scissor linkage with one switch (only if the owner asks for it and step 1 proves it), and the switch
-part (4.9). ADR-0026 names only existing IDs in its Related field (the proposed MECH, TC and SW items appear as "plan 09 section 4.7"), so that
+texts (2). Alternatives: S2 + M1 with the B3U-1000P (the owner's direction D1; recommended), S2 + M1 with the TL3342F160QG (first assumption of this plan), S3 + M3 (fallback), a scissor linkage with one switch
+(not studied, owner decision D1), and the switch part (4.9: B3U-1000P, KSC221JLFS, TL3342F160QG). ADR-0026 names only existing IDs in its Related field (the proposed MECH, TC and SW items appear as "plan 09 section 4.7"), so that
 `check_traceability.py` passes before step 2.
 
 ### 4.9 Switch part
@@ -246,7 +254,7 @@ the B3U pre-travel tolerance is not yet in that band and breaks the force window
 **Rule 1 and the order of work.** Steps 0 and 1 are analysis and evidence under the Approved requirements MECH-004, MECH-002, MECH-003 and
 HW-008 (they check the owner's decision 9 against them) and change no CAD, board or requirement text; they add two new evidence files, one updated evidence file, about five new Python files with tests, one changed script
 (`check_tolerance.py` with its test), one allow-list line in `check_license_map.py`, three new documents (stock-check report, analysis report, ADR-0026) and a README
-row. **They start only after the owner confirms this reading and this change set** (section 7, question 6); until then the plan is not ready to run.
+row. **Owner decision D2 of 2026-11-24 confirms this reading and this change set** (section 7, question 6); step 0 has run, step 1 starts after the third readiness pass of RV-018.
 Requirement texts, `housing_params.py`, the FreeCAD model and the board follow ADR-0026 and the approval.
 
 **Step 0 (evidence)**
@@ -277,7 +285,15 @@ Requirement texts, `housing_params.py`, the FreeCAD model and the board follow A
     Sequence[Support], switches: Sequence[tuple[float, float, float]], click_travel_mm: float, points: Sequence[tuple[float, float]]) -> PressMetrics`
     where a switch is (x mm, y mm, stiffness N/mm) and is added to the supports; the click is the first switch whose travel reaches `click_travel_mm`;
     a point whose plunger travel is not positive counts in `lift_points`.
-  - `main() -> None` prints the matrix of 3.2 for the report.
+  - `s2_click_force(switch_force_n: float, bridge_k: float, n_bridges: int, click_travel_mm: float) -> float` = switch_force_n + n_bridges * bridge_k * click_travel_mm (S2: the
+    disc moves rigidly at the centre switch, so the click force is position-independent); `click_force_extremes(switch_force_n, force_tol_n, click_travel_min_mm,
+    click_travel_max_mm, bridge_k, n_bridges) -> tuple[float, float]` = (F - tol + n k x_min, F + tol + n k x_max); `bridge_band(switch_force_n, force_tol_n, click_travel_mm, window_n:
+    tuple[float, float], travel_limit_mm, points, bridge_r_mm: float = 14.0) -> tuple[float, float]` returns (k_low, k_high): k_low is the larger of the bridge stiffness at which the
+    largest press-point travel (sweep with `press_metrics`, three bridges at 90, 210, 330 degrees on `bridge_r_mm`, switch at the centre) equals `travel_limit_mm` (bisection
+    between 0.1 and 20 N/mm) and the stiffness at which F - tol reaches the lower window value; k_high is the stiffness at which F + tol reaches the upper window value; it raises `ValueError`
+    if k_low is greater than k_high. Working values: window (2.0, 5.0) N, travel limit 1.0 mm, 600 random points plus centre plus 48 boundary points at R_use = 13 mm.
+  - `main() -> None` prints the matrix of 3.2 for the report with three switches (TL3342F160QG 1.57 N, 0.25 mm assumed; B3U-1000P 1.50 N, 0.15 mm; KSC221JLFS 2.0 N, 0.35 mm), the bands of
+    `bridge_band` (tolerance 0.49 N for the TL3342 and the B3U, 0.5 N for the KSC221) and the click force at the pre-travel extremes of the B3U (0.05 and 0.35 mm).
   - `guided_beam_stiffness(E_mpa, w_mm, t_mm, L_mm) -> float` = E w t^3 / L^3 (fixed-guided beam, N/mm); `arm_stress(E_mpa, t_mm, L_mm, stroke_mm) -> float`
     = 3 E t stroke / L^2 (MPa); `guide_jam_length(e_mm, mu) -> float` = 2 mu e (mm); `plate_deflection(radius_mm, thickness_mm, E_mpa, nu, force_n,
     edge: Literal["simply_supported", "clamped"]) -> float` (carries `# noqa: PLR0913, PLR0917` as `check_part_evidence.py` does) for a **central** load (P R^2 (3 + nu) / (16 pi D (1 + nu)) and P R^2 / (16 pi D) with
@@ -292,7 +308,9 @@ Requirement texts, `housing_params.py`, the FreeCAD model and the board follow A
   three equal supports at 120 degrees with the load at the centroid give F/(3k); the centroid-rule case with the exact angle acos(0.2) gives equal plunger travel at all sample points
   to 1e-9; the S2 rows are position-independent and equal the analytic F = 0.25 (3 k + k_switch) within 1e-9; the M3 maximum is the analytic 4.80 N at the centre; beam 0.199 N/mm for
   E = 1500, 1.2 x 1.2, L = 25; plate 0.042 mm/N for R = 15, t = 1.2, E = 1500, nu = 0.4; analytic values of `arm_stress`, `guide_jam_length` and the clamped plate; a singular
-  support set raises `ValueError`; `sample_points` is deterministic for a seed and holds the extra points; the sampled matrix rows of 3.2 within 5 %), `test_button_light.py` (value 0.18 to 0.20 at r = 0 relative to the ring value at r = 20 by the same function), additions to
+  support set raises `ValueError`; `s2_click_force` equals the analytic F of the S2 rows for TL3342 (1.6 N, 0.25 mm, k = 3: 3.85 N) and for the B3U (1.5 N, 0.15 mm, k = 2: 2.40 N);
+`click_force_extremes` for the B3U at k = 3 and pre-travel 0.05 to 0.35 mm gives (1.46, 5.14) N by hand; `bridge_band` for the TL3342 (1.57, 0.49, 0.25) gives (2.83, 3.92) and for the B3U (1.50, 0.49, 0.15)
+gives (2.20, 6.69), each within 3 % (the travel side comes from the sampled sweep, the force side is analytic), and the B3U band is wider than the TL3342 band; a window that no stiffness meets raises `ValueError`; `sample_points` is deterministic for a seed and holds the extra points; the sampled matrix rows of 3.2 within 5 %), `test_button_light.py` (value 0.18 to 0.20 at r = 0 relative to the ring value at r = 20 by the same function), additions to
   `test_check_tolerance.py` (hand values for worst case and RSS and for `recess_worst_case`), tests for `led_squares` and `antenna_strip` in `test_button_zone.py`.
 - `hw/kicad/spike-gate/src/button_zone.py` (outside ruff while in spike-gate, as `pyproject.toml` already excludes that folder; the exception is
   recorded in the report) with `tests/test_button_zone.py`:
@@ -311,7 +329,8 @@ Requirement texts, `housing_params.py`, the FreeCAD model and the board follow A
     tuple[int, int, float, float]` scans triplet rotations 0 to 119 degrees in 1 degree steps and the four switch orientations and returns (feasible, total, best gap to the body, best gap to the strip);
   - `main() -> None` prints the S2 and S3 results for the report.
   - Tests: the SW1 outline is 6.4 x 5.2 mm and its courtyard 8.5 x 6.0 mm in board-p1; baseline 5.06 mm within 0.1 mm for the stored footprint and 6.07 mm for `mech_outline`; no pose overlaps an LED
-    or the switch; the best S2 distance is below the baseline; `s3_scan` finds at most 20 of 480 feasible for the 6.4 x 5.2 body and none for the courtyard (the goldfish scan found 7 and 0; the
+    or the switch; the best S2 distance is below the baseline; for the B3U body (3.0 x 2.5 mm, switch gap 1.0 mm) `s2_poses` has more poses and a larger best distance than for the TL3342 body (6.4 x 5.2 mm), both below 5.06 mm
+(the scratch values 1,322 poses and 3.90 mm, and 10 poses and 2.51 mm, are printed in the report, not asserted); `s3_scan` is also run for the B3U body and the result is reported; `s3_scan` finds at most 20 of 480 feasible for the 6.4 x 5.2 body and none for the courtyard (the goldfish scan found 7 and 0; the
     test asserts "small", not the exact count); the pose count and the best distances are printed in the report, not asserted.
 - Documents: `docs/verification/reports/analysis-button-disc.md` (results, the capacity estimate of 4.6, the reconciliation of the two module models and
   of `POST_AZ` 30/150/270 in `mech_outline.py` against `POST_DEG` 60/180/300 in `housing_params.py` as a list of issues with no file change),
@@ -362,8 +381,8 @@ Not run now: everything above. The numbers of section 3 come from scratch script
 
 ## 7. Risks and open questions
 Risks (entered in the register after the owner reads this revision):
-1. "Press anywhere" fails (3.2): only S2 + M1 in a narrow band, or S3 + M3 (not placeable at r = 11 with the real switch), pass the model; a rocking or binding disc; a mushy click from the stack.
-2. A hand over the antenna during a 3 s or 10 s press; S2 cuts the antenna margin to 50 to 60 % of today's 5.06 mm with the real switch; S3 puts metal
+1. "Press anywhere" fails (3.2): only S2 + M1 (band ratio 3.0 with the B3U, 1.4 with the TL3342; the B3U pre-travel tolerance of +0.2/-0.1 mm still breaks the force window at its extremes, so the click travel must be measured), or S3 + M3 (not placeable at r = 11 with the TL3342 body), pass the model; a rocking or binding disc; a mushy click from the stack.
+2. A hand over the antenna during a 3 s or 10 s press; S2 with the B3U keeps 77 % of today's 5.06 mm on paper (50 to 60 % with the TL3342 body); S3 puts metal
    next to the strip if it can be placed at all.
 3. Light: the disc is lit by spill; a gap line is likely (4.4).
 4. Unintended or stuck press (4.5); three parallel switches triple the stuck-closed chance.
@@ -376,13 +395,11 @@ are the assistant's working proposals without a standard behind them; step 0 rep
 
 Open questions for the owner (they change what is built):
 1. **Light:** accept a softly lit disc (19 % to 80 % of the ring brightness), or an opaque mask or a smaller disc?
-2. **Direction:** with the TL3342 body, S2 (module moves; antenna margin 2.5 to 3.0 mm against 5.06 mm today) and S3 (three switches; they do not fit around the stored module at r = 11,
-   area up to 82 to 96 %) are both strained. Step 0 found the Omron B3U-1000P (3.0 x 2.5 mm): S2 then keeps 3.9 mm (77 %) on paper. Choose S2 with the B3U as the direction for step 1,
-   keep S3 as a fallback, or still add a scissor-linkage study?
+2. **Direction:** answered (D1, 2026-11-24): S2 with the Omron B3U-1000P, S3 as fallback, no scissor study. Not asked again.
 3. **Hand over the antenna:** is a loss of up to [6] dB with a hand on the disc acceptable (A6)?
 4. **Stuck press:** accept the rules of 4.5 (no start after a stuck press; reset needs a second deliberate action)?
 5. **Life** in presses ([20 000]) and the force window [2] to [5] N.
-6. **Process:** may steps 0 and 1 run as analysis under the Approved requirements before MECH-010 is approved?
+6. **Process:** answered (D2, 2026-11-24): steps 0 and 1 run as analysis. Not asked again.
 7. Disc and R_use against the free circle: 30 mm and 26 mm of 38 mm (62 % and 47 % of the area). Is that "the entire centre"?
 8. Ingress: the gap is a 75 mm2 opening above the board and no requirement covers liquid or dust; add one or accept?
 
