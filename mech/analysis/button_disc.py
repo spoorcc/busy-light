@@ -164,6 +164,25 @@ def click_force_extremes(  # noqa: PLR0913, PLR0917
     )
 
 
+def tolerance_band(  # noqa: PLR0913, PLR0917
+    switch_force_n: float,
+    force_tol_n: float,
+    click_travel_min_mm: float,
+    click_travel_max_mm: float,
+    window_n: tuple[float, float],
+    n_bridges: int = N_BRIDGES,
+) -> tuple[float, float]:
+    """(k_low, k_high) in N/mm that keep the click force inside the window over the whole tolerance.
+
+    Force only: k_low from the smallest click force (F - tol + n k x_min >= window low) and
+    k_high from the largest (F + tol + n k x_max <= window high). k_low > k_high means that no
+    stiffness works.
+    """
+    k_low = (window_n[0] - (switch_force_n - force_tol_n)) / (n_bridges * click_travel_min_mm)
+    k_high = (window_n[1] - (switch_force_n + force_tol_n)) / (n_bridges * click_travel_max_mm)
+    return k_low, k_high
+
+
 def _max_travel(  # noqa: PLR0913, PLR0917
     switch_force_n: float,
     click_travel_mm: float,
@@ -173,6 +192,8 @@ def _max_travel(  # noqa: PLR0913, PLR0917
 ) -> float:
     ks = switch_force_n / click_travel_mm
     m = press_metrics(bridges(bridge_r_mm, k), [(0.0, 0.0, ks)], click_travel_mm, points)
+    if m.lift_points:
+        raise ValueError(f"the plunger lifts at {m.lift_points} press points (k = {k:g} N/mm)")
     return m.travel_max_mm
 
 
@@ -289,15 +310,55 @@ def main() -> None:
             f"{name}, k = 3 N/mm, pre-travel {xa} to {xb} mm ({label} reading): "
             f"click force {lo_f:.2f} to {hi_f:.2f} N against the window {WINDOW_N}"
         )
-    sws = [
-        (11.0 * math.cos(math.radians(a)), 11.0 * math.sin(math.radians(a)), 1.6 / 0.25)
-        for a in BRIDGE_ANGLES_DEG
-    ]
-    m3 = press_metrics([], sws, 0.25, pts)
+        k_lo, k_hi = tolerance_band(f, tol, xa, xb, WINDOW_N)
+        verdict = "no stiffness meets the window" if k_lo > k_hi else "a band exists"
+        print(
+            f"   over the whole tolerance the window needs k >= {k_lo:.2f} and "
+            f"k <= {k_hi:.2f} N/mm: "
+            f"{verdict}"
+        )
     print(
-        f"M3: three TL3342 switches at r = 11 mm, rigid disc: F {m3.force_min_n:.2f} to "
-        f"{m3.force_max_n:.2f} N, press-point travel {m3.travel_max_mm:.2f} mm"
+        f"plate in series: a 30 mm PETG plate (t = 1.2, E = 1500, simply supported) deflects "
+        f"{plate_deflection(15.0, 1.2, 1500.0, 0.4, 1.0, 'simply_supported'):.3f} mm/N at a "
+        "central load, "
+        f"+{plate_deflection(15.0, 1.2, 1500.0, 0.4, 2.4, 'simply_supported'):.2f} mm at 2.4 N and "
+        f"+{plate_deflection(15.0, 1.2, 1500.0, 0.4, 5.0, 'simply_supported'):.2f} mm at 5 N "
+        "(added to the press-point travel of a central press; the rigid-disc rows leave it out)"
     )
+    ang = math.degrees(math.acos(0.2))
+    ks = 1.6 / 0.25
+    s1_pts = sample_points(R_USE_MM, N_RANDOM, N_BOUNDARY, SEED, extra=[(0.0, 0.0), (7.0, 0.0)])
+    print("S1 (switch 7 mm off the centre, TL3342 1.6 N / 0.25 mm):")
+    for k in (1.0, 3.0, 10.0, 30.0):
+        arms = [
+            (15.0 * math.cos(math.radians(a)), 15.0 * math.sin(math.radians(a)), k)
+            for a in (0.0, ang, -ang)
+        ]
+        m = press_metrics(arms, [(7.0, 0.0, ks)], 0.25, s1_pts)
+        print(
+            f"   bridges centred on the switch, k = {k:g}: F {m.force_min_n:.2f} to "
+            f"{m.force_max_n:.2f} N, "
+            f"travel {m.travel_max_mm:.1f} mm"
+        )
+    for k in (1.0, 3.0, 10.0):
+        m = press_metrics(bridges(14.0, k), [(7.0, 0.0, ks)], 0.25, s1_pts)
+        print(
+            f"   symmetric bridges, k = {k:g}: F {m.force_min_n:.2f} to {m.force_max_n:.2f} N, "
+            f"travel {m.travel_max_mm:.1f} mm"
+        )
+    for name, f, tol, x in SWITCHES[:2]:
+        sws = [
+            (11.0 * math.cos(math.radians(a)), 11.0 * math.sin(math.radians(a)), f / x)
+            for a in BRIDGE_ANGLES_DEG
+        ]
+        m3 = press_metrics([], sws, x, pts)
+        print(
+            f"M3: three {name} at r = 11 mm, rigid disc: F {m3.force_min_n:.2f} to "
+            f"{m3.force_max_n:.2f} N, press-point travel {m3.travel_max_mm:.2f} mm; "
+            f"with the switch tolerance an edge press needs {m3.force_min_n - tol:.2f} N "
+            "and a centre press "
+            f"3 x (OF +- tol) = {3 * (f - tol):.2f} to {3 * (f + tol):.2f} N"
+        )
 
 
 if __name__ == "__main__":

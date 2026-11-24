@@ -14,7 +14,7 @@ import math
 
 RING_R_MM = 20.0
 N_LED = 16
-HEIGHT_MM = 8.0  # LED plane to the lid underside: 15.25 - 7.25 (plan 09 section 2)
+HEIGHT_MM = 7.7  # LED top (Z 7.25) to the disc underside (Z 14.95); the lid underside is 8.0 mm
 
 
 def _irradiance(  # noqa: PLR0913, PLR0917

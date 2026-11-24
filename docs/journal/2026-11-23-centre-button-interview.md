@@ -48,3 +48,7 @@ Light, hand over the antenna, stuck press, life and force window, disc size and 
 ## Step 1 (2026-11-24)
 Third readiness pass: NO-GO (RV-018 rows R13 to R27, all resolved in plan 09 revision 7). Step 1 built: `button_disc.py`, `button_light.py`, `button_zone.py`, tolerance chains, tests, report, ADR-0026 (Proposed).
 The B3U pre-travel tolerance was read on the rendered catalogue page: 0.15 +0.2/-0.1 mm. A goldfish reviews plan and code together before the pair is called ready.
+
+## Review of step 1 (2026-11-24)
+A fresh goldfish reviewed plan 09 revision 7 against the built files: NOT READY on reasoning and test strength, all headline numbers reproduced. Resolved in revision 8 (RV-018 rows R29 to R45).
+Result worth the owner's attention: the first ADR scored S2 with the B3U at 96 against 89 for S3; the corrected scores are 84 and 87 (within noise), because the best S2 pose puts the metal switch 1.35 mm from the antenna strip, no bridge stiffness holds the force window over the B3U pre-travel tolerance, and three switches miss the window at both ends. The assistant now recommends taking both to the coupon gate; the owner's direction D1 stays the working direction until the owner decides.

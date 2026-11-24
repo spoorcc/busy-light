@@ -70,12 +70,12 @@ def test_steep_ledge_fails(monkeypatch) -> None:
 
 
 # Centre button chains (plan 09 section 3.4, informational)
-BUTTON_VERTICAL_WC = 1.31
-BUTTON_VERTICAL_RSS = 0.5763
+BUTTON_VERTICAL_WC = 1.41
+BUTTON_VERTICAL_RSS = 0.6017
 BUTTON_LATERAL_WC = 3.05
 BUTTON_LATERAL_RSS = 2.0402
 NOMINAL_RECESS = 0.30
-RECESS_WC = -0.20
+RECESS_WC = 0.10
 
 
 def test_button_vertical_chain_matches_hand_values() -> None:
@@ -95,7 +95,23 @@ def test_nominal_lateral_gap_value_is_the_housing_value() -> None:
     assert abs(ct.BUTTON_LATERAL["spigot_play"] - ct.spigot()["play_max"]) < EPS / 10
 
 
-def test_recess_worst_case_goes_negative_with_the_nominal_recess() -> None:
+def test_button_values_are_tied_to_the_housing_tolerances() -> None:
+    v = ct.BUTTON_VERTICAL
+    assert abs(v["pcb_post"] - (p.TOL_FDM_FINE + p.TOL_PCB_T)) < EPS / 10
+    assert v["lid_ledge"] == p.TOL_FDM
+    assert v["lid_plate"] == p.TOL_FDM_FINE
+    assert v["disc_plunger"] == p.TOL_FDM_FINE
+    assert ct.BUTTON_LATERAL["plunger_tip"] == p.TOL_PLACE
+
+
+def test_recess_ignores_the_ledge_that_moves_disc_and_band_together() -> None:
+    tol = dict(ct.BUTTON_VERTICAL)
+    base = ct.recess_worst_case(NOMINAL_RECESS, tol)
+    tol["lid_ledge"] = 5.0
+    assert ct.recess_worst_case(NOMINAL_RECESS, tol) == base
+
+
+def test_recess_worst_case_keeps_the_nominal_step_minus_the_plate_term() -> None:
     assert abs(ct.recess_worst_case(NOMINAL_RECESS, ct.BUTTON_VERTICAL) - RECESS_WC) < EPS / 10
 
 

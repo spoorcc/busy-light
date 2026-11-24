@@ -110,20 +110,20 @@ BUTTON_VERTICAL_KEYS = (
     "switch_actuation",
 )
 BUTTON_VERTICAL = {
-    "pcb_post": 0.20 + 0.16,  # post seat (TOL_FDM_FINE) plus board thickness (TOL_PCB_T)
-    "lid_ledge": 0.30,  # lid ledge height, TOL_FDM
-    "lid_plate": 0.20,  # lid plate and band thickness, TOL_FDM_FINE
-    "disc_plunger": 0.20,  # plunger length under the disc, TOL_FDM_FINE
+    "pcb_post": p.TOL_FDM_FINE + p.TOL_PCB_T,  # post seat plus board thickness
+    "lid_ledge": p.TOL_FDM,  # lid ledge height
+    "lid_plate": p.TOL_FDM_FINE,  # lid plate and band thickness
+    "disc_plunger": p.TOL_FDM_FINE,  # plunger length under the disc
     "switch_height": 0.15,  # ASSUMPTION: no datasheet gives it
-    "switch_actuation": 0.10,  # ASSUMPTION: spread of the click point (B3U: +0.2/-0.1 on 0.15)
+    "switch_actuation": 0.20,  # click point spread, the larger side of the B3U +0.2/-0.1 mm
 }
 # Lateral chain: where the plunger tip lands relative to the switch actuator.
 BUTTON_LATERAL_KEYS = ("pcb_wall_gap", "spigot_play", "tilt_walk", "plunger_tip")
 BUTTON_LATERAL = {
-    "pcb_wall_gap": 1.90,  # nominal radial gap board to wall, pcb_gap()["nominal"]
-    "spigot_play": 0.65,  # lid spigot play, SPIGOT_CLEAR + TOL_FDM, spigot()["play_max"]
+    "pcb_wall_gap": (p.D_OUT - 2 * p.WALL - p.D_PCB) / 2.0,  # nominal radial gap, board to one side
+    "spigot_play": p.SPIGOT_CLEAR + p.TOL_FDM,  # lid spigot play
     "tilt_walk": 0.20,  # ASSUMPTION: disc tilt of 0.1 rad over a 2 mm plunger length
-    "plunger_tip": 0.30,  # plunger tip placement on the disc underside, TOL_PLACE
+    "plunger_tip": p.TOL_PLACE,  # plunger tip placement on the disc underside
 }
 
 
@@ -143,12 +143,14 @@ def button_lateral_chain(tolerances: Mapping[str, float]) -> dict[str, float]:
 
 
 def recess_worst_case(nominal_recess_mm: float, tolerances: Mapping[str, float]) -> float:
-    """Disc top below the band top at the worst case.
+    """Disc top below the band top at the worst case (placeholder formula, see below).
 
-    The nominal recess minus the two terms that move the disc top against the band top (lid_ledge
-    and lid_plate). A negative value means the disc can stand proud of the band.
+    Disc and band are one print, so the ledge height moves both and does not change the step between
+    them; only the plate thickness term (lid_plate) is taken as the independent spread of that step.
+    A negative value means the disc can stand proud of the band. The formula is an assumption
+    until a coupon measures the step.
     """
-    return nominal_recess_mm - tolerances["lid_ledge"] - tolerances["lid_plate"]
+    return nominal_recess_mm - tolerances["lid_plate"]
 
 
 def run() -> tuple[list[str], list[str]]:

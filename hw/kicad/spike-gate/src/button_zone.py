@@ -246,26 +246,60 @@ def s2_poses(  # noqa: PLR0913, PLR0917
     return out
 
 
-def best_antenna_distance(
-    poses: Sequence[Pose],
+def strip_polygon(
+    pose: Pose,
+    flipped: bool,
+    module_size: tuple[float, float] = MODULE_SIZE,
+    strip_mm: float = ANT_STRIP_MM,
+) -> Poly:
+    """The antenna strip of a module pose: at the -y end of the local frame, or the +y end when flipped."""
+    x, y, ang = pose
+    width, length = module_size
+    a = math.radians(ang)
+    off = (1.0 if flipped else -1.0) * (length / 2 - strip_mm / 2)
+    return rect(x - off * math.sin(a), y + off * math.cos(a), width, strip_mm, ang)
+
+
+def antenna_distance(  # noqa: PLR0913, PLR0917
+    pose: Pose,
+    flipped: bool,
     module_size: tuple[float, float] = MODULE_SIZE,
     strip_mm: float = ANT_STRIP_MM,
     leds: Sequence[Sequence[Point]] | None = None,
 ) -> float:
-    """Largest over the poses and both antenna ends of the antenna-strip to nearest-LED-centre distance.
+    """Distance from the antenna strip of one pose and end to the nearest LED centre."""
+    leds = led_squares() if leds is None else leds
+    return nearest_led_distance(strip_polygon(pose, flipped, module_size, strip_mm), leds)
 
-    The antenna end is the -y end of the local frame, or the +y end when flipped. Returns 0 for no pose.
+
+def best_antenna_distance(  # noqa: PLR0913, PLR0917
+    poses: Sequence[Pose],
+    module_size: tuple[float, float] = MODULE_SIZE,
+    strip_mm: float = ANT_STRIP_MM,
+    leds: Sequence[Sequence[Point]] | None = None,
+    switch_size: tuple[float, float] | None = None,
+    min_switch_strip_mm: float = 0.0,
+    away_from_switch: bool = False,
+) -> float:
+    """Largest over the poses and both antenna ends of the strip to nearest-LED-centre distance.
+
+    With switch_size (the switch is axis-aligned at the origin) an end counts only if its strip is at
+    least min_switch_strip_mm from the switch body and, with away_from_switch, not nearer to the switch
+    than the strip of the other end (plan 09 section 4.3: switch on the side away from the antenna).
+    Returns 0 for no eligible pose.
     """
     leds = led_squares() if leds is None else leds
-    width, length = module_size
+    sw = None if switch_size is None else rect(0.0, 0.0, switch_size[0], switch_size[1], 0.0)
     best = 0.0
-    for x, y, ang in poses:
-        a = math.radians(ang)
-        for sign in (-1.0, 1.0):
-            off = sign * (length / 2 - strip_mm / 2)
-            cx = x - off * math.sin(a)
-            cy = y + off * math.cos(a)
-            strip = rect(cx, cy, width, strip_mm, ang)
+    for pose in poses:
+        strips = [strip_polygon(pose, f, module_size, strip_mm) for f in (False, True)]
+        dists = [poly_distance(s, sw) if sw is not None else math.inf for s in strips]
+        for k, strip in enumerate(strips):
+            if sw is not None:
+                if dists[k] < min_switch_strip_mm - EPS:
+                    continue
+                if away_from_switch and dists[k] < dists[1 - k] - EPS:
+                    continue
             best = max(best, nearest_led_distance(strip, leds))
     return best
 
@@ -374,23 +408,43 @@ def main() -> None:
     print("S2: module moved, switch at the centre (0.5 mm and 3 degree grid, rotation 0 to 177):")
     for name, size, gap in cases:
         poses = s2_poses(MODULE_SIZE, size, gap, 0.5, 19.5, 14.0, 0.5, 3.0)
-        best = best_antenna_distance(poses, MODULE_SIZE, ANT_STRIP_MM, leds)
-        pct = 100 * best / base
-        print(f"   {name}: {len(poses)} poses, best strip to LED {best:.2f} mm ({pct:.0f} % of {base:.2f})")
-    print("S3: three switches at r = 11 mm around the stored module:")
+        d_any = best_antenna_distance(poses, MODULE_SIZE, ANT_STRIP_MM, leds)
+        d_away = best_antenna_distance(poses, MODULE_SIZE, ANT_STRIP_MM, leds, size, 0.0, True)
+        d_3mm = best_antenna_distance(poses, MODULE_SIZE, ANT_STRIP_MM, leds, size, 3.0)
+        print(f"   {name}: {len(poses)} poses; best strip to LED {d_any:.2f} mm ({100 * d_any / base:.0f} %),")
+        print(
+            f"      antenna end away from the switch {d_away:.2f} mm ({100 * d_away / base:.0f} %), "
+            f"strip at least 3 mm from the switch {d_3mm:.2f} mm ({100 * d_3mm / base:.0f} %)"
+        )
+    print("S2 module corner limit (courtyard case, gap 0): the limit is material:")
+    for cr in (1e9, 19.5, 19.0):
+        p = s2_poses(MODULE_SIZE, SWITCH_TL3342_COURTYARD, 0.0, 0.5, cr, 14.0, 0.5, 3.0)
+        label = "none" if cr > 1e6 else f"{cr:g} mm"
+        print(f"   corner limit {label}: {len(p)} poses, best {best_antenna_distance(p, leds=leds):.2f} mm")
+    print("S3: three switches at r = 11 mm around the stored module (clearance 0 and 1.0 mm):")
     for name, size in (
         ("TL3342 body 6.4 x 5.2", SWITCH_TL3342),
         ("TL3342 courtyard 8.5 x 6.0", SWITCH_TL3342_COURTYARD),
         ("B3U body 3.0 x 2.5", SWITCH_B3U),
     ):
-        ok, tot, gb, gs = s3_scan(11.0, size, 0.0, body, strip, leds)
-        print(f"   {name}: {ok} of {tot} feasible, best gap to body {gb:.2f} mm, to strip {gs:.2f} mm")
-    print("Fill of the ring interior (plan 08 A3 figures: 430 mm2 movable, 650 mm2 available, not recomputed):")
-    today = fill_fraction(430.0, 650.0)
-    s2_b3u = fill_fraction(430.0, 650.0, fixed_delta_mm2=4.0 * 3.5 - 8.5 * 6.0)
-    s3_tl = fill_fraction(430.0, 650.0, extra_movable_mm2=2 * 8.5 * 6.0)
-    print(f"   today {100 * today:.0f} %, S2 with the B3U courtyard (4.0 x 3.5) {100 * s2_b3u:.0f} %,")
-    print(f"   S3 with two more TL3342 courtyards {100 * s3_tl:.0f} %")
+        for clear in (0.0, 1.0):
+            ok, tot, gb, gs = s3_scan(11.0, size, clear, body, strip, leds)
+            print(
+                f"   {name}, clearance {clear:g}: {ok} of {tot} feasible, best gap to body {gb:.2f} mm, "
+                f"to strip {gs:.2f} mm (two independent maxima)"
+            )
+    print("Fill of the ring interior (plan 08 A3 figures: 430 mm2 movable on 650 mm2 available, not recomputed;")
+    print("switch courtyards treated as fixed parts, SW1 courtyard 8.5 x 6.0 = 51 mm2 leaves the available area):")
+    sw1 = 8.5 * 6.0
+    for name, count, yard in (
+        ("today (SW1)", 1, sw1),
+        ("S2 with the B3U (4.0 x 3.5)", 1, 4.0 * 3.5),
+        ("S3 with three B3U", 3, 4.0 * 3.5),
+        ("S3 with three TL3342", 3, sw1),
+    ):
+        frac = fill_fraction(430.0, 650.0, fixed_delta_mm2=count * yard - sw1)
+        print(f"   {name}: {100 * frac:.0f} %")
+    print("   (plan 08 counted the two extra TL3342 courtyards as movable: 82 %)")
 
 
 def _size(poly: Sequence[Point]) -> str:

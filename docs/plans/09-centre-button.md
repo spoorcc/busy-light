@@ -1,6 +1,6 @@
 # 09 -- Centre-of-ring button (design doc)
 
-- **Status:** Draft (revision 7 of 2026-11-24: revision 6 with the resolutions of the third readiness NO-GO (RV-018 rows R13 to R27) and the step 1 files as built; revision 6: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
+- **Status:** Draft (revision 8 of 2026-11-24: revision 7 with the resolutions of the review of plan and code (RV-018 rows R29 to R45); revision 7 was revision 6 with the resolutions of the third readiness NO-GO (RV-018 rows R13 to R27) and the step 1 files as built; revision 6: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
   step 1 rescoped to the B3U values. Step 0 ran on 2026-11-23 (section 4.9). The third readiness pass runs on this revision; the other questions of section 7 stay open)
 - **Date:** 2026-11-23  **Owner:** Ben Spoor (author: assistant)
 - **Area:** mech (with hw and sw consequences)
@@ -114,7 +114,7 @@ Findings:
 1. The centroid rule makes the plunger travel position-independent, but with the plunger 7 mm off the centre the three supports must sit
    on one side and the far side of the disc is unrestrained (press-point travel 3.6 mm or more at every stiffness). A single off-centre
    switch on soft supports **does not work**.
-2. The centred switch with three bridges passes only in a narrow band of bridge stiffness (about 2.5 to 3.2 N/mm). Arm stiffness follows
+2. The centred switch with three bridges passes only in a narrow band of bridge stiffness (2.83 to 3.92 N/mm with the TL3342 and the force tolerance). Arm stiffness follows
    w t^3: with w and t both off by +-0.3 mm on a 1.2 x 1.2 mm arm it spreads by 0.32x to 2.4x (0.42x to 1.95x for t alone), so the band is
    not reachable without per-unit tuning.
 3. Three switches give the stiffness and the tilt restraint from the switches and are insensitive to FDM tolerance, but **they do not fit
@@ -140,9 +140,12 @@ pivot post: only S2 has room, and the switch is then not at the centre; dropped 
 | **S3** Three switches around the module (with M3) | Module as stored | Antenna strip to LED unchanged at 5.06 mm, but the switches are not placeable at r = 11 around the stored module with the real switch (finding 3 of 3.2); two more courtyards and metal next to the antenna strip if they are placed |
 | S4 Switch under the board | Plunger through the board | Breaks HW-008; rejected |
 
-Direction (owner decision D1 of 2026-11-24): **S2 with the Omron B3U-1000P** (body 3.0 x 2.5 mm; section 4.9). With the TL3342 body S2 halves the antenna margin (2.51 mm); with the B3U body
-it keeps 3.90 mm (77 %) in `button_zone.py` (1,330 poses on the 0.5 mm and 3 degree grid; the assistant's scratch search counted 1,322 with an axis-aligned clearance test). S3 stays as the fallback (it does not fit at r = 11 with the TL3342 body; the B3U body
-is smaller and step 1 rescans it). No scissor study. ADR-0026 records the choice and the owner accepts it.
+Direction (owner decision D1 of 2026-11-24): **S2 with the Omron B3U-1000P** (body 3.0 x 2.5 mm; section 4.9) as the working direction of step 1. The review of plan and code (RV-018 rows R29 to R45) then
+found that the headline 3.90 mm (77 %) puts the antenna end 1.35 mm from the metal switch; with the antenna end away from the switch (section 4.3) it is 3.64 mm (72 % of 5.06 mm, 60 % of the `mech_outline` 6.07 mm),
+and 3.55 mm (70 %) with the strip at least 3 mm from the switch. Over the whole datasheet pre-travel tolerance no bridge stiffness keeps the click force in the window (section 4.1), and a k = 3 N/mm arm sees 53 MPa
+against the assumed 40 MPa yield. S3 with three B3U is placeable (92 of 480 at clearance 0, 22 at 1.0 mm) and a rigid disc on three switches does not depend on the arm stiffness, but it fails the force window at both ends
+(an edge press needs 1.34 N, a centre press 3.03 to 5.97 N with the tolerance). ADR-0026 scores S2 at 84 and S3 at 87 against 66 for S2 with the TL3342: **S2 and S3 are within the scoring noise**. Recommendation of
+revision 8: take both to the pre-order coupon gate (step 3) and choose on the measured click travel and arm stiffness. No scissor study (D1). The owner decides in ADR-0026.
 
 ### 3.4 Stack tolerance (the click cannot be designed without closing it)
 Vertical chain: PCB on its posts, posts, lid ledge, lid plate and disc, plunger, switch height, switch actuation point. The existing
@@ -152,7 +155,7 @@ computed) against a switch travel that is itself unknown. A soft series plunger 
 zero at worst case means a nominal gap of at least the worst-case sum. Closing mechanisms: (a) a spacer or shim selected per unit after a
 first-article gap measurement, (b) a preloaded soft plunger (preload below the click force, plunger stiffness at most [0.3] N/mm so +-1.2 mm
 costs +-0.36 N), (c) a switch with longer travel (a different part, 4.9). The lateral chain (spigot play 0.65 mm maximum, PCB-to-wall gap
-1.38 mm at worst case, disc tilt) places the plunger on the 2.0 mm actuator; the plunger tip is sized from it. Step 1 adds both chains as
+1.38 mm at worst case; the code takes the 1.90 mm nominal gap as the board shift, disc tilt) places the plunger on the 2.0 mm actuator; the plunger tip is sized from it. Step 1 adds both chains as
 functions of `check_tolerance.py` with named datums; they are **informational** (not part of `run()` and not a CI gate) until step 2
 approves the numbers, because the worst-case recess check fails against the nominal 0.3 mm recess by design. The worst case governs the
 safety-type criteria ("never rests on the switch", "recess stays above zero").
@@ -186,7 +189,7 @@ rest and during an AP start; interim limit [6] dB (MECH-003). Metal switch bodie
 
 ### 4.4 Light (MECH-002)
 By the plan 05 geometry (LEDs 8 mm under a translucent plate; Lambertian, ring sum; the LED beam angle is not found) the plate shows about
-19 % of the ring brightness at the centre (re-checked), 54 % at r = 13 mm and 71 to 81 % at r = 15 to 16 mm (reviewer values). **The disc is
+16.5 % of the ring brightness at the centre, 50 % at r = 13 mm and 67 to 77 % at r = 15 to 16 mm (`button_light.py`, receiver at the disc underside, 7.7 mm above the LED top; with the lid underside at 8.0 mm the values are 18 %, 53 % and 70 to 79 %). **The disc is
 lit by spill** (the owner's "not lit on its own" can only mean no extra LED), and a gap or step at r = 15 to 16 mm sits in the bright zone,
 so a line is likely. Options for the owner: (i) accept a softly lit disc and a stepped light seal at the gap, (ii) an opaque underside mask on
 the disc (a coupon decides), (iii) a smaller disc. TC-302 gets a procedure first (it is a stub today), then a photo at 1 m and 0.5 m of disc
@@ -284,6 +287,8 @@ found open are pinned here (RV-018 rows R13 to R27). All values below are reprod
   - `PressMetrics(force_min_n, force_max_n, travel_max_mm, lift_points)` and `press_metrics(supports, switches, click_travel_mm, points)`: a switch is (x, y, N/mm) and is added to
     the supports; per point the plunger travel w is the largest switch displacement for a unit load; w <= 1e-9 counts as a lift point and is left out of the force and travel ranges;
     F = click_travel / w and the press-point travel is F times the displacement at the point; if every point lifts the forces are `inf` and the travel is 0.
+  - `tolerance_band(F, tol, x_min, x_max, window_n, n_bridges=3)` = (k_low, k_high) from the force only over the whole pre-travel tolerance; for the B3U (1.5 +- 0.49 N, 0.05 to 0.35 mm) k >= 6.60 and
+    k <= 2.87 N/mm, so **no stiffness holds the window** (0.05 to 0.25 mm: k <= 4.01, still none). `bridge_band` evaluates the travel at the nominal click force and raises `ValueError` if the plunger lifts at any press point.
   - `s2_click_force(switch_force_n, bridge_k, n_bridges, click_travel_mm)` = F + n k x; `click_force_extremes(F, tol, x_min, x_max, k, n)` = (F - tol + n k x_min, F + tol + n k x_max);
     `bridge_band(F, tol, x, window_n, travel_limit_mm, points, bridge_r_mm=14.0) -> (k_low, k_high)`: k_low is the larger of the stiffness at which the largest press-point travel equals the
     limit (bisection between 0.1 and 20 N/mm, 80 steps) and the stiffness at which F - tol reaches the lower window value; k_high is the stiffness at which F + tol reaches the upper value;
@@ -293,12 +298,12 @@ found open are pinned here (RV-018 rows R13 to R27). All values below are reprod
     (`ValueError` is caught and printed as "no band", which happens for the KSC221), then the click force of the B3U at k = 3 for the pre-travel extremes 0.05 to 0.35 mm (typeset table) and 0.05 to 0.25 mm
     (PDF text layer), and the M3 row.
 - `mech/analysis/button_light.py` (linted): `ring_irradiance(r_mm, height_mm=8.0, ring_r_mm=20.0, n=16, azimuth_deg=0.0, phase_deg=0.0) -> float` is sum_k h^2 / (d_k^2 + h^2)^2 (Lambertian emitter, planar
-  receiver; d_k the horizontal distance to LED k at phase_deg + 360 k / n degrees), divided by the same sum at the ring radius and azimuth phase_deg (directly above an LED). The value at r = 0 is 0.182
-  (test: 0.17 to 0.20). The quoted 54 % at r = 13 mm and 71 to 81 % at r = 15 to 16 mm are 53 % and 70 to 79 % by this function and are not asserted.
+  receiver; d_k the horizontal distance to LED k at phase_deg + 360 k / n degrees), divided by the same sum at the ring radius and azimuth phase_deg (directly above an LED). The value at r = 0 is 0.165
+  (`HEIGHT_MM` 7.7, test 0.15 to 0.20; 0.165 at r = 0, 0.500 at 13, 0.672 at 15, 0.771 at 16, pinned to 0.002).
 - `mech/analysis/check_tolerance.py` (changed, informational; neither chain is called by `run()`): `BUTTON_VERTICAL` (mm plus-minus: `pcb_post` 0.36 = 0.20 post seat + 0.16 board thickness, `lid_ledge` 0.30,
-  `lid_plate` 0.20, `disc_plunger` 0.20, `switch_height` 0.15 assumption, `switch_actuation` 0.10 assumption; datum PCB top Z 6.6 to the plunger contact plane) and `BUTTON_LATERAL` (`pcb_wall_gap` 1.90 = nominal
+  `lid_plate` 0.20, `disc_plunger` 0.20, `switch_height` 0.15 assumption, `switch_actuation` 0.20; datum PCB top Z 6.6 to the plunger contact plane) and `BUTTON_LATERAL` (`pcb_wall_gap` 1.90 = nominal
   radial gap, `spigot_play` 0.65, `tilt_walk` 0.20 assumption, `plunger_tip` 0.30); `button_vertical_chain(tolerances)` and `button_lateral_chain(tolerances)` return `{"wc": sum, "rss": root of the sum of
-  squares}` (hand values: vertical 1.31 and 0.5763, lateral 3.05 and 2.0402); `recess_worst_case(nominal, tolerances)` = nominal - `lid_ledge` - `lid_plate` (0.3 gives -0.20). A missing key raises `KeyError`.
+  squares}` (hand values: vertical 1.41 and 0.6017, lateral 3.05 and 2.0402); `recess_worst_case(nominal, tolerances)` = nominal - `lid_plate` (0.3 gives +0.10; the ledge moves disc and band together in one print, so it is left out; placeholder until a coupon measures the step). The values are tied to `housing_params` (`switch_height` 0.15 and `tilt_walk` 0.20 are assumptions; `switch_actuation` 0.20 is the larger side of the B3U +0.2/-0.1 mm). A missing key raises `KeyError`.
 - `hw/kicad/spike-gate/src/button_zone.py` (outside ruff while in spike-gate, as `pyproject.toml` excludes that folder; recorded in the report) with `hw/kicad/spike-gate/tests/test_button_zone.py` (unittest style,
   runs in the spike-gate suite, needs no `pcbnew`, no skips; all frames have the board centre at the origin, KiCad's y down for outlines and y up for the ring and the searches, harmless because the antenna strip is
   symmetric about the module long axis):
@@ -312,8 +317,10 @@ found open are pinned here (RV-018 rows R13 to R27). All values below are reprod
     degrees; a pose is one entry per (x, y, angle), valid when all corners are within `corner_radius_mm` of the origin and the Euclidean distance is at least `switch_gap_mm` to the switch (axis-aligned at the
     origin) and at least `led_gap_mm` to every LED square; a distance below the gap, touching or overlapping conflicts (so gap 0 means no overlap). Report arguments: module (13.2, 16.6), switch (6.4, 5.2) gap 1.0 or
     (8.5, 6.0) gap 0.0 or (3.0, 2.5) gap 1.0 or (4.0, 3.5) gap 1.0, LED gap 0.5, corner radius 19.5, extent 14.0, step 0.5, 3.0 degrees.
-    `best_antenna_distance(poses, module_size=(13.2, 16.6), strip_mm=4.6, leds=None)` is the largest, over the poses and both antenna ends, of the strip to nearest LED centre distance (0 for no pose).
-    Results: 10 poses and 2.51 mm, 58 and 3.04 mm, 1,330 and 3.90 mm, 428 and 3.64 mm in that order; without the corner limit the courtyard case gives 134 poses and 3.57 mm and at 19.0 mm 12 poses and 2.86 mm.
+    `strip_polygon(pose, flipped, ...)` and `antenna_distance(pose, flipped, ...)` give one pose and end (the stored module pose (x -5.1, y 0, 90 degrees, flipped) gives 5.0628 mm);
+    `best_antenna_distance(poses, module_size=(13.2, 16.6), strip_mm=4.6, leds=None, switch_size=None, min_switch_strip_mm=0.0, away_from_switch=False)` is the largest, over the poses and both antenna ends, of the strip to
+    nearest LED centre distance (0 for no pose); with `switch_size` an end counts only if its strip is at least `min_switch_strip_mm` from the switch and, with `away_from_switch`, not nearer to it than the other end.
+    Results (pinned in the tests): 10 poses and 2.51 mm, 58 and 3.04 mm, 1,330 and 3.90 mm, 428 and 3.64 mm in that order (B3U with the antenna end away from the switch 3.64 mm, strip at least 3 mm from the switch 3.55 mm); without the corner limit the courtyard case gives 134 poses and 3.57 mm and at 19.0 mm 12 poses and 2.86 mm.
   - `s3_conflicts(switch_centres, switch_size, switch_rotation_deg, module_body, antenna_strip_poly, leds, clearance_mm)` returns "SW<i> overlaps module", "SW<i> overlaps antenna strip" and
     "SW<i> overlaps LED<j>" strings; `s3_scan(r_mm, switch_size, clearance_mm, module_body, antenna_strip_poly, leds) -> (feasible, total, best gap to body, best gap to strip)` scans triplet azimuths 90 + rot + 120 k for
     rot 0 to 119 degrees in 1 degree steps and the four **absolute** switch orientations 0, 45, 90 and 135 degrees (all three switches share one), total 480, clearance 0 (touching conflicts); the best gap is the largest over the
@@ -325,8 +332,9 @@ found open are pinned here (RV-018 rows R13 to R27). All values below are reprod
   `arm_stress`, `guide_jam_length`; `s2_click_force` 3.85 and 2.40 N; `click_force_extremes` (1.46, 5.14); `bridge_band` for the TL3342 (2.83, 3.92) and the B3U (2.20, 6.69) within 3 %, the B3U band wider, `ValueError` for
   the KSC221 and for an empty window; `main()` smoke test), `test_button_light.py` (0.17 to 0.20 at r = 0; reference 1; monotone; `main()` smoke test), additions to `test_check_tolerance.py` (hand values, key
   check, not part of `run()`), and `hw/kicad/spike-gate/tests/test_button_zone.py` (outlines, baselines 5.06 mm within 0.1 mm for the stored footprint and 6.07 mm for `mech_outline`, LED squares, strip, distances,
-  no pose overlapping the switch or an LED on a coarse 1 mm and 6 degree grid, the B3U better than the TL3342, at most 20 of 480 for the 6.4 x 5.2 mm body and none for the courtyard, conflict strings, fill figures,
-  `main()` smoke test). The pose counts and best distances of the report are printed, not asserted.
+  the pose counts and best distances pinned on the full 0.5 mm and 3 degree grid (10, 58, 1,330, 428 poses; 2.51, 3.04, 3.90, 3.64 mm; the metal-switch rule values 3.64 and 3.55 mm; corner limit variants 134 and 12 poses),
+  every pose checked for the gaps, the corner limit and the angle range, the stored module pose giving 5.0628 mm, S3 counts pinned (7 and 0 at clearance 0; 92 and 22 for the B3U at clearance 0 and 1.0 mm), conflict strings,
+  fill figures, `main()` smoke test; the S2 tests take about 30 s).
 - Documents: `docs/verification/reports/analysis-button-disc.md` (raw output, tools, revision, issues found without file change: `POST_AZ` 30/150/270 in `mech_outline.py` against `POST_DEG` 60/180/300 in
   `housing_params.py`, the two module models, the stored-board pin of `test_button_zone.py`, the TC-310 probe margin), `mech/analysis/README.md` (rows for the new files),
   `docs/decisions/ADR-0026-centre-button-concept.md` (Proposed). Verification of step 1: the new tests, `check_traceability.py`, `ruff check .`, `ruff format --check .`, `reuse lint`, `check_license_map.py`,
@@ -336,7 +344,7 @@ found open are pinned here (RV-018 rows R13 to R27). All values below are reprod
 the owner approves; ESD, overload, life and click procedures are written (TC-207, TC-302, TC-304, TC-311, TC-314 are stubs or new).
 
 **Step 3 (pre-order gate)** printed lids and a plain stand-in board with the switch or switches at the planned points (no module), made by a script in `scripts/`
-(rule 12); coupons in `mech/freecad/coupons.py` (disc stiffness, 0.8 mm gap, stop lip, light seal, the 0.8 / 1.2 / 1.6 mm plates), PETG brand and print settings
+(rule 12); coupons in `mech/freecad/coupons.py` (disc stiffness for S2 and the rigid disc for S3, 0.8 mm gap, stop lip, light seal, the 0.8 / 1.2 / 1.6 mm plates), with one B3U at the centre and three B3U at r = 11 mm on the stand-in board, PETG brand and print settings
 recorded; TC-310 at coupon level on three lids with the 4 mm probe; sample sizes of 3 lids, 25 points, 10 presses. P1 is not re-placed before this passes; a failed
 gate sends the plan back to ADR-0026 (the alternative to the gate is a respin).
 
@@ -389,12 +397,13 @@ Sources of the working values: the 2 to 5 N window, 1.0 mm travel, 20 N overload
 are the assistant's working proposals without a standard behind them; step 0 replaces what the datasheets give, the owner decides the rest.
 
 Open questions for the owner (they change what is built):
-1. **Light:** accept a softly lit disc (19 % to 80 % of the ring brightness), or an opaque mask or a smaller disc?
+1. **Light:** accept a softly lit disc (17 % to 77 % of the ring brightness), or an opaque mask or a smaller disc?
 2. **Direction:** answered (D1, 2026-11-24): S2 with the Omron B3U-1000P, S3 as fallback, no scissor study. Not asked again.
 3. **Hand over the antenna:** is a loss of up to [6] dB with a hand on the disc acceptable (A6)?
 4. **Stuck press:** accept the rules of 4.5 (no start after a stuck press; reset needs a second deliberate action)?
 5. **Life** in presses ([20 000]) and the force window [2] to [5] N.
 6. **Process:** answered (D2, 2026-11-24): steps 0 and 1 run as analysis. Not asked again.
+9. **S2 or S3:** the scores are within noise (ADR-0026: 84 and 87). Take both to the coupon gate (recommended), keep S2 only (D1), or switch to S3?
 7. Disc and R_use against the free circle: 30 mm and 26 mm of 38 mm (62 % and 47 % of the area). Is that "the entire centre"?
 8. Ingress: the gap is a 75 mm2 opening above the board and no requirement covers liquid or dust; add one or accept?
 
