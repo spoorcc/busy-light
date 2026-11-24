@@ -44,3 +44,7 @@ After the step 0 report the owner said "Do your recommendations". Recorded as de
 - D2: steps 0 and 1 run as analysis under the Approved requirements.
 - D3: the extended-part class of the B3U-1000P is noted; the order-day part and stock check stays in the gate.
 Light, hand over the antenna, stuck press, life and force window, disc size and ingress had no recommendation in the report and stay open. Plan 09 is at revision 6; a third readiness pass is running.
+
+## Step 1 (2026-11-24)
+Third readiness pass: NO-GO (RV-018 rows R13 to R27, all resolved in plan 09 revision 7). Step 1 built: `button_disc.py`, `button_light.py`, `button_zone.py`, tolerance chains, tests, report, ADR-0026 (Proposed).
+The B3U pre-travel tolerance was read on the rendered catalogue page: 0.15 +0.2/-0.1 mm. A goldfish reviews plan and code together before the pair is called ready.

@@ -95,3 +95,29 @@ the rows of the matrix reproduce except for the sample and angle items below.
 
 The plan is in revision 4. No third readiness pass runs now: steps 0 and 1 cannot start before the owner answers section 7, and the answers (direction, light, switch size) change what they contain.
 A third pass runs on the plan as it stands after those answers.
+
+## Implementation readiness (R), third pass on revision 6: NO-GO for step 1 as written (four blockers, resolved in revision 7)
+Run on 2026-11-24 after the owner direction D1 to D3 (plan 09 section 0). The fresh goldfish read the plan and the repository, rebuilt the matrix, the band, the pose search and the S3 scan with the standard
+library, and confirmed paths, statuses, baselines (5.0628 and 6.0683 mm), the Z chain, the matrix rows, the bands (2.83 to 3.92 and 2.20 to 6.69 N/mm), the pose counts for the TL3342 cases and the S3 count of
+7 of 480. Verdict NO-GO for step 1 "exactly, without asking questions": G1 to G4 force a guess, G5 breaks `ruff check .`. Resolutions below; the pass was **not repeated on the text alone**: revision 7 pins the
+conventions to the code as built, and a goldfish reviews plan and code together (row R28).
+| # | Severity | Finding | Resolution | Status |
+|---|---|---|---|---|
+| R13 (G1) | Blocking | The tolerance chains had no values, datums or formulas | Values, datum and formulas are in plan 09 step 1 and in `check_tolerance.py` (`BUTTON_VERTICAL`, `BUTTON_LATERAL`, `recess_worst_case` = nominal - `lid_ledge` - `lid_plate`); hand values in `test_check_tolerance.py` | Resolved |
+| R14 (G2) | High | `best_antenna_distance(poses)` could not be computed; `Pose` flip field unclear | `Pose` is (x, y, angle); the antenna end is chosen inside `best_antenna_distance(poses, module_size, strip_mm, leds)` over both ends; counts are per (x, y, angle) | Resolved |
+| R15 (G3) | High | `main()` prints a band for the KSC221 where `bridge_band` must raise | `bridge_band` raises `ValueError` when the travel limit is not met up to 20 N/mm; `main()` prints "no band"; rows and the B3U extremes line are specified | Resolved |
+| R16 (G4) | High | `s3_scan` orientations, clearance and "best gap" unspecified | Four absolute orientations 0, 45, 90, 135 degrees, clearance 0 (touching conflicts), best gap = largest over feasible configurations of the smallest gap, two independent maxima; test uses the stored board | Resolved |
+| R17 (G5) | Medium | `ruff check .` failed on signatures (PLR0913/0917) and test literals (PLR2004) | `noqa` on every function with more than five arguments; named constants in tests; `ruff check .` and `ruff format --check .` pass | Resolved |
+| R18 (G6) | Medium | B3U pre-travel tolerance was an unverified reading | Read from the rendered catalogue page on 2026-11-24: 0.15 +0.2/-0.1 mm (typeset). The PDF text layer shows "0.15 +- 0.1"; the report and `main()` print both readings | Resolved |
+| R19 (G7) | Medium | The capacity estimate had no method | `fill_fraction` with the plan 08 A3 figures (430 on 650 mm2): 66 % today, 63 % S2 with the B3U courtyard (assumed 4.0 x 3.5 mm), 82 % S3 with two more TL3342 courtyards; the 650 and 430 mm2 are not recomputed | Resolved |
+| R20 (G8) | Medium | B3U height 1.2 or 1.6 mm; land pattern not read | Step 1 needs the body and a gap only; `switch_height` is a tolerance value (0.15 mm, assumption); the height question stays for the footprint step | Resolved |
+| R21 (G9) | Medium | Revision 6 uncommitted; RV-018 had no entry; D2 rests on "Do your recommendations" | Revision 6 committed (commit `bd59b6c`); this entry; the owner's words and the recommendation list are in the journal of 2026-11-23 and plan 09 section 0 | Resolved |
+| R22 (G10) | Medium | `test_button_zone.py` pins the stored board and step 4 re-places it | Added to the step 4 file list | Resolved |
+| R23 (G11) | Medium | `ring_irradiance` formula, azimuth and normalisation unspecified; 0.182 sits near the 0.18 test bound | Formula and normalisation pinned in plan 09 step 1; test bound 0.17 to 0.20; 54 % and 71 to 81 % restated as 53 % and 70 to 79 % and not asserted | Resolved |
+| R24 (G12) | Low | Figures: B3U 1,330 not 1,322 poses, 428 not 424; without the corner limit 134 poses and 3.57 mm, at 19.0 mm 12 poses and 2.86 mm; gap 0 needs a strict test | Corrected in plan 09 and the report; the distance test is Euclidean and a touching pose conflicts | Resolved |
+| R25 (G13) | Low | Stale plan text (placeholder `pin_count: 2`, allow-list line, five files, test placement, traceability claim) | Edited | Resolved |
+| R26 (G14) | Low | `main()` and `s3_conflicts` strings untested; arm stress length missing; report fields missing | Smoke tests for the three `main()` functions and a string test; arm length 10.1 mm and 53 MPa for k = 3 N/mm; the report names tools, revision and raw output | Resolved |
+| R27 (G15) | Low | `press_metrics` lift handling and the y-axis frames were unstated | Stated in plan 09 step 1 | Resolved |
+| Extra | Note | The TC-310 probe at r = 13 mm reaches the disc edge with no margin | Outer ring of the force map moved to r = 12 mm (plan 09 TC-310) | Resolved |
+| R28 | Process | A fourth readiness pass on the text alone was not run | A fresh goldfish reviews plan 09 revision 7 against the implemented files; its result is recorded below when it returns | Open |
+

@@ -67,3 +67,49 @@ def test_steep_ledge_fails(monkeypatch) -> None:
     monkeypatch.setattr(p, "LEDGE_Z", 13.6)
     _, fail = ct.run()
     assert any("ledge" in f for f in fail)
+
+
+# Centre button chains (plan 09 section 3.4, informational)
+BUTTON_VERTICAL_WC = 1.31
+BUTTON_VERTICAL_RSS = 0.5763
+BUTTON_LATERAL_WC = 3.05
+BUTTON_LATERAL_RSS = 2.0402
+NOMINAL_RECESS = 0.30
+RECESS_WC = -0.20
+
+
+def test_button_vertical_chain_matches_hand_values() -> None:
+    chain = ct.button_vertical_chain(ct.BUTTON_VERTICAL)
+    assert abs(chain["wc"] - BUTTON_VERTICAL_WC) < EPS / 10
+    assert abs(chain["rss"] - BUTTON_VERTICAL_RSS) < EPS / 10
+
+
+def test_button_lateral_chain_matches_hand_values() -> None:
+    chain = ct.button_lateral_chain(ct.BUTTON_LATERAL)
+    assert abs(chain["wc"] - BUTTON_LATERAL_WC) < EPS / 10
+    assert abs(chain["rss"] - BUTTON_LATERAL_RSS) < EPS / 10
+
+
+def test_nominal_lateral_gap_value_is_the_housing_value() -> None:
+    assert abs(ct.BUTTON_LATERAL["pcb_wall_gap"] - ct.pcb_gap()["nominal"]) < EPS / 10
+    assert abs(ct.BUTTON_LATERAL["spigot_play"] - ct.spigot()["play_max"]) < EPS / 10
+
+
+def test_recess_worst_case_goes_negative_with_the_nominal_recess() -> None:
+    assert abs(ct.recess_worst_case(NOMINAL_RECESS, ct.BUTTON_VERTICAL) - RECESS_WC) < EPS / 10
+
+
+def test_button_chains_need_every_key() -> None:
+    partial = {k: v for k, v in ct.BUTTON_VERTICAL.items() if k != "switch_height"}
+    try:
+        ct.button_vertical_chain(partial)
+    except KeyError as exc:
+        assert "switch_height" in str(exc)
+    else:
+        raise AssertionError("a missing key must raise KeyError")
+
+
+def test_button_chains_are_not_part_of_run() -> None:
+    out, fail = ct.run()
+    assert fail == []
+    assert not any("button" in line.lower() for line in out)

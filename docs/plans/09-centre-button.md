@@ -1,6 +1,6 @@
 # 09 -- Centre-of-ring button (design doc)
 
-- **Status:** Draft (revision 6 of 2026-11-24: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
+- **Status:** Draft (revision 7 of 2026-11-24: revision 6 with the resolutions of the third readiness NO-GO (RV-018 rows R13 to R27) and the step 1 files as built; revision 6: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
   step 1 rescoped to the B3U values. Step 0 ran on 2026-11-23 (section 4.9). The third readiness pass runs on this revision; the other questions of section 7 stay open)
 - **Date:** 2026-11-23  **Owner:** Ben Spoor (author: assistant)
 - **Area:** mech (with hw and sw consequences)
@@ -51,11 +51,11 @@ Facts, read from the repository (not measured). Heights are measured from the ho
 - Z chain (`mech/analysis/housing_params.py`): PCB top Z 6.6, LED top 7.25, module top 9.0 (2.4 above the PCB), lid underside 15.25,
   lid plate 1.2, lid top 16.45. The lid joint is a spigot with 3 snap hooks at 60, 180 and 300 degrees.
 - Switch TL3342F160QG: the stored SW1 footprint has four pads, F.Fab outline **6.4 x 5.2 mm** and courtyard **8.5 x 6.0 mm** (checked in
-  `board-p1`). The vendor datasheet, read by the readiness goldfish from the LCSC-hosted copy and to be stored as evidence in step 0, gives a
+  `board-p1`). The vendor datasheet (LCSC-hosted copy, stored as evidence in step 0: `hw/evidence/parts/sw-tl3342.yaml`) gives a
   5.20 x 5.20 mm body, 6.40 mm over the terminals, 1.54 mm height, an actuator of about 2.0 mm diameter, 160 +-50 gf (1.08 to 2.06 N) and
   100 000 cycles, and **no travel and no force-travel curve**. Revision 2 used 4.5 x 3.5 mm, which is the side-button placeholder in
   `mech_outline.py` (BTN_BODY_T and BTN_BODY_R), and a travel of 0.25 mm, which is an **assumption** until a source or the TC-310 bench
-  measurement exists. `hw/evidence/parts/sw-tl3342.yaml` is a placeholder with `pin_count: 2` (wrong; four terminals).
+  measurement exists. The evidence file now carries `pin_count: 4`.
 - Press functions: short, [3] s (configuration AP), [10] s (factory reset after a ring confirmation) (SYS-017, A8). A hand lies over the
   antenna during these presses.
 - HW-008: all SMD parts on one side, so a switch under the board is not allowed; a snap dome is a manual assembly step and is excluded
@@ -126,8 +126,8 @@ Findings:
    fault path (4.5).
 4. Unequal supports and a parallel-motion linkage (scissor or double lever, print-in-place hinges) are not analysed.
 
-Concepts: **M1** compliant bridges (viable only with S2, narrow band; arm stress about 40 MPa at 1.0 mm travel against the assumed
-yield, so a fatigue limit is needed). **M2** guided disc in a bore: **rejected**. A guide jams when the load offset e exceeds L/(2 mu); with
+Concepts: **M1** compliant bridges (viable only with S2; the stiffness band is narrow with the TL3342 and wider with the B3U; a k = 3 N/mm arm of 1.2 x 1.2 mm needs L = 10.1 mm and sees 53 MPa at 1.0 mm of stroke
+against the assumed yield of 40 MPa, so the arm must be made thinner or longer and a fatigue limit is needed). **M2** guided disc in a bore: **rejected**. A guide jams when the load offset e exceeds L/(2 mu); with
 mu = 0.3 and e = 13 mm the guide must be at least 7.8 mm long and the free height is 5.95 mm; a tilt of c/h = 0.35/2 = 0.17 rad lifts a
 plunger 10 mm away by 1.7 mm. **M3** rigid disc on three switches in parallel on BTN_SW with three spring tabs as hold-down. **M4** central
 pivot post: only S2 has room, and the switch is then not at the centre; dropped unless M1 and M3 fail.
@@ -141,7 +141,7 @@ pivot post: only S2 has room, and the switch is then not at the centre; dropped 
 | S4 Switch under the board | Plunger through the board | Breaks HW-008; rejected |
 
 Direction (owner decision D1 of 2026-11-24): **S2 with the Omron B3U-1000P** (body 3.0 x 2.5 mm; section 4.9). With the TL3342 body S2 halves the antenna margin (2.51 mm); with the B3U body
-it keeps 3.90 mm (77 %) in the assistant's scratch search (1,322 poses), which step 1 reproduces by a tested script. S3 stays as the fallback (it does not fit at r = 11 with the TL3342 body; the B3U body
+it keeps 3.90 mm (77 %) in `button_zone.py` (1,330 poses on the 0.5 mm and 3 degree grid; the assistant's scratch search counted 1,322 with an axis-aligned clearance test). S3 stays as the fallback (it does not fit at r = 11 with the TL3342 body; the B3U body
 is smaller and step 1 rescans it). No scissor study. ADR-0026 records the choice and the owner accepts it.
 
 ### 3.4 Stack tolerance (the click cannot be designed without closing it)
@@ -207,7 +207,7 @@ and gap; the criterion is a luminance ratio disc-to-band of [10] to [60] % and n
 - ADR-0026 fixes exact switch coordinates (SW1, and SW1B and SW1C for S3), kept in `housing_params.py` and `pcb_full.py` (`SW1_POS` is one
   (radius, azimuth) tuple today and becomes a list for S3); the placer keeps treating the switches as fixed parts. The ADR lists the keep-outs of
   the chosen concept (plunger columns, tab landing zones, stop lip, any skirt ring).
-- Area check: step 1 gives a capacity estimate from courtyard areas (3.2 finding 3); the placer run with the chosen concept is part of plan 08
+- Area check: step 1 gives a capacity estimate (`button_zone.fill_fraction`, plan 08 A3 figures of 430 mm2 on 650 mm2: 66 % today, 63 % for S2 with the B3U courtyard of 4.0 x 3.5 mm, 82 % for S3 with two more TL3342 courtyards); the placer run with the chosen concept is part of plan 08
   revision 6 (step 4), with the area fill before and after as its report.
 - Plan 05: rows "btn" and "az_btn" are replaced; O8 answered; section 4.5 gets a pointer. Plan 08 revision 6 inherits the switch rule.
 - Part structure per concept: M1 is one print; M3 is a separate disc retained by a hook (print orientation: plate on the bed). `housing.py`
@@ -247,13 +247,13 @@ and class on those pages need a second source, which step 0 states per part.
 No listed part meets all criteria above; no part publishes a force-travel curve. Alternative 1 is the **Omron B3U-1000P** (LCSC C231329, JLCPCB Extended, LCSC stock 49,545):
 body 3.0 x 2.5 mm, 1.50 +- 0.49 N, pre-travel 0.15 mm, life 200,000 or more. Alternative 2 is the **C&K KSC221JLFS** (C221726, Extended, stock 15,080): 6.2 x 6.2 mm, 2 +- 0.5 N, travel 0.35 +0.3/-0.1 mm,
 life 500,000, IP67. The TL3342F160QG has LCSC stock 1 and publishes no travel. First-order values (assistant's scratch scripts, not evidence until step 1): with the B3U body, S2 keeps 3.90 mm (77 % of 5.06 mm)
-at 1,322 module poses (TL3342 body: 2.51 mm, 10 poses); the bridge stiffness band for the pass rule of 4.1 widens from 2.83 to 3.92 N/mm (ratio 1.4, TL3342 with the assumed 0.25 mm) to 2.20 to 6.69 N/mm (ratio 3.0, B3U);
+at 1,330 module poses (TL3342 body: 2.51 mm, 10 poses); the bridge stiffness band for the pass rule of 4.1 widens from 2.83 to 3.92 N/mm (ratio 1.4, TL3342 with the assumed 0.25 mm) to 2.20 to 6.69 N/mm (ratio 3.0, B3U);
 the B3U pre-travel tolerance is not yet in that band and breaks the force window at its extremes. Step 1 must rerun the matrix, the stack and the antenna search with these values; step 3 must measure click travel.
 
 ## 5. Detailed implementation plan
 **Rule 1 and the order of work.** Steps 0 and 1 are analysis and evidence under the Approved requirements MECH-004, MECH-002, MECH-003 and
-HW-008 (they check the owner's decision 9 against them) and change no CAD, board or requirement text; they add two new evidence files, one updated evidence file, about five new Python files with tests, one changed script
-(`check_tolerance.py` with its test), one allow-list line in `check_license_map.py`, three new documents (stock-check report, analysis report, ADR-0026) and a README
+HW-008 (they check the owner's decision 9 against them) and change no CAD, board or requirement text; they add two new evidence files, one updated evidence file, four new Python files with tests (`button_disc.py`, `button_light.py`,
+`button_zone.py` and their three test files), one changed script (`check_tolerance.py` with its test), two allow-list lines in `check_license_map.py` (made in step 0), three new documents (stock-check report, analysis report, ADR-0026) and a README
 row. **Owner decision D2 of 2026-11-24 confirms this reading and this change set** (section 7, question 6); step 0 has run, step 1 starts after the third readiness pass of RV-018.
 Requirement texts, `housing_params.py`, the FreeCAD model and the board follow ADR-0026 and the approval.
 
@@ -273,69 +273,64 @@ Requirement texts, `housing_params.py`, the FreeCAD model and the board follow A
 - Output: the numbers that step 1 needs (body, height, force and tolerance, travel if published). If no alternative meets all criteria of 4.9, the report names
   the best two and the criteria they fail; alternatives enter the S2 and S3 analysis by body size only.
 
-**Step 1 (analysis; Python standard library only, no numpy; SPDX Apache-2.0 headers; `reuse lint` clean)**
-- `mech/analysis/button_disc.py` (linted):
-  - `Support = tuple[float, float, float]` (x mm, y mm, stiffness N/mm); `Plane = tuple[float, float, float]` (a mm, b, c) with w(x, y) = a + b x + c y.
-  - `solve_plane(supports: Sequence[Support], load_xy: tuple[float, float], force_n: float) -> Plane`: solves sum_i k_i v_i v_i^T [a b c]^T = F [1 x y]^T
-    with v_i = [1, x_i, y_i] by Cramer's rule; raises `ValueError` if singular.
-  - `displacement(plane: Plane, point: tuple[float, float]) -> float`.
-  - `sample_points(radius_mm: float, n_random: int, n_boundary: int, seed: int, extra: Sequence[tuple[float, float]] = ()) -> list[tuple[float, float]]`: the
-    `n_random` points as in 3.2 (u first, then v, from `random.Random(seed)`), then `extra` (the centre and the switch positions), then `n_boundary` points from angle 0.
-  - `PressMetrics` (frozen dataclass: `force_min_n`, `force_max_n`, `travel_max_mm`, `lift_points: int`) and `press_metrics(supports:
-    Sequence[Support], switches: Sequence[tuple[float, float, float]], click_travel_mm: float, points: Sequence[tuple[float, float]]) -> PressMetrics`
-    where a switch is (x mm, y mm, stiffness N/mm) and is added to the supports; the click is the first switch whose travel reaches `click_travel_mm`;
-    a point whose plunger travel is not positive counts in `lift_points`.
-  - `s2_click_force(switch_force_n: float, bridge_k: float, n_bridges: int, click_travel_mm: float) -> float` = switch_force_n + n_bridges * bridge_k * click_travel_mm (S2: the
-    disc moves rigidly at the centre switch, so the click force is position-independent); `click_force_extremes(switch_force_n, force_tol_n, click_travel_min_mm,
-    click_travel_max_mm, bridge_k, n_bridges) -> tuple[float, float]` = (F - tol + n k x_min, F + tol + n k x_max); `bridge_band(switch_force_n, force_tol_n, click_travel_mm, window_n:
-    tuple[float, float], travel_limit_mm, points, bridge_r_mm: float = 14.0) -> tuple[float, float]` returns (k_low, k_high): k_low is the larger of the bridge stiffness at which the
-    largest press-point travel (sweep with `press_metrics`, three bridges at 90, 210, 330 degrees on `bridge_r_mm`, switch at the centre) equals `travel_limit_mm` (bisection
-    between 0.1 and 20 N/mm) and the stiffness at which F - tol reaches the lower window value; k_high is the stiffness at which F + tol reaches the upper window value; it raises `ValueError`
-    if k_low is greater than k_high. Working values: window (2.0, 5.0) N, travel limit 1.0 mm, 600 random points plus centre plus 48 boundary points at R_use = 13 mm.
-  - `main() -> None` prints the matrix of 3.2 for the report with three switches (TL3342F160QG 1.57 N, 0.25 mm assumed; B3U-1000P 1.50 N, 0.15 mm; KSC221JLFS 2.0 N, 0.35 mm), the bands of
-    `bridge_band` (tolerance 0.49 N for the TL3342 and the B3U, 0.5 N for the KSC221) and the click force at the pre-travel extremes of the B3U (0.05 and 0.35 mm).
-  - `guided_beam_stiffness(E_mpa, w_mm, t_mm, L_mm) -> float` = E w t^3 / L^3 (fixed-guided beam, N/mm); `arm_stress(E_mpa, t_mm, L_mm, stroke_mm) -> float`
-    = 3 E t stroke / L^2 (MPa); `guide_jam_length(e_mm, mu) -> float` = 2 mu e (mm); `plate_deflection(radius_mm, thickness_mm, E_mpa, nu, force_n,
-    edge: Literal["simply_supported", "clamped"]) -> float` (carries `# noqa: PLR0913, PLR0917` as `check_part_evidence.py` does) for a **central** load (P R^2 (3 + nu) / (16 pi D (1 + nu)) and P R^2 / (16 pi D) with
-    D = E t^3 / (12 (1 - nu^2))); edge presses are left to the coupon (step 3).
-- `mech/analysis/button_light.py` (linted): `ring_irradiance(r_mm: float, height_mm: float = 8.0, ring_r_mm: float = 20.0, n: int = 16) -> float`,
-  Lambertian ring sum relative to the value above an LED.
-- `mech/analysis/check_tolerance.py` (changed, informational): `button_vertical_chain(tolerances: Mapping[str, float]) -> dict[str, float]` returning
-  `{"wc": ..., "rss": ...}` and `button_lateral_chain(tolerances: Mapping[str, float]) -> dict[str, float]` likewise (keys: `pcb_wall_gap`, `spigot_play`, `tilt_walk`, `plunger_tip`); the vertical keys are `pcb_post`, `lid_ledge`, `lid_plate`,
-  `disc_plunger`, `switch_height`, `switch_actuation`. The inputs are a local dict of working values (the switch-height tolerance is not published, so it is an assumption), not
-  `housing_params.py`; neither function is called by `run()`; a third function `recess_worst_case(nominal_recess_mm, tolerances) -> float` gives the worst-case recess that the report quotes.
-- Tests (root pytest, `pyproject.toml` testpaths): `mech/analysis/test_button_disc.py` (residual of the three equilibrium equations below 1e-9;
-  three equal supports at 120 degrees with the load at the centroid give F/(3k); the centroid-rule case with the exact angle acos(0.2) gives equal plunger travel at all sample points
-  to 1e-9; the S2 rows are position-independent and equal the analytic F = 0.25 (3 k + k_switch) within 1e-9; the M3 maximum is the analytic 4.80 N at the centre; beam 0.199 N/mm for
-  E = 1500, 1.2 x 1.2, L = 25; plate 0.042 mm/N for R = 15, t = 1.2, E = 1500, nu = 0.4; analytic values of `arm_stress`, `guide_jam_length` and the clamped plate; a singular
-  support set raises `ValueError`; `s2_click_force` equals the analytic F of the S2 rows for TL3342 (1.6 N, 0.25 mm, k = 3: 3.85 N) and for the B3U (1.5 N, 0.15 mm, k = 2: 2.40 N);
-`click_force_extremes` for the B3U at k = 3 and pre-travel 0.05 to 0.35 mm gives (1.46, 5.14) N by hand; `bridge_band` for the TL3342 (1.57, 0.49, 0.25) gives (2.83, 3.92) and for the B3U (1.50, 0.49, 0.15)
-gives (2.20, 6.69), each within 3 % (the travel side comes from the sampled sweep, the force side is analytic), and the B3U band is wider than the TL3342 band; a window that no stiffness meets raises `ValueError`; `sample_points` is deterministic for a seed and holds the extra points; the sampled matrix rows of 3.2 within 5 %), `test_button_light.py` (value 0.18 to 0.20 at r = 0 relative to the ring value at r = 20 by the same function), additions to
-  `test_check_tolerance.py` (hand values for worst case and RSS and for `recess_worst_case`), tests for `led_squares` and `antenna_strip` in `test_button_zone.py`.
-- `hw/kicad/spike-gate/src/button_zone.py` (outside ruff while in spike-gate, as `pyproject.toml` already excludes that folder; the exception is
-  recorded in the report) with `tests/test_button_zone.py`:
-  - `read_footprint_outline(pcb_text: str, ref: str, layer: str = "F.Fab", board_centre: tuple[float, float] = (40.0, 40.0)) -> list[tuple[float, float]]` (stdlib regex parse of
-    the `.kicad_pcb` of board-p1; the y axis stays KiCad's, pointing down; the rotation is KiCad's, X = x + lx cos t + ly sin t and Y = y - lx sin t + ly cos t for the footprint
-    angle t; the outline is the bounding rectangle of the layer's lines; `pcbnew` is not needed and the tests are not skipped);
-  - `led_squares(r_mm: float = 20.0, n: int = 16, phase_deg: float = 3.75, size_mm: float = 2.0) -> list[list[tuple[float, float]]]`;
-  - `antenna_strip(body: Sequence[tuple[float, float]], strip_mm: float = 4.6, end: str = "min_x") -> list[tuple[float, float]]` (4.6 mm from the stated end of the bounding rectangle; the interior
-    F.Fab line at 5.4 mm is ignored);
-  - `nearest_led_distance(strip, leds) -> float` (to the LED centre);
-  - `Pose = tuple[float, float, float, bool]` (x mm, y mm, angle degrees, antenna end flipped); `s2_poses(module_size: tuple[float, float], switch_size: tuple[float, float], switch_gap_mm: float,
-    led_gap_mm: float, corner_radius_mm: float, extent_mm: float, step_mm: float, step_deg: float) -> list[Pose]` (report values: 19.5, 14.0, 0.5, 3.0; the corner radius is material:
-    without it the result is 58 poses and 2.86 mm for the courtyard case) and `best_antenna_distance(poses) -> float`;
-  - `s3_conflicts(switch_centres: Sequence[tuple[float, float]], switch_size: tuple[float, float], switch_rotation_deg: float, module_body, antenna_strip, leds, clearance_mm: float) -> list[str]` returns one
-    string per overlap ("SW<i> overlaps module", "SW<i> overlaps LED<j>") and the gaps to the body and the strip; `s3_scan(r_mm: float, switch_size, clearance_mm: float, module_body, antenna_strip, leds) ->
-    tuple[int, int, float, float]` scans triplet rotations 0 to 119 degrees in 1 degree steps and the four switch orientations and returns (feasible, total, best gap to the body, best gap to the strip);
-  - `main() -> None` prints the S2 and S3 results for the report.
-  - Tests: the SW1 outline is 6.4 x 5.2 mm and its courtyard 8.5 x 6.0 mm in board-p1; baseline 5.06 mm within 0.1 mm for the stored footprint and 6.07 mm for `mech_outline`; no pose overlaps an LED
-    or the switch; the best S2 distance is below the baseline; for the B3U body (3.0 x 2.5 mm, switch gap 1.0 mm) `s2_poses` has more poses and a larger best distance than for the TL3342 body (6.4 x 5.2 mm), both below 5.06 mm
-(the scratch values 1,322 poses and 3.90 mm, and 10 poses and 2.51 mm, are printed in the report, not asserted); `s3_scan` is also run for the B3U body and the result is reported; `s3_scan` finds at most 20 of 480 feasible for the 6.4 x 5.2 body and none for the courtyard (the goldfish scan found 7 and 0; the
-    test asserts "small", not the exact count); the pose count and the best distances are printed in the report, not asserted.
-- Documents: `docs/verification/reports/analysis-button-disc.md` (results, the capacity estimate of 4.6, the reconciliation of the two module models and
-  of `POST_AZ` 30/150/270 in `mech_outline.py` against `POST_DEG` 60/180/300 in `housing_params.py` as a list of issues with no file change),
-  `mech/analysis/README.md` (rows for the new files), `docs/decisions/ADR-0026-centre-button-concept.md` (Proposed). Verification of step 1: the new
-  tests, `check_traceability.py`, `ruff check .`, `ruff format --check .`, `reuse lint`, `check_license_map.py`, the root pytest and the spike-gate suite for `button_zone.py`; a `CHANGELOG.md` entry.
+**Step 1 (analysis; Python standard library only, no numpy; SPDX Apache-2.0 headers; `reuse lint` clean) - as built on 2026-11-24.** Conventions that the third readiness pass
+found open are pinned here (RV-018 rows R13 to R27). All values below are reproduced by the scripts; the report `docs/verification/reports/analysis-button-disc.md` holds the raw output.
+- `mech/analysis/button_disc.py` (linted, `# noqa: PLR0913, PLR0917` on every function with more than five arguments):
+  - `Support = tuple[float, float, float]` (x mm, y mm, N/mm); `Plane = (a mm, b, c)` with w(x, y) = a + b x + c y; `Point = tuple[float, float]`.
+  - `solve_plane(supports, load_xy, force_n) -> Plane` solves sum_i k_i v_i v_i^T [a b c]^T = F [1 x y]^T (v_i = [1, x_i, y_i]) by Cramer's rule; `ValueError` if |det| < 1e-12.
+    `displacement(plane, point) -> float`. `bridges(radius_mm, stiffness) -> list[Support]` gives three equal bridges at 90, 210 and 330 degrees.
+  - `sample_points(radius_mm, n_random, n_boundary, seed, extra=())`: `n_random` points (u first, then v, from `random.Random(seed)`; radius R sqrt(u), angle 2 pi v), then `extra`, then
+    `n_boundary` points from angle 0. The report uses 600, the centre as extra, 48, seed 7, R_use = 13 mm.
+  - `PressMetrics(force_min_n, force_max_n, travel_max_mm, lift_points)` and `press_metrics(supports, switches, click_travel_mm, points)`: a switch is (x, y, N/mm) and is added to
+    the supports; per point the plunger travel w is the largest switch displacement for a unit load; w <= 1e-9 counts as a lift point and is left out of the force and travel ranges;
+    F = click_travel / w and the press-point travel is F times the displacement at the point; if every point lifts the forces are `inf` and the travel is 0.
+  - `s2_click_force(switch_force_n, bridge_k, n_bridges, click_travel_mm)` = F + n k x; `click_force_extremes(F, tol, x_min, x_max, k, n)` = (F - tol + n k x_min, F + tol + n k x_max);
+    `bridge_band(F, tol, x, window_n, travel_limit_mm, points, bridge_r_mm=14.0) -> (k_low, k_high)`: k_low is the larger of the stiffness at which the largest press-point travel equals the
+    limit (bisection between 0.1 and 20 N/mm, 80 steps) and the stiffness at which F - tol reaches the lower window value; k_high is the stiffness at which F + tol reaches the upper value;
+    `ValueError` if the travel limit is not met up to 20 N/mm or if k_low > k_high. Working values: window (2.0, 5.0) N, travel limit 1.0 mm.
+  - `guided_beam_stiffness`, `arm_stress`, `guide_jam_length` and `plate_deflection(radius, thickness, E, nu, force, edge)` (central load only) as in the formulas of 3.2.
+  - `main()` prints, for the TL3342 (1.57 +- 0.49 N, 0.25 mm assumed), the B3U (1.50 +- 0.49 N, 0.15 mm) and the KSC221 (2.0 +- 0.5 N, 0.35 mm): the S2 rows for k = 1, 2, 3, 4, 6 N/mm and the band
+    (`ValueError` is caught and printed as "no band", which happens for the KSC221), then the click force of the B3U at k = 3 for the pre-travel extremes 0.05 to 0.35 mm (typeset table) and 0.05 to 0.25 mm
+    (PDF text layer), and the M3 row.
+- `mech/analysis/button_light.py` (linted): `ring_irradiance(r_mm, height_mm=8.0, ring_r_mm=20.0, n=16, azimuth_deg=0.0, phase_deg=0.0) -> float` is sum_k h^2 / (d_k^2 + h^2)^2 (Lambertian emitter, planar
+  receiver; d_k the horizontal distance to LED k at phase_deg + 360 k / n degrees), divided by the same sum at the ring radius and azimuth phase_deg (directly above an LED). The value at r = 0 is 0.182
+  (test: 0.17 to 0.20). The quoted 54 % at r = 13 mm and 71 to 81 % at r = 15 to 16 mm are 53 % and 70 to 79 % by this function and are not asserted.
+- `mech/analysis/check_tolerance.py` (changed, informational; neither chain is called by `run()`): `BUTTON_VERTICAL` (mm plus-minus: `pcb_post` 0.36 = 0.20 post seat + 0.16 board thickness, `lid_ledge` 0.30,
+  `lid_plate` 0.20, `disc_plunger` 0.20, `switch_height` 0.15 assumption, `switch_actuation` 0.10 assumption; datum PCB top Z 6.6 to the plunger contact plane) and `BUTTON_LATERAL` (`pcb_wall_gap` 1.90 = nominal
+  radial gap, `spigot_play` 0.65, `tilt_walk` 0.20 assumption, `plunger_tip` 0.30); `button_vertical_chain(tolerances)` and `button_lateral_chain(tolerances)` return `{"wc": sum, "rss": root of the sum of
+  squares}` (hand values: vertical 1.31 and 0.5763, lateral 3.05 and 2.0402); `recess_worst_case(nominal, tolerances)` = nominal - `lid_ledge` - `lid_plate` (0.3 gives -0.20). A missing key raises `KeyError`.
+- `hw/kicad/spike-gate/src/button_zone.py` (outside ruff while in spike-gate, as `pyproject.toml` excludes that folder; recorded in the report) with `hw/kicad/spike-gate/tests/test_button_zone.py` (unittest style,
+  runs in the spike-gate suite, needs no `pcbnew`, no skips; all frames have the board centre at the origin, KiCad's y down for outlines and y up for the ring and the searches, harmless because the antenna strip is
+  symmetric about the module long axis):
+  - `read_footprint_outline(pcb_text, ref, layer="F.Fab", board_centre=(40.0, 40.0))`: bounding rectangle of the layer's `fp_line` items of one footprint (balanced-parenthesis parse; KiCad rotation
+    X = x + lx cos t + ly sin t, Y = y - lx sin t + ly cos t); `ValueError` for an unknown reference or a layer without lines. SW1: 6.4 x 5.2 mm (F.Fab) and 8.5 x 6.0 mm (F.CrtYd); U9: 16.6 x 13.2 mm,
+    x from -13.4 to +3.2 mm.
+  - `led_squares(r_mm=20.0, n=16, phase_deg=3.75, size_mm=2.0)`; `antenna_strip(body, strip_mm=4.6, end="min_x")` (the strip of the bounding rectangle 4.6 mm from the stated end);
+    `nearest_led_distance(strip, leds)` (to the LED centre); `poly_distance` and `point_poly_distance` for convex polygons.
+  - `Pose = tuple[float, float, float]` (x, y, angle degrees); `s2_poses(module_size, switch_size, switch_gap_mm, led_gap_mm, corner_radius_mm, extent_mm, step_mm, step_deg)`: `module_size` is
+    (width 13.2, length 16.6) with the width along local x and the antenna end at local -y; the module is rotated counter-clockwise by the angle about its centre (x, y); x and y run from -extent to +extent, the angle from 0 to 177
+    degrees; a pose is one entry per (x, y, angle), valid when all corners are within `corner_radius_mm` of the origin and the Euclidean distance is at least `switch_gap_mm` to the switch (axis-aligned at the
+    origin) and at least `led_gap_mm` to every LED square; a distance below the gap, touching or overlapping conflicts (so gap 0 means no overlap). Report arguments: module (13.2, 16.6), switch (6.4, 5.2) gap 1.0 or
+    (8.5, 6.0) gap 0.0 or (3.0, 2.5) gap 1.0 or (4.0, 3.5) gap 1.0, LED gap 0.5, corner radius 19.5, extent 14.0, step 0.5, 3.0 degrees.
+    `best_antenna_distance(poses, module_size=(13.2, 16.6), strip_mm=4.6, leds=None)` is the largest, over the poses and both antenna ends, of the strip to nearest LED centre distance (0 for no pose).
+    Results: 10 poses and 2.51 mm, 58 and 3.04 mm, 1,330 and 3.90 mm, 428 and 3.64 mm in that order; without the corner limit the courtyard case gives 134 poses and 3.57 mm and at 19.0 mm 12 poses and 2.86 mm.
+  - `s3_conflicts(switch_centres, switch_size, switch_rotation_deg, module_body, antenna_strip_poly, leds, clearance_mm)` returns "SW<i> overlaps module", "SW<i> overlaps antenna strip" and
+    "SW<i> overlaps LED<j>" strings; `s3_scan(r_mm, switch_size, clearance_mm, module_body, antenna_strip_poly, leds) -> (feasible, total, best gap to body, best gap to strip)` scans triplet azimuths 90 + rot + 120 k for
+    rot 0 to 119 degrees in 1 degree steps and the four **absolute** switch orientations 0, 45, 90 and 135 degrees (all three switches share one), total 480, clearance 0 (touching conflicts); the best gap is the largest over the
+    feasible configurations of the smallest gap of the three switches, the two maxima independent. Stored module: 7 of 480 (best gaps 0.33 mm and 0.34 mm) for the 6.4 x 5.2 mm body, 0 for the courtyard, 92 of 480
+    (1.68 mm and 2.97 mm) for the B3U body 3.0 x 2.5 mm. The `mech_outline` model gives 7 and 0.33 mm for the TL3342 body.
+  - `fill_fraction(movable_mm2, available_mm2, extra_movable_mm2=0.0, fixed_delta_mm2=0.0)` = (movable + extra) / (available - fixed delta); `main()` prints the S2, S3 and fill results.
+- Tests: `mech/analysis/test_button_disc.py` (equilibrium residuals below 1e-9; three equal supports; the centroid-rule case with acos(0.2) gives equal plunger travel to 1e-9; S2 rows position-independent and equal to
+  0.25 (3 k + k_switch); S2 and S1 rows within 5 % of 3.2; M3 maximum 4.80 N; singular set raises; empty list gives `inf`; sampler determinism and extras; beam 0.199 N/mm; plate 0.042 and the clamped analytic value;
+  `arm_stress`, `guide_jam_length`; `s2_click_force` 3.85 and 2.40 N; `click_force_extremes` (1.46, 5.14); `bridge_band` for the TL3342 (2.83, 3.92) and the B3U (2.20, 6.69) within 3 %, the B3U band wider, `ValueError` for
+  the KSC221 and for an empty window; `main()` smoke test), `test_button_light.py` (0.17 to 0.20 at r = 0; reference 1; monotone; `main()` smoke test), additions to `test_check_tolerance.py` (hand values, key
+  check, not part of `run()`), and `hw/kicad/spike-gate/tests/test_button_zone.py` (outlines, baselines 5.06 mm within 0.1 mm for the stored footprint and 6.07 mm for `mech_outline`, LED squares, strip, distances,
+  no pose overlapping the switch or an LED on a coarse 1 mm and 6 degree grid, the B3U better than the TL3342, at most 20 of 480 for the 6.4 x 5.2 mm body and none for the courtyard, conflict strings, fill figures,
+  `main()` smoke test). The pose counts and best distances of the report are printed, not asserted.
+- Documents: `docs/verification/reports/analysis-button-disc.md` (raw output, tools, revision, issues found without file change: `POST_AZ` 30/150/270 in `mech_outline.py` against `POST_DEG` 60/180/300 in
+  `housing_params.py`, the two module models, the stored-board pin of `test_button_zone.py`, the TC-310 probe margin), `mech/analysis/README.md` (rows for the new files),
+  `docs/decisions/ADR-0026-centre-button-concept.md` (Proposed). Verification of step 1: the new tests, `check_traceability.py`, `ruff check .`, `ruff format --check .`, `reuse lint`, `check_license_map.py`,
+  the root pytest and the spike-gate suite for `button_zone.py`; a `CHANGELOG.md` entry.
 
 **Step 2** The owner decides ADR-0026 and the questions of section 7; `regulatory-check`; the requirement texts of 4.7 enter the requirement files as proposals and
 the owner approves; ESD, overload, life and click procedures are written (TC-207, TC-302, TC-304, TC-311, TC-314 are stubs or new).
@@ -348,7 +343,7 @@ gate sends the plan back to ADR-0026 (the alternative to the gate is a respin).
 **Step 4** Plan 08 revision 6 with exact switch coordinates and keep-outs; readiness review; re-placement and routing. Files changed then: `housing_params.py`
 (BTN_* replaced), `mech_outline.py` (BTN_AZ, BTN_BODY_R/T; LED_PHASE loses its reason), `src/pcb_full.py` (`SW1_POS`, `note_fixed`), `src/pcb_quality.py` (SW1
 exemption), `src/pcb_rules.py`, `scripts/panel_tabs.py` ("button 240" keep-out), `scripts/tests/test_panel_tabs.py` (asserts on `BTN_D` and `BTN_DEG`),
-`tests/test_mech_outline.py`, `tests/test_board_p1.py` (the U9-courtyard overlap set contains SW1), `tests/test_pcb_full.py`, `known-open-violations.json`,
+`tests/test_mech_outline.py`, `tests/test_board_p1.py` (the U9-courtyard overlap set contains SW1), `tests/test_pcb_full.py`, `tests/test_button_zone.py` (pins the stored board-p1: SW1, U9 at (37.6, 40), 5.06 mm), `known-open-violations.json`,
 DEV-004 (SW1 is one of its 14 fixed parts), and for S3 `src/layout_full.py` and `src/sourcing.py`. Acceptance: the full root pytest and the spike-gate suite (the
 board tests need `pcbnew`, which only the CI hardware container has).
 
@@ -368,7 +363,7 @@ revision 6 (the stored SW1 at 13 mm does not match the housing hole today). Plan
 | (unit) `test_check_tolerance.py` | MECH-010 | vertical and lateral chain | Unit | worst case and RSS reproduce hand values |
 | (unit) `test_button_zone.py` | analysis | outlines, distances, pose search | Unit | as listed in step 1 |
 | (check) `check_part_evidence.py` | analysis | switch evidence | Check | 0 errors; hash and quote checks reported as run or not run |
-| TC-310 | MECH-010 | force and position map | Coupon, then prototype | [4] mm probe with a 1 mm pad, 1 mm/s, gauge accuracy 0.1 N, actuation read from the BTN_SW level on a scope; 25 points (centre, 8 at r = 7, 8 at r = 13, 8 in the edge zone) on 3 housings, 10 presses each, unit flat and on a vertical mount, at 25 and 50 degC; every point inside R_use actuates at [2] to [5] N and at most [1.0] mm; no sticking; the click force drop is read here |
+| TC-310 | MECH-010 | force and position map | Coupon, then prototype | [4] mm probe with a 1 mm pad, 1 mm/s, gauge accuracy 0.1 N, actuation read from the BTN_SW level on a scope; 25 points (centre, 8 at r = 7, 8 at r = 12 (probe edge at 14 mm, 0.7 mm inside the disc edge against the +-0.3 mm print tolerance), 8 in the edge zone) on 3 housings, 10 presses each, unit flat and on a vertical mount, at 25 and 50 degC; every point inside R_use actuates at [2] to [5] N and at most [1.0] mm; no sticking; the click force drop is read here |
 | TC-311 | MECH-013 | life and click | Prototype | [20 000] presses with a servo jig (jig to define; the owner decides the number); force within [+-20] %; no crack |
 | TC-312 | MECH-003, SYS-038 | range with a hand on the disc | Prototype | loss against the TC-038 baseline with a hand phantom on the disc, at rest and during an AP start; at most [6] dB |
 | TC-313 | MECH-012 | no unintended press | Prototype | unit face down on a flat table, on a soft pad, on a convex object, and under [5] N spread over the band, each for [60] s, vertical mount included; no actuation |
@@ -406,5 +401,5 @@ Open questions for the owner (they change what is built):
 ## 8. Rollout / rollback and traceability
 Created: plan 09, RV-018, ADR-0026 (Proposed, step 1), MECH-010 to MECH-013 (proposals), TC-310 to TC-315, risk entries, analysis scripts and tests,
 `button_zone.py`, switch evidence. Changed (proposals): HW-007, MECH-004, SYS-017, one SW item, ADR-0006 note, plan 05, plan 08 revision 6, DEV-004.
-IDs reserved by this plan: ADR-0026, RV-018, MECH-010 to MECH-013, TC-310 to TC-315 (the traceability check does not read `docs/plans/`; the IDs enter
+IDs reserved by this plan: ADR-0026, RV-018, MECH-010 to MECH-013, TC-310 to TC-315 (the traceability check reads `docs/**/*.md`, plans included, and finds the IDs only where a heading starts with one; the IDs enter
 the checked files at step 2). Rollback: the fallback of section 5.

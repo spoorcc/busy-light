@@ -52,7 +52,7 @@ claims:
   category: mechanical
   typ: 0.15
   unit: mm
-  notes: 'The PDF text shows 0.15 +- 0.1 with a stray 0.2 on the next line; the assistant reads PT as 0.15 +0.2/-0.1 mm from the typeset table (tolerance not text-checked).
+  notes: 'The PDF text shows 0.15 +- 0.1 with a stray 0.2 on the next line; the assistant read PT as 0.15 +0.2/-0.1 mm on the rendered page image on 2026-11-24 (tolerance not text-checked).
     No total travel, no over-travel and no force-travel curve are in this catalogue.'
   source: {page: 1, locator: Operating characteristics table, quote: '预行程(PT) 0.15 +- 0.1'}
 - id: SW-B3U-1000P.lifetime
