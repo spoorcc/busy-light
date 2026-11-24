@@ -174,7 +174,7 @@ class FullBoard(unittest.TestCase):
     def test_ilim_resistor_values(self):
         P = layout_full.PARTS
         self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
-                         ("47.0k 0.1%", "56.2k 0.1%", "56.2k 0.1%"))   # ADR-0023: step 3 = both switches on, same part
+                         ("47.0k 0.1%", "56.2k 0.1%", "54.9k 0.1%"))   # ADR-0023 step 3 = both switches on; 54.9 k since 2026-11-24
         self.assertNotIn("R20", P)
         self.assertEqual(P["R_ILIM3"][2], "Resistor_SMD:R_0603_1608Metric")
 
@@ -196,15 +196,35 @@ class FullBoard(unittest.TestCase):
         self.assertEqual(pn[("R_ILIM3", "2")], "ILIM")
 
     def test_holdoff_capacitor_set(self):
-        """Owner decision 2026-11-06: six 100 nF C0G 5 % 1206 on SUP_CT (HW-010 revision)."""
+        """ADR-0025 (owner 2026-11-24): one 68 nF C0G 5 % 1206 on SUP_CT replaces the six 100 nF of 2026-11-06."""
         P = layout_full.PARTS
-        vals = {r: P[r][-1] for r in ("C1", "C27", "C28", "C29", "C30", "C31")}
-        self.assertEqual(sorted(v.split()[0] for v in vals.values()), ["100n"] * 6)
-        for r, v in vals.items():
-            self.assertIn("C0G 5%", v)
-            self.assertEqual(self.pin_net[(r, "1")], "SUP_CT")
-            self.assertEqual(self.pin_net[(r, "2")], "GND")
-            self.assertEqual("Capacitor_SMD:C_1206_3216Metric", P[r][2])
+        for gone in ("C27", "C28", "C29", "C30", "C31"):
+            self.assertNotIn(gone, P)
+        self.assertEqual(P["C1"][-1], "68n C0G 5% 50V")
+        self.assertEqual(P["C1"][2], "Capacitor_SMD:C_1206_3216Metric")
+        self.assertEqual(self.pin_net[("C1", "1")], "SUP_CT")
+        self.assertEqual(self.pin_net[("C1", "2")], "GND")
+
+    def test_supervisor_is_the_tps3808g01_on_the_protected_supply(self):
+        """ADR-0025 option B. TPS3808G01DBV (SBVS050N table 5-1): 1 RESET, 2 GND, 3 MR, 4 CT, 5 SENSE, 6 VDD."""
+        P, pn = layout_full.PARTS, self.pin_net
+        self.assertEqual(P["U5"][2:], ("Package_TO_SOT_SMD:SOT-23-6", "TPS3808G01"))
+        self.assertEqual([pn[("U5", str(i))] for i in (1, 2, 4, 5, 6)],
+                         ["HOLD_OK", "GND", "SUP_CT", "SUP_SENSE", "VDD_U1"])
+        self.assertNotIn(("U5", "3"), pn)             # MR open: 90 kohm pull-up to VDD inside the part
+        self.assertEqual((pn[("R26", "1")], pn[("R26", "2")]), ("VBUS_IC", "SUP_SENSE"))
+        self.assertEqual((pn[("R27", "1")], pn[("R27", "2")]), ("SUP_SENSE", "GND"))
+        self.assertEqual((P["R26"][-1], P["R27"][-1]), ("910k 1%", "100k"))
+
+    def test_divider_thresholds_keep_the_release_below_the_vbus_minimum(self):
+        """910 k / 100 k (931 k is not stocked): falling 3.915 to 4.271 V, release up to 4.399 V, below the 4.5 V of HW-010 criterion 5."""
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "sim"))
+        import supervisor_options as so
+        fall_lo, fall_hi, _, rel_hi = so.tps3808_divider(910.0, 100.0)
+        self.assertAlmostEqual(fall_lo, 3.915, places=3)
+        self.assertAlmostEqual(fall_hi, 4.271, places=3)
+        self.assertAlmostEqual(rel_hi, 4.399, places=3)
+        self.assertLess(rel_hi, 4.5)
 
     def test_no_uart_test_points(self):
         self.assertFalse({"UART_TX", "UART_RX"} & set(self.pin_net.values()))
@@ -308,7 +328,7 @@ class GateOkReadback(unittest.TestCase):
 
     def test_hold_off_node_has_the_vbus_ic_pull_up(self):
         self.assertEqual(self.members("HOLD_OK"), {("U5", "1"), ("R6", "2"), ("U3", "6"), ("U4", "6"), ("U10", "2")})
-        self.assertEqual(self.pin_net[("R6", "1")], "VBUS_IC")
+        self.assertEqual(self.pin_net[("R6", "1")], "VDD_U1")     # ADR-0025: the pull-up follows the protected supply node
         self.assertEqual(layout_full.PARTS["R6"][3], "150k")      # at least 134 kohm (A10 of the supervisor evidence)
 
     def test_fault_node_has_the_3v3_pull_up_and_a_test_pad(self):
@@ -392,7 +412,7 @@ class DampingLink(unittest.TestCase):
     def test_switch_side_members(self):
         members = {k for k, v in self.pin_net.items() if v == "VBUS_IC"}
         expected = {("U7", "1"), ("U7", "3"), ("C2", "1"), ("R1", "1"), ("R21", "1"), ("R_SU1", "1"),
-                    ("R_SU14", "1"), ("R_SU15", "1"), ("U5", "2"), ("R22", "2"), ("R6", "1")}
+                    ("R_SU14", "1"), ("R_SU15", "1"), ("R26", "1"), ("R22", "2")}
         self.assertEqual(members, expected)
 
 

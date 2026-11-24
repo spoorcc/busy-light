@@ -143,11 +143,11 @@ class TrimT1(unittest.TestCase):
 
 
 class BothOnStep3(unittest.TestCase):
-    """ADR-0023 (owner 2026-11-18): step 3 = both select switches on; R_ILIM3 = R_ILIM2 = 56.2 k (0.1 %)."""
+    """ADR-0023 (owner 2026-11-18): step 3 = both select switches on; R_ILIM3 = 54.9 k (owner 2026-11-24, option A), R_ILIM2 = 56.2 k (0.1 %)."""
     KW = dict(leak_a=il.TMUX_LEAK_A, rds_max=il.TMUX_RDS_ON_MAX_OHM)
 
     def test_values(self):
-        self.assertEqual(il.candidate_both_on(), (47.0, 56.2, 56.2))
+        self.assertEqual(il.candidate_both_on(), (47.0, 56.2, 54.9))
 
     def test_every_state_inside_the_hw010_limits(self):
         w = il.both_on_windows(*il.candidate_both_on(), il.TOL_01PCT, **self.KW)
@@ -162,8 +162,8 @@ class BothOnStep3(unittest.TestCase):
 
     def test_numbers_of_the_owner_question(self):
         w = il.both_on_windows(*il.candidate_both_on(), il.TOL_01PCT, **self.KW)
-        self.assertAlmostEqual(w["3"][0], 1368.8, delta=0.2)
-        self.assertAlmostEqual(w["3"][1], 1553.5, delta=0.2)
+        self.assertAlmostEqual(w["3"][0], 1379.1, delta=0.2)    # 56.2 k gave 1368.8 to 1553.5 mA
+        self.assertAlmostEqual(w["3"][1], 1564.3, delta=0.2)
 
     def test_the_old_over_limit_state_is_gone(self):
         # exclusive design: both switches on gave 1817 to 2020 mA (only the NOR gate prevented it)
@@ -177,7 +177,7 @@ class Generator(unittest.TestCase):
     def test_generator_values_are_the_checked_set(self):
         P = layout_full.PARTS
         self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
-                         ("47.0k 0.1%", "56.2k 0.1%", "56.2k 0.1%"))     # ADR-0023: step 3 = both switches on
+                         ("47.0k 0.1%", "56.2k 0.1%", "54.9k 0.1%"))     # ADR-0023 step 3 = both switches on; R_ILIM3 54.9 k (owner 2026-11-24)
         self.assertNotIn("R20", P)
         r1, r2 = ohms(P["R_ILIM1"][-1]) / 1e3, ohms(P["R_ILIM2"][-1]) / 1e3
         r3 = ohms(P["R_ILIM3"][-1]) / 1e3

@@ -202,8 +202,9 @@ def candidate_p1():
 
 
 def candidate_both_on():
-    """ADR-0023 (owner 2026-11-18): step 3 = both switches on; R_ILIM3 equals R_ILIM2 (one part type)."""
-    return 47.0, 56.2, 56.2
+    """ADR-0023 (owner 2026-11-18): step 3 = both switches on. R_ILIM3 is 54.9 k since the owner decision of 2026-11-24
+    (option A of analysis-ilim-drift.md: the only value whose step 3 margin survives tolerance and TCR)."""
+    return 47.0, 56.2, 54.9
 
 
 def both_on_windows(r1, r2, r3, tol, **kw):

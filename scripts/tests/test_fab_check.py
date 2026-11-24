@@ -65,7 +65,7 @@ M02*
 PARTS = [
     footprint("R_ILIM1", "47.0k 0.1%"),
     footprint("R_ILIM2", "56.2k 0.1%"),
-    footprint("R_ILIM3", "56.2k 0.1%"),
+    footprint("R_ILIM3", "54.9k 0.1%"),
     footprint("C1", "100n", "Capacitor_SMD:C_0603_1608Metric"),
     footprint("U5", "TPS3840DL40", "Package_TO_SOT_SMD:SOT-23-5"),
     footprint("J1", "USB-C receptacle", "CUSTOM:USB_C", attrs="through_hole"),
@@ -85,7 +85,7 @@ PARTS = [
 BOM_ROWS = [
     ("47.0k 0.1%", "R_ILIM1", "R_0603", "C326725"),
     ("56.2k 0.1%", "R_ILIM2", "R_0603", "C705784"),
-    ("56.2k 0.1%", "R_ILIM3", "R_0603", "C705784"),
+    ("54.9k 0.1%", "R_ILIM3", "R_0603", "C855900"),
     ("100n", "C1", "C_0603", "C1591"),
     ("TPS3840DL40", "U5", "SOT-23-5", ""),
 ]
@@ -286,7 +286,7 @@ def test_ilim_resistors_need_the_exact_values(tmp_path: Path) -> None:
         bom = [(wrong, *BOM_ROWS[2][1:]) if r[1] == "R_ILIM3" else r for r in BOM_ROWS]
         res, _ = check(tmp_path, bom=bom)
         assert not res["ilim_values"].ok, wrong
-        assert f"R_ILIM3={wrong!r} (expected '56.2k 0.1%')" in res["ilim_values"].detail
+        assert f"R_ILIM3={wrong!r} (expected '54.9k 0.1%')" in res["ilim_values"].detail
 
 
 def test_ilim_values_equal_the_generator_and_the_model() -> None:
@@ -366,11 +366,12 @@ def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
     """Every listed ref is on the board, and its value has an MPN but no LCSC number in sourcing.py.
 
     A number added there makes this test ask for the list update. The board is board-p1 when it
-    exists. R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225).
+    exists. R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225); U5 on 2026-11-24 (ADR-0025).
     """
     listed = fc.read_missing_list(ROOT / "scripts" / "fab_missing_lcsc.txt")
-    # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers
-    assert set(listed) == {"U5"}
+    # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers.
+    # 2026-11-24: U5 left the list (ADR-0025: TPS3808G01DBVR, C19653), so the list is empty.
+    assert set(listed) == set()
     p1 = SPIKE / "board-p1" / "busy_light_spike.kicad_pcb"
     board = p1 if p1.exists() else SPIKE / "board" / "busy_light_spike.kicad_pcb"
     values = {f.ref: f.value for f in fc.read_footprints(board)}

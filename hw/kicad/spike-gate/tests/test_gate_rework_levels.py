@@ -14,6 +14,16 @@ class Levels(unittest.TestCase):
         self.assertAlmostEqual(g.hold_ok_high(4.3), 2.036, delta=0.002)
         self.assertGreater(g.hold_ok_high(4.75) - g.LVC_VIH, 0.45)
 
+    def test_hold_ok_high_with_the_pull_up_on_vdd_u1(self):
+        """ADR-0025: the pull-up follows the protected supply node. At the largest release voltage of the 910 k / 100 k divider
+        (4.399 V) the worst-case level is just above VIH: thin margin, the same as the 2.04 V of the VBUS_IC pull-up at 4.3 V."""
+        v = g.hold_ok_high_vdd_u1(4.399)
+        self.assertGreater(v, g.LVC_VIH)
+        self.assertAlmostEqual(v, 2.03, delta=0.01)
+        self.assertLess(g.hold_ok_high_vdd_u1(4.3), g.LVC_VIH)      # below VIH only with the worst-case leakage of all three inputs
+        self.assertGreater(g.hold_ok_high_vdd_u1(4.75) - g.LVC_VIH, 0.35)
+        self.assertEqual(g.hold_ok_high_vdd_u1(9.0, n_inputs=0), 5.1 - g.TPS3840_ILKG * 150e3)   # the zener clamps VDD_U1
+
     def test_r6_meets_the_vpor_rule(self):
         self.assertAlmostEqual(g.hold_ok_r6_min(), 133.9e3, delta=100)
         self.assertGreaterEqual(150e3, g.hold_ok_r6_min())

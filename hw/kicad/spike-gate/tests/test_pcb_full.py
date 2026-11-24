@@ -177,9 +177,9 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 105)     # ADR-0024: +U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (97 after ADR-0023)
-        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 57)
-        for ref in ("C27", "C28", "C29", "C30", "C31", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
+        self.assertEqual(len(self.comps), 102)     # ADR-0024: +U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (97 after ADR-0023); ADR-0025: -C27 to C31, +R26, R27
+        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 58)
+        for ref in ("R26", "R27", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
                     "C32"):
             self.assertIn(ref, self.comps)
         for ref in ("U10", "R6", "R23", "R24", "R25", "TVS3", "TVS4", "TP7"):    # ADR-0024
@@ -193,7 +193,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 57)        # ADR-0024: 52 after ADR-0023, +HOLD_OK, FAULT_N, CC_OK_RB, CC1_IC, CC2_IC
+        self.assertEqual(res["nets_named"], 58)        # ADR-0024: 52 after ADR-0023, +HOLD_OK, FAULT_N, CC_OK_RB, CC1_IC, CC2_IC; ADR-0025: +SUP_SENSE
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")

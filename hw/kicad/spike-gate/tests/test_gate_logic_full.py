@@ -102,7 +102,7 @@ class GateStructure(unittest.TestCase):
         self.assertEqual(net_of(n, "U10", "4"), "GATE_OK_RB")
         self.assertEqual(net_of(n, "U9", "20"), "GATE_OK_RB")
         self.assertNotIn("FAULT_N", {net_of(n, g, "6") for g in ("U3", "U4")})
-        self.assertEqual(net_of(n, "R6", "1"), "VBUS_IC")
+        self.assertEqual(net_of(n, "R6", "1"), "VDD_U1")   # ADR-0025: the pull-up follows the protected supply node
         self.assertEqual(net_of(n, "R8", "1"), "+3V3")
 
     def test_fault_input_net_has_a_test_pad(self):

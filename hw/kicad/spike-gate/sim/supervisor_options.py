@@ -30,6 +30,7 @@ OPTIONS = {
     "TPS3840PL42 (push-pull)": tps3840(4.2),
     "TPS3840PL43 (push-pull)": tps3840(4.3),
     "TPS3808G01, 931k/100k 1 %": tps3808_divider(931.0, 100.0),
+    "TPS3808G01, 910k/100k 1 % (as built)": tps3808_divider(910.0, 100.0),   # 931 k is not stocked (ADR-0025, 2026-11-24)
 }
 
 

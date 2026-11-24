@@ -1,8 +1,8 @@
 # ADR-0024: Gate rework after RV-017: hold-off AND gate restored, GPIO0 resistor, CC-pin protection
 
-- **Status:** Proposed. The three choices are owner decisions 1, 2 and 4 of 2026-11-22 (in the working session; recorded by
-  the assistant, `docs/journal/2026-11-22-owner-decisions-p1-rework.md`). This text, the part choices in it and the
-  requirement proposals have not been read by the owner; no goldfish review. Amends ADR-0023 (withdraws its decision 2) and
+- **Status:** Accepted (owner, Ben Spoor, 2026-11-24, in the working session; recorded by the assistant). The three choices are owner decisions 1, 2 and 4 of 2026-11-22 (in the working session; recorded by
+  the assistant, `docs/journal/2026-11-22-owner-decisions-p1-rework.md`). The owner accepted the ADR on 2026-11-24 on the assistant's
+  summary of it; the requirement amendments stay for the owner to confirm; no goldfish review. Amends ADR-0023 (withdraws its decision 2) and
   returns to ADR-0018 option E.
 - **Date:** 2026-11-22
 - **Deciders / reviewers:** owner (Ben Spoor); written by the assistant

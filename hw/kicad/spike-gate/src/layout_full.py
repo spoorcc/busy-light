@@ -68,18 +68,17 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "R18": (*R0402, "100k"), "R19": (*R0402, "100k"), "C24": (*C0402, "100n"), "C25": (*C0402, "100n"),
     # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
-    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "56.2k 0.1%"),   # ADR-0023: step 3 = both switches on, same part as R_ILIM2 (replaces trim T1)
+    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "54.9k 0.1%"),   # ADR-0023 step 3 = both switches on; 54.9 k Yageo AT (owner decision 2026-11-24, option A of analysis-ilim-drift.md)
     "R_ILIM1": (*R, "47.0k 0.1%"),
-    "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
+    "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS3808G01"),   # ADR-0025 option B (owner decision 2026-11-24)
+    "R26": (*R0402, "910k 1%"), "R27": (*R0402, "100k"),   # SENSE divider from VBUS_IC: 910 k / 100 k (931 k is not stocked, see ADR-0025)
     "R6": (*R0402, "150k"),   # ADR-0024: HOLD_OK pull-up to VBUS_IC, at least 134 kohm (datasheet-evidence-supervisor.md, A10)
     "U10": (*G08, "74LVC1G08"),   # ADR-0024 (ADR-0018 option E): GATE_OK_RB = HOLD_OK AND FAULT_N, output to GPIO6 only
     # ADR-0024: GPIO0 series resistor (owner decision 2) and CC protection (owner decision 4, P3): ESD diode at the connector,
     # 100 ohm in series to the CC IC
     "R23": (*R0402, "10k"), "R24": (*R0402, "100"), "R25": (*R0402, "100"),
     "TVS3": (*TVS, "TVS"), "TVS4": (*TVS, "TVS"),
-    "C1": (*C1206, "100n C0G 5% 50V"), "C27": (*C1206, "100n C0G 5% 50V"),
-    "C28": (*C1206, "100n C0G 5% 50V"), "C29": (*C1206, "100n C0G 5% 50V"),
-    "C30": (*C1206, "100n C0G 5% 50V"), "C31": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
+    "C1": (*C1206, "68n C0G 5% 50V"),   # ADR-0025: one 68 nF C0G on CT replaces the six 100 nF (hold-off 221.8 to 572.7 ms)
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
     "C2": (*C, "4.7u 16V X5R"), "C3": (*C0805, "10u 25V X5R"), "R8": (*R0402, "100k"),   # ADR-0024: pull-up of the open-drain FAULT_N of U7 (3V3)
     "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
@@ -145,7 +144,11 @@ BOXES = {
         ("7", "OUT1_N", "right", 5.08, "open_collector"), ("8", "OUT2_N", "right", 0, "open_collector"),
         ("3", "CURRENT_MODE", "right", -5.08, "passive"), ("6", "VCONN_FAULT", "right", -7.62, "open_collector"),
         ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")]), half_h=15.24),
-    "U5": L.SUPERVISOR,
+    # TPS3808G01DBV (SBVS050N table 5-1, SOT-23): 1 RESET, 2 GND, 3 MR (90 kohm pull-up inside), 4 CT, 5 SENSE, 6 VDD
+    "U5": L.box_symbol("TPS3808G01", [
+        ("6", "VDD", "top", 0, "power_in"), ("2", "GND", "bottom", 0, "power_in"),
+        ("1", "RESET", "right", 2.54, "open_collector"), ("4", "CT", "right", -5.08, "passive"),
+        ("5", "SENSE", "left", 2.54, "passive"), ("3", "MR", "left", -2.54, "passive")]),
     "U14": L.TMUX1101, "U15": L.TMUX1101,
     "U7": L.box_symbol("TPS2553_BOX", [
         ("1", "IN", "top", -2.54, "power_in"), ("3", "EN", "top", 2.54, "input"),
@@ -170,7 +173,7 @@ BOXES = {
         ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")]),
         half_w=22.86, half_h=33.02, hide_numbers=True),
 }
-BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
+BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "TPS3808G01", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
            "U9": "ESP32_C3_MINI_1"}
 
 LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
@@ -184,9 +187,8 @@ PLACE = {
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
     "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
     "R_ILIM3": (gx(250.19), 91.44, 90),
-    "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C27": (gx(86.36), 146.05, 0),
-    "C28": (gx(93.98), 146.05, 0), "C29": (gx(101.6), 146.05, 0), "C30": (gx(109.22), 146.05, 0),
-    "C31": (gx(116.84), 146.05, 0),
+    "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0),
+    "R26": (gx(26.67), 126.0, 0), "R27": (gx(26.67), 146.05, 0),
     "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
     "C3": (350.5, 24.0, 0), "R8": (364.0, 36.83, 0),
     "U8": (335.0, 100.0, 0), "C5": (317.0, 103.81, 0), "C6": (353.0, 103.81, 0),
@@ -557,30 +559,31 @@ def _build():
     s.junction(BUSX_FULL, il[1])
     s.pw("GND", ("R_ILIM1", "2"), True, 180)
 
-    # ------------------------------------------------------------ hold-off supervisor
-    s.pw("VBUS_IC", ("U5", "2"), True)
-    s.pw("GND", ("U5", "3"))
-    s.nc(P("U5", "4"))
+    # ------------------------------------------------------------ hold-off supervisor (ADR-0025 option B)
+    s.stub("VDD_U1", ("U5", "6"), 0, -5.08, 90)   # VDD from the protected TUSB321 supply node (6 V pin, ADR-0021)
+    s.pw("GND", ("U5", "2"))
+    s.nc(P("U5", "3"))                            # MR: 90 kohm pull-up to VDD inside the part, left open
     rs = P("U5", "1")
-    s.bind("HOLD_OK", "U5", 1)   # open drain, pull-up R6 to VBUS_IC (ADR-0024, withdraws ADR-0023 decision 2)
+    s.bind("HOLD_OK", "U5", 1)   # open drain, pull-up R6 to VDD_U1 (ADR-0024 structure, ADR-0025 supply node)
     s.wire(rs, (gx(101.6), rs[1]))
     s.bind("HOLD_OK", "R6", 2)
     s.junction(*P("R6", "2"))
-    s.pw("VBUS_IC", ("R6", "1"))
+    s.stub("VDD_U1", ("R6", "1"), 0, -5.08, 90)
     s.label("HOLD_OK", gx(101.6), rs[1])
-    ct = P("U5", "5")
-    s.bind("SUP_CT", "U5", 5)
+    ct = P("U5", "4")
+    s.bind("SUP_CT", "U5", 4)
     s.bind("SUP_CT", "C1", 1)
     s.wire(ct, P("C1", 1))
-    s.bind("SUP_CT", "C27", 1)
-    for a_, b_ in (("C1", "C27"), ("C27", "C28"), ("C28", "C29"), ("C29", "C30"), ("C30", "C31")):   # parallel C0G set, one rail wire
-        s.bind("SUP_CT", b_, 1)
-        s.wire(P(a_, 1), P(b_, 1))
-    for r_ in ("C1", "C27", "C28", "C29", "C30"):
-        s.junction(*P(r_, 1))
+    s.junction(*P("C1", 1))
     s.label("SUP_CT", gx(68.58), ct[1])
-    for r_ in ("C1", "C27", "C28", "C29", "C30", "C31"):
-        s.pw("GND", (r_, "2"), True)
+    s.pw("GND", ("C1", "2"), True)
+    # SENSE divider: VBUS_IC - R26 (910 k) - SENSE - R27 (100 k) - GND; falling threshold 3.915 to 4.271 V, release up to 4.399 V
+    s.pw("VBUS_IC", ("R26", "1"), True)
+    s.ends("SUP_SENSE", ("R26", "2"), ("R27", "1"))
+    s.stub("SUP_SENSE", ("R27", "1"), 2.54, 0, 0)
+    s.j(("R27", "1"))
+    s.pw("GND", ("R27", "2"), True)
+    s.stub("SUP_SENSE", ("U5", "5"), -7.62, 0, 180)
 
     # ------------------------------------------------------------ TPS2553 and 5 V output
     uin, uen = P("U7", "1"), P("U7", "3")

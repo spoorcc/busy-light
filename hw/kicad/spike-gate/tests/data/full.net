@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/full-out3/full.kicad_sch")
-		(date "2026-11-23T20:09:11")
+		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullP2/full.kicad_sch")
+		(date "2026-11-24T12:16:55")
 		(tool "Eeschema 10.0.8")
 		(sheet
 			(number "1")
@@ -56,15 +56,15 @@
 	(components
 		(comp
 			(ref "C1")
-			(value "100n C0G 5% 50V")
+			(value "68n C0G 5% 50V")
 			(footprint "Capacitor_SMD:C_1206_3216Metric")
 			(fields
 				(field
-					(name "MPN") "GRM31C5C1H104JA01L")
+					(name "MPN") "GRM3195C1H683JA05D")
 				(field
-					(name "Manufacturer") "Murata")
+					(name "Manufacturer") "Murata Electronics")
 				(field
-					(name "LCSC") "C97946")
+					(name "LCSC") "C3847777")
 				(field
 					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
 				(field
@@ -81,15 +81,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "GRM31C5C1H104JA01L")
+				(value "GRM3195C1H683JA05D")
 			)
 			(property
 				(name "Manufacturer")
-				(value "Murata")
+				(value "Murata Electronics")
 			)
 			(property
 				(name "LCSC")
-				(value "C97946")
+				(value "C3847777")
 			)
 			(property
 				(name "Sheetname")
@@ -1921,366 +1921,6 @@
 				(tstamps "/")
 			)
 			(tstamps "424b6e67-24a9-5d8f-99bf-940f409f7519")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C27")
-			(value "100n C0G 5% 50V")
-			(footprint "Capacitor_SMD:C_1206_3216Metric")
-			(fields
-				(field
-					(name "MPN") "GRM31C5C1H104JA01L")
-				(field
-					(name "Manufacturer") "Murata")
-				(field
-					(name "LCSC") "C97946")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "MPN")
-				(value "GRM31C5C1H104JA01L")
-			)
-			(property
-				(name "Manufacturer")
-				(value "Murata")
-			)
-			(property
-				(name "LCSC")
-				(value "C97946")
-			)
-			(property
-				(name "Sheetname")
-				(value "full")
-			)
-			(property
-				(name "Sheetfile")
-				(value "full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "dc1183c7-c883-5a81-be9f-af4ab6bd64a9")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C28")
-			(value "100n C0G 5% 50V")
-			(footprint "Capacitor_SMD:C_1206_3216Metric")
-			(fields
-				(field
-					(name "MPN") "GRM31C5C1H104JA01L")
-				(field
-					(name "Manufacturer") "Murata")
-				(field
-					(name "LCSC") "C97946")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "MPN")
-				(value "GRM31C5C1H104JA01L")
-			)
-			(property
-				(name "Manufacturer")
-				(value "Murata")
-			)
-			(property
-				(name "LCSC")
-				(value "C97946")
-			)
-			(property
-				(name "Sheetname")
-				(value "full")
-			)
-			(property
-				(name "Sheetfile")
-				(value "full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "7bfe415f-3b97-52c3-8031-22d4100de964")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C29")
-			(value "100n C0G 5% 50V")
-			(footprint "Capacitor_SMD:C_1206_3216Metric")
-			(fields
-				(field
-					(name "MPN") "GRM31C5C1H104JA01L")
-				(field
-					(name "Manufacturer") "Murata")
-				(field
-					(name "LCSC") "C97946")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "MPN")
-				(value "GRM31C5C1H104JA01L")
-			)
-			(property
-				(name "Manufacturer")
-				(value "Murata")
-			)
-			(property
-				(name "LCSC")
-				(value "C97946")
-			)
-			(property
-				(name "Sheetname")
-				(value "full")
-			)
-			(property
-				(name "Sheetfile")
-				(value "full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "43d087cd-bc22-5081-afda-d775b17a8c2d")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C30")
-			(value "100n C0G 5% 50V")
-			(footprint "Capacitor_SMD:C_1206_3216Metric")
-			(fields
-				(field
-					(name "MPN") "GRM31C5C1H104JA01L")
-				(field
-					(name "Manufacturer") "Murata")
-				(field
-					(name "LCSC") "C97946")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "MPN")
-				(value "GRM31C5C1H104JA01L")
-			)
-			(property
-				(name "Manufacturer")
-				(value "Murata")
-			)
-			(property
-				(name "LCSC")
-				(value "C97946")
-			)
-			(property
-				(name "Sheetname")
-				(value "full")
-			)
-			(property
-				(name "Sheetfile")
-				(value "full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "ab2de14e-68c4-543f-87dc-f6949b6e0852")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C31")
-			(value "100n C0G 5% 50V")
-			(footprint "Capacitor_SMD:C_1206_3216Metric")
-			(fields
-				(field
-					(name "MPN") "GRM31C5C1H104JA01L")
-				(field
-					(name "Manufacturer") "Murata")
-				(field
-					(name "LCSC") "C97946")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "MPN")
-				(value "GRM31C5C1H104JA01L")
-			)
-			(property
-				(name "Manufacturer")
-				(value "Murata")
-			)
-			(property
-				(name "LCSC")
-				(value "C97946")
-			)
-			(property
-				(name "Sheetname")
-				(value "full")
-			)
-			(property
-				(name "Sheetfile")
-				(value "full.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "5f8be564-1232-511d-819f-3bfe4ccfa010")
 			(units
 				(unit
 					(name "A")
@@ -4323,11 +3963,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0603WAF1503T5E")
+					(name "MPN") "0402WGF1503TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C22807")
+					(name "LCSC") "C25755")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -4344,7 +3984,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0603WAF1503T5E")
+				(value "0402WGF1503TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -4352,7 +3992,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C22807")
+				(value "C25755")
 			)
 			(property
 				(name "Sheetname")
@@ -5403,14 +5043,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN")
-				)
+					(name "MPN") "0402WGF1000TCE")
 				(field
-					(name "Manufacturer")
-				)
+					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C25076")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -5427,15 +5064,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "")
+				(value "0402WGF1000TCE")
 			)
 			(property
 				(name "Manufacturer")
-				(value "")
+				(value "UNI-ROYAL")
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C25076")
 			)
 			(property
 				(name "Sheetname")
@@ -5478,14 +5115,11 @@
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN")
-				)
+					(name "MPN") "0402WGF1000TCE")
 				(field
-					(name "Manufacturer")
-				)
+					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C25076")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -5502,15 +5136,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "")
+				(value "0402WGF1000TCE")
 			)
 			(property
 				(name "Manufacturer")
-				(value "")
+				(value "UNI-ROYAL")
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C25076")
 			)
 			(property
 				(name "Sheetname")
@@ -5533,6 +5167,150 @@
 				(tstamps "/")
 			)
 			(tstamps "773da7ff-e2e7-519d-9c91-c03d33b609b6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R26")
+			(value "910k 1%")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "MPN") "ERJ2RKF9103X")
+				(field
+					(name "Manufacturer") "Panasonic")
+				(field
+					(name "LCSC") "C409936")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "ERJ2RKF9103X")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Panasonic")
+			)
+			(property
+				(name "LCSC")
+				(value "C409936")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "009996d2-3317-57d2-86e7-ae0161121e8d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R27")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ffaf2ac2-43b5-5377-98b7-1cf0aa379290")
 			(units
 				(unit
 					(name "A")
@@ -5693,15 +5471,15 @@
 		)
 		(comp
 			(ref "R_ILIM3")
-			(value "56.2k 0.1%")
+			(value "54.9k 0.1%")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
 				(field
-					(name "MPN") "RT0603BRD0756K2L")
+					(name "MPN") "AT0603BRD0754K9L")
 				(field
 					(name "Manufacturer") "Yageo")
 				(field
-					(name "LCSC") "C705784")
+					(name "LCSC") "C855900")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
@@ -5718,7 +5496,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "RT0603BRD0756K2L")
+				(value "AT0603BRD0754K9L")
 			)
 			(property
 				(name "Manufacturer")
@@ -5726,7 +5504,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C705784")
+				(value "C855900")
 			)
 			(property
 				(name "Sheetname")
@@ -7205,18 +6983,17 @@
 		)
 		(comp
 			(ref "U5")
-			(value "TPS3840DL40")
-			(footprint "Package_TO_SOT_SMD:SOT-23-5")
+			(value "TPS3808G01")
+			(footprint "Package_TO_SOT_SMD:SOT-23-6")
 			(fields
 				(field
-					(name "MPN") "TPS3840DL40DBVR")
+					(name "MPN") "TPS3808G01DBVR")
 				(field
 					(name "Manufacturer") "Texas Instruments")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C19653")
 				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
 				(field
 					(name "Datasheet")
 				)
@@ -7226,12 +7003,12 @@
 			)
 			(libsource
 				(lib "busylight_gate")
-				(part "SUPERVISOR")
+				(part "TPS3808G01")
 				(description "")
 			)
 			(property
 				(name "MPN")
-				(value "TPS3840DL40DBVR")
+				(value "TPS3808G01DBVR")
 			)
 			(property
 				(name "Manufacturer")
@@ -7239,7 +7016,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C19653")
 			)
 			(property
 				(name "Sheetname")
@@ -7259,19 +7036,22 @@
 					(name "A")
 					(pins
 						(pin
-							(num "4")
-						)
-						(pin
-							(num "2")
+							(num "5")
 						)
 						(pin
 							(num "3")
 						)
 						(pin
+							(num "6")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
 							(num "1")
 						)
 						(pin
-							(num "5")
+							(num "4")
 						)
 					)
 				)
@@ -7691,14 +7471,11 @@
 			(footprint "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")
 			(fields
 				(field
-					(name "MPN")
-				)
+					(name "MPN") "SN74LVC1G08DCKR")
 				(field
-					(name "Manufacturer")
-				)
+					(name "Manufacturer") "Texas Instruments")
 				(field
-					(name "LCSC")
-				)
+					(name "LCSC") "C7832")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")
 				(field
@@ -7715,15 +7492,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "")
+				(value "SN74LVC1G08DCKR")
 			)
 			(property
 				(name "Manufacturer")
-				(value "")
+				(value "Texas Instruments")
 			)
 			(property
 				(name "LCSC")
-				(value "")
+				(value "C7832")
 			)
 			(property
 				(name "Sheetname")
@@ -8916,52 +8693,6 @@
 		)
 		(libpart
 			(lib "busylight_gate")
-			(part "SUPERVISOR")
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "SUPERVISOR")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "RESET")
-					(type "open_collector")
-				)
-				(pin
-					(num "2")
-					(name "VDD")
-					(type "power_in")
-				)
-				(pin
-					(num "3")
-					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "4")
-					(name "MR")
-					(type "passive")
-				)
-				(pin
-					(num "5")
-					(name "CT")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "busylight_gate")
 			(part "TLV75733P_DBV")
 			(fields
 				(field
@@ -9100,6 +8831,57 @@
 					(num "6")
 					(name "OUT")
 					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "busylight_gate")
+			(part "TPS3808G01")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TPS3808G01")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "RESET")
+					(type "open_collector")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "MR")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "CT")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "SENSE")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "VDD")
+					(type "power_in")
 				)
 			)
 		)
@@ -9855,39 +9637,35 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C27")
-				(pin "1")
+				(ref "U5")
+				(pin "4")
+				(pinfunction "CT_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "22")
+			(name "/SUP_SENSE")
+			(class "Default")
+			(node
+				(ref "R26")
+				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "C28")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C29")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C30")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C31")
+				(ref "R27")
 				(pin "1")
 				(pintype "passive")
 			)
 			(node
 				(ref "U5")
 				(pin "5")
-				(pinfunction "CT_5")
+				(pinfunction "SENSE_5")
 				(pintype "passive")
 			)
 		)
 		(net
-			(code "22")
+			(code "23")
 			(name "/USB_DN")
 			(class "Default")
 			(node
@@ -9904,7 +9682,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "24")
 			(name "/USB_DP")
 			(class "Default")
 			(node
@@ -9921,7 +9699,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "25")
 			(name "/VDD_U1")
 			(class "Default")
 			(node
@@ -9936,6 +9714,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "R_SU1")
 				(pin "2")
 				(pintype "passive")
@@ -9946,9 +9729,15 @@
 				(pinfunction "VDD_12")
 				(pintype "power_in")
 			)
+			(node
+				(ref "U5")
+				(pin "6")
+				(pinfunction "VDD_6")
+				(pintype "power_in")
+			)
 		)
 		(net
-			(code "25")
+			(code "26")
 			(name "/VDD_U14")
 			(class "Default")
 			(node
@@ -9975,7 +9764,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "27")
 			(name "/VDD_U15")
 			(class "Default")
 			(node
@@ -10002,7 +9791,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "28")
 			(name "GND")
 			(class "Default")
 			(node
@@ -10101,32 +9890,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C27")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "C28")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "C29")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
 				(ref "C3")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "C30")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "C31")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -10330,6 +10094,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R27")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "R3")
 				(pin "2")
 				(pintype "passive")
@@ -10458,8 +10227,8 @@
 			)
 			(node
 				(ref "U5")
-				(pin "3")
-				(pinfunction "GND_3")
+				(pin "2")
+				(pinfunction "GND_2")
 				(pintype "power_in")
 			)
 			(node
@@ -10614,7 +10383,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "29")
 			(name "Net-(D1-DIN)")
 			(class "Default")
 			(node
@@ -10630,7 +10399,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "30")
 			(name "Net-(D1-DOUT)")
 			(class "Default")
 			(node
@@ -10647,7 +10416,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "31")
 			(name "Net-(D2-DOUT)")
 			(class "Default")
 			(node
@@ -10664,7 +10433,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "32")
 			(name "Net-(D3-DOUT)")
 			(class "Default")
 			(node
@@ -10681,7 +10450,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "33")
 			(name "Net-(D4-DOUT)")
 			(class "Default")
 			(node
@@ -10698,7 +10467,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "34")
 			(name "Net-(D5-DOUT)")
 			(class "Default")
 			(node
@@ -10715,7 +10484,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "35")
 			(name "Net-(D6-DOUT)")
 			(class "Default")
 			(node
@@ -10732,7 +10501,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "36")
 			(name "Net-(D7-DOUT)")
 			(class "Default")
 			(node
@@ -10749,7 +10518,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "37")
 			(name "Net-(D10-DIN)")
 			(class "Default")
 			(node
@@ -10766,7 +10535,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "38")
 			(name "Net-(D10-DOUT)")
 			(class "Default")
 			(node
@@ -10783,7 +10552,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "39")
 			(name "Net-(D11-DOUT)")
 			(class "Default")
 			(node
@@ -10800,7 +10569,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "40")
 			(name "Net-(D12-DOUT)")
 			(class "Default")
 			(node
@@ -10817,7 +10586,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "41")
 			(name "Net-(D13-DOUT)")
 			(class "Default")
 			(node
@@ -10834,7 +10603,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "42")
 			(name "Net-(D14-DOUT)")
 			(class "Default")
 			(node
@@ -10851,7 +10620,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "43")
 			(name "Net-(D15-DOUT)")
 			(class "Default")
 			(node
@@ -10868,7 +10637,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "44")
 			(name "Net-(J1-D+-PadA6)")
 			(class "Default")
 			(node
@@ -10891,7 +10660,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "45")
 			(name "Net-(J1-D--PadA7)")
 			(class "Default")
 			(node
@@ -10914,7 +10683,7 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "46")
 			(name "Net-(R12-Pad2)")
 			(class "Default")
 			(node
@@ -10930,7 +10699,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "47")
 			(name "Net-(U1-VBUS_DET)")
 			(class "Default")
 			(node
@@ -10946,7 +10715,7 @@
 			)
 		)
 		(net
-			(code "47")
+			(code "48")
 			(name "Net-(U9-EN)")
 			(class "Default")
 			(node
@@ -10973,7 +10742,7 @@
 			)
 		)
 		(net
-			(code "48")
+			(code "49")
 			(name "Net-(U9-GPIO0)")
 			(class "Default")
 			(node
@@ -10989,7 +10758,7 @@
 			)
 		)
 		(net
-			(code "49")
+			(code "50")
 			(name "Net-(U9-GPIO2_(strap))")
 			(class "Default")
 			(node
@@ -11005,7 +10774,7 @@
 			)
 		)
 		(net
-			(code "50")
+			(code "51")
 			(name "Net-(U9-GPIO8_(strap))")
 			(class "Default")
 			(node
@@ -11021,7 +10790,7 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "52")
 			(name "Net-(U9-GPIO9_(boot))")
 			(class "Default")
 			(node
@@ -11038,7 +10807,7 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "53")
 			(name "Net-(U9-GPIO20_U0RXD)")
 			(class "Default")
 			(node
@@ -11054,7 +10823,7 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "54")
 			(name "Net-(U9-GPIO21_U0TXD)")
 			(class "Default")
 			(node
@@ -11070,7 +10839,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "55")
 			(name "Net-(U14-D)")
 			(class "Default")
 			(node
@@ -11086,7 +10855,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "56")
 			(name "Net-(U15-D)")
 			(class "Default")
 			(node
@@ -11102,7 +10871,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "57")
 			(name "VBUS")
 			(class "Default")
 			(node
@@ -11148,7 +10917,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "58")
 			(name "VBUS_IC")
 			(class "Default")
 			(node
@@ -11172,7 +10941,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R6")
+				(ref "R26")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -11192,12 +10961,6 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "U5")
-				(pin "2")
-				(pinfunction "VDD_2")
-				(pintype "power_in")
-			)
-			(node
 				(ref "U7")
 				(pin "1")
 				(pinfunction "IN_1")
@@ -11211,7 +10974,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "59")
 			(name "unconnected-(D16-DOUT-Pad1)")
 			(class "Default")
 			(node
@@ -11222,7 +10985,7 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "60")
 			(name "unconnected-(J1-SBU1-PadA8)")
 			(class "Default")
 			(node
@@ -11233,7 +10996,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "61")
 			(name "unconnected-(J1-SBU2-PadB8)")
 			(class "Default")
 			(node
@@ -11244,7 +11007,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "62")
 			(name "unconnected-(U1-CURRENT_MODE-Pad3)")
 			(class "Default")
 			(node
@@ -11255,7 +11018,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "63")
 			(name "unconnected-(U1-DIR-Pad11)")
 			(class "Default")
 			(node
@@ -11266,7 +11029,7 @@
 			)
 		)
 		(net
-			(code "63")
+			(code "64")
 			(name "unconnected-(U1-ID-Pad9)")
 			(class "Default")
 			(node
@@ -11277,7 +11040,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "65")
 			(name "unconnected-(U1-OUT2_N-Pad8)")
 			(class "Default")
 			(node
@@ -11288,7 +11051,7 @@
 			)
 		)
 		(net
-			(code "65")
+			(code "66")
 			(name "unconnected-(U1-VCONN_FAULT-Pad6)")
 			(class "Default")
 			(node
@@ -11299,7 +11062,7 @@
 			)
 		)
 		(net
-			(code "66")
+			(code "67")
 			(name "unconnected-(U2-NC-Pad1)")
 			(class "Default")
 			(node
@@ -11310,18 +11073,18 @@
 			)
 		)
 		(net
-			(code "67")
-			(name "unconnected-(U5-MR-Pad4)")
+			(code "68")
+			(name "unconnected-(U5-MR-Pad3)")
 			(class "Default")
 			(node
 				(ref "U5")
-				(pin "4")
-				(pinfunction "MR_4")
+				(pin "3")
+				(pinfunction "MR_3")
 				(pintype "passive+no_connect")
 			)
 		)
 		(net
-			(code "68")
+			(code "69")
 			(name "unconnected-(U8-NC-Pad4)")
 			(class "Default")
 			(node
@@ -11332,7 +11095,7 @@
 			)
 		)
 		(net
-			(code "69")
+			(code "70")
 			(name "unconnected-(U9-GPIO1-Pad13)")
 			(class "Default")
 			(node
@@ -11343,7 +11106,7 @@
 			)
 		)
 		(net
-			(code "70")
+			(code "71")
 			(name "unconnected-(U9-GPIO4-Pad18)")
 			(class "Default")
 			(node

@@ -17,6 +17,16 @@ def hold_ok_high(vbus, r6=150e3, n_inputs=3):
     return vbus - r6 * (n_inputs * LVC_II + TPS3840_ILKG)
 
 
+def hold_ok_high_vdd_u1(vbus_ic, r6=150e3, n_inputs=3, r_su1=470.0, i_u1=200e-6, i_u5=6e-6):
+    """ADR-0025: HOLD_OK high level with the pull-up on VDD_U1 (VBUS_IC behind R_SU1 and the 5.1 V zener). The drop over R_SU1
+    carries the TUSB321 supply (100 uA unattached, TUSB321.i_unattached_ufp; 200 uA is an ASSUMPTION for an attached cable),
+    the TPS3808 supply (6 uA is an ASSUMPTION, its table was not read) and the pull-up current of the three inputs. The
+    zener clamp is not reached below 5.1 V."""
+    i_load = i_u1 + i_u5 + n_inputs * LVC_II
+    v_vdd_u1 = min(vbus_ic - r_su1 * i_load, 5.1)
+    return v_vdd_u1 - r6 * (n_inputs * LVC_II + TPS3840_ILKG)
+
+
 def hold_ok_r6_min(vol=0.2):
     """Smallest pull-up to VBUS_IC that keeps a valid low at VPOR (datasheet-evidence-supervisor.md, A10)."""
     return (TPS3840_VPOR - vol) / TPS3840_I_POR
@@ -46,6 +56,8 @@ def rd_seen_by_source(r_series=100.0):
 def main():
     for v in (4.3, 4.5, 4.75):
         print(f"HOLD_OK high, VBUS_IC {v} V, R6 150k, worst leakage: {hold_ok_high(v):.2f} V (VIH {LVC_VIH} V)")
+    for v in (4.399, 4.5, 4.75):
+        print(f"HOLD_OK high with R6 on VDD_U1 (ADR-0025), VBUS_IC {v} V, worst leakage: {hold_ok_high_vdd_u1(v):.2f} V (VIH {LVC_VIH} V)")
     print(f"R6 minimum for a valid low at VPOR: {hold_ok_r6_min() / 1e3:.0f} kohm")
     print(f"GPIO0 with the 10 k resistor, U2 low, internal pull-up 30 k on: {gpio0_pin_with_pullup():.2f} V (VIL 0.75 V at 3.0 V)")
     print(f"GPIO0 driven high into U2 low: {gpio0_drive_current() * 1e3:.2f} mA")

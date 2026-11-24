@@ -75,6 +75,8 @@ R_ILIM3 stays 56.2 k in the schematic until the owner decides.
 | C | All three in a 0.40 % class (AT or MCT) | the HW-010 limits follow from guaranteed limits | 47.0 k and 56.2 k in AT or MCT class have no stocked LCSC part today; needs other values (a new E192 search with stocked parts) or global sourcing |
 | D | Change HW-010 (wider step 1 and step 3 limits, or limits that state the resistor class) | removes the conflict at the source | changes an approved safety requirement; ADR-0010 margins to the source rating get smaller |
 
+**Decision (owner, Ben Spoor, 2026-11-24, in the working session; recorded by the assistant): option A for P1** (R_ILIM3 = 54.9 k Yageo AT0603BRD0754K9L, C855900; the bench check of the three ILIM resistances on every P1 board; C or D before a product build).
+
 **Recommendation: A for P1, and C before a product build.** 54.9 k costs nothing in area and turns the step 3 margin from
 1.0 mA into 11.3 mA; the bench check is the honest cover for the RT parts on five boards. A product build needs C or D.
 

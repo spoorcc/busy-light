@@ -1,6 +1,6 @@
 # 08 -- Prototype board P1: one-sided assembly for JLCPCB Economic PCBA (design doc)
 
-- **Status:** In Review (revision 5 of 2026-11-22: section 0 records the state after the build; goldfish review RV-016.
+- **Status:** In Review (revision 6 of 2026-11-24: the re-placement and routing after the owner decisions, section R below; readiness review RV-019. Revision 5 of 2026-11-22: section 0 records the state after the build; goldfish review RV-016.
   Revision 4: after the RV-014 readiness review: NO-GO overall, steps 1 to 4 ready; blocking gaps B1 to B3 fixed in that revision). The owner pre-approved implementation after a GO from the
   readiness review (answer 16 of 2026-11-17, `docs/journal/2026-11-17-p1-order-owner-decisions.md`). The owner confirms or
   rejects this plan and its result together.
@@ -17,6 +17,41 @@
   to choose between two-sided P1 (recommended), part reduction, board growth or giving up the keep-out. Steps 1 to 5 and the order-package
   scripts are implemented; routing of P1 waits for that decision. *(Revision 5: answered on 2026-11-18 by the "fewer parts"
   decisions of ADR-0023; ADR-0022 itself is still Proposed. See section 0.)*
+
+## R. Revision 6 (2026-11-24): re-placement and routing after the owner decisions
+**Why.** The only red check on PR #16 is `fab-release` / `build`: `scripts/fab_p1.sh` fails on the stored board-p1 (exit 2: the placement rules cannot be
+measured, 9 rules missed; `scripts/tests/test_fab_check.py::test_must_place_parts_are_on_board_p1` fails once the netlist has R26 and R27). That failure is the compensating
+measure of DEV-008 and is correct: the stored board is behind the schematic. The owner asked on 2026-11-24 to fix CI; the honest fix is the board, not the gate.
+Rule 12 of CLAUDE.md applies: the board is made only by the scripts. No gate is loosened, no waiver is added, no test is skipped.
+
+**Inputs (owner decisions).** Journal `2026-11-22-owner-decisions-p1-rework.md` (11 decisions), ADR-0024 (Accepted 2026-11-24), ADR-0025 option B (Accepted 2026-11-24; divider
+910 k / 100 k instead of 931 k because no 931 k part is stocked), R_ILIM3 = 54.9 k (option A of `analysis-ilim-drift.md`, 2026-11-24), MECH-001 60 mm (approved amendment), HW-017 R22 1206.
+**Netlist change against board-p1** (`tests/data/full.net`, 102 parts, 58 nets, strict ERC 0 findings, deterministic): added U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (ADR-0024) and R26, R27 (ADR-0025);
+removed C27 to C31; U5 is the TPS3808G01 in SOT-23-6 (pins 1 RESET, 2 GND, 3 MR open, 4 CT, 5 SENSE, 6 VDD on VDD_U1); C1 is one 68 nF C0G 1206; R6 pulls up to VDD_U1; R22 is the 1206 5 mohm link;
+R_ILIM3 is 54.9 k. LCSC numbers: `src/sourcing.py` (U5 C19653, thin stock; C1 C3847777; R26 C409936; R_ILIM3 C855900; the missing-LCSC list is empty).
+**Button.** SW1 stays the fixed part at (13.0 mm, 240 degrees) as a **placeholder**. The centre-button concept is open (plan 09, ADR-0026: S2 and S3 go to the coupon gate). This board is **not an order candidate**:
+the order steps O0 to O8 and plan 09 step 3 still apply, and a module or switch move after the gate means another re-placement (a new revision of this section).
+**Rules in code** (changed 2026-11-24, tests updated): `pcb_full.LAYOUT_RULES`: C1 to U5 8.0 mm, R26 and R27 to U5 10.0 mm (C27 to C31 removed); `pcb_rules.BLOCKS`: U5 block C1, R6, R26, R27;
+`fab_check.MUST_PLACE`: R26 and R27 replace C27 to C31; `fab_check.ILIM_VALUES` R_ILIM3 54.9k. Unchanged and enforced: `INPUT_PATH_RULES` (TVS1, U6, R22 to J1:VBUS; R22 to U7; TVS3, TVS4 to J1:CC1 and CC2), the HW-016 spares within 7.0 mm of U7,
+no via in an SMD pad, LED capacitors beside their LED and clear of the tab sectors, tab azimuths 105, 217.5, 285 and 330 degrees.
+
+**Steps (each with its test; one commit when all hold).**
+- R1 Netlist and tests: `SPIKE_ALLOW_KNOWN_OPEN=0 sh run_full.sh python3 <scratch>/fullP2` (done, strict ERC 0); `tests/data/full.net` refreshed; the spike-gate suite and the root pytest pass except the one stale-board test
+  (`test_must_place_parts_are_on_board_p1`), which is the gate this revision closes.
+- R2 Placement gate (section 4.3 unchanged): one placed board, `overlap_mm2` 0, all `LAYOUT_RULES`, `INPUT_PATH_RULES` and the HW-016 rule met (`pcb_layout_check.py` exit 0), strict `placed-4l` DRC, the pairs overlapping U9 listed.
+- R3 Routing batches (section 4.3 baseline environment: `P1=1 PLACE_GRID=1.0 PLACE_ANT_KEEPOUT=1 PLACE_BLOCKS=3 PLACE_ORIENT=1.5 KEYFIRST=1 PRESTITCH=1 FR_THREADS=1 SPIKE_ALLOW_KNOWN_OPEN=0`, planes inner, 4 layers,
+  Freerouting 2.5.0 jar sha256 pinned in `run_pcb.sh`, Java 25, KiCad 10.0.8): `sh run_best.sh <fullP2> <out> 4` with `SEED_OFFSET` 0 (batch c1), 200 (c2) and 400 (c3), at most three batches, one change per batch;
+  the winner is chosen by (unconnected items, strict FAIL lines, hard findings) only; then `run_repass.sh` on the winner, `pcb_finish.py` in three passes, `pcb_sourcing.py`.
+- R4 Acceptance (all hold, else the best partial result is reported and the owner decides; no waiver, no loosened gate, no new DEV entry by the assistant): strict DRC `stitched-4l` only tolerated classes at their maxima; strict ERC 0;
+  `pcb_fabcheck.py --no-via-in-pad` PASS; `pcb_layout_check.py` exit 0 (every rule measured and met); `pcb_power_check.py` numbers reported and the J1 to U7 path wider than 0.6 mm with the drop reported; panel tabs;
+  `scripts/fab_p1.sh <board> <out>` exit 0; every assembled part on top; `tests/test_board_p1.py`, the spike-gate suite and the root pytest pass.
+- R5 Store and record: the board in `hw/kicad/spike-gate/board-p1/` with `run_meta.json`, `repass_meta.json`, `chosen_run.txt`, DRC and ERC JSON, `placement.json`; `board-p1/README.md` and `docs/verification/reports/p1-board.md` updated
+  (batch table, gate counts, power drops, what was not run); CHANGELOG; `check_traceability.py`; images by the `readme-refresh` skill; DEV-008 gets a dated note (it closes only when the owner has confirmed the requirement amendments).
+- **Not run / not claimed:** no bench, no housing fit, no antenna range, no JLCPCB DFM or price, no ESD test (TC-314), no regulatory re-check, no live stock on the order day (U5 has 4 on the JLCPCB overseas count and 0 at LCSC on 2026-11-24).
+**Risks.** Freerouting varies between runs and may not reach zero open connections at 0.15 mm (A3: the ring interior fill was 66 %; five 1206 parts leave, two 0402 parts arrive, so it is not worse); the HOLD_OK high level with the pull-up on VDD_U1
+is 2.03 V at the 4.399 V release maximum with the worst-case input leakage (VIH 2.0 V; `sim/gate_rework_levels.py`; bench TC-210); the TPS3808 datasheet asks for a 100 nF capacitor near VDD, and VDD_U1 has C26 near U1 only
+(an added 100 nF next to U5 is an owner choice, not added); TPS3808 stock is thin.
+**Review.** `docs/reviews/RV-019-plan-08-rev6-readiness.md`. DEV-008 requires a readiness GO of this section before step R2 runs.
 
 ## 0. Revision 5: state after the build (2026-11-22)
 Where this section and sections 1 to 8 differ, this section applies. Sections 1 to 8 are the revision 4 text of 2026-11-18,

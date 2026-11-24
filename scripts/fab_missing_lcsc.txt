@@ -5,4 +5,4 @@
 # evidence, the ref leaves this list, and a new release is made, so the ordered BOM equals a hashed manifest.
 # Source of the list: sourcing.py on 2026-11-18, after ADR-0023 (U10, U13 removed; U3, U4, U11 found) and the U6 lookup.
 # 2026-11-22: R22 left the list (HW-017 amendment: TA-I Tech RLM12FTCMR005, LCSC C316225).
-U5    TPS3840DL40DBVR (HW-010 hold-off): no LCSC or JLCPCB listing found 2026-11-18 (Q1 variant C6560464 out of stock); without U5 the hold-off does not work
+# 2026-11-24: U5 left the list (ADR-0025 accepted: TPS3808G01DBVR, LCSC C19653; thin stock, check on the order day). The list is empty.

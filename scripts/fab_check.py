@@ -60,13 +60,13 @@ ILIM_REFS = ("R_ILIM1", "R_ILIM2", "R_ILIM3")
 # HW-010 as amended by ADR-0023: step 3 = both switches, R_ILIM3 equals R_ILIM2. The test
 # test_ilim_values_equal_the_generator_and_the_model keeps this equal to
 # ilim_steps.candidate_both_on() and to the generator (layout_full.PARTS).
-ILIM_VALUES = {"R_ILIM1": "47.0k 0.1%", "R_ILIM2": "56.2k 0.1%", "R_ILIM3": "56.2k 0.1%"}
+ILIM_VALUES = {"R_ILIM1": "47.0k 0.1%", "R_ILIM2": "56.2k 0.1%", "R_ILIM3": "54.9k 0.1%"}
 # Parts whose absence leaves the HW-010 gate open or undefined, or the board without power: the CC
 # IC and its inverter and pull-up, both ANDs, the supervisor and its delay capacitors, the
 # gate-node pull-up, the limiter, both select switches, the ILIM resistors, the HW-017 link
 # (ADR-0016, ADR-0023, HW-017). The fail-direction table of RV-016 row 7 may add parts.
 MUST_PLACE = frozenset(
-    {"U1", "U2", "R1", "U3", "U4", "U5", "C1", "C27", "C28", "C29", "C30", "C31", "R8", "U7"}
+    {"U1", "U2", "R1", "U3", "U4", "U5", "C1", "R26", "R27", "R8", "U7"}
     | {"U14", "U15", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22"}
 )
 BOTTOM_PASTE = re.compile(r"(B_Paste|BPaste|\.gbp$)", re.IGNORECASE)

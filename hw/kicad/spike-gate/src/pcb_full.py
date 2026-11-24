@@ -177,8 +177,8 @@ MARGIN_EXT = 0.25             # extent = pads + this margin (stands in for the c
 LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R19", "U15", 6.0),
                 ("C24", "U14", 6.0), ("C25", "U15", 6.0),         # bypass capacitor at the switch supply pin
                 ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0),
-                ("C1", "U5", 8.0), ("C27", "U5", 12.0), ("C28", "U5", 14.0), ("C29", "U5", 14.0),
-                ("C30", "U5", 14.0), ("C31", "U5", 14.0),
+                ("C1", "U5", 8.0),                                  # CT capacitor (ADR-0025: one 68 nF replaces the six 100 nF)
+                ("R26", "U5", 10.0), ("R27", "U5", 10.0),           # SENSE divider next to the supervisor (ADR-0025)
                 # HW-016 (Approved): spare pad centres within [10] mm of U7 pin 6. Part centres: 7.0 + 1.48 (U7 pad 6 from the
                 # SOT-23-6 origin) + 1.475 (1206 centre to pad centre) = 9.955 mm (plan 08 section 4.2; RV-016 row 19: 7.5 mm
                 # allowed 10.455 mm). Batch p1b3 without a rule: C4 at 24.8 mm.
