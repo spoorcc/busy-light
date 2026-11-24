@@ -55,6 +55,17 @@ def test_a_taller_gap_spreads_the_light() -> None:
     assert bl.ring_irradiance(0.0, height_mm=12.0) > bl.ring_irradiance(0.0, height_mm=6.0)
 
 
+def test_required_transmission_follows_the_spill() -> None:
+    assert abs(bl.required_transmission(0.03, 15.0) - 0.03 / bl.ring_irradiance(15.0)) < TIGHT
+    assert bl.required_transmission(0.03, 15.0) < bl.required_transmission(0.03, 0.0)
+    assert (
+        bl.required_transmission(5.0, 0.0) == 1.0
+    )  # a disc that cannot exceed the limit needs nothing
+    assert abs(bl.required_transmission(0.03, 15.0) - 0.0446) < PIN / 10
+
+
 def test_main_prints_the_table(capsys: pytest.CaptureFixture[str]) -> None:
     bl.main()
-    assert "0.165" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "0.165" in out
+    assert "optical density at least" in out

@@ -1,6 +1,6 @@
 # 09 -- Centre-of-ring button (design doc)
 
-- **Status:** Draft (revision 8 of 2026-11-24: revision 7 with the resolutions of the review of plan and code (RV-018 rows R29 to R45); revision 7 was revision 6 with the resolutions of the third readiness NO-GO (RV-018 rows R13 to R27) and the step 1 files as built; revision 6: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
+- **Status:** Draft (revision 9 of 2026-11-24: revision 8 plus the owner's second set of answers (section 0, D4 to D8: both concepts to the gate, force window good enough, rare use, light from the ring only, Apple-grade look); not yet reviewed by a goldfish; revision 8 was revision 7 with the resolutions of the review of plan and code (RV-018 rows R29 to R45); revision 7 was revision 6 with the resolutions of the third readiness NO-GO (RV-018 rows R13 to R27) and the step 1 files as built; revision 6: revision 5 plus the owner's direction of 2026-11-24 (section 0, decisions D1 to D3): S2 with the Omron B3U-1000P, S3 kept as the fallback,
   step 1 rescoped to the B3U values. Step 0 ran on 2026-11-23 (section 4.9). The third readiness pass runs on this revision; the other questions of section 7 stay open)
 - **Date:** 2026-11-23  **Owner:** Ben Spoor (author: assistant)
 - **Area:** mech (with hw and sw consequences)
@@ -28,6 +28,17 @@ After the step 0 report the owner said "Do your recommendations". The recommenda
 - **D2 Process (question 6):** steps 0 and 1 run as analysis under the Approved requirements with the change set of section 5. Step 0 ran on 2026-11-23.
 - **D3 Part class:** the B3U-1000P is an Extended part and the TL3342F160QG is Extended too with LCSC stock 1; the owner did not object to the extended-part fee. This is noted only: the order-day part and stock check stays in the gate.
 Not decided by "Do your recommendations", because the report made no recommendation for them: light (question 1), hand over the antenna (3), stuck press (4), life and force window (5), disc size (7) and ingress (8). Step 1 uses the working values in brackets for them.
+
+### Owner answers of 2026-11-24, second set (in the working session; recorded by the assistant)
+Answers to the open questions of the status report after revision 8. The owner's words are quoted; nothing else is a decision.
+- **D4 (question 9, S2 or S3):** "Both." S2 and S3 both go to the pre-order coupon gate; ADR-0026 stays Proposed until the owner accepts it.
+- **D5 (force window):** "Good enough to start." The working window [2] to [5] N stays for the coupons; the life figure is not answered (see D6).
+- **D6:** "Button is only used very rarely."
+- **D7 (light):** "Light should come from the ring/rim not the center." The disc must not glow: the owner's earlier "not lit on its own" is replaced by "dark".
+- **D8:** "Product should look like a really designed apple grade product." A goal for the whole product; for the button it means a flush, tight, even and dark centre disc, no visible tolerance.
+Derived by the assistant from D6 to D8, **working values that the owner may change**: life [2 000] presses (was [20 000]); hand over the antenna [6] dB stays (rare use); the stuck-press rules of 4.5 stay (cheap, and a rare
+press does not remove a stuck one); ingress accepted with a tight gap; the disc is a **separate opaque part** (not translucent, not print-in-place) so that the gap can be [0.4] mm and the disc can be dark; the look
+criteria of 4.1 and MECH-014 are proposals. Open: the process for an Apple-grade surface (question 10) and the disc material and finish (question 11).
 
 ## 1. Problem definition
 SYS-017 and NEED-008 give the device one button. Today SW1 is a TL3342-family tact switch (E-Switch TL3342F160QG, C2886898)
@@ -164,10 +175,14 @@ safety-type criteria ("never rests on the switch", "recess stays above zero").
 ### 4.1 What every variant must meet (working values in brackets; sources in section 7)
 - Disc: diameter 30 mm, plate 1.2 mm lowered 0.3 mm against the band (top at Z 16.15, underside at Z 14.95). The recess must stay above
   zero at the worst case of the stack (the nominal value follows from step 1) so that a flat surface touches the band, not the disc.
-- Gap around the disc: [0.8] mm wide (print-in-place separation of a 0.8 mm gap needs a coupon). A score line with a skin is **deleted**:
-  a 0.4 mm skin around 97 mm has about 18 kN/mm stiffness against the 3 to 10 N/mm needed.
+- Gap around the disc: [0.4] mm wide and even to [+-0.1] mm (D8). The disc is a **separate opaque part** (D7), so the gap is set by two printed edges and the assembly, not by a print-in-place separation; FDM
+  tolerance (TOL_FDM 0.30 mm) is wider than the gap tolerance, so the coupon decides which process reaches it (question 10). A score line with a skin is **deleted**: a 0.4 mm skin around 97 mm has about 18 kN/mm
+  stiffness against the 3 to 10 N/mm needed.
+- Look (D8, proposals for MECH-014): the disc top is flush with the band to [+-0.1] mm or recessed by a designed [0.3] mm dish (the coupons compare 0, 0.15 and 0.3 mm; flush needs the actuation force and the
+  no-actuation test of MECH-012 to hold); no visible fastener, hook, seam or print line on the visible face other than the one gap; one matt finish and colour over lid, band and disc; the visible travel of a press at most
+  [0.3] mm (S3 travels 0.26 mm, S2 0.6 to 1.3 mm: this favours S3).
 - Actuation: [2] to [5] N at every point whose force resultant lies inside R_use (the switch alone is 1.1 to 2.1 N by its +-50 gf, so the
-  window of revision 2, 2 to 4 N, did not allow for it); press-point travel at most [1.0] mm; a click (force drop of at least [30] %,
+  window of revision 2, 2 to 4 N, did not allow for it; the owner called the window good enough to start, D5); press-point travel at most [1.0] mm; a click (force drop of at least [30] %,
   **measured in TC-310 on the real switch** because the TL3342 datasheet has no curve). Test probe: [4] mm flat end with a 1 mm elastomer pad,
   so that the resultant at r = 13 mm stays inside the 15 mm disc.
 - Overload: a [20] N press (assumption) is carried by a stop inside the lid (the disc rim against a lip of the band), not by the PCB and not
@@ -187,13 +202,15 @@ the 3 s and 10 s presses detunes it. TC-312 measures the loss with a hand on the
 rest and during an AP start; interim limit [6] dB (MECH-003). Metal switch bodies inside the MECH-003 box need a MECH-003 wording or a DEV
 (for S3); the soft rule "switch on the side away from the antenna" is kept for S2.
 
-### 4.4 Light (MECH-002)
-By the plan 05 geometry (LEDs 8 mm under a translucent plate; Lambertian, ring sum; the LED beam angle is not found) the plate shows about
-16.5 % of the ring brightness at the centre, 50 % at r = 13 mm and 67 to 77 % at r = 15 to 16 mm (`button_light.py`, receiver at the disc underside, 7.7 mm above the LED top; with the lid underside at 8.0 mm the values are 18 %, 53 % and 70 to 79 %). **The disc is
-lit by spill** (the owner's "not lit on its own" can only mean no extra LED), and a gap or step at r = 15 to 16 mm sits in the bright zone,
-so a line is likely. Options for the owner: (i) accept a softly lit disc and a stepped light seal at the gap, (ii) an opaque underside mask on
-the disc (a coupon decides), (iii) a smaller disc. TC-302 gets a procedure first (it is a stub today), then a photo at 1 m and 0.5 m of disc
-and gap; the criterion is a luminance ratio disc-to-band of [10] to [60] % and no gap line brighter than the band (values after the first coupon).
+### 4.4 Light (MECH-002; owner decision D7: the light comes from the ring and rim, not from the centre)
+The ring glows as a closed band (MECH-002 stays); **the disc stays dark**. By the plan 05 geometry (LEDs under a translucent plate; Lambertian ring sum, `button_light.py`, receiver at the disc underside 7.7 mm above the LED
+top) the spill reaches 16.5 % of the value above an LED at the centre, 50 % at r = 13 mm and 67 to 77 % at r = 15 to 16 mm (18 %, 53 % and 70 to 79 % with the lid underside at 8.0 mm). A translucent disc would glow, so:
+- the disc is an **opaque** part (colour and finish chosen with the owner, question 11); with a working limit of [3] % of the ring luminance the disc transmission must be at most 18 % at the centre, 6.0 % at r = 13 mm and
+  4.5 % at r = 15 mm (optical density at least 0.74, 1.22 and 1.35; `button_light.required_transmission`), so an unmasked thin opaque print is not enough and the coupon measures the disc;
+- **no light leaks at the gap**: the disc rim overlaps a lip of the band (a labyrinth) so that no bright line shows at the 0.4 mm gap, and the gap is dark against the ring (a line brighter than the band is a fail);
+- the lit band is even: no single LED visible at 1 m (MECH-002) and a luminance variation along the ring of at most [+-25] % (value after the first coupon).
+TC-302 gets a procedure first (it is a stub today), then a photo at 1 m and 0.5 m of disc, gap and ring; the criteria are a disc-to-ring luminance ratio of at most [3] %, no gap line brighter than [3] % of the ring and the
+MECH-002 band criteria. MECH-002 (Approved) gets a change proposal: "the centre disc shall not glow".
 
 ### 4.5 Firmware and system (proposals for SYS-017 and a new SW requirement)
 - A press present at boot, or one not preceded by a release of at least [1] s, starts nothing (a stuck press cannot start the AP at 3 s or
@@ -213,8 +230,8 @@ and gap; the criterion is a luminance ratio disc-to-band of [10] to [60] % and n
 - Area check: step 1 gives a capacity estimate (`button_zone.fill_fraction`, plan 08 A3 figures of 430 mm2 on 650 mm2: 66 % today, 63 % for S2 with the B3U courtyard of 4.0 x 3.5 mm, 82 % for S3 with two more TL3342 courtyards); the placer run with the chosen concept is part of plan 08
   revision 6 (step 4), with the area fill before and after as its report.
 - Plan 05: rows "btn" and "az_btn" are replaced; O8 answered; section 4.5 gets a pointer. Plan 08 revision 6 inherits the switch rule.
-- Part structure per concept: M1 is one print; M3 is a separate disc retained by a hook (print orientation: plate on the bed). `housing.py`
-  asserts one solid today and changes for a cut disc.
+- Part structure (D7, D8): for both concepts the disc is a separate opaque part retained by hooks or tabs under the band (print orientation: plate on the bed); for S2 the bridge arms are part of the disc part or of a
+  carrier ring. `housing.py` asserts one solid today and changes for a separate disc.
 
 ### 4.7 Requirement proposals (text; entered as proposals in the requirement files at step 2)
 Parent of all: SYS-017, NEED-008, owner decision 9.
@@ -225,17 +242,19 @@ Parent of all: SYS-017, NEED-008, owner decision 9.
 - **MECH-012 No unintended actuation.** The button shall not actuate when the unit lies face down on a flat surface, or when a [5] N force is
   spread over the lid band. TC-313.
 - **MECH-013 Click and life.** The button shall give a click (force drop at least [30] %, measured on the real switch) and keep its actuation
-  force within [+-20] % after [20 000] presses (the TL3342 datasheet gives 100 000 cycles for the switch alone). TC-311 (the life figure is an
-  owner decision).
+  force within [+-20] % after [2 000] presses (rare use, D6; the switch alone is rated 100 000 cycles for the TL3342 and 200 000 for the B3U). TC-311 (the life figure is derived
+  from D6 and stays the owner's to change).
+- **MECH-014 Appearance of the button (proposal, D8).** The centre disc shall sit flush with the band to [+-0.1] mm (or in a designed recess), with a gap of [0.4] mm even to [+-0.1] mm, with no visible
+  fastener or print line on the visible face and with the same finish and colour family as the lid. Verified by TC-316 (gauge, photo at 0.5 m, owner design review of the sample).
+- **MECH-002 change (D7):** add "the centre disc shall not glow: its luminance shall be at most [3] % of the ring luminance and the gap shall show no line brighter than that". TC-302.
 - **MECH-004 change:** "to the button with a finger" becomes "to the centre disc of the ring with a finger". **HW-007 change:** the button input
   may be driven by up to three parallel switches (S3); the pull-up and the ESD path are unchanged. **SYS-017 amendment:** section 4.5.
 
 ### 4.8 ADR-0026 criteria (weights 1 to 5)
-Actuation force and travel inside the window at every point (5); robustness to FDM tolerance and to the stack (5); antenna margin and metal near
-the antenna (5); no unintended or stuck actuation (4); part count, area and cost (3); light and look (3); printability (3); change to approved
-texts (2). Alternatives: S2 + M1 with the B3U-1000P (the owner's direction D1; recommended), S2 + M1 with the TL3342F160QG (first assumption of this plan), S3 + M3 (fallback), a scissor linkage with one switch
-(not studied, owner decision D1), and the switch part (4.9: B3U-1000P, KSC221JLFS, TL3342F160QG). ADR-0026 names only existing IDs in its Related field (the proposed MECH, TC and SW items appear as "plan 09 section 4.7"), so that
-`check_traceability.py` passes before step 2.
+Actuation force and travel inside the window at every point (5); robustness to FDM tolerance and to the stack (5); antenna margin and metal near the antenna (5); **look and feel, Apple grade: flush, narrow even gap,
+short visible travel (5, new with D8)**; no unintended or stuck actuation (4); part count, area and cost (3); light from the ring only, disc dark (3, D7); printability (3); change to approved texts and decisions (2).
+Alternatives: S2 + M1 with the B3U-1000P (the owner's direction D1), S2 + M1 with the TL3342F160QG (dropped), S3 + M3 (fallback; D4: both go to the gate), a scissor linkage with one switch (not studied, D1), and the
+switch part (4.9). ADR-0026 names only existing IDs in its Related field (the proposed MECH, TC and SW items appear as "plan 09 section 4.7"), so that `check_traceability.py` passes before step 2.
 
 ### 4.9 Switch part
 Decision 9 also asks to change the button choice. Step 0 reads the datasheet of the TL3342F160QG and of **two alternatives chosen by these
@@ -344,7 +363,7 @@ found open are pinned here (RV-018 rows R13 to R27). All values below are reprod
 the owner approves; ESD, overload, life and click procedures are written (TC-207, TC-302, TC-304, TC-311, TC-314 are stubs or new).
 
 **Step 3 (pre-order gate)** printed lids and a plain stand-in board with the switch or switches at the planned points (no module), made by a script in `scripts/`
-(rule 12); coupons in `mech/freecad/coupons.py` (disc stiffness for S2 and the rigid disc for S3, 0.8 mm gap, stop lip, light seal, the 0.8 / 1.2 / 1.6 mm plates), with one B3U at the centre and three B3U at r = 11 mm on the stand-in board, PETG brand and print settings
+(rule 12); coupons in `mech/freecad/coupons.py` (disc stiffness for S2 and the rigid disc for S3, 0.8 mm gap, stop lip, light seal, the 0.8 / 1.2 / 1.6 mm plates), with one B3U at the centre and three B3U at r = 11 mm on the stand-in board (D4: both), an opaque disc coupon for the light limit of 4.4, a 0.4 mm gap with a labyrinth lip, and the flush, 0.15 mm and 0.3 mm recess variants of 4.1, PETG brand and print settings
 recorded; TC-310 at coupon level on three lids with the 4 mm probe; sample sizes of 3 lids, 25 points, 10 presses. P1 is not re-placed before this passes; a failed
 gate sends the plan back to ADR-0026 (the alternative to the gate is a respin).
 
@@ -372,12 +391,13 @@ revision 6 (the stored SW1 at 13 mm does not match the housing hole today). Plan
 | (unit) `test_button_zone.py` | analysis | outlines, distances, pose search | Unit | as listed in step 1 |
 | (check) `check_part_evidence.py` | analysis | switch evidence | Check | 0 errors; hash and quote checks reported as run or not run |
 | TC-310 | MECH-010 | force and position map | Coupon, then prototype | [4] mm probe with a 1 mm pad, 1 mm/s, gauge accuracy 0.1 N, actuation read from the BTN_SW level on a scope; 25 points (centre, 8 at r = 7, 8 at r = 12 (probe edge at 14 mm, 0.7 mm inside the disc edge against the +-0.3 mm print tolerance), 8 in the edge zone) on 3 housings, 10 presses each, unit flat and on a vertical mount, at 25 and 50 degC; every point inside R_use actuates at [2] to [5] N and at most [1.0] mm; no sticking; the click force drop is read here |
-| TC-311 | MECH-013 | life and click | Prototype | [20 000] presses with a servo jig (jig to define; the owner decides the number); force within [+-20] %; no crack |
+| TC-311 | MECH-013 | life and click | Prototype | [2 000] presses with a servo jig (jig to define; the owner decides the number); force within [+-20] %; no crack |
 | TC-312 | MECH-003, SYS-038 | range with a hand on the disc | Prototype | loss against the TC-038 baseline with a hand phantom on the disc, at rest and during an AP start; at most [6] dB |
 | TC-313 | MECH-012 | no unintended press | Prototype | unit face down on a flat table, on a soft pad, on a convex object, and under [5] N spread over the band, each for [60] s, vertical mount included; no actuation |
 | TC-314 | HW-007 | ESD at the disc and gap | Prototype | IEC 61000-4-2 air discharge at the disc and the gap, levels from the technical file; no reset, no false press (test case to write) |
 | TC-315 | MECH-011 | overload | Prototype | [20] N for [10] s at the disc edge and centre, then TC-310; the click occurs before the stop at every point |
-| TC-302 (extended) | MECH-002 | disc and gap light | Prototype | photo at 1 m and 0.5 m; luminance ratios of 4.4 |
+| TC-302 (extended) | MECH-002, MECH-014 | ring band, dark disc and gap | Coupon, prototype | photo at 1 m and 0.5 m with luminance read-out; disc-to-ring luminance at most [3] %; no gap line brighter than [3] % of the ring; ring variation at most [+-25] %; no single LED visible at 1 m |
+| TC-316 | MECH-014 | appearance of the disc | Coupon, prototype | feeler gauge or optical measurement of the gap at 8 points (0.4 +- 0.1 mm) and of the flushness (+-0.1 mm); photo at 0.5 m; owner design review of the sample against the Apple-grade goal (D8); no visible fastener or print line |
 | TC-207, TC-304 (extended) | HW-007, MECH-004 | button input, access | Analysis, demonstration | procedures written at step 2 (both are stubs today) |
 
 Not run now: everything above. The numbers of section 3 come from scratch scripts.
@@ -385,30 +405,28 @@ Not run now: everything above. The numbers of section 3 come from scratch script
 ## 7. Risks and open questions
 Risks (entered in the register after the owner reads this revision):
 1. "Press anywhere" fails (3.2): only S2 + M1 (band ratio 3.0 with the B3U, 1.4 with the TL3342; the B3U pre-travel tolerance of +0.2/-0.1 mm still breaks the force window at its extremes, so the click travel must be measured), or S3 + M3 (not placeable at r = 11 with the TL3342 body), pass the model; a rocking or binding disc; a mushy click from the stack.
-2. A hand over the antenna during a 3 s or 10 s press; S2 with the B3U keeps 77 % of today's 5.06 mm on paper (50 to 60 % with the TL3342 body); S3 puts metal
+2. A hand over the antenna during a 3 s or 10 s press; S2 with the B3U keeps 72 % of today's 5.06 mm with the antenna end away from the switch (50 % with the TL3342 body); S3 puts metal
    next to the strip if it can be placed at all.
-3. Light: the disc is lit by spill; a gap line is likely (4.4).
+3. Light: the disc must stay dark (D7); the spill needs a disc transmission of at most 4.5 % at r = 15 mm and a light-tight gap; a bright gap line or a glowing disc fails TC-302 (4.4).
+3a. Look (D8): FDM tolerance (+-0.3 mm) is wider than a 0.4 mm gap tolerance of +-0.1 mm; an Apple-grade finish may need another process for the visible parts (question 10).
 4. Unintended or stuck press (4.5); three parallel switches triple the stuck-closed chance.
 5. PETG creep and fatigue of arms or tabs at 50 degC (A2); FDM tolerance against a switch travel that is not yet known (3.4).
 6. Area: S3 raises the fill of the ring interior from 66 % to about 82 % (plan 08 figures, not recomputed).
 7. Pre-order gate delay; respin cost if the gate is skipped.
 
-Sources of the working values: the 2 to 5 N window, 1.0 mm travel, 20 N overload, 5 N spread load, 20 000 presses, 30 % click drop and R_use = 13 mm
+Sources of the working values: the 2 to 5 N window, 1.0 mm travel, 20 N overload, 5 N spread load, 2 000 presses (derived from D6), 30 % click drop and R_use = 13 mm
 are the assistant's working proposals without a standard behind them; step 0 replaces what the datasheets give, the owner decides the rest.
 
 Open questions for the owner (they change what is built):
-1. **Light:** accept a softly lit disc (17 % to 77 % of the ring brightness), or an opaque mask or a smaller disc?
-2. **Direction:** answered (D1, 2026-11-24): S2 with the Omron B3U-1000P, S3 as fallback, no scissor study. Not asked again.
-3. **Hand over the antenna:** is a loss of up to [6] dB with a hand on the disc acceptable (A6)?
-4. **Stuck press:** accept the rules of 4.5 (no start after a stuck press; reset needs a second deliberate action)?
-5. **Life** in presses ([20 000]) and the force window [2] to [5] N.
-6. **Process:** answered (D2, 2026-11-24): steps 0 and 1 run as analysis. Not asked again.
-9. **S2 or S3:** the scores are within noise (ADR-0026: 84 and 87). Take both to the coupon gate (recommended), keep S2 only (D1), or switch to S3?
-7. Disc and R_use against the free circle: 30 mm and 26 mm of 38 mm (62 % and 47 % of the area). Is that "the entire centre"?
-8. Ingress: the gap is a 75 mm2 opening above the board and no requirement covers liquid or dust; add one or accept?
+Answered: direction (D1), process (D2), S2 or S3 (D4: both to the gate), force window (D5: good enough to start), light (D7: from the ring, the disc dark). Derived from D6 to D8 and open to correction: life [2 000], antenna [6] dB, stuck-press rules, ingress.
+7. Disc and R_use against the free circle: 30 mm and 26 mm of 38 mm (62 % and 47 % of the area). Is that "the entire centre"? (unchanged; a dark opaque disc makes the size a pure design question)
+10. **Process for the look (D8):** FDM (+-0.3 mm) cannot make a 0.4 mm gap even to +-0.1 mm or a flush disc without finishing. Recommendation: prove the function with FDM coupons and housings, make the appearance
+    sample (lid, band and disc) in a finer process (resin or MJF with finishing, to be priced), and decide the production process (injection moulding) at the manufacturing review; do not promise the Apple-grade finish in FDM.
+11. **Disc material and finish:** opaque (optical density of at least 1.35 at r = 15 mm) in which colour and surface (matt, same family as the lid)? Recommendation: the lid colour family in a matt opaque material, with the
+    finish decided on the appearance sample.
 
 ## 8. Rollout / rollback and traceability
 Created: plan 09, RV-018, ADR-0026 (Proposed, step 1), MECH-010 to MECH-013 (proposals), TC-310 to TC-315, risk entries, analysis scripts and tests,
 `button_zone.py`, switch evidence. Changed (proposals): HW-007, MECH-004, SYS-017, one SW item, ADR-0006 note, plan 05, plan 08 revision 6, DEV-004.
-IDs reserved by this plan: ADR-0026, RV-018, MECH-010 to MECH-013, TC-310 to TC-315 (the traceability check reads `docs/**/*.md`, plans included, and finds the IDs only where a heading starts with one; the IDs enter
+IDs reserved by this plan: ADR-0026, RV-018, MECH-010 to MECH-014, TC-310 to TC-316 (the traceability check reads `docs/**/*.md`, plans included, and finds the IDs only where a heading starts with one; the IDs enter
 the checked files at step 2). Rollback: the fallback of section 5.

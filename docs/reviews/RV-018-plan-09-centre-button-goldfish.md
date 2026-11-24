@@ -145,3 +145,9 @@ built on them and about test strength. No repository file was edited by the gold
 | R45 (F17) | Info | The B3U result is stable under the search assumptions (corner limit, LED clearance, plunger keep-out) | None needed | Checked |
 Consequence: with the corrected scores ADR-0026 puts S2 (84) and S3 (87) within noise and S2 with the TL3342 last (66); plan 09 revision 8 recommends taking S2 and S3 to the coupon gate. The owner's direction D1 (S2 with the B3U)
 stays the working direction for step 1, but the review did not support the first claim that S2 leads. Open: plan 09 question 9 (S2, S3 or both to the gate).
+
+## Note on revision 9 (2026-11-24, after the owner's second set of answers)
+Plan 09 revision 9 (decisions D4 to D8) is **not reviewed by a goldfish**; the next review is the readiness pass before step 2 starts. While making revision 9 the assistant found that the commit of revision 8
+(`7064a1f`) had lost the criteria, alternatives and comparison sections of ADR-0026 through a slicing error in an edit script (the traceability, style and licence checks do not read ADR structure, so they passed). The ADR was
+restored in full with the revision 9 content; the other edited documents (plan 09, the report, this record) were checked for their section lists. Lesson: edit scripts must use unique anchors and the result must be read, not only checked.
+

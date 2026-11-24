@@ -47,6 +47,20 @@ def ring_irradiance(  # noqa: PLR0913, PLR0917
     return _irradiance(r_mm, azimuth_deg, height_mm, ring_r_mm, n, phase_deg) / ref
 
 
+def required_transmission(max_ratio: float, r_mm: float, **kwargs: float) -> float:
+    """Largest transmission of the disc (0 to 1) that keeps its luminance at radius r_mm under
+    max_ratio of the ring luminance.
+
+    The disc is lit only by spill, so its luminance is the spill ratio times the transmission. The
+    ring luminance is the value above an LED (ratio 1). kwargs go to ring_irradiance. Plan 09
+    section 4.4 (owner decision D7: the light comes from the ring, not from the centre).
+    """
+    return min(1.0, max_ratio / ring_irradiance(r_mm, **kwargs))
+
+
+MAX_DISC_RATIO = 0.03  # working value: the disc shows at most 3 % of the ring luminance
+
+
 def main() -> None:
     print("Irradiance relative to the value above an LED (LED at azimuth 0):")
     print("  r mm   at an LED azimuth   between two LEDs")
@@ -54,6 +68,12 @@ def main() -> None:
         at_led = ring_irradiance(r, azimuth_deg=0.0)
         between = ring_irradiance(r, azimuth_deg=360.0 / N_LED / 2)
         print(f"  {r:4d}   {at_led:15.3f}   {between:15.3f}")
+    print(
+        f"Disc transmission that keeps the disc under {MAX_DISC_RATIO:.0%} of the ring luminance:"
+    )
+    for r in (0, 13, 15):
+        tr = required_transmission(MAX_DISC_RATIO, float(r))
+        print(f"  r = {r:2d} mm: at most {tr:.1%} (optical density at least {-math.log10(tr):.2f})")
 
 
 if __name__ == "__main__":

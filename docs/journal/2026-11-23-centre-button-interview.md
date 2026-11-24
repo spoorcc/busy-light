@@ -52,3 +52,9 @@ The B3U pre-travel tolerance was read on the rendered catalogue page: 0.15 +0.2/
 ## Review of step 1 (2026-11-24)
 A fresh goldfish reviewed plan 09 revision 7 against the built files: NOT READY on reasoning and test strength, all headline numbers reproduced. Resolved in revision 8 (RV-018 rows R29 to R45).
 Result worth the owner's attention: the first ADR scored S2 with the B3U at 96 against 89 for S3; the corrected scores are 84 and 87 (within noise), because the best S2 pose puts the metal switch 1.35 mm from the antenna strip, no bridge stiffness holds the force window over the B3U pre-travel tolerance, and three switches miss the window at both ends. The assistant now recommends taking both to the coupon gate; the owner's direction D1 stays the working direction until the owner decides.
+
+## Owner answers, second set (2026-11-24)
+Answers to the open questions after revision 8, recorded in plan 09 section 0 as D4 to D8: "Both" (S2 and S3 to the coupon gate); the force window is "good enough to start"; "Button is only used very rarely";
+"Light should come from the ring/rim not the center"; "Product should look like a really designed apple grade product". The assistant derived working values (life [2 000] presses, a separate opaque disc with a [0.4] mm gap, flush or
+designed dish, MECH-014 appearance proposal) and opened two questions: the process for an Apple-grade surface (FDM tolerance is wider than the gap tolerance) and the disc material and finish.
+Process note: the revision 8 commit had damaged ADR-0026 (a slicing error in an edit script removed three sections); found and restored the same day.
