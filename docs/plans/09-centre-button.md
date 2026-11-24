@@ -35,10 +35,11 @@ Answers to the open questions of the status report after revision 8. The owner's
 - **D5 (force window):** "Good enough to start." The working window [2] to [5] N stays for the coupons; the life figure is not answered (see D6).
 - **D6:** "Button is only used very rarely."
 - **D7 (light):** "Light should come from the ring/rim not the center." The disc must not glow: the owner's earlier "not lit on its own" is replaced by "dark".
+- **D9 (2026-11-24, third answer; questions 10 and 11):** "I agree with your recommendations." The recommendations were: question 10, prove the function with FDM coupons and housings, make the appearance sample (lid, band and disc) in a finer process (resin or MJF with finishing, to be priced) and decide the production process (injection moulding) at the manufacturing review, without promising the Apple-grade finish in FDM; question 11, a matt opaque disc in the lid colour family, with the finish decided on the appearance sample. Question 7 (disc size) had no recommendation and stays open with 30 mm as the working value.
 - **D8:** "Product should look like a really designed apple grade product." A goal for the whole product; for the button it means a flush, tight, even and dark centre disc, no visible tolerance.
 Derived by the assistant from D6 to D8, **working values that the owner may change**: life [2 000] presses (was [20 000]); hand over the antenna [6] dB stays (rare use); the stuck-press rules of 4.5 stay (cheap, and a rare
 press does not remove a stuck one); ingress accepted with a tight gap; the disc is a **separate opaque part** (not translucent, not print-in-place) so that the gap can be [0.4] mm and the disc can be dark; the look
-criteria of 4.1 and MECH-014 are proposals. Open: the process for an Apple-grade surface (question 10) and the disc material and finish (question 11).
+criteria of 4.1 and MECH-014 are proposals. The process for the look and the disc material were answered by D9.
 
 ## 1. Problem definition
 SYS-017 and NEED-008 give the device one button. Today SW1 is a TL3342-family tact switch (E-Switch TL3342F160QG, C2886898)
@@ -418,12 +419,11 @@ Sources of the working values: the 2 to 5 N window, 1.0 mm travel, 20 N overload
 are the assistant's working proposals without a standard behind them; step 0 replaces what the datasheets give, the owner decides the rest.
 
 Open questions for the owner (they change what is built):
-Answered: direction (D1), process (D2), S2 or S3 (D4: both to the gate), force window (D5: good enough to start), light (D7: from the ring, the disc dark). Derived from D6 to D8 and open to correction: life [2 000], antenna [6] dB, stuck-press rules, ingress.
+Answered: direction (D1), process (D2), S2 or S3 (D4: both to the gate), force window (D5: good enough to start), light (D7: from the ring, the disc dark), process for the look (D9, question 10) and disc material and finish (D9, question 11). Derived from D6 to D8 and open to correction: life [2 000], antenna [6] dB, stuck-press rules, ingress.
 7. Disc and R_use against the free circle: 30 mm and 26 mm of 38 mm (62 % and 47 % of the area). Is that "the entire centre"? (unchanged; a dark opaque disc makes the size a pure design question)
-10. **Process for the look (D8):** FDM (+-0.3 mm) cannot make a 0.4 mm gap even to +-0.1 mm or a flush disc without finishing. Recommendation: prove the function with FDM coupons and housings, make the appearance
-    sample (lid, band and disc) in a finer process (resin or MJF with finishing, to be priced), and decide the production process (injection moulding) at the manufacturing review; do not promise the Apple-grade finish in FDM.
-11. **Disc material and finish:** opaque (optical density of at least 1.35 at r = 15 mm) in which colour and surface (matt, same family as the lid)? Recommendation: the lid colour family in a matt opaque material, with the
-    finish decided on the appearance sample.
+10. **Process for the look (D8):** answered (D9): FDM coupons and housings prove the function; the appearance sample (lid, band, disc) is made in a finer process (resin or MJF with finishing, to be priced); the
+    production process is decided at the manufacturing review; no Apple-grade promise in FDM. Not asked again.
+11. **Disc material and finish:** answered (D9): matt opaque, lid colour family, finish decided on the appearance sample (optical density of at least 1.35 at r = 15 mm). Not asked again.
 
 ## 8. Rollout / rollback and traceability
 Created: plan 09, RV-018, ADR-0026 (Proposed, step 1), MECH-010 to MECH-013 (proposals), TC-310 to TC-315, risk entries, analysis scripts and tests,

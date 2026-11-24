@@ -58,3 +58,7 @@ Answers to the open questions after revision 8, recorded in plan 09 section 0 as
 "Light should come from the ring/rim not the center"; "Product should look like a really designed apple grade product". The assistant derived working values (life [2 000] presses, a separate opaque disc with a [0.4] mm gap, flush or
 designed dish, MECH-014 appearance proposal) and opened two questions: the process for an Apple-grade surface (FDM tolerance is wider than the gap tolerance) and the disc material and finish.
 Process note: the revision 8 commit had damaged ADR-0026 (a slicing error in an edit script removed three sections); found and restored the same day.
+
+## Third answer (2026-11-24)
+"I agree with your recommendations also fix ci": recorded as D9 in plan 09 (questions 10 and 11). "Fix ci": the only red check on PR #16 is `fab-release` / `build` (the `ci` workflow and the `fab-release` test job pass). It fails because the stored board-p1 does not
+meet the current placement rules and is behind the schematic. Making it pass honestly needs the re-placement (plan 08 revision 6), which waits for three owner decisions (ADR-0024, ADR-0025, R_ILIM3).
