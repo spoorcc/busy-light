@@ -179,6 +179,7 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
                 ("R_ILIM1", "U7", 15.0), ("R_ILIM2", "U7", 15.0), ("R_ILIM3", "U7", 15.0),
                 ("C1", "U5", 8.0),                                  # CT capacitor (ADR-0025: one 68 nF replaces the six 100 nF)
                 ("R26", "U5", 10.0), ("R27", "U5", 10.0),           # SENSE divider next to the supervisor (ADR-0025)
+                ("C33", "U5", 6.0), ("C34", "U5", 8.0),             # TPS3808 bypass: 100 nF close to VDD, 1 nF on SENSE (SBVS050N)
                 # HW-016 (Approved): spare pad centres within [10] mm of U7 pin 6. Part centres: 7.0 + 1.48 (U7 pad 6 from the
                 # SOT-23-6 origin) + 1.475 (1206 centre to pad centre) = 9.955 mm (plan 08 section 4.2; RV-016 row 19: 7.5 mm
                 # allowed 10.455 mm). Batch p1b3 without a rule: C4 at 24.8 mm.
@@ -188,7 +189,7 @@ LAYOUT_RULES = (("R3", "U15", 6.0), ("R2", "U14", 6.0), ("R18", "U14", 6.0), ("R
 # (RV-016 row 12: not implemented in the placer for board-p1, all four missed).
 INPUT_PATH_RULES = (("TVS1", "J1:VBUS", 6.0), ("U6", "J1:VBUS", 8.0), ("R22", "J1:VBUS", 8.0), ("R22", "U7", 6.0),
                     # ADR-0024 (owner decision 4, P3): the CC ESD diodes at the connector pads of CC1 and CC2
-                    ("TVS3", "J1:CC1", 6.0), ("TVS4", "J1:CC2", 6.0))
+                    ("TVS3", "J1:/CC1", 6.0), ("TVS4", "J1:/CC2", 6.0))   # net names as in the netlist (RV-019 G1)
 PLACE_MARGIN = 0.27           # extents already include the courtyard; this only keeps rounding off the DRC line
 R_MOVE = 17.3                 # movable parts stay inside this radius (the LED ring pads start at about 17.8; was 16.6, loosened 2026-11-07 by owner choice)
 # Plan 08 section 4.2 (P1, HW-008): the LED bypass capacitors move beside their LED on the top side, which frees the ring

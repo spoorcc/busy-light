@@ -54,6 +54,21 @@ class Power(unittest.TestCase):
         self.assertEqual(K.power_fails_from(out), 1)
 
 
+class Layout(unittest.TestCase):
+    def test_placement_rule_misses_rank_after_the_gate_and_before_power_and_tidiness(self):
+        """RV-019 G6: the picker ignored the placement rules."""
+        with tempfile.TemporaryDirectory() as t:
+            runs = [make(t, "r1", drc(0)), make(t, "r2", drc(0)), make(t, "r3", drc(1))]
+            miss = {"r1": 2, "r2": 0, "r3": 0}                  # r1 is tidier and has no power failure, but misses two rules
+            best, rows = K.pick(runs, gate=lambda b: 0, layout=lambda b: miss[b.parent.parent.name], power=lambda b: 0,
+                                tidy=lambda b: (0,) if b.parent.parent.name == "r1" else (9,))
+            self.assertEqual(best.name, "r2")                   # r3 meets the rules but has an open item
+            self.assertEqual(dict(rows)[runs[1]], (0, 0, 0, 0, 0, 9))   # unconnected, strict, hard, rule misses, power, tidy
+
+    def test_layout_misses_counts_missed_and_unmeasurable_rules_and_is_99_when_unreadable(self):
+        self.assertEqual(K.layout_misses(Path("/nonexistent/board.kicad_pcb")), 99)
+
+
 class Pick(unittest.TestCase):
     def test_score_counts_kinds(self):
         self.assertEqual(K.score(drc(2, clearance=1, courtyards_overlap=14, track_dangling=3)), (2, 1, 3))

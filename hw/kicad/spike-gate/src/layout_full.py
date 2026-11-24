@@ -72,7 +72,8 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "R_ILIM1": (*R, "47.0k 0.1%"),
     "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS3808G01"),   # ADR-0025 option B (owner decision 2026-11-24)
     "R26": (*R0402, "910k 1%"), "R27": (*R0402, "100k"),   # SENSE divider from VBUS_IC: 910 k / 100 k (931 k is not stocked, see ADR-0025)
-    "R6": (*R0402, "150k"),   # ADR-0024: HOLD_OK pull-up to VBUS_IC, at least 134 kohm (datasheet-evidence-supervisor.md, A10)
+    "R6": (*R0402, "100k"),   # HOLD_OK pull-up to VDD_U1 (ADR-0024, ADR-0025; owner 2026-11-24: 100 k, high level 2.77 V at the 4.399 V release maximum, RV-019 G9)
+    "C33": (*C0402, "100n"), "C34": (*C0402, "1n"),   # TPS3808 bypass (SBVS050N 7.3.1 and table 5-1): 100 nF close to VDD, 1 nF on SENSE (owner 2026-11-24)
     "U10": (*G08, "74LVC1G08"),   # ADR-0024 (ADR-0018 option E): GATE_OK_RB = HOLD_OK AND FAULT_N, output to GPIO6 only
     # ADR-0024: GPIO0 series resistor (owner decision 2) and CC protection (owner decision 4, P3): ESD diode at the connector,
     # 100 ohm in series to the CC IC
@@ -189,6 +190,7 @@ PLACE = {
     "R_ILIM3": (gx(250.19), 91.44, 90),
     "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0),
     "R26": (gx(26.67), 126.0, 0), "R27": (gx(26.67), 146.05, 0),
+    "C33": (gx(63.5), 124.46, 0), "C34": (gx(15.24), 136.0, 0),
     "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
     "C3": (350.5, 24.0, 0), "R8": (364.0, 36.83, 0),
     "U8": (335.0, 100.0, 0), "C5": (317.0, 103.81, 0), "C6": (353.0, 103.81, 0),
@@ -569,6 +571,8 @@ def _build():
     s.bind("HOLD_OK", "R6", 2)
     s.junction(*P("R6", "2"))
     s.stub("VDD_U1", ("R6", "1"), 0, -5.08, 90)
+    s.stub("VDD_U1", ("C33", "1"), 0, -5.08, 90)   # 100 nF at the supply pin of U5 (placement rule: close to U5)
+    s.pw("GND", ("C33", "2"), True)
     s.label("HOLD_OK", gx(101.6), rs[1])
     ct = P("U5", "4")
     s.bind("SUP_CT", "U5", 4)
@@ -584,6 +588,8 @@ def _build():
     s.j(("R27", "1"))
     s.pw("GND", ("R27", "2"), True)
     s.stub("SUP_SENSE", ("U5", "5"), -7.62, 0, 180)
+    s.stub("SUP_SENSE", ("C34", "1"), 0, -5.08, 90)   # 1 nF SENSE bypass (SBVS050N 7.3.1)
+    s.pw("GND", ("C34", "2"), True)
 
     # ------------------------------------------------------------ TPS2553 and 5 V output
     uin, uen = P("U7", "1"), P("U7", "3")

@@ -215,6 +215,9 @@ class FullBoard(unittest.TestCase):
         self.assertEqual((pn[("R26", "1")], pn[("R26", "2")]), ("VBUS_IC", "SUP_SENSE"))
         self.assertEqual((pn[("R27", "1")], pn[("R27", "2")]), ("SUP_SENSE", "GND"))
         self.assertEqual((P["R26"][-1], P["R27"][-1]), ("910k 1%", "100k"))
+        self.assertEqual((pn[("C33", "1")], pn[("C33", "2")]), ("VDD_U1", "GND"))      # 100 nF close to VDD (SBVS050N)
+        self.assertEqual((pn[("C34", "1")], pn[("C34", "2")]), ("SUP_SENSE", "GND"))   # 1 nF on SENSE (SBVS050N 7.3.1)
+        self.assertEqual((P["C33"][-1], P["C34"][-1]), ("100n", "1n"))
 
     def test_divider_thresholds_keep_the_release_below_the_vbus_minimum(self):
         """910 k / 100 k (931 k is not stocked): falling 3.915 to 4.271 V, release up to 4.399 V, below the 4.5 V of HW-010 criterion 5."""
@@ -329,7 +332,7 @@ class GateOkReadback(unittest.TestCase):
     def test_hold_off_node_has_the_vbus_ic_pull_up(self):
         self.assertEqual(self.members("HOLD_OK"), {("U5", "1"), ("R6", "2"), ("U3", "6"), ("U4", "6"), ("U10", "2")})
         self.assertEqual(self.pin_net[("R6", "1")], "VDD_U1")     # ADR-0025: the pull-up follows the protected supply node
-        self.assertEqual(layout_full.PARTS["R6"][3], "150k")      # at least 134 kohm (A10 of the supervisor evidence)
+        self.assertEqual(layout_full.PARTS["R6"][3], "100k")      # owner 2026-11-24: 100 k keeps the high level 2.77 V at the release maximum
 
     def test_fault_node_has_the_3v3_pull_up_and_a_test_pad(self):
         self.assertEqual(self.members("FAULT_N"), {("U7", "4"), ("R8", "2"), ("U10", "1"), ("TP7", "1")})

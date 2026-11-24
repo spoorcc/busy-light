@@ -112,3 +112,46 @@ claims:
   category: function
   statement: RESET is an open-drain output, driven low while asserted; it needs a pull-up resistor.
   source: {page: 4, locator: Pin functions, quote: RESET is an open-drain output that is driven to a low-impedance state when RESET is asserted}
+- id: TPS3808G01.pins_1_6
+  parameter: SOT-23 DBV pins 1 and 6
+  category: function
+  statement: Pin 1 is RESET and pin 6 is VDD.
+  source: {page: 4, locator: Figure 5-1 DBV package top view, quote: RESET 1 6 VDD}
+- id: TPS3808G01.pins_2_5
+  parameter: SOT-23 DBV pins 2 and 5
+  category: function
+  statement: Pin 2 is GND and pin 5 is SENSE.
+  source: {page: 4, locator: Figure 5-1 DBV package top view, quote: GND 2 5 SENSE}
+- id: TPS3808G01.pin_3
+  parameter: SOT-23 DBV pin 3
+  category: function
+  statement: Pin 3 is MR.
+  source: {page: 4, locator: Figure 5-1 DBV package top view, quote: MR 3 4}
+- id: TPS3808G01.pin_4
+  parameter: SOT-23 DBV pin 4
+  category: function
+  statement: Pin 4 is CT.
+  source: {page: 4, locator: Table 5-1 pin functions, quote: CT 4 3 I}
+- id: TPS3808G01.mr_pullup
+  parameter: Manual reset input MR
+  category: function
+  statement: MR is tied to VDD inside the part by a 90 kohm pull-up resistor, so it may be left open (ADR-0025 leaves it open).
+  source: {page: 4, locator: Table 5-1 pin functions, quote: MR is internally tied to VDD by a}
+- id: TPS3808G01.ioh_reset
+  parameter: RESET leakage current when not asserted
+  category: electrical
+  condition: {v_reset: {value: 6.5, unit: V}}
+  max: 300
+  unit: nA
+  notes: Used for the HOLD_OK high level with the pull-up R6 (sim/gate_rework_levels.py, RV-019 G9); the TPS3840 value is 90 nA.
+  source: {page: 6, locator: 6.5 Electrical characteristics, quote: 'IOH RESET leakage current V RESET = 6.5V, RESET not asserted 300 nA'}
+- id: TPS3808G01.vdd_bypass
+  parameter: Bypass capacitor at VDD
+  category: function
+  statement: Good practice is a 0.1 uF ceramic capacitor close to VDD (C33 of the schematic, owner decision 2026-11-24).
+  source: {page: 4, locator: Table 5-1 pin functions, quote: It is good analog design practice to place a 0.1μF ceramic capacitor close}
+- id: TPS3808G01.sense_bypass
+  parameter: Bypass capacitor on SENSE
+  category: function
+  statement: Good practice is 1 nF to 10 nF on SENSE to reduce sensitivity to transients and layout parasitics (C34 of the schematic, owner decision 2026-11-24).
+  source: {page: 10, locator: 7.3.1 SENSE input, quote: Good analog design practice is to put a from 1nF to 10nF bypass capacitor on the}

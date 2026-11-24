@@ -68,13 +68,32 @@ class RuleMisses(unittest.TestCase):
 
     def test_cc_protection_rules_resolve_to_the_j1_cc_pads(self):
         """ADR-0024 (owner decision 4, P3): the CC ESD diodes sit within 6 mm of the connector pad of their line."""
-        nets = {"CC1": [("J1", "A5"), ("TVS3", "1"), ("R24", "1")], "CC2": [("J1", "B5"), ("TVS4", "1"), ("R25", "1")]}
+        nets = {"/CC1": [("J1", "A5"), ("TVS3", "1"), ("R24", "1")], "/CC2": [("J1", "B5"), ("TVS4", "1"), ("R25", "1")]}
         fixed_pins = {("J1", "A5"): (1.0, 2.0), ("J1", "B5"): (1.0, 4.5)}
         comps = {r: None for r in ("J1", "TVS3", "TVS4")}
         rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, comps)
         self.assertIn(("TVS3", ((1.0, 2.0),), 6.0), rules)
         self.assertIn(("TVS4", ((1.0, 4.5),), 6.0), rules)
         self.assertEqual(len(rules), 2)
+
+    def test_every_input_path_partner_net_exists_in_the_real_netlist(self):
+        """RV-019 G1: the CC rules named "J1:CC1" while the netlist net is "/CC1": the placer dropped TVS3 and TVS4 silently and
+        pcb_layout_check could not measure them (exit 2). Every "REF:NET" partner must name a net of the real netlist that
+        has a pad of REF."""
+        _, nets = pcb_full.read_netlist(NETLIST)
+        for a, b, _lim in pcb_full.INPUT_PATH_RULES:
+            if ":" not in b:
+                continue
+            ref, net = b.split(":", 1)
+            self.assertIn(net, nets, "%s: net %s is not in the netlist" % (a, net))
+            self.assertTrue([r for r, _ in nets[net] if r == ref], "%s has no pad on %s" % (ref, net))
+
+    def test_all_input_path_rules_resolve_on_the_real_netlist(self):
+        """Six rules (TVS1, U6, R22 to J1:VBUS, R22 to U7, TVS3, TVS4) must all reach the placer."""
+        comps, nets = pcb_full.read_netlist(NETLIST)
+        fixed = {(r, p): (1.0, 2.0) for r, p in sum((v for v in nets.values()), []) if r == "J1"}
+        rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed, comps)
+        self.assertEqual(len(rules), len(pcb_full.INPUT_PATH_RULES))
 
     def test_hw016_rule_keeps_the_spare_pads_within_10_mm(self):
         """7.0 mm part centres + 1.48 mm (U7 pad 6 from its origin) + 1.475 mm (1206 pad centre) <= 10 mm (HW-016)."""
@@ -177,7 +196,7 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 102)     # ADR-0024: +U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (97 after ADR-0023); ADR-0025: -C27 to C31, +R26, R27
+        self.assertEqual(len(self.comps), 104)     # ADR-0024: +U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (97 after ADR-0023); ADR-0025: -C27 to C31, +R26, R27, C33, C34
         self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 58)
         for ref in ("R26", "R27", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
                     "C32"):

@@ -279,6 +279,9 @@ SOURCING_BY_FP = {
     # at LCSC); 910 k Panasonic ERJ2RKF9103X: LCSC page 500, JLCPCB 540, extended, 0402 thick film 1 % 100 mW 100 ppm.
     ("910k 1%", "R_0402_1005Metric"): {"MPN": "ERJ2RKF9103X", "Manufacturer": "Panasonic", "LCSC": "C409936",
                                        "Evidence": "LCSC and JLCPCB part pages 2026-11-24 (500 and 540 in stock, extended); 910 k replaces 931 k, ADR-0025"},
+    # ADR-0025 (owner 2026-11-24): 1 nF on SENSE. LCSC page 2026-11-24: 367,800 in stock; JLCPCB page 435,536 (extended).
+    ("1n", "C_0402_1005Metric"): {"MPN": "CL05B102KB5NNNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C14442",
+                                  "Evidence": "LCSC and JLCPCB part pages 2026-11-24: 0402 1 nF 50 V X7R 10 %, extended; ADR-0025 owner decision 2026-11-24"},
     ("1u", "C_0402_1005Metric"): {"MPN": "CL05A105KA5NQNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C52923",
                                   "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 1 uF 25 V X5R 10%; ADR-0023"},
     ("330", "R_0402_1005Metric"): {"MPN": "0402WGF3300TCE", "Manufacturer": _U04, "LCSC": "C25104",

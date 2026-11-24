@@ -366,7 +366,8 @@ def test_committed_missing_list_matches_sourcing_and_the_board() -> None:
     """Every listed ref is on the board, and its value has an MPN but no LCSC number in sourcing.py.
 
     A number added there makes this test ask for the list update. The board is board-p1 when it
-    exists. R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225); U5 on 2026-11-24 (ADR-0025).
+    exists. R22 left the list on 2026-11-22 (HW-017 amendment: RLM12FTCMR005, C316225); U5 on
+    2026-11-24 (ADR-0025).
     """
     listed = fc.read_missing_list(ROOT / "scripts" / "fab_missing_lcsc.txt")
     # 2026-11-18: ADR-0023 removed U10 and U13; U3, U4, U11 (SC-70) and U6 have LCSC numbers.

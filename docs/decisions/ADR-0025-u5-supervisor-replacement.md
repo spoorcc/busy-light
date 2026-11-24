@@ -106,13 +106,13 @@ the LVC inputs to the clamp; B also removes the six 1206 capacitors that the pla
 objection: the delay spread at 68 nF is extrapolated. Answer: recorded as an assumption; the sensitivity line shows B still
 leads, and TC-210 measures it on every board.
 
-## Amendment of 2026-11-24 (implementation; the owner accepted option B the same day)
-- **Divider 910 k / 100 k instead of 931 k / 100 k.** No 931 k 1 % 0402 resistor is stocked: Walsin C172143, KOA C2577872 and LIZ C100560 show 0 at LCSC and 0 to 29 on the JLCPCB overseas count (pages read 2026-11-24).
+## Amendment of 2026-11-24 (implementation; the owner accepted option B the same day and confirmed the changes below)
+- **Divider 910 k / 100 k instead of 931 k / 100 k (owner confirmed).** No 931 k 1 % 0402 resistor is stocked: Walsin C172143, KOA C2577872 and LIZ C100560 show 0 at LCSC and 0 to 29 on the JLCPCB overseas count (pages read 2026-11-24).
   The Panasonic ERJ2RKF9103X 910 k 1 % (C409936) has 500 at LCSC and 540 on the JLCPCB count (extended). Thresholds (`sim/supervisor_options.py`, row "as built"): falling 3.915 to 4.271 V, release up to
   4.399 V, below the 4.5 V of HW-010 criterion 5 with more margin than 931 k (4.491 V); the falling minimum 3.915 V is close to today's 3.94 V. Refs R26 (910 k, top) and R27 (100 k, bottom, the 0402WGF1003TCE of R1).
-- **Parts as drawn:** U5 TPS3808G01DBVR (C19653), pins 1 RESET, 2 GND, 3 MR (open: 90 kohm pull-up to VDD inside, SBVS050N table 5-1), 4 CT, 5 SENSE, 6 VDD on VDD_U1; C1 one 68 nF C0G 1206 (C3847777, 2,335 at LCSC); R6 150 k on VDD_U1.
-- **HOLD_OK high level** with the pull-up on VDD_U1: 2.03 V at VBUS_IC 4.399 V with the worst-case leakage of the three inputs (5 uA each; TUSB321 100 to 200 uA and TPS3808 6 uA assumed), against VIH 2.0 V: the same thin margin as the
-  2.04 V of the VBUS_IC pull-up at 4.3 V (`sim/gate_rework_levels.py`, `tests/test_gate_rework_levels.py`); typical leakage gives more than 4 V. TC-210 measures it.
+- **Parts as drawn:** U5 TPS3808G01DBVR (C19653), pins 1 RESET, 2 GND, 3 MR (open: 90 kohm pull-up to VDD inside, SBVS050N table 5-1), 4 CT, 5 SENSE, 6 VDD on VDD_U1; C1 one 68 nF C0G 1206 (C3847777, 2,335 at LCSC);
+  **R6 100 k** on VDD_U1 (owner confirmed; 150 k was carried over from the TPS3840); **C33 100 nF** at VDD and **C34 1 nF** on SENSE (owner confirmed; SBVS050N asks for both).
+- **HOLD_OK high level** with the pull-up on VDD_U1 and the TPS3808 RESET leakage of 300 nA (SBVS050N section 6.5; the TPS3840 value of 90 nA had been used first): with R6 = 150 k the worst-case level at the 4.399 V release maximum is 2.0001 V
+  against VIH 2.0 V (no margin); with R6 = 100 k it is 2.77 V (TUSB321 100 to 200 uA and TPS3808 6 uA assumed; worst-case input leakage 5 uA each; `sim/gate_rework_levels.py`, `tests/test_gate_rework_levels.py`). The pull-up must stay above 40 kohm
+  for a valid low while VDD is at VPOR (0.8 V, 15 uA, VOL 0.2 V). TC-210 measures the levels.
 - **Stock:** TPS3808G01DBVR has 0 at LCSC and 4 on the JLCPCB overseas count on 2026-11-24 (30 on 2026-11-22): too thin for five boards without a check on the order day; the Q1 variant (C130062, pin-compatible) is the fallback and its datasheet is not read.
-- **Open:** the TPS3808 datasheet asks for a 100 nF capacitor close to VDD; VDD_U1 has C26 near U1 only. An added capacitor is the owner's choice (not added).
-

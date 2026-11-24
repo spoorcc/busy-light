@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullP2/full.kicad_sch")
-		(date "2026-11-24T12:16:55")
+		(source "/tmp/claude-0/-home-user-busy-light/f7655ba1-1ee1-5f78-a7b0-842a23e55d13/scratchpad/fullP3/full.kicad_sch")
+		(date "2026-11-24T13:16:59")
 		(tool "Eeschema 10.0.8")
 		(sheet
 			(number "1")
@@ -2017,6 +2017,150 @@
 			)
 		)
 		(comp
+			(ref "C33")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "01f64a03-80c5-5766-aaa4-00201d2d2e86")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C34")
+			(value "1n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "MPN") "CL05B102KB5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C14442")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B102KB5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C14442")
+			)
+			(property
+				(name "Sheetname")
+				(value "full")
+			)
+			(property
+				(name "Sheetfile")
+				(value "full.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "bad9500b-c128-59f3-a64b-4237090d3441")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
 			(ref "D1")
 			(value "WS2812B")
 			(footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
@@ -3959,15 +4103,15 @@
 		)
 		(comp
 			(ref "R6")
-			(value "150k")
+			(value "100k")
 			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "MPN") "0402WGF1503TCE")
+					(name "MPN") "0402WGF1003TCE")
 				(field
 					(name "Manufacturer") "UNI-ROYAL")
 				(field
-					(name "LCSC") "C25755")
+					(name "LCSC") "C25741")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
@@ -3984,7 +4128,7 @@
 			)
 			(property
 				(name "MPN")
-				(value "0402WGF1503TCE")
+				(value "0402WGF1003TCE")
 			)
 			(property
 				(name "Manufacturer")
@@ -3992,7 +4136,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C25755")
+				(value "C25741")
 			)
 			(property
 				(name "Sheetname")
@@ -9648,6 +9792,11 @@
 			(name "/SUP_SENSE")
 			(class "Default")
 			(node
+				(ref "C34")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "R26")
 				(pin "2")
 				(pintype "passive")
@@ -9704,6 +9853,11 @@
 			(class "Default")
 			(node
 				(ref "C26")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C33")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -9896,6 +10050,16 @@
 			)
 			(node
 				(ref "C32")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C33")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C34")
 				(pin "2")
 				(pintype "passive")
 			)
