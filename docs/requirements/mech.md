@@ -9,7 +9,7 @@ Process rules: `docs/process/README.md`.
 
 ### MECH-001 Housing size
 
-- **Statement:** The printed housing with the board fitted, without cable and plug, shall have a largest outer dimension from 48 mm to 60 mm.
+- **Statement:** The printed housing with the board fitted, without cable and plug, shall have a largest outer dimension from 48 mm to 65 mm.
 - **Rationale:** SYS-028: size between a table-tennis ball and a tennis ball. Working value in plan 05: diameter [53.0] mm, height [16.5] mm (17.45 mm with feet); the values are redone for horizontal and vertical mounting (RV-004 A1). The cable and its plug are excluded (RV-004).
 - **Parent:** SYS-028
 - **Acceptance criteria:** A caliper measurement of [3] printed housings gives a largest dimension within the range.
@@ -20,6 +20,7 @@ Process rules: `docs/process/README.md`.
 - **Priority:** Must
 - **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 - **Approved amendment (owner, Ben Spoor, 2026-11-22, decision 8 in the working session; recorded by the assistant, `docs/journal/2026-11-22-owner-decisions-p1-rework.md`):** the upper limit is 60 mm (was 58 mm). Reason: with the USB-C connector at the edge of the 46 mm board the housing is 59.24 mm (`placement.json` of board-p1 and of the spike board; RV-016 row 22); the LED ring blocks moving the connector inwards. Still within SYS-028 (smaller than a tennis ball). The placer limit `MAX_DIM_MECH001` follows.
+- **Approved amendment (owner, Ben Spoor, 2026-11-27, in the working session: "Raise to 65mm"; recorded by the assistant, `docs/journal/2026-11-27-owner-decision-housing-limit-65.md`):** the upper limit is 65 mm (was 60 mm). Reason: the placement of the 22 rules cannot be met on the 12 mm tab at the USB-C connector (`docs/verification/reports/p1-placement-feasibility.md`); the owner chose a droplet-shaped board nose with more room around J1, and the nose needs length as well as width. 65 mm is 0.4 mm below the smallest ITF tennis ball (65.4 mm), so "smaller than a tennis ball" (SYS-028 rationale) holds with a small margin. The generator guard `MAX_DIM_SPIKE_MM` is the limit minus 0.2 mm (print tolerance). SYS-028 (Draft) carries the same change.
 
 ### MECH-002 Light diffuser
 

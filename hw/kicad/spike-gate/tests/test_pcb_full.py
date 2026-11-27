@@ -298,12 +298,12 @@ class Board(unittest.TestCase):
         self.assertEqual(bad, [])
 
     def test_t12_largest_dim_is_computed_and_limited(self):
-        """T12: the housing size comes from the board and must not exceed the old 59.8 mm."""
+        """T12: the housing size comes from the board and must not exceed the guard (MECH-001 65 mm since 2026-11-27, minus 0.2 mm)."""
         self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
         mouth = pcbnew.ToMM(self.fps["J1"].GetBoundingBox(False).GetRight()) - pcb_full.CX
         self.assertAlmostEqual(mech_outline.largest_dim_mm(mouth), self.info["largest_dim_mm"], places=1)
         with self.assertRaises(ValueError):
-            mech_outline.check_largest_dim(32.3)                 # 59.9 mm
+            mech_outline.check_largest_dim(37.3)                 # 64.9 mm
 
     def test_usb_c_on_the_tab_facing_plus_x(self):
         b = self.fps["J1"].GetBoundingBox(False)
@@ -312,7 +312,7 @@ class Board(unittest.TestCase):
         self.assertGreaterEqual(self.info["j1_mouth_r"], pcb_full.J1_MOUTH_R)
 
     def test_mouth_against_the_mech_limit_is_recorded(self):
-        """Plan 06 D2: the limit MAX_DIM_MECH001 (60 mm since 2026-11-22) is reported; the spike limit is the old 59.8 mm."""
+        """Plan 06 D2: the limit MAX_DIM_MECH001 (65 mm since 2026-11-27) is reported; the generator guard is 0.2 mm below it."""
         self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
 
     def test_antenna_strip_is_free(self):

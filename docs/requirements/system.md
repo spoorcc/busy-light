@@ -380,13 +380,14 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 - **Statement:** The largest outer dimension of the finished device shall be [53] mm, with a tolerance of [plus or minus 5] mm.
 - **Rationale:** The owner wants the size halfway between a table-tennis ball (40 mm) and a tennis ball (about 67 mm) (NEED-014).
 - **Parent:** NEED-014
-- **Acceptance criteria:** A measurement of the printed housing with the PCB fitted gives a largest dimension from 48 mm to 58 mm. The 16 LEDs are evenly spaced on a ring of at least [38] mm diameter inside the housing.
+- **Acceptance criteria:** A measurement of the printed housing with the PCB fitted gives a largest dimension from 48 mm to 65 mm (see the amendment below). The 16 LEDs are evenly spaced on a ring of at least [38] mm diameter inside the housing.
 - **Verification method:** Inspection
 - **Verified by:** TC-028
 - **Category:** Mechanical
 - **Regulatory:** TBD
 - **Priority:** Must
 - **Status:** Draft
+- **Amendment (owner decision 2026-11-27, "Raise to 65mm"; the requirement stays Draft until the owner approves it):** the upper limit of the largest dimension is 65 mm (58 mm before). MECH-001 (Approved) had 60 mm since 2026-11-22 while this entry still said 58 mm; both now say the same limit. The working value [53] mm is the diameter of the round body; the nose at the USB-C connector makes the largest dimension longer. The smallest ITF tennis ball is 65.4 mm, so the margin to "smaller than a tennis ball" is 0.4 mm.
 
 ### SYS-029 Firmware update over the network
 - **Statement:** The device shall install a new firmware image received over the network through the web interface, shall accept the image only if its signature is valid, and shall keep the previous image so that it returns to it if the new image fails to start.

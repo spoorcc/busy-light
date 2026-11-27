@@ -62,7 +62,7 @@ MECH = {
     "USB_L": (7.35, "script P['USB_L'] PLACEHOLDER typical mid-mount receptacle length"),
     "USB_W": (8.94, "script P['USB_W'] PLACEHOLDER"),
     "USB_H": (3.26, "script P['USB_H'] PLACEHOLDER"),
-    "MAX_DIM_MECH001": (60.0, "MECH-001 as amended by the owner 2026-11-22 (was 58.0, script P['MAX_DIM_MECH001'], report 4.1)"),
+    "MAX_DIM_MECH001": (65.0, "MECH-001 as amended by the owner 2026-11-27 (60.0 from 2026-11-22, 58.0 before; script P['MAX_DIM_MECH001'], report 4.1)"),
     "T_WALL": (1.6, "script P['T_WALL']"),
     "V1_MOUTH_IN": (0.5, "script P['V1_MOUTH_IN']: mouth protrudes 0.5 mm into the window"),
     "BTN_AZ": (240.0, "script P['BTN_AZ']: side-actuated button at the PCB edge"),
@@ -86,11 +86,12 @@ R_OUT = 26.5                                               # script P['D_OUT'] /
 
 def largest_dim_mm(mouth_r):
     """Housing largest dimension in V1 for a receptacle mouth at radius mouth_r: end wall outer face plus R_OUT.
-    The script gives 57.43 mm for mouth 29.85 (report 4.1); the limit is MAX_DIM_MECH001 = 60 mm (MECH-001, 2026-11-22)."""
+    The script gives 57.43 mm for mouth 29.85 (report 4.1); the limit is MAX_DIM_MECH001 = 65 mm (MECH-001, 2026-11-27)."""
     return (mouth_r - m("V1_MOUTH_IN") + m("T_WALL")) + R_OUT
 
 
-MAX_DIM_SPIKE_MM = 59.8      # plan 06 D2: the housing size of the earlier spike result; the board must not exceed it
+MAX_DIM_GUARD_MM = 0.2       # print tolerance kept below the MECH-001 limit (plan 06 D2 kept 0.2 mm below 60 mm)
+MAX_DIM_SPIKE_MM = m("MAX_DIM_MECH001") - MAX_DIM_GUARD_MM   # generator guard: the board must not exceed it (was 59.8, plan 06 D2)
 LED_SIZE_MM = 2.0            # WS2812B-2020 stand-in (LED_WS2812B-2020_PLCC4_2.0x2.0mm), vendor drawing not checked
 
 
