@@ -19,7 +19,7 @@ IN=$1; OUT=$2; LAYERS=${3:-2}; PLANES=${4:-}
 HERE=$(cd "$(dirname "$0")" && pwd)
 PY=${PCB_PYTHON:-python3}
 mkdir -p "$OUT"
-export PYTHONPATH="$HERE/src"
+export PYTHONPATH="$HERE/src${PYTHONPATH:+:$PYTHONPATH}"   # keep the packages that run_in_kicad.sh adds (KC_PYTHONPATH)
 NET="$IN/kicad.net"
 [ -f "$NET" ] || { echo "no $NET (run run_full.sh first)"; exit 1; }
 if [ -n "$FREEROUTING_JAR" ]; then      # pinned release; a missing or different file stops the run (plan 06 T5)

@@ -24,7 +24,7 @@ JAR_SHAS=$(sed -n 's/^ *JAR_SHAS="\(.*\)"$/\1/p' "$HERE/run_pcb.sh")
 [ -n "$FREEROUTING_JAR" ] && [ -f "$FREEROUTING_JAR" ] || { echo "FREEROUTING_JAR: no such file: $FREEROUTING_JAR"; exit 1; }
 JAR_HAVE=$(sha256sum "$FREEROUTING_JAR" | cut -d' ' -f1)
 case " $JAR_SHAS " in *" $JAR_HAVE "*) ;; *) echo "FREEROUTING_JAR: sha256 is not the pinned $JAR_SHAS"; exit 1;; esac
-export PYTHONPATH="$HERE/src"
+export PYTHONPATH="$HERE/src${PYTHONPATH:+:$PYTHONPATH}"   # keep the packages that run_in_kicad.sh adds (KC_PYTHONPATH)
 filter() { grep -v 'PROPERTY_ENUM' || true; }
 R="$A/repass"
 rm -rf "$R"; mkdir -p "$R"

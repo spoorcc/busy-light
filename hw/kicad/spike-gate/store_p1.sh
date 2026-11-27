@@ -9,15 +9,16 @@ W=$1
 HERE=$(cd "$(dirname "$0")" && pwd)
 T=${2:-${BOARD_P1_DIR:-$HERE/board-p1}}
 [ -n "$W" ] || { sed -n 3,6p "$0"; exit 2; }
-for f in busy_light_spike.kicad_pcb busy_light_spike.kicad_pro busy_light_spike.kicad_dru busy_light_spike.kicad_prl busy_light_spike.kicad_sch \
+for f in busy_light_spike.kicad_pcb busy_light_spike.kicad_pro busy_light_spike.kicad_dru busy_light_spike.kicad_sch \
          busy_light_spike.placement.json run_meta.json fp-lib-table sym-lib-table busylight_gate.kicad_sym drc1.json drc2.json drc3.json; do
   [ -f "$W/$f" ] || { echo "store_p1: no $f in $W"; exit 2; }
 done
 [ -d "$W/CUSTOM.pretty" ] || { echo "store_p1: no CUSTOM.pretty in $W"; exit 2; }
 mkdir -p "$T"
 for f in "$T"/*; do [ -e "$f" ] || continue; [ "$(basename "$f")" = README.md ] || rm -rf "$f"; done
-for f in busy_light_spike.kicad_pcb busy_light_spike.kicad_pro busy_light_spike.kicad_dru busy_light_spike.kicad_prl busy_light_spike.kicad_sch \
+for f in busy_light_spike.kicad_pcb busy_light_spike.kicad_pro busy_light_spike.kicad_dru busy_light_spike.kicad_sch \
          busy_light_spike.placement.json run_meta.json fp-lib-table sym-lib-table busylight_gate.kicad_sym; do cp "$W/$f" "$T/"; done
+[ -f "$W/busy_light_spike.kicad_prl" ] && cp "$W/busy_light_spike.kicad_prl" "$T/"   # git-ignored KiCad side file; optional
 [ -f "$W/repass_meta.json" ] && cp "$W/repass_meta.json" "$T/"
 cp -r "$W/CUSTOM.pretty" "$T/"
 for i in 1 2 3; do cp "$W/drc$i.json" "$T/drc_pass$i.json"; done

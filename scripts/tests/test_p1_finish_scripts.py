@@ -181,3 +181,130 @@ def test_container_script_without_a_command_prints_usage() -> None:
     res = run(["sh", str(CONTAINER)])
     assert res.returncode == USAGE_EXIT
     assert "Usage: run_in_kicad.sh" in res.stdout
+
+
+# --- RV-019 pass 2 (readiness NO-GO of 2026-11-27):
+# findings 1, 2, 5, 6, 8 and 15, each with a test that failed first ---
+
+PCB_PY_FAKE = """#!/bin/sh
+# stands for python3 in run_finish.sh: the three tools it calls are told apart by the script name
+script=$1; shift
+out=""
+while [ $# -gt 0 ]; do [ "$1" = "--out" ] && out=$2; shift; done
+case "$script" in
+  *pcb_finish.py) [ "$FAKE_FINISH_RC" = 0 ] || { echo "finish crashed"; exit "$FAKE_FINISH_RC"; } ;;
+  *kicad_strict.py) [ -n "$out" ] && echo '{"violations": []}' > "$out"
+                    [ "$FAKE_DRC_RC" = 0 ] && echo "DRC OK" || echo "DRC NOT RUN: kicad-cli exit 1"
+                    exit "$FAKE_DRC_RC" ;;
+  *merge_drc.py) cp "$1" "$3" 2>/dev/null; exit 0 ;;
+esac
+exit 0
+"""
+
+
+def make_run(root: Path, *, prl: bool = True, first_pass_kept: bool = False) -> tuple[Path, Path]:
+    a = root / "a"
+    (a / "repass").mkdir(parents=True)
+    for f in ("pcb", "pro", "dru") + (("prl",) if prl else ()):
+        (a / f"final.kicad_{f}").write_text("x", encoding="utf-8")
+    (a / "busy_light_spike.placement.json").write_text("{}", encoding="utf-8")
+    (a / "run_meta.json").write_text("{}", encoding="utf-8")
+    (a / "repass" / "run_meta.json").write_text("{}", encoding="utf-8")
+    if first_pass_kept:
+        (a / "final_pass1.kicad_pcb").write_text("x", encoding="utf-8")
+    net = root / "net"
+    (net / "CUSTOM.pretty").mkdir(parents=True)
+    for f in ("full.kicad_sch", "sym-lib-table", "fp-lib-table", "busylight_gate.kicad_sym"):
+        (net / f).write_text("x", encoding="utf-8")
+    return a, net
+
+
+def finish(root: Path, finish_rc: int, drc_rc: int, **kw: bool) -> subprocess.CompletedProcess[str]:
+    fake = root / "fakepy"
+    fake.write_text(PCB_PY_FAKE, encoding="utf-8")
+    fake.chmod(0o755)
+    a, net = make_run(root, **kw)
+    return run(
+        ["sh", str(FINISH), str(a), str(net), str(root / "w")],
+        PCB_PYTHON=str(fake),
+        FAKE_FINISH_RC=str(finish_rc),
+        FAKE_DRC_RC=str(drc_rc),
+    )
+
+
+def test_finish_stops_when_a_finishing_pass_crashes(tmp_path: Path) -> None:
+    res = finish(tmp_path, finish_rc=3, drc_rc=0)
+    assert res.returncode != 0
+    assert "finished board in" not in res.stdout
+
+
+def test_finish_stops_when_the_strict_drc_did_not_run(tmp_path: Path) -> None:
+    res = finish(tmp_path, finish_rc=0, drc_rc=2)
+    assert res.returncode != 0
+    assert "finished board in" not in res.stdout
+    assert "DRC did not run" in res.stdout
+
+
+def test_finish_succeeds_with_the_fakes_and_without_a_prl_file(tmp_path: Path) -> None:
+    res = finish(tmp_path, finish_rc=0, drc_rc=0, prl=False)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "finished board in" in res.stdout
+    assert not (tmp_path / "w" / "busy_light_spike.kicad_prl").exists()
+
+
+def test_finish_copies_the_second_pass_record_only_when_that_pass_was_taken(tmp_path: Path) -> None:
+    taken = tmp_path / "taken"
+    taken.mkdir()
+    assert finish(taken, 0, 0, first_pass_kept=True).returncode == 0
+    assert (taken / "w" / "repass_meta.json").exists()
+    not_taken = tmp_path / "not_taken"
+    not_taken.mkdir()
+    assert finish(not_taken, 0, 0, first_pass_kept=False).returncode == 0
+    assert not (not_taken / "w" / "repass_meta.json").exists()
+
+
+def test_store_does_not_need_a_prl_file(tmp_path: Path) -> None:
+    w = make_work(tmp_path, repass=False)
+    (w / "busy_light_spike.kicad_prl").unlink()
+    target = tmp_path / "t"
+    res = run(["sh", str(STORE), str(w), str(target)])
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
+def fake_docker(tmp_path: Path) -> Path:
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    (bindir / "docker").write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n', encoding="utf-8")
+    (bindir / "docker").chmod(0o755)
+    return bindir
+
+
+def test_container_mounts_the_etc_target_of_java_symlinks(tmp_path: Path) -> None:
+    # Debian's Java keeps its config files as symlinks into /etc/java-<n>-openjdk;
+    # without that directory the JVM stops at start-up.
+    java = tmp_path / "jdk"
+    (java / "conf").mkdir(parents=True)
+    (java / "conf" / "java.security").symlink_to("/etc/passwd")
+    res = run(
+        ["sh", str(CONTAINER), "true"],
+        PATH=f"{fake_docker(tmp_path)}:{os.environ['PATH']}",
+        KC_JAVA_HOME=str(java),
+    )
+    assert res.returncode == 0, res.stderr
+    assert "/etc/passwd:/etc/passwd:ro" in res.stdout.splitlines()
+
+
+@pytest.mark.parametrize("script", ["run_pcb.sh", "run_repass.sh"])
+def test_router_scripts_keep_the_python_path_they_were_given(script: str) -> None:
+    # run_in_kicad.sh passes numpy and scipy through PYTHONPATH (KC_PYTHONPATH);
+    # the image has neither.
+    lines = [
+        ln
+        for ln in (SPIKE / script).read_text(encoding="utf-8").splitlines()
+        if ln.startswith("export PYTHONPATH=")
+    ]
+    assert len(lines) == 1
+    res = run(["sh", "-c", f'HERE=/h\n{lines[0]}\necho "$PYTHONPATH"'], PYTHONPATH="/extra/site")
+    assert res.stdout.strip() == "/h/src:/extra/site"
+    res = run(["sh", "-c", f'HERE=/h\nunset PYTHONPATH\n{lines[0]}\necho "$PYTHONPATH"'])
+    assert res.stdout.strip() == "/h/src"

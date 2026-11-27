@@ -13,3 +13,5 @@ drift are for the owner to confirm.
 The fresh goldfish said NO-GO (RV-019, 20 findings): the CC rules named `J1:CC1` and `J1:CC2` but the netlist nets are `/CC1` and `/CC2`, so the placer dropped TVS3 and TVS4 and the layout check could not measure them (fixed with a failing test first);
 the finishing and store steps existed only as scratch scripts (now `run_finish.sh`, `store_p1.sh`, `run_in_kicad.sh` in the repository); the run picker ignored the placement rules (now ranked); the HOLD_OK high level used the TPS3840 leakage (the TPS3808 gives 300 nA:
 2.0001 V at the release maximum with R6 = 150 k); the datasheet recommends 100 nF at VDD and 1 nF on SENSE. The owner confirmed 910 k / 100 k, chose R6 = 100 k and chose to add both capacitors (C33, C34). The schematic has 104 parts and 58 nets, strict ERC 0 findings.
+
+**Correction (2026-11-27, RV-019 pass 2):** the 2.03 V in the first paragraph is the HOLD_OK high level with a 150 k pull-up. The owner chose R6 = 100 k on 2026-11-24 (G9 in RV-019): 2.77 V at the 4.399 V release maximum with worst-case input leakage.

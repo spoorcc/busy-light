@@ -119,6 +119,18 @@ class BoardP1(unittest.TestCase):
         self.assertEqual(missed, [])
 
     @unittest.expectedFailure
+    def test_board_carries_identification_text_and_fiducials(self):
+        """Plan 08 R4 (i), RV-019 pass 2 finding 8 (RV-016 row 18): the finishing step put the board identification
+        "busy-light P1 <commit>" on B.SilkS and at least three fiducials on the board. Expected to fail on the board stored
+        before the re-placement (no text, since pcb_finish.py had no identification then); the stored new board must pass,
+        and then this marker goes."""
+        texts = [d.GetText() for d in self.board.GetDrawings()
+                 if d.GetClass() == "PCB_TEXT" and d.GetLayer() == pcbnew.B_SilkS]
+        self.assertTrue(any(s.startswith("busy-light P1") for s in texts), texts)
+        fids = sorted(r for r in self.fps if r.startswith("FID"))
+        self.assertGreaterEqual(len(fids), 3, fids)
+
+    @unittest.expectedFailure
     def test_main_path_is_0_6_mm_wide(self):
         """Plan 08 step 9 and TC-217: the J1-R22-U7 main path has a copper path of tracks at least 0.6 mm wide
         (pcb_rules.NET_WIDTH) on both nets. Expected to fail on board-p1 (RV-016 row 13: 0.45 mm segments on VBUS and
