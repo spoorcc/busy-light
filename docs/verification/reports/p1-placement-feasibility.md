@@ -44,5 +44,17 @@ and D1, C8, C23, D16, R_ILIM1 and DZ15 compete for the same patch. This is a rou
 
 Recommendation: option 1 first (cheapest, no requirement or housing change), after the TVS datasheet is read; option 2 only with an antenna review.
 
-## 6. Not run
-Routing, any batch beyond the seed groups above, the TVS datasheet check, the antenna range, and a placement with a rule changed (waits for the owner).
+## 6. Droplet nose: sizing (owner chose "grow the board", 2026-11-27)
+The board is a 46 mm disc with a 12 mm wide tab at J1 (`V1_TAB_W`, to r 29.0; the receptacle body is 8.94 mm wide on it). The housing is a 53 mm disc (`R_OUT` 26.5) with the USB nose; its largest dimension is 57.43 mm along the nose, MECH-001 allows 60 mm. Growing the nose sideways does not change that dimension.
+Experiment on scratch copies of `src/` (the repository is unchanged): the part region on the nose is widened to a half-width `W` until x = 26 mm, then tapers linearly to the present half-width at the tip (x = 29.0). Placement only, four placements per setting, the seed groups of `run_best.sh`, fewest misses kept.
+| Nose width (2 x W) | `RULE_PEN` 300: misses | `RULE_PEN` 3000: misses and overlap |
+|---|---|---|
+| 12 mm (today) | 7, 6, 4, 5 | 4, 4, 4, 4; 0.13 to 0.26 mm2 |
+| 16 mm | 6, 7, 6, 6 | 5, 4, 5, 6; 0.20 to 0.79 mm2 |
+| 20 mm | 5, 4, 4, 4 | **1, 0, 1, 0**; no overlap |
+| 24 mm | 3, 4, 4, 4 | not run |
+With a 20 mm nose and `RULE_PEN` 3000 two of four placements meet all 22 rules without overlap (seeds 29 and 56); the other two miss only R22 to J1, by 0.45 mm and 1.5 mm. A 16 mm nose gives no gain.
+Limits of this result: only the placer region changed (no Edge.Cuts outline, no housing, no hook keep-outs, no panel tabs, no routing); `RULE_PEN` 3000 is a non-default setting; four placements per setting. The shape is a model of a droplet, not a design: the real outline needs a smooth contour from the 46 mm circle to the tip.
+
+## 7. Not run
+Routing, a droplet outline in Edge.Cuts, the housing nose, the panel tabs, any batch beyond the seed groups above, the TVS datasheet check, the antenna range, and a placement with a rule changed (waits for the owner).
