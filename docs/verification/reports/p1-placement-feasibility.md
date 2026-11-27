@@ -56,5 +56,25 @@ Experiment on scratch copies of `src/` (the repository is unchanged): the part r
 With a 20 mm nose and `RULE_PEN` 3000 two of four placements meet all 22 rules without overlap (seeds 29 and 56); the other two miss only R22 to J1, by 0.45 mm and 1.5 mm. A 16 mm nose gives no gain.
 Limits of this result: only the placer region changed (no Edge.Cuts outline, no housing, no hook keep-outs, no panel tabs, no routing); `RULE_PEN` 3000 is a non-default setting; four placements per setting. The shape is a model of a droplet, not a design: the real outline needs a smooth contour from the 46 mm circle to the tip.
 
+### 6.1 Longer nose after the limit went to 65 mm (owner, 2026-11-27, "Raise to 65mm")
+Same experiment, plus the receptacle moved out by `J1_EXTRA` mm (the tab ends 0.85 mm before the mouth, so the part region on the nose grows by the same length). The present board has the mouth at 31.64 mm and a housing of 59.24 mm; +4 mm gives 63.2 mm, +5 mm gives 64.2 mm (guard 64.8 mm). Scratch copies again, placement only, four placements per setting.
+| Nose width | Extra length | `RULE_PEN` | Misses per placement | Notes |
+|---|---|---|---|---|
+| 20 mm | 0 | 3000 | 1, 0, 1, 0 | section 6 (best so far; two clean) |
+| 20 mm | +2 | 300 | 5, 4, 4, 5 | no overlap |
+| 20 mm | +4 | 300 | 3, 3, 2, 3 | no overlap (0 mm: 5, 4, 4, 4 with overlap) |
+| 20 mm | +4 | 3000 | 1, 1, 1, 1 | always R22 to J1, 10.5 to 12.8 mm against 8.0 |
+| 16 mm | +4 | 300 | 4, 4, 5, 3 | no overlap |
+| 24 mm | 0 | 3000 | 1, 2, 4, 1 | R22 8.04 mm; TVS1 6.5 to 6.6 mm against 6.0 |
+| 24 mm | +2 | 3000 | 2, 3, 2, 2 | one placement with 0.012 mm2 overlap |
+| 24 mm | +4 | 300 | 2, 2, 3, 2 | no overlap |
+| 24 mm | +4 | 3000 | 1, 1, 1, 1 | always R22 to J1, 9.7 to 13.6 mm against 8.0 |
+| 24 mm | +5 | 3000 | 1, 1, 1, 1 | always R22 to J1, 10.7 to 11.7 mm against 8.0 |
+Reading (the assistant's, not tested further):
+- Extra length removes the overlap at `RULE_PEN` 300, but no setting with extra length reaches a clean placement. At 3000 the one remaining miss is always R22 to J1, and it gets larger with more length (2.5 to 5.5 mm over the limit) than the 0.45 to 1.5 mm of the 20 mm nose without extra length.
+- A plausible cause: R22 must be within 8 mm of the J1 VBUS pad and within 6 mm of U7 pin 1 (two rules), U7 stays inside the disc, and moving the J1 pads out stretches that chain. This was not checked by moving U7.
+- Width helps (12 mm fails, 16 mm no gain, 20 mm is the first width with clean placements); 24 mm is no better than 20 mm. Four placements per setting are few: 24 mm with no extra length gave 1, 2, 4, 1 misses against 1, 0, 1, 0 for 20 mm, which is within the spread of the placer.
+- The 65 mm limit is therefore headroom, not what resolves the placement. The recommended nose is about 20 mm wide with the mouth where the generator puts it (59.24 mm housing).
+
 ## 7. Not run
 Routing, a droplet outline in Edge.Cuts, the housing nose, the panel tabs, any batch beyond the seed groups above, the TVS datasheet check, the antenna range, and a placement with a rule changed (waits for the owner).
