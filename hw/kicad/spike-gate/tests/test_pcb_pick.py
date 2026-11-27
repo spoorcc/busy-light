@@ -94,6 +94,20 @@ class Pick(unittest.TestCase):
             self.assertTrue(Path(t, "best", "CUSTOM.pretty", "x.kicad_mod").exists())
             self.assertTrue(Path(t, "best", "fp-lib-table").exists())
 
+    def test_nominal_width_path_failure_counts_as_a_power_failure(self):
+        out = json.dumps({"nets": {"VBUS": {"within_50mv": True, "full_width_path": True, "nominal_width_path": False},
+                                   "+5V": {"within_50mv": True, "full_width_path": True}}})
+        self.assertEqual(K.power_fails_from(out), 1)      # RV-019 pass 3, S5: the 0.6 mm criterion of plan 08 R4 (e)
+
+    def test_chosen_path_is_the_run_folder_so_two_batches_do_not_clash(self):
+        with tempfile.TemporaryDirectory() as t:
+            c1, c2 = Path(t, "c1"), Path(t, "c2")
+            c1.mkdir()
+            c2.mkdir()
+            runs = [make(str(c1), "run1", drc(3)), make(str(c2), "run1", drc(0))]
+            K.main(["x", t] + [str(r) for r in runs])
+            self.assertEqual(Path(t, "best", "chosen_path.txt").read_text().strip(), str(runs[1]))
+
     def test_main_fails_when_every_run_has_open_items(self):
         with tempfile.TemporaryDirectory() as t:
             self.assertEqual(K.main(["x", t, str(make(t, "r1", drc(1)))]), 1)

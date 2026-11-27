@@ -726,7 +726,7 @@ def build(netlist, outdir, name="busy_light_spike", sa_iters=None, layers=2):
 
     state, seed, wl, ov = pcb_place.place(parts, sa_nets, fixed_pins, fixed_rects, region_ok,
                                           seeds=SA_SEEDS, iters=sa_iters or SA_ITERS, margin=PLACE_MARGIN,
-                                          accept=layout_rules_ok, weights=weights, rules=rules,
+                                          accept=layout_rules_ok, misses=lambda st: len(rule_misses(st, rules)), weights=weights, rules=rules,
                                           blocks=[b for b in pcb_rules.BLOCKS if b[0] in comps and b[1] in comps],
                                           families=orientation_families(comps, fixed, STRICT_ICS)[0],
                                           strict_families=orientation_families(comps, fixed, STRICT_ICS)[1],

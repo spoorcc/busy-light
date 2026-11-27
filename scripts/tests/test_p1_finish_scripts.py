@@ -279,9 +279,7 @@ def fake_docker(tmp_path: Path) -> Path:
     return bindir
 
 
-def test_container_mounts_the_etc_target_of_java_symlinks(tmp_path: Path) -> None:
-    # Debian's Java keeps its config files as symlinks into /etc/java-<n>-openjdk;
-    # without that directory the JVM stops at start-up.
+def run_container_with_java_link(tmp_path: Path, **env: str) -> list[str]:
     java = tmp_path / "jdk"
     (java / "conf").mkdir(parents=True)
     (java / "conf" / "java.security").symlink_to("/etc/passwd")
@@ -289,9 +287,32 @@ def test_container_mounts_the_etc_target_of_java_symlinks(tmp_path: Path) -> Non
         ["sh", str(CONTAINER), "true"],
         PATH=f"{fake_docker(tmp_path)}:{os.environ['PATH']}",
         KC_JAVA_HOME=str(java),
+        **env,
     )
     assert res.returncode == 0, res.stderr
-    assert "/etc/passwd:/etc/passwd:ro" in res.stdout.splitlines()
+    return res.stdout.splitlines()
+
+
+def test_container_mounts_the_etc_target_of_java_symlinks(tmp_path: Path) -> None:
+    # Debian's Java keeps its config files as symlinks into /etc/java-<n>-openjdk;
+    # without that directory the JVM stops at start-up.
+    # KC_ETC_PREFIX (default /etc/java) limits what is mounted.
+    args = run_container_with_java_link(tmp_path, KC_ETC_PREFIX="/etc/pass")
+    assert "/etc/passwd:/etc/passwd:ro" in args
+
+
+def test_container_mounts_nothing_else_from_etc(tmp_path: Path) -> None:
+    # RV-019 pass 3, S9: a JDK link into /etc/ssl (the CA store)
+    # must not mount the host's /etc/ssl
+    args = run_container_with_java_link(tmp_path)
+    assert not any(a.startswith("/etc/passwd") for a in args)
+
+
+def test_container_creates_its_home_before_the_command(tmp_path: Path) -> None:
+    # RV-019 pass 3, S1: HOME=/tmp/kc-home did not exist,
+    # so `git config --global` failed in the container
+    args = run_container_with_java_link(tmp_path)
+    assert any(a.startswith('mkdir -p "$HOME"') for a in args), args
 
 
 @pytest.mark.parametrize("script", ["run_pcb.sh", "run_repass.sh"])
@@ -308,3 +329,23 @@ def test_router_scripts_keep_the_python_path_they_were_given(script: str) -> Non
     assert res.stdout.strip() == "/h/src:/extra/site"
     res = run(["sh", "-c", f'HERE=/h\nunset PYTHONPATH\n{lines[0]}\necho "$PYTHONPATH"'])
     assert res.stdout.strip() == "/h/src"
+
+
+PLACE_BEST = SPIKE / "run_place_best.sh"
+
+
+def test_place_best_is_valid_shell_and_prints_usage() -> None:
+    assert run(["sh", "-n", str(PLACE_BEST)]).returncode == 0
+    res = run(["sh", str(PLACE_BEST)])
+    assert res.returncode == USAGE_EXIT
+    assert "Usage: run_place_best.sh" in res.stdout
+
+
+def test_place_best_names_the_missing_netlist(tmp_path: Path) -> None:
+    res = run(["sh", str(PLACE_BEST), str(tmp_path), str(tmp_path / "o")])
+    assert res.returncode == 1
+    assert "kicad.net" in res.stdout
+
+
+def test_container_passes_the_rule_penalty_variable(tmp_path: Path) -> None:
+    assert "PLACE_RULE_PEN" in run_container_with_java_link(tmp_path)

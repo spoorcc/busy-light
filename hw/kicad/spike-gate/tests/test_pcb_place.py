@@ -199,3 +199,70 @@ class ProximityRules(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SeedChoice(unittest.TestCase):
+    """RV-019 pass 3 (S4): when no seed meets every rule, the placer keeps the overlap-free seed with the fewest rule misses
+    (then the shortest wire), not just the shortest wire."""
+
+    @staticmethod
+    def run_place(results, misses_of, accept=lambda st: False, counter=True):
+        class Stub:
+            def __init__(self, *args, seed=0, **kw):
+                self.seed = seed
+                self.state = {"seed": seed}
+
+            def run(self, iters=0):
+                return None
+
+            def total_overlap(self):
+                return results[self.seed][0]
+
+            def total_hpwl(self):
+                return results[self.seed][1]
+
+        real = P.Placer
+        P.Placer = Stub
+        try:
+            return P.place({}, {}, {}, [], lambda *a: True, seeds=sorted(results), accept=accept,
+                           misses=(lambda st: misses_of[st["seed"]]) if counter else None)
+        finally:
+            P.Placer = real
+
+    def test_fewest_misses_beat_a_shorter_wire(self):
+        self.assertEqual(self.run_place({1: (0.0, 100.0), 2: (0.0, 120.0)}, {1: 5, 2: 3})[1], 2)
+
+    def test_equal_misses_take_the_shorter_wire(self):
+        self.assertEqual(self.run_place({1: (0.0, 120.0), 2: (0.0, 100.0)}, {1: 3, 2: 3})[1], 2)
+
+    def test_overlap_still_comes_first(self):
+        self.assertEqual(self.run_place({1: (0.5, 100.0), 2: (0.0, 120.0)}, {1: 0, 2: 9})[1], 2)
+
+    def test_without_a_miss_counter_the_shortest_wire_wins(self):
+        self.assertEqual(self.run_place({1: (0.0, 100.0), 2: (0.0, 120.0)}, {1: 5, 2: 3}, counter=False)[1], 1)
+
+    def test_an_accepted_seed_is_returned_at_once(self):
+        res = self.run_place({1: (0.0, 120.0), 2: (0.0, 100.0)}, {1: 0, 2: 0}, accept=lambda st: st["seed"] == 1)
+        self.assertEqual(res[1], 1)
+
+
+class RulePenaltyKnob(unittest.TestCase):
+    """PLACE_RULE_PEN sets the cost per mm beyond a proximity rule; unset it is the value of ADR-0016 (40)."""
+
+    @staticmethod
+    def pen(value):
+        import subprocess
+
+        env = {k: v for k, v in os.environ.items() if k != "PLACE_RULE_PEN"}
+        if value is not None:
+            env["PLACE_RULE_PEN"] = value
+        src = os.path.join(os.path.dirname(__file__), "..", "src")
+        out = subprocess.run([sys.executable, "-c", "import pcb_place; print(pcb_place.RULE_PEN)"], cwd=src,
+                             capture_output=True, text=True, check=True, env=env)
+        return float(out.stdout)
+
+    def test_default_is_40(self):
+        self.assertEqual(self.pen(None), 40.0)
+
+    def test_env_overrides(self):
+        self.assertEqual(self.pen("250"), 250.0)

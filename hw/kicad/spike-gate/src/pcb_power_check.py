@@ -245,6 +245,7 @@ def plane_cuts(board, net, layer):
 
 
 def main(path, out=None):
+    import pcb_rules  # noqa: PLC0415
     board = pcbnew.LoadBoard(path)
     ras = Raster(board)
     layers = [board.GetLayerName(l) for l in board.GetEnabledLayers().CuStack()]
@@ -252,10 +253,13 @@ def main(path, out=None):
     for net, (src, dst, amps, basis) in CASES.items():
         r = effective_resistance(board, ras, net, src, dst, layers)
         rw = effective_resistance(board, ras, net, src, dst, layers, min_path_width(net))
+        rn = effective_resistance(board, ras, net, src, dst, layers, pcb_rules.NET_WIDTH[net] - 0.001) if net in INPUT_PATH else None
         res["nets"][net] = {"resistance_mohm": None if r is None else round(r * 1000, 2), "current_a": amps,
                             "drop_mv": None if r is None else round(r * amps * 1000, 1), "basis": basis,
                             "within_50mv": None if r is None else r * amps <= TARGET_V,
                             "full_width_path": None if rw is None else rw != float("inf"),
+                            # the main path (VBUS, VBUS_IC) has copper tracks at least the net's width (0.6 mm) all the way: plan 08 R4 (e)
+                            "nominal_width_path": None if net not in INPUT_PATH else (rn is not None and rn != float("inf")),
                             "min_path_width_mm": round(min_path_width(net), 3)}
     res["input_path"] = input_path(res["nets"])
     for net, layer in (("GND", "In1.Cu"), ("+5V", "In2.Cu")):

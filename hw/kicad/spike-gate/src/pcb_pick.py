@@ -35,10 +35,12 @@ def strict_fails(board: Path, profile: str = "stitched-4l") -> int:
 
 def power_fails_from(text: str) -> int:
     """Number of power nets over their drop target in the output of pcb_power_check.py (an infinite drop counts), or whose
-    current needs a track narrower than the full-width rule (`full_width_path` false, batch p1b7); 99 when unreadable."""
+    current needs a track narrower than the full-width rule (`full_width_path` false, batch p1b7), or whose main path has a track narrower than
+    the net's width (`nominal_width_path` false, VBUS and VBUS_IC, plan 08 R4 (e)); 99 when unreadable."""
     try:
         d = json.loads(text[text.index("{"):text.rindex("}") + 1])
-        return sum(1 for v in d["nets"].values() if not v["within_50mv"] or v.get("full_width_path") is False)
+        return sum(1 for v in d["nets"].values()
+                   if not v["within_50mv"] or v.get("full_width_path") is False or v.get("nominal_width_path") is False)
     except (ValueError, KeyError, TypeError):
         return 99
 
@@ -119,8 +121,9 @@ def main(argv: list[str]) -> int:
     for d in (best / "a").glob("*.pretty"):
         shutil.copytree(d, dst / d.name)
     (dst / "chosen_run.txt").write_text(best.name + "\n", encoding="utf-8")
+    (dst / "chosen_path.txt").write_text(str(best) + "\n", encoding="utf-8")        # the run folder as given: batches reuse run1 to run4
     s = dict(rows)[best]
-    print("best:", best.name, "->", dst)
+    print("best:", best, "->", dst)
     return 0 if s[0] == 0 and s[1] == 0 and s[2] == 0 else 1
 
 

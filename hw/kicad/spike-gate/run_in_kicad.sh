@@ -13,7 +13,9 @@ JAVA=${KC_JAVA_HOME:-/usr/lib/jvm/java-25-openjdk-amd64}
 [ $# -gt 0 ] || { sed -n 3,9p "$0"; exit 2; }
 MOUNTS="-v $ROOT:$ROOT -v $JAVA:$JAVA:ro"
 # Debian keeps the JVM config files as symlinks into /etc/java-<n>-openjdk; without those directories the JVM stops at start-up (RV-019 pass 2).
-for t in $(find "$JAVA" -type l -lname '/etc/*' 2>/dev/null | xargs -r -n1 readlink | awk -F/ '{print "/"$2"/"$3}' | sort -u); do
+# Only /etc/java* by default (KC_ETC_PREFIX): a link into /etc/ssl must not mount the host's CA store (RV-019 pass 3, S9).
+ETC_PREFIX=${KC_ETC_PREFIX:-/etc/java}
+for t in $(find "$JAVA" -type l -lname '/etc/*' 2>/dev/null | xargs -r -n1 readlink | awk -F/ '{print "/"$2"/"$3}' | grep "^$ETC_PREFIX" | sort -u); do
   [ -e "$t" ] && MOUNTS="$MOUNTS -v $t:$t:ro"
 done
 [ -n "$FREEROUTING_JAR" ] && MOUNTS="$MOUNTS -v $(dirname "$FREEROUTING_JAR"):$(dirname "$FREEROUTING_JAR"):ro"
@@ -22,5 +24,6 @@ done
 # shellcheck disable=SC2086
 exec docker run --rm -i -u 0:0 -e HOME=/tmp/kc-home -e PYTHONPATH="${KC_PYTHONPATH:-}" -e PATH="$JAVA/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
   -e FREEROUTING_JAR -e PCB_PYTHON -e SPIKE_ALLOW_KNOWN_OPEN -e SEED_OFFSET -e KEYFIRST -e FR_THREADS -e FR_PASSES -e PLACE_GRID -e PLACE_ANT_KEEPOUT \
-  -e PLACE_BLOCKS -e PLACE_ORIENT -e PLACE_ROWS -e PLACE_STRICT -e PLACE_SEED_START -e GATE_NET -e RING -e OUTER_ONLY -e CLEANUP -e SPIKE_PROFILE \
-  -e P1 -e P1_DIAM -e PRESTITCH -e PRESTITCH_REUSE -e REPASS -e BOARD_ID $MOUNTS -w "$(pwd)" "$IMAGE" "$@"
+  -e PLACE_BLOCKS -e PLACE_RULE_PEN -e PLACE_ORIENT -e PLACE_ROWS -e PLACE_STRICT -e PLACE_SEED_START -e GATE_NET -e RING -e OUTER_ONLY -e CLEANUP -e SPIKE_PROFILE \
+  -e P1 -e P1_DIAM -e PRESTITCH -e PRESTITCH_REUSE -e REPASS -e BOARD_ID $MOUNTS -w "$(pwd)" "$IMAGE" \
+  sh -c 'mkdir -p "$HOME"; exec "$@"' sh "$@"          # HOME must exist for git config (RV-019 pass 3, S1)
