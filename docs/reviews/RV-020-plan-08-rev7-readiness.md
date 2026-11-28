@@ -57,8 +57,31 @@ Verified by the assistant: strict DRC waiver (footprint_filters_mismatch max 16,
 | 31 | Medium (S) | Regulatory and safety deltas (photobiological, antenna, EMC, thermal, start-up load) | `regulatory-check` at S0; omitted items in "Not run" | Open: recorded at S0 |
 | 32 | Low | Foot margins to the window (0.06 mm) and module (0.56 mm); module body on the circle with no margin; stale panel inputs; diameter typed in two places; parts count about 100; line numbers rot; outline and mask tolerances | Open items, risks 9, a diameter test, 69 parts, symbols instead of lines, sagitta test | Resolved or listed |
 
-## Pass 3: implementation readiness
-Pending: a fresh goldfish answers GO or NO-GO on the plan as revised above; the result is entered here.
+## Pass 3: implementation readiness (third draft): NO-GO for S1 and S2 as written
+The goldfish recomputed the geometry independently and found it sound (ring, module, edge distances, caps, foot, land, counts, J1 rows all reproduced). It found the plan inconsistent with itself or the repository in four places and several deliverables without a stated test. All fixes were text edits.
+| # | Severity | Finding | Resolution (fourth draft) | Status |
+|---|---|---|---|---|
+| 1 | High | S0 gate open; the "owner's go" had no record; `regulatory-check` not recorded | This pass is entered here; the owner's pre-approval after a GO (answer 16 of 2026-11-17) and the "Yes go" of 2026-11-28 are recorded in the journal and cited in gate (c); `regulatory-check` run (below) | Resolved |
+| 2 | High | The diameter-tie test could pass only after item 6 | Test moved to S2; `housing_params.PROFILE_R58` (the generators keep 46 and 53) | Resolved |
+| 3 | High | "The ref list follows `cell_refs`" contradicts the waiver data (D1 to D16) | `test_kicad_strict.py` line 135 stays `cell_refs("r46")` | Resolved |
+| 4 | High | Profile switch and `-e P1_PROFILE` had no step, test or generation command | Switch tests in item 1; `-e P1_PROFILE` and the exact generation command in item 2 | Resolved |
+| 5 | High | Chain order not decidable; criteria contradicted the netlist paragraph | Decided: input, D17 to D32, J1 gap, D1 to D16, D16 to D33, D33 to D36 (the only candidate meeting criteria 1 and 2); `cell_refs` and `chain_links` return types and ownership defined; three excluded links named | Resolved |
+| 6 | Medium | The grep test could not pass at S1 and had no scope | Scope fixed (S1 files, code only); S2 extends it | Resolved |
+| 7 | Medium | Light-edge gate had no criterion or wall model | Mirror wall, luminance 1.0 mm inside at least 90 % of the plateau; computed 0.93 at 2.42 mm; absorbing wall about 0.55 (why the faces are white); other two MECH-015 figures not computable; gate is the first S1 task | Resolved |
+| 8 | Medium | "ADR foot position" test ambiguous; the claim held for one reading only | Two readings named: none at 9.9 mm, fewer positions than at the computed foot at 9.3 mm (reviewer: 3 against 11) | Resolved |
+| 9 | Medium | Deliverables without a test (notch `inside_pcb`, outline, `R_POST`, loader, `pcb_dsn`, `pcb_quality`, evidence reverse check, `layout_sch`, footprint filter, land metrics) | One stated check each; `pcb_dsn` and `pcb_quality` move to S2 with a per-arc spread definition; the footprint filter finding is measured on the stored board first | Resolved |
+| A | High (S2) | Largest dimension: courtyard front gives 66.0 mm, the Fab front 65.5 mm | Mouth = F.Fab front; helper `fab_front_mm(fp)`; test | Resolved |
+| B | High (S2) | Item 4 had no load model | Eight cases `+5V:<ref>`, whole ring current 1.577 A as a screening bound, test on a synthetic board | Resolved |
+| C | Medium (S2) | `mechanical` CI job outcome after item 6 | The generators and `ci_mech.sh` are not touched; baseline read before S2; a new red is a defect | Resolved |
+| D | Medium (S2) | Second CI step and its workflow test were in no step | Moved into item 3 | Resolved |
+| E | Medium (S2) | "3 excluded by name" had no rule | `chain_links` kinds `laid`, `long`, `input`; the three links named | Resolved |
+Non-blocking remarks taken into the text: centre LEDs use the tangent rule; module area 147.8 or 149 mm2 (a test value wins); ruff and mypy scope (the spike-gate files stay outside the lint configuration); `layout_full` global state (separate processes); check 6 and check 7 named as tests; "pass 4" removed from the plan header; `render_p1_images.sh` follows at S6c.
+
+## Regulatory check (skill `regulatory-check`, S0)
+Recorded in `docs/regulatory/compliance-matrix.md` (section of 2026-11-28, findings F10 to F14) and three dated notes in `applicability.md`. Inputs that change: light output (36 LEDs), antenna environment (edge, 2.40 to 2.95 mm, wall 1.90 mm), housing size; the conformity route does not change. Findings: the LED current is limited by firmware only (F10, ADR-0004 review), HW-005 cannot be met as written (F11), applicability consequences 7 and 12 out of date (F12, fixed), EMC of two long data links (F13), no technical-file evidence produced (F14). Not run: any measurement.
+
+## Pass 3b: readiness of the fourth draft
+Pending: a fresh goldfish answers GO or NO-GO for S1 and for S2; the result is entered here.
 
 ## Outcome
-Pending the readiness pass. Open for the owner whatever the verdict: HW-001 and HW-005 amendment texts, SYS-001/028/032 texts, the waiver extension if the generator cannot remove the LED footprint filter finding (gate a), the LED current basis (gate d), the housing hook and post azimuths (plan 05 revision), DEV-009 is recorded as accepted from the answer of 2026-11-28.
+Pending pass 3b. Open for the owner whatever the verdict: HW-001 and HW-005 amendment texts, SYS-001/028/032 texts, the waiver extension if the generator cannot remove the LED footprint filter finding (gate a), the LED current basis (gate d), the housing hook and post azimuths (plan 05 revision), DEV-009 is recorded as accepted from the answer of 2026-11-28.

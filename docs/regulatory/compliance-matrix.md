@@ -73,3 +73,22 @@ Findings (severity for the product; the P1 prototype has no conformity duty):
 
 Checks behind this section: the T1 and `DampingLink` tests were re-run on 2026-11-18 in the `kicad/kicad:10.0` image (7 passed).
 Not run: bench, SPICE of the new path, power check, any EMC, ESD, thermal or RoHS evidence.
+
+## Regulatory check of plan 08 revision 7: round 58.5 mm board, 36 LEDs, module at the edge (2026-11-28)
+Inputs that change (`applicability.md`): light output (16 to 36 LEDs, 32 in two arcs and 4 under the centre button; the LED current budget stays, the per-channel current basis is unverified), antenna environment (module at the board edge, end LEDs 2.40 to 2.95 mm from the antenna strip, housing wall 1.90 mm from the module corners, DEV-009), housing size (53 to 65.5 mm). Not changed: radio, power source (USB-C 5 V, at most [500] mA), connectivity, data, battery, markets. The conformity route does not change. P1 stays a prototype for the owner (no conformity duty).
+| Rule | Touched by | Requirement / TC | Evidence | Status |
+|---|---|---|---|---|
+| EN 62471 | 36 LEDs instead of 16, bright centre button under a translucent cap | SYS-001, SYS-020, HW-001 (amendment draft) | None for 36 LEDs; the consequence 7 text "16 small LEDs" is superseded; per-LED current is lower than before at the same budget but the basis is unverified | Open |
+| RED Art. 3(2) / Art. 3(1)(b) *(verify)* | Antenna at the edge with LEDs, a 21.6 mm data link crossing the J1 gap and copper near the strip | HW-005 (amendment draft), SYS-038, TC-205 | Computed distances (plan 08 section S, pure Python, not KiCad); vendor keep-out lies off the board; DEV-009 (courtyard); no range test, no EMC measurement | Open |
+| RED Art. 3(1)(a) / EN 62368-1 *(verify)* | Full-white current of 36 LEDs against a 500 mA source | SYS-020, HW-010 | Paper budget only; no figure is verified (5 mA per channel for a WS2812C-2020 against 12 mA in the stored WS2812B-2020 footprint description, which would be about 1.3 A for 36 LEDs); the limit is firmware | Open |
+| RED Art. 3(1)(a) / EN 62368-1 *(verify)* | Thermal and flammability of a larger printed housing with 36 LEDs | RISK-005 | None | Open |
+| CRA, RED Art. 3(3)(d)-(f), GDPR, RoHS, REACH, WEEE | Board layout only | -- | Not touched: firmware, interfaces and data unchanged | No change |
+
+Findings (the P1 prototype has no conformity duty):
+- **F10 Medium.** The limit of the LED current is by firmware only. With 36 LEDs a firmware fault at full white could draw more than the source allows if the per-channel current is 12 mA; ADR-0004's review says a firmware-only limit is not a safety measure. The hardware limit of the TPS2553 (HW-010) bounds the source, not the LED frame. Owner decision pending (plan 08 gate (d)).
+- **F11 Medium.** HW-005 says "no LED inside the keep-out"; the round board cannot meet that (end LEDs 2.40 to 2.95 mm from the strip). The amendment text is drafted (Draft); the range test and a pre-compliance scan decide. RISK-011 stays open.
+- **F12 Low.** `applicability.md` consequence 7 ("16 small LEDs") and consequence 12 ("about 53 mm housing, label space is tight") are out of date: noted there.
+- **F13 Low.** EMC: two long data links (21.6 mm across the J1 gap and about 26 mm to the centre) and the 800 kHz data line near the antenna strip: no pre-compliance plan yet (F2 stays open).
+- **F14 Info.** No technical-file evidence is produced by this change; the computed geometry lives in plan 08 section S and RV-020 and is not filed under `technical-file/`.
+
+Checks behind this section: reading of `applicability.md`, this matrix, ADR-0004, ADR-0027 and plan 08 section S. Not run: any measurement, simulation of the new geometry, EMC, thermal or photobiological assessment.

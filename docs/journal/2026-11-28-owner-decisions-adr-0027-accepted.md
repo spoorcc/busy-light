@@ -12,6 +12,8 @@ Context: the owner chose the LED configuration from the mock-up (`docs/journal/2
 | 6 | Approve MECH-015 | Approve as written | MECH-015 status |
 | 7 (later the same day, after the plan 08 section S review) | The module library courtyard contains the vendor antenna keep-out and would cover about 10 ring LEDs and 10 caps; the ADR-0023 rule made it a no-go area for all parts (land 910 mm2, about 20 courtyard overlaps against the waiver maximum of 14) | Body courtyard for U9 on this board (module body plus 0.25 mm; the antenna strip rule area stays) | DEV-009, DEV-004 note, plan 08 section S |
 
+Go given: after the six answers the owner said "Yes go" to the sequence 66 mm limit in the generator and placer (tests first), plan 08 revision 7, a goldfish readiness pass, then re-place and route P1. Implementation after a readiness GO was pre-approved on 2026-11-17 (answer 16 of `2026-11-17-p1-order-owner-decisions.md`).
+
 ## What changed in the records
 - ADR-0027: Accepted. Ring diameter [52] mm and LED clearance [3] mm stay working values (read from the screenshot, not asked).
 - MECH-015: Approved. Values in square brackets stay open until the coupon test (TC-317).
