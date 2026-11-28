@@ -63,6 +63,9 @@ most parts and are not a fit check.
   footprints; the board is to be placed and routed again after the owner's decisions (plan 08 section 0.5).
 - U5 TPS3840DL40DBVR has no LCSC or JLCPCB listing (the hold-off of HW-010 needs it); R22 candidate up to 20 mohm against
   HW-017 [10] mohm.
+- Superseded for the next board: the owner replaced U5 by the TPS3808G01DBVR (ADR-0025, 2026-11-24) and reworked the gate
+  (ADR-0024). The generator carries both; this stored board still has the TPS3840 and is not regenerated. The successor is
+  the round 58.5 mm board of plan 08 section S (ADR-0027); nothing has been placed or routed for it.
 - The assistant's picks: spares on the bottom in 1206; tab azimuths; the 0.75 full-width rule and the 50 mV target.
 - Not run: housing fit (FreeCAD), antenna range with the module 5 mm closer to the edge (TC-205), thermal, the fab-release
   workflow on GitHub, JLCPCB DFM upload and price, bench (TC-208, TC-210, TC-216, TC-217).

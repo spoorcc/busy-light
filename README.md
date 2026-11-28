@@ -28,8 +28,10 @@ Sixteen RGB LEDs that show your Jenkins build status or any other level, with no
 ---
 
 > **Honest status:** busy-light is in the **design phase**. There is no released firmware, no manufactured
-> hardware and no approved requirement set yet. A first prototype board (P1) is routed and checked by script,
-> but a review (RV-016) found it **not ready to order**: it is placed and routed again after owner decisions. Everything below describes the **intended** product and
+> hardware and no complete approved requirement set yet (22 of 106 requirements are approved). A first prototype board (P1, 46 mm)
+> is routed and checked by script, but a review (RV-016) found it **not ready to order**. On 2026-11-28 the owner decided a round
+> 58.5 mm successor with 36 LEDs (ADR-0027); its plan passed a readiness review (RV-020) and **no board has been made from it yet**.
+> Everything below describes the **intended** product and
 > what the project has already proved with desk studies, PC prototypes and CAD experiments.
 > Nothing here is certified, and no conformity with any regulation is claimed.
 
@@ -43,6 +45,10 @@ The first use case is a **Jenkins build light**: green, red, unstable, running, 
 **level gauge**: the ring fills like a dial from 0 to 100 percent for queue length, test pass rate, or any number
 a REST endpoint can give.
 
+The current models have 16 LEDs on a 53 mm housing. The owner decided on 2026-11-28 (ADR-0027, accepted) that the next
+prototype has 32 ring LEDs in two arcs plus 4 LEDs under a centre button, on a round 58.5 mm board in a housing of about
+65.5 mm. The draft requirements SYS-001 and SYS-028 carry these figures in brackets until the owner approves them.
+
 ## Why another status light?
 
 Most status lights need a vendor app, a cloud account or a USB cable to a PC. busy-light is designed around a
@@ -52,7 +58,7 @@ different set of goals.
 |------|---------------|
 | **Works on a shared, untrusted network** | Per-unit access point password, encrypted provisioning, authenticated and signed updates. |
 | **No app, no cloud** | Set-up and configuration through a web page served by the device itself. |
-| **Small enough to put anywhere** | About 53 mm across, powered over USB-C. |
+| **Small enough to put anywhere** | About 53 mm across in the current housing model (about 65.5 mm after the decision of 2026-11-28), powered over USB-C. |
 | **Cheap to build** | Target assembled board cost of EUR 10 to 20 with a prototype shop. |
 | **Source-available and reproducible** | Software, hardware and mechanics are all in this repository, with generated files and checks that anyone can rerun. Code is Apache-2.0. Documentation, hardware and mechanics are free to copy and build for non-commercial use. |
 | **Built like a product** | Requirements, decisions, risks and tests are traced from the first line, with EU market access (CE) in mind from day one. |
@@ -61,7 +67,7 @@ different set of goals.
 
 These are **planned**, taken from the draft requirements in [`docs/requirements/`](docs/requirements/). None is released.
 
-- **16-LED RGB ring** with status colours, animations and a level (gauge) mode
+- **RGB LED ring** (16 LEDs in the current models; 32 in two arcs plus 4 under a centre button decided for the next prototype) with status colours, animations and a level (gauge) mode
 - **Jenkins first:** receive pushed build events, or poll the Jenkins REST API
 - **Mapping without code:** pick a value in the JSON answer, map it to a state or scale it to a level
 - **Own access point for set-up:** the device creates a Wi-Fi network with a unique password printed on a label, you open a web page and enter your Wi-Fi details
@@ -75,7 +81,7 @@ These are **planned**, taken from the draft requirements in [`docs/requirements/
 flowchart LR
     J[Jenkins or other REST source] -- push or poll --> D((busy-light))
     P[Phone or laptop] -- set-up page over the device's own Wi-Fi --> D
-    D --> R[16-LED ring]
+    D --> R[LED ring]
     U[USB-C] -- power --> D
 ```
 
@@ -85,14 +91,14 @@ The project has done a lot of thinking and some experiments, but **no product co
 
 | Area | State |
 |------|-------|
-| Requirements | Written for needs, system, software, hardware and mechanics (105 entries). **21 are approved by the owner** (all 9 mechanical, 6 hardware including the current-limit gate HW-010 and the shop rules HW-008, 5 software, 1 system); the rest are drafts. |
-| Architecture decisions | 23 decision records. **19 are accepted** by the owner (ADR-0011, the housing, only for the prototype; ADR-0023 for its decisions, its text not yet read by the owner), 2 are proposed (ADR-0020 fabrication rules, ADR-0022 how P1 gets its parts onto the board) and 2 are superseded. Recent decisions: measure the hot-plug surge on the prototype first (ADR-0021) and a simpler current-limit gate with smaller packages, so that every assembled part fits on one side (ADR-0023). |
+| Requirements | Written for needs, system, software, hardware and mechanics (106 entries). **22 are approved by the owner** (all 10 mechanical, 6 hardware including the current-limit gate HW-010 and the shop rules HW-008, 5 software, 1 system); the rest are drafts, among them the amendment texts for the 36-LED board (HW-001, HW-005, SYS-001, SYS-028, SYS-032). |
+| Architecture decisions | 27 decision records. **22 are accepted** by the owner (ADR-0011, the housing, only for the prototype; ADR-0023 for its decisions, its text not yet read by the owner), 2 are proposed (ADR-0020 fabrication rules, ADR-0026 the centre-of-ring button) and 3 are superseded (ADR-0009, ADR-0013, ADR-0022). Recent decisions: the gate rework with a stocked hold-off supervisor (ADR-0024, ADR-0025) and the split LED ring on a round 58.5 mm board with the module at the board edge (ADR-0027, 2026-11-28). |
 | Risk register | Open. Each risk has a mitigation and a verification link. |
-| Reviews | 17 independent "goldfish" reviews ([`docs/reviews/`](docs/reviews/)), from the system design to the P1 board plan (RV-014), the README skill (RV-015), the built P1 board (RV-016: not ready to order) and the gate simplification ADR-0023 (RV-017: rejected as written). |
+| Reviews | 20 review records ([`docs/reviews/`](docs/reviews/)), from the system design to the built P1 board (RV-016: not ready to order), the gate simplification ADR-0023 (RV-017: rejected as written), the centre-button plan (RV-018), the re-placement plan (RV-019) and the plan for the round 58.5 mm board (RV-020: the readiness pass answered GO for its first two steps, the code for them is not written). |
 | Software | Zephyr 4.5.0 workspace pinned. The input-current gate logic (`sw/app/src/gate.c`) has **20 host unit tests that pass** on `native_sim`. The application **builds** for the ESP32-C3 dev kit without warnings, but the gate logic is not in that image yet and **nothing was flashed or run on a board**. A mapping extractor and an LED current limiter were tried as PC-only prototypes (results in the reports, code not in `sw/`). |
-| Hardware | A scripted KiCad flow makes the full schematic (USB-C input, CC detection, current-limit gate, hold-off, ESP32-C3 module, 16 LEDs) and the **P1 prototype board**: 46 mm, 4 layers, every assembled part on the top side ([`board-p1/`](hw/kicad/spike-gate/board-p1/README.md)). Script checks pass: strict ERC and DRC with **0 unconnected items** (only the tolerated antenna findings), no via in a pad, supply drops of 7 to 44 mV. The order package (KiKit panel, JLCPCB files) builds, but review RV-016 found the board **not ready to order**: gate-safety gaps after the ADR-0023 simplification, missed placement rules, a main path narrower than 0.6 mm and the housing size limit of MECH-001; the hold-off IC (U5) has no shop listing, and the candidate for the damping link R22 has up to 20 mΩ against the 10 mΩ of HW-017. Part datasheet evidence is recorded in a schema, **none verified**. The surge on the 5 V side is still to be **measured** on a built board. |
-| Mechanics | FreeCAD scripts generate the housing (base with USB-C window, button hole, PCB posts and snap hooks, annular back bayonet with lock lips and a mating accessory ring, lid with snap bumps), print coupons for the diffuser and the bayonet, and a tolerance check with tests. **Nothing printed or fit-tested**; the tolerances are assumptions. The fit of the P1 board in the housing is **not checked**. |
-| Regulatory | Applicability analysis and compliance matrix started; the P1 board changes have a regulatory check. No test evidence collected, no declaration made. |
+| Hardware | A scripted KiCad flow makes the full schematic (USB-C input, CC detection, current-limit gate, hold-off, ESP32-C3 module, 16 LEDs) and the **P1 prototype board**: 46 mm, 4 layers, every assembled part on the top side ([`board-p1/`](hw/kicad/spike-gate/board-p1/README.md)). Script checks pass: strict ERC and DRC with **0 unconnected items** (only the tolerated antenna findings), no via in a pad, supply drops of 7 to 44 mV. The order package (KiKit panel, JLCPCB files) builds, but review RV-016 found the board **not ready to order**: gate-safety gaps after the ADR-0023 simplification, missed placement rules, a main path narrower than 0.6 mm and the housing size limit of MECH-001. The generator and the placement rules now carry the owner's decisions of 2026-11-24 (gate rework ADR-0024, hold-off supervisor TPS3808G01DBVR instead of the unlisted TPS3840 in ADR-0025), but **the stored board predates them and is not regenerated**. The successor is a round 58.5 mm board with 32 ring and 4 centre LEDs (ADR-0027); its plan (plan 08, section S) passed the readiness review for its first two steps (RV-020), and **no placement, routing or check has been run for it**. Part datasheet evidence is recorded in a schema, **none verified**. The surge on the 5 V side is still to be **measured** on a built board. |
+| Mechanics | FreeCAD scripts generate the housing (base with USB-C window, button hole, PCB posts and snap hooks, annular back bayonet with lock lips and a mating accessory ring, lid with snap bumps), print coupons for the diffuser and the bayonet, and a tolerance check with tests. **Nothing printed or fit-tested**; the tolerances are assumptions. The fit of the P1 board in the housing is **not checked**. The housing limit is 66 mm (MECH-001, approved amendment of 2026-11-28) and the centre-button requirement MECH-015 is approved, but the generators still make the 53 mm housing and are **not valid for the 58.5 mm board** until the housing plan is revised. |
+| Regulatory | Applicability analysis and compliance matrix started; the P1 board changes and the plan for the 36-LED board have a regulatory check (RV-020: photobiological safety of 36 LEDs, antenna at the board edge, EMC of the long data links, thermal are open items). No test evidence collected, no declaration made. |
 
 The reports behind these lines are in [`docs/verification/reports/`](docs/verification/reports/).
 
@@ -104,7 +110,7 @@ All images are generated from text sources or tool exports; none is hand-drawn. 
 
 ![Proposed software blocks: Jenkins and a phone browser talk to the device; inside the device source adapters, mapping, display engine, network manager, web server and settings store](docs/diagrams/generated/plantuml/arch-system-blocks.svg)
 
-**Prototype board P1 (KiCad 10, generated by script, checked by script, not ready to order per RV-016):**
+**Prototype board P1, the stored 46 mm board with 16 LEDs (KiCad 10, generated by script, checked by script, not ready to order per RV-016; the round 58.5 mm successor of ADR-0027 has no board yet):**
 
 | Schematic (P1), part 1: USB-C input, CC detection, current-step gate, hold-off, current limit, regulator |
 |---|
@@ -138,7 +144,7 @@ Regenerate with [`hw/kicad/spike-gate/render_p1_images.sh`](hw/kicad/spike-gate/
 |-------|------|-------|
 | **0. Foundation** | Process, requirements, decisions, risks, regulatory outline, CI | in progress |
 | **1. Spikes** | Prove the risky parts on a dev kit: Wi-Fi access point, web page, LED drive, power budget, secure boot | planned, waiting for approval of the spike plan |
-| **2. Prototype** | 10 internal prototypes: schematic, board, housing, first firmware | started: P1 board routed and checked by script; RV-016: not ready to order, to be placed and routed again (plan 08) |
+| **2. Prototype** | 10 internal prototypes: schematic, board, housing, first firmware | started: P1 board (46 mm) routed and checked by script; RV-016: not ready to order. Next: the round 58.5 mm board with 36 LEDs (plan 08 section S, readiness GO for steps S1 and S2, no code written yet) |
 | **3. Verify** | Test cases against approved requirements, pre-compliance tests | planned |
 | **4. Release candidate** | Signed firmware, documentation, technical file | planned |
 
