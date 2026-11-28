@@ -80,8 +80,23 @@ Non-blocking remarks taken into the text: centre LEDs use the tangent rule; modu
 ## Regulatory check (skill `regulatory-check`, S0)
 Recorded in `docs/regulatory/compliance-matrix.md` (section of 2026-11-28, findings F10 to F14) and three dated notes in `applicability.md`. Inputs that change: light output (36 LEDs), antenna environment (edge, 2.40 to 2.95 mm, wall 1.90 mm), housing size; the conformity route does not change. Findings: the LED current is limited by firmware only (F10, ADR-0004 review), HW-005 cannot be met as written (F11), applicability consequences 7 and 12 out of date (F12, fixed), EMC of two long data links (F13), no technical-file evidence produced (F14). Not run: any measurement.
 
-## Pass 3b: readiness of the fourth draft
+## Pass 3b: readiness of the fourth draft: NO-GO for S1 and S2 as written
+The goldfish reproduced the geometry, the land, the light-edge gate (0.930 at 1.0 mm for the mirror wall at 2.42 mm), the counts and the baseline tests. It found specification gaps only; its container items could not run in its sandbox (no Docker daemon, no kiutils), whereas the scratch wrapper `kc` of R0 works here (pcbnew 10.0.8).
+| # | Severity | Finding | Resolution (fifth draft) | Status |
+|---|---|---|---|---|
+| 1 | High (env) | Container deliverables (`full-r58.net`, strict ERC, determinism, library footprint test) cannot run in the reviewer's sandbox | Item 2 states the R0 container (wrapper `kc` starts dockerd) and that S1 cannot close without it | Resolved (environment verified here) |
+| 2 | High | The perturbation test had no definition; "3 positions, 0.1 mm" conflicted with reviewers' 11 | **Verified, plan was wrong:** with the radius fixed at the nominal value the end LED has 3 positions, with the radius adjusted inward (up to 0.17 mm) 18; the rule is now "smallest inward shift per slide", `CAP_INWARD_MAX_MM` 0.2 enters `R_MOVE` (22.72, land about 1005 mm2); perturbation criterion: derived radius, at least one position per cell for both signs | Resolved |
+| 3 | Medium | Evidence-checker path wrong; no acceptance command; "BOM entry" undefined | `scripts/test_check_part_evidence.py`; `full-r58.net` exits 0 and `full.net --subset-netlist` exits 0; BOM = `src/sourcing.py` | Resolved |
+| 4 | Medium | ruff and mypy verification without commands or home; `NamedTuple` field `index` | Exact commands, `MYPYPATH`, `collections.namedtuple`, results in the S1 closing commit | Resolved |
+| 5 | Medium | Gate (b) prediction not in items; `items_not_allowed` untestable at S1 | `u9_courtyard_pairs` added to item 1; `items_not_allowed` read at S3 and S5 | Resolved |
+| 6 | Medium | API and data structures not fixed | API paragraph in item 1 (profile fields, signatures, `Cell.pos`, `netlist_path`) | Resolved |
+| S2-1 | Medium | `check_tolerance --profile` had no mechanism | `pcb_gap(params=...)` only; nominal 1.90 mm pinned | Resolved |
+| S2-2 | Medium | `pcb_dsn` description wrong; marker selection open | `pcb_dsn` and `pcb_fix` follow `pcb_ring.cells()`; markers `r46` and `r58`, `-m "not r58"` and `-m "not r46"` | Resolved |
+| S2-3 | Medium | S2 inherits S1 gaps | S2 starts after the S1 closing commit pins the API | Resolved |
+Non-blocking remarks taken into the text: `ilim_steps.py` path, `test_kicad_strict.py` line 134 unchanged, "fifth draft", D16 to D33 about 20 mm (compliance matrix F13 corrected), J1 shell pins 28.25, J1-side raw area 130 to 150 mm2, determinism test strips the design header, AST test with exact string equality, U9 body and strip in the cap obstacles, gate inputs read from the computed values, `first_led_mm` sets the wall-to-wall length, `Cell` unpacking in `test_pcb_full.py`, commits when asked (rule 14), HW-014 sum 19.99 uF.
+
+## Pass 3c: readiness of the fifth draft
 Pending: a fresh goldfish answers GO or NO-GO for S1 and for S2; the result is entered here.
 
 ## Outcome
-Pending pass 3b. Open for the owner whatever the verdict: HW-001 and HW-005 amendment texts, SYS-001/028/032 texts, the waiver extension if the generator cannot remove the LED footprint filter finding (gate a), the LED current basis (gate d), the housing hook and post azimuths (plan 05 revision), DEV-009 is recorded as accepted from the answer of 2026-11-28.
+Pending pass 3c. Open for the owner whatever the verdict: HW-001 and HW-005 amendment texts, SYS-001/028/032 texts, the waiver extension if the generator cannot remove the LED footprint filter finding (gate a), the LED current basis (gate d), the housing hook and post azimuths (plan 05 revision), DEV-009 is recorded as accepted from the answer of 2026-11-28.
