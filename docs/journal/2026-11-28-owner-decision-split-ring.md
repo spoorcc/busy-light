@@ -14,11 +14,11 @@ Owner answer, in full: **"Do a split ring ensure by the mechanical design that t
 - Mock-up updated (same artifact link): light walls, white or black faces, lit ring with hard ends.
 - Not changed: MECH-001 (65 mm, to 66 mm with the ADR), SYS-001, SYS-028, SYS-032, `mech_outline.py`, the generator, the housing model, plan 05, plan 08 (revision 7) and plan 09. No code in `hw/` or `mech/freecad` was touched.
 
-## Reading of "sharp" (to be confirmed)
-The assistant read "edges are sharp" as the four ends of the two arcs and the borders of the band, not as a thin ring. The glow along each arc stays soft and even (MECH-002, owner decision of 2026-11-07). If the owner means only sharp borders, the walls and the gain table of ADR-0027 are not needed.
+## Reading of "sharp" (answered)
+The assistant read "edges are sharp" as the four ends of the two arcs and the borders of the band, not as a thin ring, with the glow along each arc soft and even (MECH-002, owner decision of 2026-11-07), and asked. Owner answer, in full: **"Of the light I mean"**. The edges are the edges of the light (the ends and the borders of the lit arcs), not mechanical edges. MECH-014 now covers the borders as well as the ends. Not asked: whether the glow along each arc stays soft; the assistant keeps that assumption.
 
 ## Points for the owner
-- Confirm the reading of "sharp", the LED count and the ring diameter, and accept or change ADR-0027 and MECH-014.
+- Choose the LED count and the ring diameter, and accept or change ADR-0027 and approve or change MECH-014.
 - Construction A has four housing parts instead of two (base, cap, two inserts) and replaces concept B of ADR-0011.
 - The owner's printer and filaments decide fallback D (two materials in one lid). The black filament must be non-conductive near the antenna (MECH-003).
 - The antenna at the board edge is a range risk (RISK-011): the 6 dB range test of SYS-038 decides, with the wall at 2.65 mm.
