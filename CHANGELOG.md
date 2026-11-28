@@ -10,6 +10,7 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ## [Unreleased]
 
+- Owner decisions of 2026-11-28 (`docs/journal/2026-11-28-owner-decisions-adr-0027-accepted.md`): ADR-0027 (split ring) accepted; MECH-015 (sharp light edges) approved; 32 ring LEDs plus 4 LEDs under a smaller round centre button (radius about 11 mm, bright centre); LED current budget unchanged; MECH-001 upper limit 66 mm (amendment); SYS-001, SYS-028, SYS-032 and NEED-003 texts updated (Draft). ADR-0003, ADR-0011 and ADR-0023 are superseded in part. No hardware or mechanical file changed.
 ### Added
 - Plan 09 (Draft): the centre of the LED ring as the button (owner decision 9 of 2026-11-22, interview of 2026-11-23): separate
   centre disc, switch place and disc support still open (S1 off-centre switch against S2 moved module; guided disc against

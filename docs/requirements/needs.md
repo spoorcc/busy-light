@@ -21,6 +21,7 @@ Product concept: a Wi-Fi connected ring of individually controllable RGB LEDs th
 ### NEED-003 Ring of individually controllable RGB LEDs
 - **Statement:** The device has an LED ring. Each LED is RGB and can be controlled individually.
 - **Clarified (owner, 2026-11-03):** 16 LEDs.
+- **Clarified (owner, 2026-11-28, ADR-0027):** 32 ring LEDs in two arcs plus 4 LEDs under the centre button (36 in total); the earlier figure of 16 is replaced.
 - **Open points:** Brightness target (visible across a room or only on a desk?), colour accuracy needs, animation needs.
 - **Status:** Draft
 

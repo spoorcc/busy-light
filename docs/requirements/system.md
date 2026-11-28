@@ -26,10 +26,10 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 
 ### SYS-001 Status indicator ring
 
-- **Statement:** The device shall show its status on a ring of [16] RGB LEDs, each LED controlled individually for colour and brightness.
-- **Rationale:** The ring is the only display; individual control allows levels and animations. The brightness figure depends on the current that the source allows (SYS-020): at the default 500 mA the paper power budget leaves 5 to 58 % of full white depending on LED type, on a source that advertises 1.5 A the limiter does not dim (`spike-7-5-power-budget-paper.md`, section 8). The figure is therefore to be agreed at two operating points: the default source and a source advertising 1.5 A.
+- **Statement:** The device shall show its status on a ring of [32] RGB LEDs in two arcs and on [4] RGB LEDs under the centre button, each LED controlled individually for colour and brightness.
+- **Rationale:** The ring is the only display; individual control allows levels and animations. The brightness figure depends on the current that the source allows (SYS-020): at the default 500 mA the paper power budget leaves 5 to 58 % of full white depending on LED type, on a source that advertises 1.5 A the limiter does not dim (`spike-7-5-power-budget-paper.md`, section 8). At the owner's decision of 2026-11-28 the LED current budget stays as it is, so the total light of the ring is unchanged and each of the [36] LEDs gets about 44 % of the 16-LED figure (36 LEDs at full white are [540] mA, working value from 15 mA per LED). The figure is therefore to be agreed at two operating points: the default source and a source advertising 1.5 A.
 - **Parent:** NEED-003
-- **Acceptance criteria:** Each LED can be set to any of 256 levels per colour channel, independently of the others (before the current limit of SYS-020 scales the frame), and with all LEDs at the status brightness the ring gives a luminous intensity of at least [to be set from the bench measurement in spike 7.5; working value 100 mcd per LED] measured at 0.5 m, and a person with normal colour vision can name the state colour at 2 m in 300 lux room light.
+- **Acceptance criteria:** Each LED can be set to any of 256 levels per colour channel, independently of the others (before the current limit of SYS-020 scales the frame), and with all LEDs at the status brightness the ring gives a luminous intensity of at least [to be set from the bench measurement in spike 7.5; working value 1600 mcd for the ring in total, the 16 LEDs times 100 mcd of the earlier text, so about 50 mcd per ring LED at 32 LEDs; the centre LEDs have their own figure] measured at 0.5 m, and a person with normal colour vision can name the state colour at 2 m in 300 lux room light.
 - **Verification method:** Test
 - **Verified by:** TC-001
 - **Category:** Functional
@@ -380,7 +380,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 - **Statement:** The largest outer dimension of the finished device shall be [53] mm, with a tolerance of [plus or minus 5] mm.
 - **Rationale:** The owner wants the size halfway between a table-tennis ball (40 mm) and a tennis ball (about 67 mm) (NEED-014).
 - **Parent:** NEED-014
-- **Acceptance criteria:** A measurement of the printed housing with the PCB fitted gives a largest dimension from 48 mm to 65 mm (see the amendment below). The 16 LEDs are evenly spaced on a ring of at least [38] mm diameter inside the housing.
+- **Acceptance criteria:** A measurement of the printed housing with the PCB fitted gives a largest dimension from 48 mm to 65 mm (see the amendment below). The 32 ring LEDs sit in two arcs of 16, evenly spaced along each arc, on a ring of [52] mm diameter inside the housing (ADR-0027); 4 more LEDs sit under the centre button.
 - **Verification method:** Inspection
 - **Verified by:** TC-028
 - **Category:** Mechanical
@@ -388,6 +388,7 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 - **Priority:** Must
 - **Status:** Draft
 - **Amendment (owner decision 2026-11-27, "Raise to 65mm"; the requirement stays Draft until the owner approves it):** the upper limit of the largest dimension is 65 mm (58 mm before). MECH-001 (Approved) had 60 mm since 2026-11-22 while this entry still said 58 mm; both now say the same limit. The working value [53] mm is the diameter of the round body; the nose at the USB-C connector makes the largest dimension longer. The smallest ITF tennis ball is 65.4 mm, so the margin to "smaller than a tennis ball" is 0.4 mm.
+- **Amendment (owner decision 2026-11-28, acceptance of ADR-0027; the requirement stays Draft until the owner approves it):** the upper limit is 66 mm (65 mm before) for the round 58.5 mm board in a 65.5 mm housing, without a nose. The margin to the smallest ITF tennis ball is gone (65.5 mm is inside the ITF range of 65.4 to 68.6 mm); the rationale figure "about 67 mm" still holds.
 
 ### SYS-029 Firmware update over the network
 - **Statement:** The device shall install a new firmware image received over the network through the web interface, shall accept the image only if its signature is valid, and shall keep the previous image so that it returns to it if the new image fails to start.
@@ -427,10 +428,10 @@ Open items are listed in `docs/plans/02-system-design.md` section 10 and in `doc
 
 ### SYS-032 Level display
 
-- **Statement:** The device shall show a level between 0 % and 100 % as a filled arc of the ring, starting at the LED given by SYS-047 (the fixed LED when the unit is flat), with the last lit LED set in proportion to the remainder.
+- **Statement:** The device shall show a level between 0 % and 100 % as a filled arc of the ring (two arcs, the fill passes the two gaps), starting at the LED given by SYS-047 (the fixed LED when the unit is flat), with the last lit LED set in proportion to the remainder.
 - **Rationale:** The owner wants levels as well as states in the first release (NEED-004, owner answer 2026-11-03).
 - **Parent:** NEED-004
-- **Acceptance criteria:** For input levels 0, 25, 50, 75 and 100 % the ring lights 0, 4, 8, 12 and 16 LEDs fully; for 50 % plus half of one LED step (53.1 %) the ninth LED is lit at about half brightness; a step of 1/16 of the range (6.25 %) is visible as a change. The user can set the colour and the value range (minimum and maximum) per source.
+- **Acceptance criteria:** For input levels 0, 25, 50, 75 and 100 % the 32 ring LEDs light 0, 8, 16, 24 and 32 LEDs fully, the fill running along the arcs and across the two gaps in the order of SYS-047; for 50 % plus half of one LED step (51.6 %) the 17th LED is lit at about half brightness; a step of 1/32 of the range (3.1 %) is visible as a change. The centre LEDs do not take part in the level display. The user can set the colour and the value range (minimum and maximum) per source.
 - **Verification method:** Test
 - **Verified by:** TC-032
 - **Category:** Functional
