@@ -9,10 +9,11 @@ Process rules: `docs/process/README.md`.
 
 ### HW-001 LED ring layout
 
-- **Statement:** The board shall carry 16 single-wire addressable RGB LEDs, at equal angular spacing of 22.5 degrees on one circle of at least [38] mm diameter, all on the same side of the board.
+- **Statement:** The board shall carry [36] single-wire addressable RGB LEDs, all on the same side of the board: [32] ring LEDs in two arcs of [16] on one circle of [52] mm diameter, centred on two opposite azimuths with equal pitch within each arc, and [4] centre LEDs on a circle of [6.4] mm radius at 45, 135, 225 and 315 degrees.
+- **Amendment (draft, 2026-11-28; ADR-0027 Accepted, SYS-001/028/032 drafts; the owner approves the text):** the previous text read "16 single-wire addressable RGB LEDs, at equal angular spacing of 22.5 degrees on one circle of at least [38] mm diameter" (46 mm board). Values in brackets are working values until plan 08 revision 7 computes them (the centre radius is the smallest that clears the switch courtyard).
 - **Rationale:** SYS-001 and SYS-028 set count, spacing and ring size; ADR-0004 chooses the single-wire LED type. One side keeps assembly at the prototype shop simple (SYS-022).
 - **Parent:** SYS-001, SYS-028
-- **Acceptance criteria:** In the KiCad layout the LED centres lie on one circle within [0.2] mm of the nominal radius and [1] degree of the nominal angle; all LEDs are on the same side; the circle diameter is at least the limit.
+- **Acceptance criteria:** In the KiCad layout the ring LED centres lie on one circle within [0.2] mm of the nominal radius and [1] degree of the nominal angle (pitch 131/15 degrees within each arc, arcs centred on 90 and 270 degrees); the centre LEDs lie within [0.2] mm of their nominal position; all LEDs are on the same side.
 - **Verification method:** Inspection
 - **Verified by:** TC-201
 - **Category:** Functional
@@ -73,6 +74,7 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** RED Art. 3(2) *(verify)*
 - **Priority:** Must
 - **Status:** Draft
+- **Amendment (draft, 2026-11-28; ADR-0027, plan 08 revision 7, DEV-009; the owner approves the text):** the module sits at the board edge with the antenna end flush with the edge; the vendor keep-out lies off the board. The antenna strip of the module (4.6 mm) is free of copper, components and wire on every layer (rule area). The end ring LEDs are 2.40 mm (courtyard) to 2.95 mm (body) from the strip and are inside the vendor's 15 mm area, so the statement "no LED inside that area" is not met by them; the range test decides (RISK-011, TC-205).
 - **Note (owner decisions of 2026-11-18, ADR-0023 update):** for P1 the module moves 5 mm towards the antenna-side board edge and the full library courtyard of the module (antenna keep-out included) is kept free of movable parts; the LED ring parts D6 to D12 and their capacitors stay inside the vendor keep-out as before (DEV-004). Not measured: range (TC-205).
 
 ### HW-006 Test points and programming access

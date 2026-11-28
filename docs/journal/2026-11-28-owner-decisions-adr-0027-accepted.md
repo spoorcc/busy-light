@@ -10,6 +10,7 @@ Context: the owner chose the LED configuration from the mock-up (`docs/journal/2
 | 4 | 36 LEDs are 540 mA at full white on a 500 mA source | Keep today's LED current budget: total light unchanged, each LED about 44 % as bright | ADR-0027, SYS-001 (Draft) |
 | 5 | Accept ADR-0027 | Accept | ADR-0027 status; ADR-0003, ADR-0011 and ADR-0023 superseded in part |
 | 6 | Approve MECH-015 | Approve as written | MECH-015 status |
+| 7 (later the same day, after the plan 08 section S review) | The module library courtyard contains the vendor antenna keep-out and would cover about 10 ring LEDs and 10 caps; the ADR-0023 rule made it a no-go area for all parts (land 910 mm2, about 20 courtyard overlaps against the waiver maximum of 14) | Body courtyard for U9 on this board (module body plus 0.25 mm; the antenna strip rule area stays) | DEV-009, DEV-004 note, plan 08 section S |
 
 ## What changed in the records
 - ADR-0027: Accepted. Ring diameter [52] mm and LED clearance [3] mm stay working values (read from the screenshot, not asked).
@@ -20,7 +21,7 @@ Context: the owner chose the LED configuration from the mock-up (`docs/journal/2
 - Plan 09: D10 gets the owner answers (11 mm disc, bright centre); revision 10 redoes the S2 and S3 pose search.
 
 ## Not done
-- No generator, outline, housing, board or firmware change. `MAX_DIM_MECH001` is still 65.0 in `mech_outline.py`.
+- No generator, outline, housing, board or firmware change except `MAX_DIM_MECH001` 66.0 in `mech_outline.py` (tests first, commit 3a9db65).
 - SW requirements and firmware that assume 16 LEDs are not reviewed yet (the SYS-032 level steps and the SYS-001 count change them).
-- Plan 08 revision 7 is not drafted and the readiness review (goldfish pass 4) has not run: no placement before it.
+- Plan 08 revision 7 (section S) is drafted and reviewed (RV-020: comprehension, three antagonistic passes); the readiness pass decides whether S1 may start. No placement before it.
 - Open for the owner from before: approval of SYS-001, SYS-028, SYS-032 texts, plan 09 questions, DEV records, plan 08 approval.

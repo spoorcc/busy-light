@@ -43,6 +43,7 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Risk assessment:** the antenna environment is not acceptable as it stands; no statement on antenna performance is made. Open items for the owner: board cutout, separate antenna board, U.FL variant or module at the edge (mech or HW-005 decision).
 - **Scope & duration:** spike only, until the owner decides the antenna arrangement. Extended to the P1 prototype board (owner, 2026-11-22): 14 fixed parts (D6 to D12, C13 to C18, SW1) in the module courtyard; antenna range still to be measured (TC-205).
 - **Approved by / date:** owner, Ben Spoor, 2026-11-22 (decision 11 in the working session, for the spike and P1; recorded by the assistant, `docs/journal/2026-11-22-owner-decisions-p1-rework.md`); proposed 2026-11-05
+- **Note 2026-11-28:** for the round 58.5 mm board (plan 08 revision 7) the module courtyard is replaced by a body courtyard, DEV-009; this entry then applies to the 46 mm board only.
 
 ### DEV-005 ADR-0016 accepted before its own goldfish review
 
@@ -104,3 +105,13 @@ Entries follow `docs/templates/deviation.md`. A suppression in code/CAD without 
 - **Scope & duration:** board-p1 and ADR-0023 as of 2026-11-22; closed when the owner has decided the open rows, the requirement
   texts are approved or reverted, and the reworked plan has a readiness GO.
 - **Approved by / date:** accepted as a record by the owner, Ben Spoor, 2026-11-22 (decision 11 in the working session; recorded by the assistant); stays open until its closing condition above is met
+
+### DEV-009 U9 courtyard replaced by a body courtyard on the round board (plan 08 revision 7)
+
+- **Status:** Accepted as a record (owner decision of 2026-11-28, answer to one question in the working session; recorded by the assistant); open until the board is stored and the range test (SYS-038) is done
+- **Rule / requirement deviated from:** the ESP32-C6-MINI-1 library footprint (its courtyard is the vendor antenna keep-out); the owner rule of 2026-11-18 (ADR-0023) that the full library courtyard is an obstacle for movable parts; HW-005 as written (Draft: "no copper, LED, component or wire inside that area").
+- **Location:** `hw/kicad/spike-gate/src/pcb_full.py` (courtyard of U9 replaced through the pcbnew API for profile `r58`; the file of the footprint is not edited), `u9_courtyard_mask`; the board profile `r58` only.
+- **Justification:** with the module at the board edge (ADR-0027) the vendor keep-out (15 mm beyond the antenna end, 21.6 mm each side) lies mostly off the board, but the library polygon still covers the left half of the board, including about 10 ring LEDs and 10 capacitors, and removes 273 mm2 (of 1183 mm2) from the movable land. The antenna strip (no copper, no parts, every layer) stays a rule area and is the DRC guard. The courtyard is the module body plus 0.25 mm.
+- **Risk assessment:** the end LEDs are 2.40 mm (courtyard), 2.71 mm (pad) and 2.95 mm (body) from the strip and the wall is 1.90 mm from the module corners, against the vendor's 15 mm: the antenna environment is not acceptable as a claim; no statement on range is made. The DRC no longer reports the LEDs inside the vendor area. RISK-011 stays open; the range test (SYS-038, TC-205) decides, and a failed test restarts the layout (ADR-0027 revisit).
+- **Scope & duration:** the round board `r58` from plan 08 revision 7; DEV-004 (the 46 mm board) is closed for the module when the `r58` board is stored (plan 08 S6c).
+- **Approved by / date:** accepted as a record by the owner, Ben Spoor, 2026-11-28 (question answer "Body courtyard for U9", recorded by the assistant)
