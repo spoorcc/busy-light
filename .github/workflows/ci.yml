@@ -38,6 +38,8 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: {python-version: "3.12"}
       - run: python -m pip install --group hw --group dev
+      - name: ngspice for the surge tests of hw/sim/scripts (they skip without it)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ngspice
       - run: reuse lint
       - run: python3 scripts/check_license_map.py
       - run: ruff check .
@@ -47,12 +49,30 @@ jobs:
   hardware:
     runs-on: ubuntu-24.04
     container:
-      image: kicad/kicad:10.0
+      # kicad/kicad:10.0 by digest, the same image as fab-release.yml (RV-016 row 43)
+      image: kicad/kicad@sha256:3f4a01786dfbe803a65f345c3342b765db9add913f5e9448f8356793714ddc34
       options: --user root
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Python packages of the P1 power check and the spike-gate tests (pinned with sha256), ngspice
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends python3-pip ngspice   # the image has no pip
+          pip install --break-system-packages --ignore-installed --require-hashes -r scripts/requirements-fab.txt -r scripts/requirements-fab-test.txt
       - run: scripts/ci_hw.sh
         env: {HW_CI_OUT: hw-reports}
+      # RV-016 row 26: the board, placement, rule and sourcing tests ran only in fab-release.yml (main only); 2026-11-22:
+      # 430 passed, 1 skipped (Freerouting jar not set) in 149 s in this image.
+      - name: Spike-gate tests (hw/kicad/spike-gate/tests)
+        shell: bash
+        run: |
+          set -o pipefail
+          (cd hw/kicad/spike-gate && GATE_NET=tests/data/gate.net python3 -m pytest -q -rsx -p no:cacheprovider tests) | tee pytest-spike.txt
+          {
+            echo "## Spike-gate tests"
+            echo "- $(tail -1 pytest-spike.txt)"
+            echo "### Not run (skipped) and expected failures (known board defects)"
+            grep -h -E '^(SKIPPED|XFAIL)' pytest-spike.txt | sed 's/^/- /' || echo "- none"
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with: {name: hw-reports, path: hw-reports, if-no-files-found: ignore}

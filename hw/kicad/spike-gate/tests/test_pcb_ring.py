@@ -35,6 +35,29 @@ class Ring(unittest.TestCase):
     def test_every_cell_completes(self):
         self.assertEqual(self.failed, [])
 
+    def test_data_chain_is_laid_before_the_power_stubs(self):
+        """Batches p1b4 to p1b9 (2026-11-19): with the stubs first, the stubs and vias of the capacitors turned away from
+        the panel tabs closed four data gaps (D3-D4, D7-D8, D11-D12, D14-D15); the router then left D14-D15 open in every
+        run of one placement. Data links first: all 47 links on the four P1 placements of the batches."""
+        from unittest import mock
+        order = []
+        real = pcb_ring.F.Fixer.commit
+
+        def rec(fx, net, *a, **k):
+            order.append(net)
+            return real(fx, net, *a, **k)
+        with tempfile.TemporaryDirectory() as t, mock.patch.object(pcb_ring.F.Fixer, "commit", rec):
+            shutil.copy(self.pcb, t + "/b.kicad_pcb")
+            shutil.copy(str(Path(self.pcb).with_suffix(".placement.json")), t + "/busy_light_spike.placement.json")
+            self.assertEqual(pcb_ring.build(t + "/b.kicad_pcb", t + "/r.kicad_pcb"), [])
+        self.assertEqual(len(order), 15 + 32)
+        self.assertTrue(all(n not in ("+5V", "GND") for n in order[:15]), order[:15])
+        self.assertTrue(all(n in ("+5V", "GND") for n in order[15:]))
+
+    def test_two_sided_cells_link_to_the_bottom_capacitor(self):
+        # plan 08 step 5: the link layer follows the capacitor; without P1 the capacitors are on B.Cu
+        self.assertEqual({pcb_ring.cap_link_layer(self.board, c) for _, c in pcb_ring.cells()}, {"B.Cu"})
+
     def test_cap_pads_sit_under_the_led_pads_of_the_same_net(self):
         mm = pcbnew.ToMM
         for d, c in pcb_ring.cells():
@@ -68,6 +91,22 @@ class Ring(unittest.TestCase):
         rep = json.loads((d / "r.json").read_text())
         bad = [v for v in rep["violations"] if v["type"] in ("clearance", "hole_clearance", "hole_to_hole", "copper_edge_clearance", "shorting_items", "track_width", "via_dangling")]
         self.assertEqual(bad, [])
+
+    def test_no_ring_via_touches_an_smd_pad(self):
+        # plan 08 section 4.3 (HW-008): the grid router keeps every cell via off the SMD pads of any net, the LED and
+        # capacitor pads of its own cell included; checked by the producers' rule and by the exact copper of pcb_fabcheck
+        import pcb_fabcheck
+        import pcb_rules
+        import pcb_stitch
+        boxes = pcb_stitch.pad_boxes(self.board)
+        tr = self.board.Tracks()
+        vias = [pcbnew.Cast_to_PCB_VIA(tr[i]) for i in range(tr.size()) if tr[i].GetClass() == "PCB_VIA"]
+        self.assertTrue(vias)
+        hits = [(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y)) for v in vias
+                if pcb_rules.via_hits_smd_pad(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y),
+                                              pcbnew.ToMM(v.GetWidth(pcbnew.F_Cu)), boxes)]
+        self.assertEqual(hits, [])
+        self.assertEqual(pcb_fabcheck.vias_in_smd_pads(self.board), [])
 
 
 if __name__ == "__main__":

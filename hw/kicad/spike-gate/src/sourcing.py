@@ -36,7 +36,15 @@ SOURCING.update(
             "MPN": "TPS3840DL40DBVR",
             "Manufacturer": "Texas Instruments",
             "LCSC": "",
-            "Evidence": "TI package addendum 29-Apr-2025 (Active, DBV 5) and DigiKey listing",
+            "Evidence": "TI package addendum 29-Apr-2025 (Active, DBV 5) and DigiKey listing; no LCSC or JLCPCB listing "
+            "of this exact part found by web search 2026-11-18 (only TPS3840DL40DBVRQ1 C6560464, shown out of stock)",
+        },
+        "TPS3808G01": {   # ADR-0025 option B, owner decision 2026-11-24
+            "MPN": "TPS3808G01DBVR",
+            "Manufacturer": "Texas Instruments",
+            "LCSC": "C19653",
+            "Evidence": "LCSC and JLCPCB part pages 2026-11-24: LCSC stock 0, JLCPCB overseas stock 4 (thin; extended); datasheet SBVS050N "
+            "(hw/evidence/parts/tps3808g01.yaml); fallback Q1 variant C130062, pin-compatible, datasheet not read",
         },
         "TPS2553": {
             "MPN": "TPS2553DBVR",
@@ -55,38 +63,34 @@ SOURCING.update(
         "USBLC6-2P6": {
             "MPN": "USBLC6-2P6",
             "Manufacturer": "STMicroelectronics",
-            "LCSC": "",
-            "Evidence": "ST product page (Active, SOT666)",
+            "LCSC": "C15999",
+            "Evidence": "ST product page (Active, SOT666); LCSC C15999 listing (ST, SOT-666-6) by web search "
+            "2026-11-18, page not opened",
         },
         "74LVC1G04": {
-            "MPN": "SN74LVC1G04DBVR",
+            "MPN": "SN74LVC1G04DCKR",
             "Manufacturer": "Texas Instruments",
-            "LCSC": "C7827",
-            "Evidence": _DK,
-        },
-        "74LVC1G02": {
-            "MPN": "SN74LVC1G02DBVR",
-            "Manufacturer": "Texas Instruments",
-            "LCSC": "",
-            "Evidence": _DK + " (DigiKey Active)",
+            "LCSC": "C8207",
+            "Evidence": "LCSC/JLCPCB/distributor listing, web search 2026-11-18 (snippets; datasheet and shop pages not opened from this container)" + "; SC-70-5 (DCK), ADR-0023",
         },
         "74LVC1G08": {
-            "MPN": "SN74LVC1G08DBVR",
+            "MPN": "SN74LVC1G08DCKR",
             "Manufacturer": "Texas Instruments",
-            "LCSC": "",
-            "Evidence": _DK,
+            "LCSC": "C7832",
+            "Evidence": "JLCPCB part page 2026-11-22: 207,023 in stock, extended; SN74LVC1G08 SCES217AA read 2026-11-22 "
+            "(hw/evidence/parts/sn74lvc1g08.yaml; DCK pin table: 1 A, 2 B, 3 GND, 4 Y, 5 VCC); SC-70-5 (DCK), ADR-0024",
         },
         "74LVC1G11": {
-            "MPN": "SN74LVC1G11DBVR",
+            "MPN": "SN74LVC1G11DCKR",
             "Manufacturer": "Texas Instruments",
-            "LCSC": "",
-            "Evidence": _DK + " (SOT-23-6)",
+            "LCSC": "C529281",
+            "Evidence": "LCSC/JLCPCB/distributor listing, web search 2026-11-18 (snippets; datasheet and shop pages not opened from this container)" + "; SC-70-6 (DCK), ADR-0023",
         },
         "74AHCT1G125": {
-            "MPN": "SN74AHCT1G125DBVR",
+            "MPN": "SN74AHCT1G125DCKR",
             "Manufacturer": "Texas Instruments",
-            "LCSC": "",
-            "Evidence": _DK,
+            "LCSC": "C350557",
+            "Evidence": "LCSC/JLCPCB/distributor listing, web search 2026-11-18 (snippets; datasheet and shop pages not opened from this container)" + "; SC-70-5 (DCK), ADR-0023",
         },
         "WS2812B": {
             "MPN": "WS2812B-2020",
@@ -100,6 +104,12 @@ SOURCING.update(
             "Manufacturer": "Nexperia",
             "LCSC": "C294621",
             "Evidence": _DK + "; Nexperia BZX84 series Rev. 7 read 2026-11-09 (hw/evidence/parts/bzx84c5v1.yaml, unverified claims)",
+        },
+        "BZT52C5V1S": {
+            "MPN": "BZT52C5V1S",
+            "Manufacturer": "LGE",
+            "LCSC": "C545356",
+            "Evidence": "LCSC/JLCPCB/distributor listing, web search 2026-11-18 (snippets; datasheet and shop pages not opened from this container)" + "; SOD-323 5.1 V 200 mW zener (4.8 to 5.4 V at 5 mA in one JLCPCB listing of the same type); several makers; JLCPCB lists other makers as Extended; ADR-0023",
         },
         "Button": {
             "MPN": "TL3342F160QG",
@@ -130,29 +140,49 @@ SOURCING.update(
         "470": _uni("0603WAF4700T5E", "C23179"),
         "150k": _uni("0603WAF1503T5E", "C22807", "; LCSC product page not seen, number from the JLCPCB page"),
         "887k": _uni("0603WAF8873T5E", "C23259", "; listing showed 0 stock, check at order time"),
-        "301 0.1%": {
-            "MPN": "TD03G3010BT",
-            "Manufacturer": "FH (Guangdong Fenghua)",
-            "LCSC": "C666860",
-            "Evidence": "LCSC listing, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm, extended part",
-        },
+        # HW-010 approved table (2026-11-07): Yageo RT 0.1 % 25 ppm. The FH TD03G parts of 2026-11-08 showed 0 stock at LCSC and
+        # JLCPCB on 2026-11-22 (analysis-ilim-drift.md); drift limits in hw/evidence/parts/ilim-resistors.yaml.
         "47.0k 0.1%": {
-            "MPN": "TD03G4702BT",
-            "Manufacturer": "FH (Guangdong Fenghua)",
-            "LCSC": "C667109",
-            "Evidence": "JLCPCB listing, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm, extended part",
+            "MPN": "RT0603BRD0747KL",
+            "Manufacturer": "Yageo",
+            "LCSC": "C326725",
+            "Evidence": "JLCPCB part page 2026-11-22: 17,723 in stock, extended; LCSC page 0; thin film 0603 0.1% 25 ppm (HW-010 table)",
         },
         "56.2k 0.1%": {
-            "MPN": "TD03G5622BT",
-            "Manufacturer": "FH (Guangdong Fenghua)",
-            "LCSC": "C667119",
-            "Evidence": "LCSC datasheet file name and listing text, web lookup 2026-11-08; thin film 0603 0.1% 25 ppm",
-        },
-        "27.4k 0.1%": {
-            "MPN": "RT0603BRE0727K4L",
+            "MPN": "RT0603BRD0756K2L",
             "Manufacturer": "Yageo",
-            "LCSC": "",
-            "Evidence": "DigiKey listing, web lookup 2026-11-08 (thin film 0603 0.1%); no LCSC number seen",
+            "LCSC": "C705784",
+            "Evidence": "JLCPCB part page 2026-11-22: 5,618 in stock, extended; LCSC page 5,600; thin film 0603 0.1% 25 ppm (HW-010 table)",
+        },
+        "54.9k 0.1%": {   # R_ILIM3, owner decision 2026-11-24 (option A of analysis-ilim-drift.md)
+            "MPN": "AT0603BRD0754K9L",
+            "Manufacturer": "Yageo",
+            "LCSC": "C855900",
+            "Evidence": "LCSC page 2026-11-24: 430 in stock; JLCPCB page 768 (extended); thin film 0603 0.1 % 25 ppm (AT class, analysis-ilim-drift.md)",
+        },
+        "68n C0G 5% 50V": {   # C1, ADR-0025
+            "MPN": "GRM3195C1H683JA05D",
+            "Manufacturer": "Murata Electronics",
+            "LCSC": "C3847777",
+            "Evidence": "LCSC page 2026-11-24: 2,335 in stock; JLCPCB page 2,338 (extended); 1206 68 nF C0G 5 % 50 V (ADR-0025)",
+        },
+        "27.7k 0.1%": {
+            "MPN": "RT0805BRD0727K7L",
+            "Manufacturer": "Yageo",
+            "LCSC": "C865349",
+            "Evidence": (
+                "JLCPCB library mirror query recorded in docs/verification/reports/stock-check-ilim-holdoff.md (27.7 k row: "
+                "0.1 % exists in 0805 only, C865349 RT0805BRD0727K7L); stock not confirmed; plan 08 trim T1, 2026-11-17"
+            ),
+        },
+        "5m 1% 1W": {   # R22, HW-017 approved amendment 2026-11-22 (2 to 5 mohm 1206 current-sense link, >= 3 A)
+            "MPN": "RLM12FTCMR005",
+            "Manufacturer": "TA-I Tech",
+            "LCSC": "C316225",
+            "Evidence": (
+                "JLCPCB part page 2026-11-22: 125,869 in stock, extended; LCSC 125,860; datasheet TRLM-120S032E: metal alloy, "
+                "1 W, +-1 %, +-50 ppm/degC, AEC-Q200 (hw/evidence/parts/rlm12.yaml); second source Prosemi LMS12CF1P0R005 C5121708"
+            ),
         },
         "100n": {
             "MPN": "CL10B104KB8NNNC",
@@ -229,10 +259,41 @@ SOURCING.update(
     }
 )
 
+# Package-specific entries (ADR-0023, 2026-11-18): the same value text in another package is another part.
+# Key: (value, footprint name without the library). Looked up first.
+_U04 = "UNI-ROYAL"
+_U04E = "JLCPCB listing, web search 2026-11-18: JLCPCB basic part, 0402 thick film 1% 62.5 mW 50 V; ADR-0023"
+SOURCING_BY_FP = {
+    ("100k", "R_0402_1005Metric"): {"MPN": "0402WGF1003TCE", "Manufacturer": _U04, "LCSC": "C25741", "Evidence": _U04E},
+    ("10k", "R_0402_1005Metric"): {"MPN": "0402WGF1002TCE", "Manufacturer": _U04, "LCSC": "C25744", "Evidence": _U04E},
+    ("1k", "R_0402_1005Metric"): {"MPN": "0402WGF1001TCE", "Manufacturer": _U04, "LCSC": "C11702", "Evidence": _U04E},
+    ("470", "R_0402_1005Metric"): {"MPN": "0402WGF4700TCE", "Manufacturer": _U04, "LCSC": "C25117", "Evidence": _U04E},
+    ("100n", "C_0402_1005Metric"): {"MPN": "CL05B104KO5NNNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C1525",
+                                    "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 100 nF 16 V X7R 10%; ADR-0023"},
+    # ADR-0024 (2026-11-22): R6 150k, R24 and R25 100 ohm. LCSC and JLCPCB part pages read 2026-11-22 (class: JLCPCB list).
+    ("150k", "R_0402_1005Metric"): {"MPN": "0402WGF1503TCE", "Manufacturer": _U04, "LCSC": "C25755",
+                                    "Evidence": "JLCPCB part page 2026-11-22: 962,571 in stock, extended; 0402 thick film 1% 62.5 mW 50 V; ADR-0024"},
+    ("100", "R_0402_1005Metric"): {"MPN": "0402WGF1000TCE", "Manufacturer": _U04, "LCSC": "C25076",
+                                   "Evidence": "JLCPCB part page 2026-11-22: 9,893,219 in stock, basic; 0402 thick film 1% 62.5 mW 50 V; ADR-0024"},
+    # ADR-0025 (2026-11-24): SENSE divider top resistor. 931 k 1 % has no stocked 0402 part (Walsin C172143, KOA C2577872 and LIZ C100560 show 0
+    # at LCSC); 910 k Panasonic ERJ2RKF9103X: LCSC page 500, JLCPCB 540, extended, 0402 thick film 1 % 100 mW 100 ppm.
+    ("910k 1%", "R_0402_1005Metric"): {"MPN": "ERJ2RKF9103X", "Manufacturer": "Panasonic", "LCSC": "C409936",
+                                       "Evidence": "LCSC and JLCPCB part pages 2026-11-24 (500 and 540 in stock, extended); 910 k replaces 931 k, ADR-0025"},
+    # ADR-0025 (owner 2026-11-24): 1 nF on SENSE. LCSC page 2026-11-24: 367,800 in stock; JLCPCB page 435,536 (extended).
+    ("1n", "C_0402_1005Metric"): {"MPN": "CL05B102KB5NNNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C14442",
+                                  "Evidence": "LCSC and JLCPCB part pages 2026-11-24: 0402 1 nF 50 V X7R 10 %, extended; ADR-0025 owner decision 2026-11-24"},
+    ("1u", "C_0402_1005Metric"): {"MPN": "CL05A105KA5NQNC", "Manufacturer": "Samsung Electro-Mechanics", "LCSC": "C52923",
+                                  "Evidence": "JLCPCB listing, web search 2026-11-18: basic part, 0402 1 uF 25 V X5R 10%; ADR-0023"},
+    ("330", "R_0402_1005Metric"): {"MPN": "0402WGF3300TCE", "Manufacturer": _U04, "LCSC": "C25104",
+                                   "Evidence": _U04E + "; the 330 ohm value is read from the part number, the listing text did not show it"},
+}
+
 FIELDS = ("MPN", "Manufacturer", "LCSC")
 
 
-def sourcing_fields(value: str) -> dict[str, str]:
-    """Return the three BOM fields of a part value; empty when it has no recorded source."""
-    entry = SOURCING.get(value, {})
+def sourcing_fields(value: str, footprint: str = "") -> dict[str, str]:
+    """Return the three BOM fields of a part value (and footprint, for package-specific parts); empty when it has no
+    recorded source."""
+    fp = footprint.split(":", 1)[-1]
+    entry = SOURCING_BY_FP.get((value, fp)) or SOURCING.get(value, {})
     return {k: entry.get(k, "") for k in FIELDS}

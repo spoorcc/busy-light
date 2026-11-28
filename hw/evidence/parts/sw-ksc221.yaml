@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the C&K KSC221 sealed tactile switch (LCSC listing KSC221JLFS), longer-travel candidate for the centre-of-ring button
+# (plan 09 step 0, alternative 2). Not used on any board. The sheet is a family sheet; the dimension drawings are graphics and are NOT
+# text-checked. See README.md.
+schema_version: 1
+part:
+  key: SW-KSC221
+  mpn: KSC221JLFS
+  manufacturer: C&K
+  description: Sealed (IP67) SMT tactile switch, J-bend terminals, silver contacts, 2 N, 6.2 x 6.2 mm body
+  selection: candidate
+  package:
+    code: KSC221J
+    name: SW_SPST_KSC2
+  used_in: []
+documents:
+- id: ksc2-ds
+  title: KSC Series sealed tact switch for SMT (C&K family sheet, copy hosted by LCSC)
+  doc_number: B-52
+  revision_date: 1 mar 17
+  origin: distributor
+  url: https://datasheet.lcsc.com/datasheet/pdf/3a34d30f42b5502786dafcef7670aec2.pdf?productCode=C221726
+  file: sw-ksc221.pdf
+  sha256: acf4adaf5185bfb3eb60ceb85789f1de81c5f7ea9fbb6a53dc739831b83f04fb
+  pages: 3
+  retrieved_on: '2026-11-23'
+defaults:
+  source_document: ksc2-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-sonnet-5.5/extractor}
+  extracted_on: '2026-11-23'
+  status: unverified
+claims:
+- id: SW-KSC221.operating_force
+  parameter: Operating force of the KSC221 type
+  category: mechanical
+  typ: 2
+  unit: N
+  source: {page: 3, locator: 'Mechanical table (type, force, life, travel)', quote: 'KSC221 2 ± 0.5 500,000 0.35 + 0.3/- 0.1'}
+- id: SW-KSC221.operating_force_tolerance
+  parameter: Tolerance of the operating force (plus and minus)
+  category: mechanical
+  typ: 0.5
+  unit: N
+  source: {page: 3, locator: 'Mechanical table (type, force, life, travel)', quote: 'KSC221 2 ± 0.5 500,000 0.35 + 0.3/- 0.1'}
+- id: SW-KSC221.travel
+  parameter: Travel of the KSC221 type
+  category: mechanical
+  typ: 0.35
+  unit: mm
+  notes: 'The sheet gives 0.35 + 0.3/- 0.1 mm, that is 0.25 mm to 0.65 mm (tolerance text-checked as part of the quote, not as a number field).'
+  source: {page: 3, locator: 'Mechanical table (type, force, life, travel)', quote: 'KSC221 2 ± 0.5 500,000 0.35 + 0.3/- 0.1'}
+- id: SW-KSC221.lifetime
+  parameter: Operating life of the KSC221 type
+  category: mechanical
+  statement: 500,000 operations (operating life column of the same row).
+  source: {page: 3, locator: 'Mechanical table (type, force, life, travel)', quote: 'KSC221 2 ± 0.5 500,000 0.35 + 0.3/- 0.1'}
+- id: SW-KSC221.sealing
+  parameter: Sealing
+  category: other
+  statement: IP67, except the KSC5 type (IP50).
+  source: {page: 1, locator: Specification, quote: 'SEALING: IP67 except KSC5 (IP50)'}
+- id: SW-KSC221.geometry
+  parameter: Body, height and actuator size (from the drawing, not text-checked)
+  category: mechanical
+  status: source-missing
+  method: extracted
+  notes: 'Not machine-checked. The drawing shows a 6.2 mm square body. The sheet says various heights exist; the height of the KSC221J is not read.
+    LCSC lists 6.2 x 6.2 mm and a height of 0.6 mm for C221726 (read 2026-11-23); the assistant does not know what that height means (plunger rise or body).'

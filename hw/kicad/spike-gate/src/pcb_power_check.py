@@ -6,6 +6,7 @@ Method: per net, the copper of the net (tracks, pads, vias, zone fills) is raste
 into a resistor network (sheet resistance of copper 0.5 mOhm/square at 35 um outer, 1.13 mOhm/square at 15.2 um inner;
 via barrel 1 mOhm); the effective resistance between the source pads and the load pads follows from one sparse solve.
 The drop is R x the stated current. The currents and the 50 mV target are the analyst's assumptions, not requirements.
+Full-width path: each case is solved again without the tracks narrower than WIDTH_SHARE x NET_WIDTH (`full_width_path`).
 Plane cut: the number of separate pieces and the share of the board area removed from the In1 (GND) and In2 (+5V) fills.
 Not covered: temperature, copper thickness tolerance, current crowding at pads (the grid resolves 0.1 mm), AC behaviour.
 """
@@ -26,12 +27,47 @@ RS_OUTER = 0.0005        # ohm per square, 35 um copper (rho 1.72e-8 ohm m)
 RS_INNER = 0.00113       # 15.2 um inner copper (0.5 oz): JLCPCB stack-ups JLC04161H-7628 and -3313, read 2026-11-08; rho 1.72e-8 ohm m
 R_VIA = 0.001
 TARGET_V = 0.050
+# Full-width path (batch p1b7, 2026-11-19): each case is solved again without the tracks narrower than WIDTH_SHARE times the
+# net's current-based width (pcb_rules.NET_WIDTH); no path then means the current needs a thin track. 0.75 keeps the
+# router's neck-down at pads (0.45 mm on the 0.6 mm nets) and rejects a 0.15 mm track. Analyst's rule, not a requirement.
+WIDTH_SHARE = 0.75
+
+
+def min_path_width(net):
+    """Narrowest track (mm) that counts for the full-width path of a case net."""
+    import pcb_rules  # noqa: PLC0415
+    return WIDTH_SHARE * pcb_rules.NET_WIDTH[net]
 # net: (source (ref, pad or None for all pads of the ref), load (ref, pad), current A, basis)
 CASES = {
-    "VBUS_IC": (("J1", None), ("U7", "1"), 1.5, "J1 VBUS pins to the TPS2553 input; 1.5 A step limit, requirement text HW-010"),
+    # HW-017 (plan 08): the input path is split by the 0 ohm link R22; the two cases add up, plus R22's own resistance
+    # (not known until a part is chosen, HW-017 [10] mohm)
+    "VBUS": (("J1", None), ("R22", "1"), 1.5, "J1 VBUS pins to the damping link R22; 1.5 A step limit, HW-010, HW-017"),
+    "VBUS_IC": (("R22", "2"), ("U7", "1"), 1.5, "R22 to the TPS2553 input; 1.5 A step limit, HW-010, HW-017"),
     "+5V": (("U7", "6"), ("U8", "1"), 1.0, "TPS2553 output to the 3V3 regulator input; analyst assumption 1.0 A"),
     "+3V3": (("U8", "5"), ("U9", "3"), 0.5, "regulator output to the module; analyst assumption 0.5 A"),
 }
+
+
+INPUT_PATH = ("VBUS", "VBUS_IC")      # J1 -> R22 -> U7 pin 1, in series (HW-017)
+JUMPER_MOHM = (10.0, 20.0)            # HW-017 [10] mohm; the candidate part has up to 20 mohm (fab_missing_lcsc.txt)
+INPUT_BUDGET_MV = 100.0               # HW-017 amendment (owner, 2026-11-22): J1 to U7 pin 1 at 1.5 A, the link at [10] mohm
+
+
+def input_path(nets):
+    """Drop from J1 to the TPS2553 input (RV-016 row 14: each case was gated alone, the sum by nothing): the copper drop
+    of the two series cases, and with the link R22 at HW-017's [10] mohm and at 20 mohm. `within_budget`: the drop with
+    the link at its [10] mohm maximum is at most INPUT_BUDGET_MV (HW-017 amendment of 2026-11-22, owner decision 7)."""
+    cases = [nets.get(n) for n in INPUT_PATH]
+    if any(c is None or c.get("drop_mv") is None for c in cases):
+        return None
+    amps = cases[0]["current_a"]
+    copper = round(sum(c["drop_mv"] for c in cases), 1)
+    out = {"nets": list(INPUT_PATH), "current_a": amps, "copper_drop_mv": copper}
+    for mohm in JUMPER_MOHM:
+        out["drop_with_r22_%g_mohm_mv" % mohm] = round(copper + mohm * amps, 1)
+    out["budget_mv"] = INPUT_BUDGET_MV
+    out["within_budget"] = out["drop_with_r22_%g_mohm_mv" % JUMPER_MOHM[0]] <= INPUT_BUDGET_MV
+    return out
 
 
 def via_width(t, lid):
@@ -60,8 +96,8 @@ class Raster:
         return ((x - self.x0) / RES, (y - self.y0) / RES)
 
 
-def layer_masks(board, ras, net, layers):
-    """{layer name: bool array} copper of `net`; tracks, pads and zone fills."""
+def layer_masks(board, ras, net, layers, min_width=0.0):
+    """{layer name: bool array} copper of `net`; tracks (those at least `min_width` mm wide), pads and zone fills."""
     out = {}
     for L in layers:
         lid = board.GetLayerID(L)
@@ -75,7 +111,7 @@ def layer_masks(board, ras, net, layers):
                 p = ras.px(mm(t.GetPosition().x), mm(t.GetPosition().y))
                 r = mm(via_width(t, lid)) / 2 / RES
                 d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=1)
-            elif t.GetLayer() == lid:
+            elif t.GetLayer() == lid and mm(t.GetWidth()) >= min_width - 1e-6:
                 a, b = ras.px(mm(t.GetStart().x), mm(t.GetStart().y)), ras.px(mm(t.GetEnd().x), mm(t.GetEnd().y))
                 w = max(1, int(round(mm(t.GetWidth()) / RES)))
                 d.line([a, b], fill=1, width=w)
@@ -116,8 +152,8 @@ def pad_cells(board, ras, ref, num, layers):
     return cells
 
 
-def effective_resistance(board, ras, net, src, dst, layers):
-    masks = layer_masks(board, ras, net, layers)
+def effective_resistance(board, ras, net, src, dst, layers, min_width=0.0):
+    masks = layer_masks(board, ras, net, layers, min_width)
     idx, n = {}, 0
     for L in layers:
         ys, xs = np.nonzero(masks[L])
@@ -209,15 +245,23 @@ def plane_cuts(board, net, layer):
 
 
 def main(path, out=None):
+    import pcb_rules  # noqa: PLC0415
     board = pcbnew.LoadBoard(path)
     ras = Raster(board)
     layers = [board.GetLayerName(l) for l in board.GetEnabledLayers().CuStack()]
     res = {"nets": {}, "planes": {}}
     for net, (src, dst, amps, basis) in CASES.items():
         r = effective_resistance(board, ras, net, src, dst, layers)
+        rw = effective_resistance(board, ras, net, src, dst, layers, min_path_width(net))
+        rn = effective_resistance(board, ras, net, src, dst, layers, pcb_rules.NET_WIDTH[net] - 0.001) if net in INPUT_PATH else None
         res["nets"][net] = {"resistance_mohm": None if r is None else round(r * 1000, 2), "current_a": amps,
                             "drop_mv": None if r is None else round(r * amps * 1000, 1), "basis": basis,
-                            "within_50mv": None if r is None else r * amps <= TARGET_V}
+                            "within_50mv": None if r is None else r * amps <= TARGET_V,
+                            "full_width_path": None if rw is None else rw != float("inf"),
+                            # the main path (VBUS, VBUS_IC) has copper tracks at least the net's width (0.6 mm) all the way: plan 08 R4 (e)
+                            "nominal_width_path": None if net not in INPUT_PATH else (rn is not None and rn != float("inf")),
+                            "min_path_width_mm": round(min_path_width(net), 3)}
+    res["input_path"] = input_path(res["nets"])
     for net, layer in (("GND", "In1.Cu"), ("+5V", "In2.Cu")):
         c = plane_cuts(board, net, layer)
         res["planes"][layer] = {"net": net, "pieces": None if c is None else c[0],

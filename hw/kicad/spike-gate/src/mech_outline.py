@@ -51,7 +51,8 @@ MECH = {
                     "base board around the antenna; width 1.0 mm = a 1.0 mm router bit (to be checked with the fabricator)"),
     "SLOT_GAP": (1.5, "distance from the antenna end of the module to the slot (assumption of the spike)"),
     "SLOT_OVER": (1.0, "slot extends this far past each long side of the module"),
-    "MOD_OFF": (1.0, "script P['MOD_OFF']: module centre offset towards azimuth 0 (report 5)"),
+    "MOD_OFF": (-4.0, "owner decision 2026-11-18 (ADR-0023): 5 mm towards the antenna-side edge so the U9 keep-out courtyard hangs "
+                       "partly off the board (was 1.0, script P['MOD_OFF'], report 5)"),
     "MOD_ANT_AZ": (180.0, "script P['MOD_ANT_AZ']: antenna end points to -X"),
     "ANT_KEEPOUT": (15.0, "script P['ANT_KEEPOUT']: vendor recommendation, plan 05 section 4.6"),
     "V1_TAB_W": (12.0, "script P['V1_TAB_W'] (variant V1): PCB tab width"),
@@ -61,7 +62,7 @@ MECH = {
     "USB_L": (7.35, "script P['USB_L'] PLACEHOLDER typical mid-mount receptacle length"),
     "USB_W": (8.94, "script P['USB_W'] PLACEHOLDER"),
     "USB_H": (3.26, "script P['USB_H'] PLACEHOLDER"),
-    "MAX_DIM_MECH001": (58.0, "script P['MAX_DIM_MECH001'], report 4.1: largest dimension limit"),
+    "MAX_DIM_MECH001": (66.0, "MECH-001 as amended by the owner 2026-11-28 (ADR-0027; 65.0 from 2026-11-27, 60.0 from 2026-11-22, 58.0 before; script P['MAX_DIM_MECH001'], report 4.1)"),
     "T_WALL": (1.6, "script P['T_WALL']"),
     "V1_MOUTH_IN": (0.5, "script P['V1_MOUTH_IN']: mouth protrudes 0.5 mm into the window"),
     "BTN_AZ": (240.0, "script P['BTN_AZ']: side-actuated button at the PCB edge"),
@@ -85,11 +86,12 @@ R_OUT = 26.5                                               # script P['D_OUT'] /
 
 def largest_dim_mm(mouth_r):
     """Housing largest dimension in V1 for a receptacle mouth at radius mouth_r: end wall outer face plus R_OUT.
-    The script gives 57.43 mm for mouth 29.85 (report 4.1); the limit is MAX_DIM_MECH001 = 58 mm."""
+    The script gives 57.43 mm for mouth 29.85 (report 4.1); the limit is MAX_DIM_MECH001 = 66 mm (MECH-001, 2026-11-28)."""
     return (mouth_r - m("V1_MOUTH_IN") + m("T_WALL")) + R_OUT
 
 
-MAX_DIM_SPIKE_MM = 59.8      # plan 06 D2: the housing size of the earlier spike result; the board must not exceed it
+MAX_DIM_GUARD_MM = 0.2       # print tolerance kept below the MECH-001 limit (plan 06 D2 kept 0.2 mm below 60 mm)
+MAX_DIM_SPIKE_MM = m("MAX_DIM_MECH001") - MAX_DIM_GUARD_MM   # generator guard: the board must not exceed it (was 59.8, plan 06 D2)
 LED_SIZE_MM = 2.0            # WS2812B-2020 stand-in (LED_WS2812B-2020_PLCC4_2.0x2.0mm), vendor drawing not checked
 
 
@@ -222,9 +224,10 @@ def vendor_keepout_rect():
     return (x0 - m("ANT_KEEPOUT"), y0, x0, y1)
 
 
-def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None):
-    """Region where movable parts may sit, mechanical coordinates. Top (F): inside r_move and outside the module.
-    Bottom (B): inside r_move, or on the tab behind the LED ring. Never in the antenna strip."""
+def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None, top_tab=False):
+    """Region where movable parts may sit, mechanical coordinates. Top (F): inside r_move and outside the module, or on
+    the tab when top_tab (plan 08 P1: every part on the top side). Bottom (B): inside r_move, or on the tab behind the LED
+    ring. Never in the antenna strip."""
     pts = [(x0, y0), (x0, y1), (x1, y0), (x1, y1)]
     ax0, ay0, ax1, ay1 = antenna_strip()
     if x1 > ax0 - 0.3 and x0 < ax1 + 0.3 and y1 > ay0 - 0.3 and y0 < ay1 + 0.3:
@@ -232,12 +235,12 @@ def region_rect_ok(side, x0, y0, x1, y1, r_move=16.6, tab_r=None):
     sx0, sy0, sx1, sy1 = slot_rect()
     if x1 > sx0 - 0.6 and x0 < sx1 + 0.6 and y1 > sy0 - 0.6 and y0 < sy1 + 0.6:       # slot and 0.6 mm to copper
         return False
+    hw = m("V1_TAB_W") / 2.0 - 0.7
+    tr = m("V1_TAB_R") if tab_r is None else tab_r
+    on_tab = x0 >= 22.9 and x1 <= tr - 0.7 and y0 >= -hw and y1 <= hw
     if side == "F":
         mx0, my0, mx1, my1 = module_rect()
         if x1 > mx0 - 0.3 and x0 < mx1 + 0.3 and y1 > my0 - 0.3 and y0 < my1 + 0.3:
             return False
-        return all(math.hypot(px, py) <= r_move for px, py in pts)
-    hw = m("V1_TAB_W") / 2.0 - 0.7
-    tr = m("V1_TAB_R") if tab_r is None else tab_r
-    on_tab = x0 >= 22.9 and x1 <= tr - 0.7 and y0 >= -hw and y1 <= hw
+        return (top_tab and on_tab) or all(math.hypot(px, py) <= r_move for px, py in pts)
     return on_tab or all(math.hypot(px, py) <= r_move for px, py in pts)

@@ -19,7 +19,7 @@ I_TOP_STEP_MAX_A = 1.577
 # Net widths in mm used by the spike. IPC-2221 external layer, 1 oz, 10 K rise: 1.5 A -> 0.53 mm, 1.577 A -> 0.56 mm,
 # 2.0 A -> 0.78 mm. The spike uses 0.6 mm (>= 0.56 mm for the highest allowed current limit); the earlier run used
 # 0.8 mm (2.0 A) and left the VBUS_IC net unrouted.
-NET_WIDTH = {"VBUS_IC": 0.6, "+5V": 0.6, "+3V3": 0.3}      # +3V3: 0.3 mm = 1.0 A by IPC-2221 (the TLV757P rating); the ESP32-C3 needs about 0.35 A
+NET_WIDTH = {"VBUS": 0.6, "VBUS_IC": 0.6, "+5V": 0.6, "+3V3": 0.3}   # VBUS: connector side of R22 (HW-017)      # +3V3: 0.3 mm = 1.0 A by IPC-2221 (the TLV757P rating); the ESP32-C3 needs about 0.35 A
 
 
 # ---- rule values (moved here from pcb_full.py and pcb_stitch.py; the numbers are unchanged)
@@ -153,7 +153,7 @@ def write_dru(path, layers=4, silk_waiver=None):
 # Placement weights of the simulated-annealing placer (pcb_place.py): the half-perimeter wire length of the named
 # nets counts this many times, so the ADR-0016 gate parts and the hold-off capacitors stay together. Without them the
 # annealer minimises total wire length only and the layout rules of the tests hold by chance.
-NET_WEIGHT = {"VBUS_IC": 3.0, "/ILIM_STEP2_EN": 4.0, "/ILIM_STEP3_EN": 4.0, "/SUP_CT": 3.0, "/ILIM": 2.0}
+NET_WEIGHT = {"VBUS": 3.0, "VBUS_IC": 3.0, "/ILIM_STEP2_EN": 4.0, "/ILIM_STEP3_EN": 4.0, "/SUP_CT": 3.0, "/ILIM": 2.0}
 # Pin ties: a bypass capacitor sits at the supply pin of its part. Added to the annealer as two-pin pseudo-nets
 # (not on the board): name -> ((ref, pad), (ref, pad), weight). Owner decision 2026-11-05 (a): 0.1 uF on the TMUX1101 VDD pin.
 PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
@@ -168,19 +168,33 @@ PIN_TIES = {"tie:C24-U14": (("C24", "1"), ("U14", "5"), 4.0),
             # Regulator bypass (layout experiment 2026-11-08, ring11): input capacitor C5 at the +5V pin and output capacitor C6
             # at the +3V3 pin of the TLV757P (U8 pins 1 and 5; the datasheet asks for the input capacitor close to the part).
             "tie:C5-U8": (("C5", "1"), ("U8", "1"), 4.0),
-            "tie:C6-U8": (("C6", "1"), ("U8", "5"), 4.0)}
+            "tie:C6-U8": (("C6", "1"), ("U8", "5"), 4.0),
+            # HW-016 (Approved, [10] mm): the spare footprints at the TPS2553 output pin. Without these ties batch p1b3 put C4
+            # 24.8 mm from U7 pin 6 (it sat in the regulator block).
+            "tie:C4-U7": (("C4", "1"), ("U7", "6"), 4.0),
+            "tie:C32-U7": (("C32", "1"), ("U7", "6"), 4.0)}
+
+# P1 panel tabs (plan 08 section 4.5; scripts/fab_p1.sh TAB_AZIMUTHS, scripts/panel_tabs.py): mechanical azimuths in gaps
+# between two ring LEDs whose bypass capacitors both face away from the tab, clear of the J1 tab, the notch, the hooks and
+# the button. 105 deg is the only such gap on the top rail side (0 to 180 deg); no LED is shared by two tabs. The P1 placer
+# keeps every LED capacitor courtyard out of a box around each tab cut (P1_TAB_CAP_MM plus a margin), so the 3 mm
+# MLCC-to-tab rule holds (batch p1b3: best 2.42 mm without this).
+P1_TAB_AZIMUTHS = (105.0, 217.5, 285.0, 330.0)
+P1_TAB_WIDTH = 3.0
+P1_TAB_CAP_MM = 3.0
+P1_TAB_KEEPOUT_MARGIN = 0.3
 
 # Functional blocks (layout experiment 2026-11-08, ring12): (anchor, member, radius mm). A member sits within the radius of the
 # anchor part, so each circuit reads as one group. The weight is PLACE_BLOCKS in pcb_place.py (0 = off). The radii are a first
 # guess from the part sizes, not a derived value.
 BLOCKS = tuple((anchor, m, rad) for anchor, rad, members in (
-    ("U8", 6.0, ("C3", "C4", "C5", "C6")),                                        # 5 V to 3.3 V regulator
-    ("U5", 10.0, ("C1", "C27", "C28", "C29", "C30", "C31", "R6")),                # supervisor and its timing capacitors
+    ("U8", 6.0, ("C3", "C5", "C6")),                                              # 5 V to 3.3 V regulator (C4 moved: HW-016)
+    ("U5", 10.0, ("C1", "R6", "R26", "R27", "C33", "C34")),                                     # supervisor, CT capacitor, HOLD_OK pull-up, SENSE divider (ADR-0024, ADR-0025)
     ("U14", 7.0, ("C24", "DZ14", "R_SU14", "R2", "R18", "R14")),                  # current-limit step 2 switch
-    ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch
-    ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1")),                           # USB-C CC detect
-    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R20")),   # VBUS switch, protection, ILIM resistors
-    ("U9", 12.0, ("R9", "C7", "R13", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11")),   # module support parts
+    ("U15", 7.0, ("C25", "DZ15", "R_SU15", "R3", "R19", "R15")),                  # current-limit step 3 switch                  # current-limit step 3 switch
+    ("U1", 7.0, ("R_SU1", "C26", "DZ1", "R21", "R1", "R24", "R25")),             # USB-C CC detect, CC series resistors (ADR-0024)
+    ("U7", 9.0, ("C2", "TVS1", "U6", "R_ILIM1", "R_ILIM2", "R_ILIM3", "R22", "C4", "C32", "R8")),   # VBUS switch, protection, ILIM, HW-016 spares, FAULT_N pull-up (ADR-0024)
+    ("U9", 12.0, ("R9", "C7", "R12", "R16", "R17", "TVS2", "R4", "R5", "R11", "R23", "U10")),   # module support parts (R13 removed, ADR-0023; GPIO0 resistor and GATE_OK_RB AND gate, ADR-0024)
 ) for m in members)
 # Twins: the parts of the two identical switch circuits. They take the same rotation and side, so the circuits look alike.
 TWINS = (("U14", "U15"), ("C24", "C25"), ("DZ14", "DZ15"), ("R_SU14", "R_SU15"), ("R2", "R3"), ("R18", "R19"))
@@ -188,6 +202,7 @@ TWINS = (("U14", "U15"), ("C24", "C25"), ("DZ14", "DZ15"), ("R_SU14", "R_SU15"),
 
 # ---- post-route clean-up helpers (pure functions; used by pcb_dsn.py import and pcb_stitch.py; tested in test_pcb_rules)
 import math as _math
+import re as _re
 
 
 def clamp_track_width(width_mm):
@@ -200,6 +215,26 @@ def hole_gap_ok(x, y, vias, drill=VIA_DRILL, gap=HOLE_TO_HOLE):
     """True when a drill of diameter `drill` at (x, y) has at least `gap` between its edge and every via in `vias`
     ((x, y, ...) tuples with the via drill VIA_DRILL), whatever the net (the hole-to-hole rule knows no nets)."""
     return all(_math.hypot(x - v[0], y - v[1]) >= (drill + VIA_DRILL) / 2 + gap for v in vias)
+
+
+_SEG_BLOCK = _re.compile(r"\(segment\s+(.*?)\(uuid ", _re.S)
+_SEG_FIELDS = {"start": r"\(start ([-\d.]+) ([-\d.]+)\)", "end": r"\(end ([-\d.]+) ([-\d.]+)\)", "width": r"\(width ([\d.]+)\)",
+               "layer": r'\(layer "([^"]*)"\)', "net": r'\(net "([^"]*)"\)'}
+
+
+def read_segments(text):
+    """(x0, y0, x1, y1, width, layer, net) of every track segment in KiCad board text, whatever the order of the fields and
+    whether `(locked yes)` stands among them (KiCad 10 writes it between width and layer). The SWIG track iterator does not
+    work with this Python, so the stitcher and pcb_check read the text. Batch p1b5 2026-11-18: a reader with a fixed field
+    order skipped the locked LED ring tracks and the pre-route stitch put a GND via on one."""
+    out = []
+    for m in _SEG_BLOCK.finditer(text):
+        f = {k: _re.search(rx, m.group(1)) for k, rx in _SEG_FIELDS.items()}
+        if any(v is None for v in f.values()):
+            continue
+        out.append((float(f["start"].group(1)), float(f["start"].group(2)), float(f["end"].group(1)), float(f["end"].group(2)),
+                    float(f["width"].group(1)), f["layer"].group(1), f["net"].group(1)))
+    return out
 
 
 def dangling_via_positions(drc):
@@ -218,7 +253,7 @@ def reuse_targets(x, y, vias, net, max_dist):
 # Nets the router lays first, on their own, before the other nets (run_pcb.sh stage 1). Their tracks are locked for stage 2.
 # Chosen from the nets that the single-pass run left open: the 1.5 A USB power path VBUS_IC (the only net still open after the
 # placement change). Plane nets (GND, +5V) are left to the planes and the stitcher. Default off (KEYFIRST=0): see the report.
-ROUTE_FIRST = ("VBUS_IC",)
+ROUTE_FIRST = ("VBUS", "VBUS_IC")   # HW-017 (plan 08): the main path crosses R22 from VBUS to VBUS_IC
 
 
 def is_key_net(name):
@@ -230,17 +265,19 @@ def is_key_net(name):
 # capacitor and the clamp; every other pin of the net (supervisor, ESD part, dividers, supply-pin resistors, enable) draws
 # microamps. Stage 1 routes the main path alone at NET_WIDTH; stage 2 routes the branches at BRANCH_WIDTH and joins them to the
 # locked main path. Pins: ref -> pins, None means every pin of the ref.
-MAIN_PATH_NET = "VBUS_IC"
-MAIN_PATH_PADS = {"J1": None, "U7": ("1",), "C2": ("1",), "TVS1": ("1",)}
+# HW-017 (plan 08, 2026-11-17): the path is split by the 0 ohm link R22; each side has its own main-path pads.
+MAIN_PATH_PADS = {"VBUS": {"J1": None, "TVS1": ("1",), "R22": ("1",)},
+                  "VBUS_IC": {"R22": ("2",), "U7": ("1",), "C2": ("1",)}}
+MAIN_PATH_NETS = tuple(MAIN_PATH_PADS)
 BRANCH_WIDTH = 0.2
 
 
 def is_main_path_pad(net, ref, pin):
-    """True when the pad takes part in stage 1 of the split routing: any pad of a net other than MAIN_PATH_NET, and
-    the MAIN_PATH_PADS pads of MAIN_PATH_NET."""
-    if net != MAIN_PATH_NET:
+    """True when the pad takes part in stage 1 of the split routing: any pad of a net other than MAIN_PATH_NETS, and
+    the MAIN_PATH_PADS pads of each main-path net."""
+    if net not in MAIN_PATH_PADS:
         return True
-    pins = MAIN_PATH_PADS.get(ref, ())
+    pins = MAIN_PATH_PADS[net].get(ref, ())
     return pins is None or pin in pins
 
 
@@ -254,11 +291,35 @@ def joins_nothing(x, y, track_ends, pad_boxes, tol=0.01):
     return len(layers) <= 1 and not on_pad
 
 
+# No via-in-pad (plan 08 section 4.3, HW-008, owner answer 9 of 2026-11-17): no via may touch the copper of an SMD pad, of
+# any net. The pad box is grown by VIA_IN_PAD_GROW, which covers the default solder-mask expansion of zero. Every via producer
+# of the spike (pcb_stitch.py, the grid router of pcb_fix.py and so pcb_ring.py) asks via_hits_smd_pad before it places a via;
+# pcb_fabcheck.py counts the vias of a finished board (`via_in_smd_pad`). Freerouting's own vias are not filtered here; the
+# count finds them.
+VIA_IN_PAD_GROW = 0.05
+
+
+def via_hits_smd_pad(x, y, via_dia, pads, grow=VIA_IN_PAD_GROW):
+    """True when a via disc (centre (x, y), diameter `via_dia`, mm) overlaps an SMD pad box grown by `grow` on every side,
+    whatever the net (a same-net pad counts). pads: (x0, y0, x1, y1, is_smd) bounding boxes in mm; a box with is_smd false
+    (a pad with a hole, which the hole rules cover) is skipped. A box is the pad's axis-aligned bounding box, so a rotated or
+    rounded pad is covered with margin. Touching (distance equal to the radius) is not an overlap."""
+    r = via_dia / 2.0
+    for x0, y0, x1, y1, smd in pads:
+        if not smd:
+            continue
+        dx = max(x0 - grow - x, 0.0, x - x1 - grow)
+        dy = max(y0 - grow - y, 0.0, y - y1 - grow)
+        if _math.hypot(dx, dy) < r:
+            return True
+    return False
+
+
 # Layer use (2026-11-07/08): In1 is the GND plane and In2 the +5V plane. VBUS_IC and +3V3 stay on the outer layers; every
 # other net except GND keeps off In1, so that signal tracks do not cut the ground plane into islands (a ground via on an
 # island is not connected; seen on run 5 of 2026-11-08). The router gets a `use_layer` rule per class; the clean-up router
 # obeys the same function.
-OUTER_ONLY = ("VBUS_IC", "+3V3")
+OUTER_ONLY = ("VBUS", "VBUS_IC", "+3V3")
 OUTER_LAYERS = ("F.Cu", "B.Cu")
 NOT_IN1_LAYERS = ("F.Cu", "In2.Cu", "B.Cu")
 GROUND_NET = "GND"

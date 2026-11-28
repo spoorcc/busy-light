@@ -16,7 +16,7 @@ Status of the inputs: the MECH requirements are Draft and not approved, so this 
 
 ## 2. Constraints and assumptions
 Constraints (from requirements and ADRs, quoted):
-- Largest outer dimension 48 to 58 mm with the board fitted (MECH-001, SYS-028 [53] mm).
+- Largest outer dimension 48 to 65 mm with the board fitted (MECH-001, SYS-028 [53] mm). The upper limit was 58 mm, then 60 mm (owner, 2026-11-22), then 65 mm (owner, 2026-11-27, "Raise to 65mm"); the extra length is for a nose at the USB-C connector (plan 08 R2). The round body stays at D_out [53.0] mm. The housing nose is not designed yet.
 - 16 LEDs at 22.5 degrees on one circle of at least [38] mm, all on one board side (HW-001, SYS-028).
 - No single LED visible as a point at 1 m; closed band (MECH-002).
 - Inside a 15 mm box around the antenna area the housing has plastic only; the nearest wall is at least 15 mm from the antenna edge (MECH-003). The vendor figure and the split between housing and layout are in section 4.6.
@@ -67,7 +67,7 @@ All values are working values in [brackets] for the owner's parameter sheet (sec
 
 | Param | Feature | Value | Tolerance | Basis |
 |-------|---------|-------|-----------|-------|
-| D_out | Outer diameter of base and lid | [53.0] mm | +-0.3 | MECH-001 (48 to 58); equals the SYS-028 working value |
+| D_out | Outer diameter of base and lid | [53.0] mm | +-0.3 | MECH-001 (48 to 65 for the largest dimension, nose included); equals the SYS-028 working value |
 | H_total | Total height, floor outer face to lid top (feet add 1.0) | [16.5] mm | +-0.3 | computed 16.45 (Z_lid_in 15.25 + t_diff 1.2), rounded; 17.45 mm with the feet |
 | H_base | Base height to the joint | [14.0] mm | +-0.2 | window top at Z 12.25 plus margin |
 | t_wall | Wall thickness | [1.6] mm | +-0.2 | 4 perimeters of 0.4 mm; 4 x layer height rule (report F8) |

@@ -123,7 +123,7 @@ class Full(unittest.TestCase):
 
     def test_custom_symbols_are_all_in_the_custom_library(self):
         lib = (self.dir / "busylight_gate.kicad_sym").read_text(encoding="utf-8")
-        for part in ("TMUX1101", "SUPERVISOR", "CC_IC_TUSB321", "TPS2553_BOX"):
+        for part in ("TMUX1101", "TPS3808G01", "CC_IC_TUSB321", "TPS2553_BOX"):
             self.assertIn(f'(symbol "{part}"', lib)
         self.assertNotIn('"busylight_gate:', lib)
 

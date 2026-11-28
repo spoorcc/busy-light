@@ -67,8 +67,9 @@ class FullBoard(unittest.TestCase):
             self.assertEqual(self.pin_net[(f"C{7 + i}", "2")], "GND")
 
     def test_button_is_not_on_a_strapping_pin_hw007(self):
-        net = self.pin_net[("R13", "2")]
-        self.assertEqual(net, "BUTTON")
+        # ADR-0023: no external pull-up (R13 removed); the firmware enables the GPIO5 internal pull-up
+        self.assertNotIn("R13", layout_full.PARTS)
+        self.assertEqual(self.pin_net[("R12", "1")], "BUTTON")
         self.assertEqual(self.pin_net[("U9", "GPIO5")], "BUTTON")
         for strap in ("GPIO2", "GPIO8", "GPIO9"):
             self.assertNotEqual(self.pin_net.get(("U9", strap)), "BUTTON")
@@ -109,29 +110,29 @@ class FullBoard(unittest.TestCase):
         SN74LVC1G08 DBV (SCES217AA): 1 A, 2 B, 3 GND, 4 Y, 5 VCC. SN74AHCT1G125 DBV (SCLS378P): 1 OE, 2 A, 3 GND, 4 Y, 5 VCC."""
         pn = self.pin_net
         self.assertEqual([pn[("U7", str(i))] for i in (1, 2, 3, 4, 5, 6)],
-                         ["VBUS_IC", "GND", "VBUS_IC", "FAULT_N", "ILIM", "+5V"])
+                         ["VBUS_IC", "GND", "VBUS_IC", "FAULT_N", "ILIM", "+5V"])        # FAULT_N on its own net again (ADR-0024)
         self.assertEqual([pn[("U10", str(i))] for i in (1, 2, 3, 4, 5)],
-                         ["FAULT_N", "HOLD_OK", "GND", "GATE_OK_RB", "+3V3"])
+                         ["FAULT_N", "HOLD_OK", "GND", "GATE_OK_RB", "+3V3"])             # SN74LVC1G08: A, B, GND, Y, VCC
+        self.assertEqual(layout_full.PARTS["U10"][2], "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")
         self.assertEqual([pn[("U11", str(i))] for i in (1, 2, 3, 4, 5)],
                          ["GND", "LED_DATA", "GND", "LED_BUF", "+5V"])
-        for ref in ("U10", "U11"):
-            self.assertEqual(layout_full.PARTS[ref][2], "Package_TO_SOT_SMD:SOT-23-5")
+        self.assertEqual(layout_full.PARTS["U11"][2], "Package_TO_SOT_SMD:SOT-353_SC-70-5")      # SC-70 (ADR-0023), same pinout
         self.assertEqual(layout_full.PARTS["U7"][2], "Package_TO_SOT_SMD:SOT-23-6")
 
     def test_gate_inputs_and_readbacks(self):
         self.assertEqual(self.pin_net[("U4", "1")], "CC_OK_1A5")
-        self.assertEqual(self.pin_net[("U3", "1")], "CC_OK_NOT_S3")
+        self.assertEqual(self.pin_net[("U3", "1")], "CC_OK_1A5")
         for g in ("U3", "U4"):
-            self.assertEqual(self.pin_net[(g, "6")], "HOLD_OK")
-        self.assertEqual(self.pin_net[("U9", "GPIO0")], "CC_OK_1A5")
-        self.assertEqual(self.pin_net[("U10", "4")], "GATE_OK_RB")
+            self.assertEqual(self.pin_net[(g, "6")], "HOLD_OK")       # ADR-0024: the gate takes the supervisor only
+        self.assertEqual(self.pin_net[("U9", "GPIO0")], "CC_OK_RB")   # through R23, not on the gate net
+        self.assertEqual(self.pin_net[("U5", "1")], "HOLD_OK")
         self.assertEqual(self.pin_net[("U9", "GPIO6")], "GATE_OK_RB")
 
     def test_no_mcu_net_is_pulled_to_5v_or_driven_by_a_5v_output(self):
         """Derived from the connections, not from net names: a pull-up resistor to a 5 V rail, or a
-        output pin of a part that runs on 5 V (U1 7/8, U5 1, U7 6, U11 4) on the same net as an MCU pin."""
+        output pin of a part that runs on 5 V (U1 7/8, U5 1, U7 4 and 6, U11 4) on the same net as an MCU pin."""
         rails = {"VBUS", "VBUS_IC", "+5V"}
-        five_volt_outputs = {("U1", "7"), ("U1", "8"), ("U5", "1"), ("U7", "6"), ("U11", "4")}
+        five_volt_outputs = {("U1", "7"), ("U1", "8"), ("U5", "1"), ("U7", "4"), ("U7", "6"), ("U11", "4")}
         for (ref, pin), net in self.pin_net.items():
             if ref != "U9" or net in ("+3V3", "GND"):
                 continue
@@ -139,10 +140,6 @@ class FullBoard(unittest.TestCase):
                 if r2[0] == "R":
                     other = "2" if p2 == "1" else "1"
                     self.assertNotIn(self.pin_net[(r2, other)], rails, f"U9 {pin}: {r2} pulls {net} to 5 V")
-                if (r2, p2) == ("U7", "4"):     # TPS2553 FAULT: open drain, must be pulled up to 3V3
-                    self.assertEqual(self.pin_net[("R8", "1")], "+3V3")
-                    self.assertEqual(self.pin_net[("R8", "2")], net)
-                    continue
                 self.assertNotIn((r2, p2), five_volt_outputs, f"U9 {pin} on {net} shares a net with {r2} pin {p2}")
 
     def test_strapping_pins_have_defined_levels(self):
@@ -162,27 +159,30 @@ class FullBoard(unittest.TestCase):
         self.assertEqual({self.pin_net[("R14", "1")], self.pin_net[("R14", "2")]}, {"ILIM_STEP2_EN", "STEP2_EN_RB"})
         self.assertEqual({self.pin_net[("R15", "1")], self.pin_net[("R15", "2")]}, {"ILIM_STEP3_EN", "STEP3_EN_RB"})
 
-    def test_exclusive_steps_nor_gate(self):
-        """U13 74LVC1G02 (A=1, B=2, GND=3, Y=4, VCC=5): NOR(CC_OUT1_N, ILIM_STEP3_EN) feeds U3 pin 1."""
+    def test_step3_is_both_switches_without_an_exclusivity_gate(self):
+        """ADR-0023: step 3 = both switches on (no switch state exceeds the step 3 maximum), so the NOR gate U13 is gone and
+        both ANDs see the same CC_OK_1A5 input."""
         pn = self.pin_net
-        self.assertEqual([pn[("U13", str(i))] for i in (1, 2, 3, 4, 5)],
-                         ["CC_OUT1_N", "ILIM_STEP3_EN", "GND", "CC_OK_NOT_S3", "+3V3"])
-        self.assertEqual(layout_full.PARTS["U13"][1], "74LVC1G02")
-        self.assertEqual(layout_full.PARTS["U13"][2], "Package_TO_SOT_SMD:SOT-23-5")
+        self.assertNotIn("U13", layout_full.PARTS)
+        self.assertEqual(pn[("U3", "1")], "CC_OK_1A5")
+        self.assertEqual(pn[("U4", "1")], "CC_OK_1A5")
+        self.assertNotIn("CC_OK_NOT_S3", self.intent)
         self.assertEqual(pn[("U15", "4")], "ILIM_STEP3_EN")
         for ref, val in (("R2", "10k"), ("R3", "10k"), ("R14", "100k"), ("R15", "100k")):
             self.assertEqual(layout_full.PARTS[ref][-1], val)
 
     def test_ilim_resistor_values(self):
         P = layout_full.PARTS
-        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1], P["R20"][-1]),
-                         ("47.0k 0.1%", "56.2k 0.1%", "27.4k 0.1%", "301 0.1%"))   # E96, HW-010 revision
+        self.assertEqual((P["R_ILIM1"][-1], P["R_ILIM2"][-1], P["R_ILIM3"][-1]),
+                         ("47.0k 0.1%", "56.2k 0.1%", "54.9k 0.1%"))   # ADR-0023 step 3 = both switches on; 54.9 k since 2026-11-24
+        self.assertNotIn("R20", P)
+        self.assertEqual(P["R_ILIM3"][2], "Resistor_SMD:R_0603_1608Metric")
 
     def test_tmux1101_ilim_switches(self):
         """Owner decision 2026-11-05 (a). TMUX1101DCK (SCDS410D tab. 5-1): 1 D, 2 S, 3 GND, 4 SEL, 5 VDD."""
         pn, P = self.pin_net, layout_full.PARTS
         for sw, en, r_ilim, cap, rpd in (("U14", "ILIM_STEP2_EN", "R_ILIM2", "C24", "R18"),
-                                         ("U15", "ILIM_STEP3_EN", "R20", "C25", "R19")):
+                                         ("U15", "ILIM_STEP3_EN", "R_ILIM3", "C25", "R19")):
             self.assertEqual([pn[(sw, str(i))] for i in (2, 3, 4, 5)], ["GND", "GND", en, f"VDD_{sw}"])   # VDD from VBUS_IC through R_SU14 / R_SU15
             self.assertEqual(pn[(sw, "1")], pn[(r_ilim, "1")])
             self.assertEqual((pn[(cap, "1")], pn[(cap, "2")]), (f"VDD_{sw}", "GND"))
@@ -193,19 +193,41 @@ class FullBoard(unittest.TestCase):
             self.assertEqual(P[sw][2], "Package_TO_SOT_SMD:SOT-353_SC-70-5")
         self.assertNotIn("Q2", P)
         self.assertNotIn("Q3", P)
-        self.assertEqual(pn[("R20", "2")], pn[("R_ILIM3", "1")])
         self.assertEqual(pn[("R_ILIM3", "2")], "ILIM")
 
     def test_holdoff_capacitor_set(self):
-        """Owner decision 2026-11-06: six 100 nF C0G 5 % 1206 on SUP_CT (HW-010 revision)."""
+        """ADR-0025 (owner 2026-11-24): one 68 nF C0G 5 % 1206 on SUP_CT replaces the six 100 nF of 2026-11-06."""
         P = layout_full.PARTS
-        vals = {r: P[r][-1] for r in ("C1", "C27", "C28", "C29", "C30", "C31")}
-        self.assertEqual(sorted(v.split()[0] for v in vals.values()), ["100n"] * 6)
-        for r, v in vals.items():
-            self.assertIn("C0G 5%", v)
-            self.assertEqual(self.pin_net[(r, "1")], "SUP_CT")
-            self.assertEqual(self.pin_net[(r, "2")], "GND")
-            self.assertEqual("Capacitor_SMD:C_1206_3216Metric", P[r][2])
+        for gone in ("C27", "C28", "C29", "C30", "C31"):
+            self.assertNotIn(gone, P)
+        self.assertEqual(P["C1"][-1], "68n C0G 5% 50V")
+        self.assertEqual(P["C1"][2], "Capacitor_SMD:C_1206_3216Metric")
+        self.assertEqual(self.pin_net[("C1", "1")], "SUP_CT")
+        self.assertEqual(self.pin_net[("C1", "2")], "GND")
+
+    def test_supervisor_is_the_tps3808g01_on_the_protected_supply(self):
+        """ADR-0025 option B. TPS3808G01DBV (SBVS050N table 5-1): 1 RESET, 2 GND, 3 MR, 4 CT, 5 SENSE, 6 VDD."""
+        P, pn = layout_full.PARTS, self.pin_net
+        self.assertEqual(P["U5"][2:], ("Package_TO_SOT_SMD:SOT-23-6", "TPS3808G01"))
+        self.assertEqual([pn[("U5", str(i))] for i in (1, 2, 4, 5, 6)],
+                         ["HOLD_OK", "GND", "SUP_CT", "SUP_SENSE", "VDD_U1"])
+        self.assertNotIn(("U5", "3"), pn)             # MR open: 90 kohm pull-up to VDD inside the part
+        self.assertEqual((pn[("R26", "1")], pn[("R26", "2")]), ("VBUS_IC", "SUP_SENSE"))
+        self.assertEqual((pn[("R27", "1")], pn[("R27", "2")]), ("SUP_SENSE", "GND"))
+        self.assertEqual((P["R26"][-1], P["R27"][-1]), ("910k 1%", "100k"))
+        self.assertEqual((pn[("C33", "1")], pn[("C33", "2")]), ("VDD_U1", "GND"))      # 100 nF close to VDD (SBVS050N)
+        self.assertEqual((pn[("C34", "1")], pn[("C34", "2")]), ("SUP_SENSE", "GND"))   # 1 nF on SENSE (SBVS050N 7.3.1)
+        self.assertEqual((P["C33"][-1], P["C34"][-1]), ("100n", "1n"))
+
+    def test_divider_thresholds_keep_the_release_below_the_vbus_minimum(self):
+        """910 k / 100 k (931 k is not stocked): falling 3.915 to 4.271 V, release up to 4.399 V, below the 4.5 V of HW-010 criterion 5."""
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "sim"))
+        import supervisor_options as so
+        fall_lo, fall_hi, _, rel_hi = so.tps3808_divider(910.0, 100.0)
+        self.assertAlmostEqual(fall_lo, 3.915, places=3)
+        self.assertAlmostEqual(fall_hi, 4.271, places=3)
+        self.assertAlmostEqual(rel_hi, 4.399, places=3)
+        self.assertLess(rel_hi, 4.5)
 
     def test_no_uart_test_points(self):
         self.assertFalse({"UART_TX", "UART_RX"} & set(self.pin_net.values()))
@@ -245,12 +267,22 @@ class FullBoard(unittest.TestCase):
         """The TestPoint_Pad footprint is excluded from the BOM; the symbol must say the same (DRC parity)."""
         tps = [y for y in self.sch.schematicSymbols
                if any(p.key == "Reference" and p.value.startswith("TP") for p in y.properties)]
-        self.assertEqual(len(tps), 6)
+        self.assertEqual(len(tps), 7)
         self.assertTrue(all(y.inBom is False for y in tps))
 
+    def test_spare_footprints_are_dnp_and_not_in_the_bom(self):
+        """HW-016: C4 and C32 are not fitted; the P1 footprints are DNP and excluded from the BOM, the symbols must say the
+        same (KiCad DRC footprint_symbol_mismatch, P1 batch of 2026-11-18)."""
+        spares = {p.value: y for y in self.sch.schematicSymbols for p in y.properties
+                  if p.key == "Reference" and p.value in ("C4", "C32")}
+        self.assertEqual(set(spares), {"C4", "C32"})
+        for ref, y in spares.items():
+            self.assertTrue(y.dnp, ref)
+            self.assertIs(y.inBom, False, ref)
+
     def test_test_points(self):
-        nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 7)}
-        self.assertEqual(nets, {"+5V", "+3V3", "GND", "LED_DATA", "CHIP_EN", "BOOT"})
+        nets = {self.pin_net[(f"TP{i}", "1")] for i in range(1, 8)}
+        self.assertEqual(nets, {"+5V", "+3V3", "GND", "LED_DATA", "CHIP_EN", "BOOT", "FAULT_N"})   # TP7: ADR-0018 condition 1
 
 
 
@@ -272,11 +304,12 @@ class SupplyPinProtection(unittest.TestCase):
         for pin, node, dz, cap in ((("U1", "VDD"), "VDD_U1", "DZ1", "C26"), (("U14", "5"), "VDD_U14", "DZ14", "C24"),
                                    (("U15", "5"), "VDD_U15", "DZ15", "C25")):
             self.assertEqual(self.pin_net[pin], node)
-            self.assertEqual(self.pin_net[(dz, "3")], node)      # cathode on the node
-            self.assertEqual(self.pin_net[(dz, "1")], "GND")     # anode on ground
+            self.assertEqual(self.pin_net[(dz, "1")], node)      # cathode on the node (D_Zener pin 1, SOD-323, ADR-0023)
+            self.assertEqual(self.pin_net[(dz, "2")], "GND")     # anode on ground
             self.assertEqual(self.pin_net[(cap, "1")], node)
             self.assertEqual(self.pin_net[(cap, "2")], "GND")
-            self.assertEqual(layout_full.PARTS[dz][3], "BZX84C5V1")
+            self.assertEqual(layout_full.PARTS[dz][3], "BZT52C5V1S")
+            self.assertEqual(layout_full.PARTS[dz][2], "Diode_SMD:D_SOD-323")
 
     def test_no_6v_supply_pin_is_left_on_the_raw_rail(self):
         for pin in (("U1", "VDD"), ("U14", "5"), ("U15", "5")):
@@ -284,26 +317,106 @@ class SupplyPinProtection(unittest.TestCase):
 
 
 class GateOkReadback(unittest.TestCase):
-    """ADR-0018 option E: GATE_OK_RB = HOLD_OK AND FAULT_N; GPIO4 and GPIO1 are free for the sensor."""
+    """ADR-0024 (restores ADR-0018 option E, withdraws ADR-0023 decision 2): the gate takes HOLD_OK (TPS3840 RESET with R6 to
+    VBUS_IC); FAULT_N (TPS2553 FAULT with R8 to 3V3) goes only to U10, whose AND output GATE_OK_RB goes only to GPIO6. GPIO4 and
+    GPIO1 stay free for the sensor."""
 
     @classmethod
     def setUpClass(cls):
         cls.sch, cls.intent = layout_full.build()
         cls.pin_net = pin_net_of(cls.intent)
 
-    def test_fault_n_reaches_the_and_gate_with_a_3v3_pull_up_and_not_the_mcu(self):
-        self.assertEqual(self.pin_net[("U10", "1")], "FAULT_N")
-        self.assertEqual(self.pin_net[("U7", "4")], "FAULT_N")
+    def members(self, net):
+        return {k for k, v in self.pin_net.items() if v == net}
+
+    def test_hold_off_node_has_the_vbus_ic_pull_up(self):
+        self.assertEqual(self.members("HOLD_OK"), {("U5", "1"), ("R6", "2"), ("U3", "6"), ("U4", "6"), ("U10", "2")})
+        self.assertEqual(self.pin_net[("R6", "1")], "VDD_U1")     # ADR-0025: the pull-up follows the protected supply node
+        self.assertEqual(layout_full.PARTS["R6"][3], "100k")      # owner 2026-11-24: 100 k keeps the high level 2.77 V at the release maximum
+
+    def test_fault_node_has_the_3v3_pull_up_and_a_test_pad(self):
+        self.assertEqual(self.members("FAULT_N"), {("U7", "4"), ("R8", "2"), ("U10", "1"), ("TP7", "1")})
         self.assertEqual(self.pin_net[("R8", "1")], "+3V3")
-        self.assertEqual(self.pin_net[("R8", "2")], "FAULT_N")
-        self.assertNotIn(("U9", "GPIO4"), self.pin_net)
+        self.assertEqual(layout_full.PARTS["R8"][3], "100k")
+
+    def test_gate_ok_readback_reaches_only_gpio6(self):
+        self.assertEqual({k for k in self.members("GATE_OK_RB") if k[0] != "U9"}, {("U10", "4")})
+        self.assertEqual(self.pin_net[("U9", "GPIO6")], "GATE_OK_RB")
+
+    def test_no_mcu_pin_is_on_a_net_that_feeds_a_gate_input(self):
+        """RV-016 row 2, RV-017 row 1: a firmware output must not be able to open the gate. The nets of the AND inputs
+        U3 and U4 (pins 1, 3, 6) hold no MCU pin; the select inputs reach the MCU through the pull-downs R4 and R5 only as
+        outputs of the MCU (SEL_STEP*_GPIO), which are the intended firmware controls."""
+        selects = {"SEL_STEP2_GPIO", "SEL_STEP3_GPIO"}
+        for g in ("U3", "U4"):
+            for pin in ("1", "6"):
+                net = self.pin_net[(g, pin)]
+                self.assertNotIn(net, selects)
+                self.assertFalse({k for k in self.members(net) if k[0] == "U9"}, f"{g} pin {pin} net {net}")
+
+    def test_gpio0_has_the_series_resistor(self):
+        self.assertEqual((self.pin_net[("R23", "1")], self.pin_net[("R23", "2")]), ("CC_OK_RB", "CC_OK_1A5"))
+        self.assertEqual(layout_full.PARTS["R23"][3], "10k")
+        self.assertEqual(self.members("CC_OK_RB"), {("U9", layout_full.pads("U9", "GPIO0")[0]), ("R23", "1")})
 
     def test_sensor_pins_are_unused(self):
         for pin in ("GPIO1", "GPIO4"):
             self.assertNotIn(("U9", pin), self.pin_net)
 
-    def test_gate_is_the_and_part(self):
-        self.assertEqual(layout_full.PARTS["U10"][1], "74LVC1G08")
+
+class CcProtection(unittest.TestCase):
+    """Owner decision 4 of 2026-11-22 (P3, ADR-0024): a bidirectional ESD diode on each CC line at the connector and
+    100 ohm in series to the CC IC."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sch, cls.intent = layout_full.build()
+        cls.pin_net = pin_net_of(cls.intent)
+
+    def test_each_line_has_a_diode_and_a_series_resistor(self):
+        for jp, up, net, ic, rs, tv in (("A5", "CC1", "CC1", "CC1_IC", "R24", "TVS3"), ("B5", "CC2", "CC2", "CC2_IC", "R25", "TVS4")):
+            self.assertEqual(self.pin_net[("J1", jp)], net)
+            self.assertEqual(self.pin_net[("U1", up)], ic)
+            self.assertEqual({self.pin_net[(rs, "1")], self.pin_net[(rs, "2")]}, {net, ic})
+            self.assertEqual({self.pin_net[(tv, "1")], self.pin_net[(tv, "2")]}, {net, "GND"})
+            self.assertEqual(layout_full.PARTS[rs][3], "100")
+            self.assertEqual(layout_full.PARTS[tv][3], "TVS")
+
+    def test_the_cc_ic_sees_the_line_only_through_the_resistor(self):
+        for net in ("CC1", "CC2"):
+            self.assertFalse({k for k, v in self.pin_net.items() if v == net and k[0] == "U1"})
+
+    def test_diode_is_the_tvs1_part(self):
+        self.assertEqual(layout_full.PARTS["TVS3"], layout_full.PARTS["TVS1"])
+
+
+class DampingLink(unittest.TestCase):
+    """HW-017 (Approved 2026-11-17, amended 2026-11-22): R22, a 5 mohm 1206 current-sense link, between the connector side VBUS and
+    VBUS_IC."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sch, cls.intent = layout_full.build()
+        cls.pin_net = pin_net_of(cls.intent)
+
+    def test_r22_part(self):
+        self.assertEqual(layout_full.PARTS["R22"][2], "Resistor_SMD:R_1206_3216Metric")
+        self.assertEqual(layout_full.PARTS["R22"][3], "5m 1% 1W")   # HW-017 amendment 2026-11-22: 2 to 5 mohm current-sense link
+
+    def test_r22_in_series(self):
+        # pin 1 on the connector side: pcb_rules.MAIN_PATH_PADS depends on this order
+        self.assertEqual((self.pin_net[("R22", "1")], self.pin_net[("R22", "2")]), ("VBUS", "VBUS_IC"))
+
+    def test_connector_side_members(self):
+        members = {k for k, v in self.pin_net.items() if v == "VBUS"}
+        expected = {("J1", p) for p in ("A4", "A9", "B4", "B9")} | {("TVS1", "1"), ("U6", "5")}
+        self.assertEqual(members - {("R22", "1"), ("R22", "2")}, expected)
+
+    def test_switch_side_members(self):
+        members = {k for k, v in self.pin_net.items() if v == "VBUS_IC"}
+        expected = {("U7", "1"), ("U7", "3"), ("C2", "1"), ("R1", "1"), ("R21", "1"), ("R_SU1", "1"),
+                    ("R_SU14", "1"), ("R_SU15", "1"), ("R26", "1"), ("R22", "2")}
+        self.assertEqual(members, expected)
 
 
 if __name__ == "__main__":

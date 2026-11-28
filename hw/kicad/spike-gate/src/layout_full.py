@@ -44,12 +44,13 @@ C = ("Device", "C", "Capacitor_SMD:C_0603_1608Metric")
 C0805 = ("Device", "C", "Capacitor_SMD:C_0805_2012Metric")
 C1206 = ("Device", "C", "Capacitor_SMD:C_1206_3216Metric")
 TVS = ("Device", "D_TVS", "Diode_SMD:D_SOD-323")
-G04 = ("74xGxx", "74LVC1G04", "Package_TO_SOT_SMD:SOT-23-5")
-G02 = ("74xGxx", "74LVC1G02", "Package_TO_SOT_SMD:SOT-23-5")
-G11 = ("74xGxx", "74LVC1G11", "Package_TO_SOT_SMD:SOT-23-6")
-G08 = ("74xGxx", "74LVC1G08", "Package_TO_SOT_SMD:SOT-23-5")
-ZENER = ("Diode", "BZX84Cxx", "Package_TO_SOT_SMD:SOT-23")
-AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-23-5")
+G04 = ("74xGxx", "74LVC1G04", "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")   # ADR-0023: SC-70 (DCK) for one-sided placement
+G11 = ("74xGxx", "74LVC1G11", "Package_TO_SOT_SMD:SOT-363_SC-70-6")
+G08 = ("74xGxx", "74LVC1G08", "Package_TO_SOT_SMD:Texas_R-PDSO-G5_DCK-5")   # ADR-0024: SC-70 (DCK), pins 1 A, 2 B, 3 GND, 4 Y, 5 VCC
+ZENER = ("Device", "D_Zener", "Diode_SMD:D_SOD-323")   # ADR-0023: SOD-323 (pin 1 K, pin 2 A)
+AHCT125 = ("74xGxx", "74AHCT1G125", "Package_TO_SOT_SMD:SOT-353_SC-70-5")
+R0402 = ("Device", "R", "Resistor_SMD:R_0402_1005Metric")   # ADR-0023: non-critical pull-ups and series resistors
+C0402 = ("Device", "C", "Capacitor_SMD:C_0402_1005Metric")   # ADR-0023: small bypass and RC capacitors
 TP = ("Connector", "TestPoint", "TestPoint:TestPoint_Pad_D1.5mm")
 # pin numbers of the KiCad symbol LED:WS2812B-2020 (the 5050 symbol has other numbers: 1 VDD, 2 DOUT, 3 VSS, 4 DIN)
 LED_DOUT, LED_VSS, LED_DIN, LED_VDD = "1", "2", "3", "4"
@@ -59,46 +60,52 @@ PARTS = {  # ref: (lib, part, footprint, value)
     "J1": ("Connector", "USB_C_Receptacle_USB2.0_16P", "CUSTOM:USB_C_Receptacle_GCT_USB4085_edge", "USB-C receptacle"),
     "TVS1": (*TVS, "TVS"), "U6": ("Power_Protection", "USBLC6-2P6", "Package_TO_SOT_SMD:SOT-666", "USBLC6-2P6"),
     "U1": (None, None, "CUSTOM:X2QFN-12_RWB", "TUSB321"),   # generated footprint, no X2QFN footprint in the KiCad libraries
-    "R21": (*R, "887k"), "R1": (*R, "100k"),
+    "R21": (*R, "887k"), "R1": (*R0402, "100k"),
     "U2": (*G04, "74LVC1G04"),
-    "U13": (*G02, "74LVC1G02"),
     "U3": (*G11, "74LVC1G11"), "U4": (*G11, "74LVC1G11"),
-    "R4": (*R, "100k"), "R5": (*R, "100k"), "R2": (*R, "10k"), "R3": (*R, "10k"),
+    "R4": (*R0402, "100k"), "R5": (*R0402, "100k"), "R2": (*R0402, "10k"), "R3": (*R0402, "10k"),
     "U14": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
     "U15": (None, None, "Package_TO_SOT_SMD:SOT-353_SC-70-5", "TMUX1101DCKR"),
-    "R18": (*R, "100k"), "R19": (*R, "100k"), "C24": (*C, "100n"), "C25": (*C, "100n"),
+    "R18": (*R0402, "100k"), "R19": (*R0402, "100k"), "C24": (*C0402, "100n"), "C25": (*C0402, "100n"),
     # owner decision 2026-11-05 (b): 0.1 % 0603; step 3 is 27.4 k + 301 ohm in series (27.701 k)
-    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "27.4k 0.1%"), "R20": (*R, "301 0.1%"),
+    "R_ILIM2": (*R, "56.2k 0.1%"), "R_ILIM3": (*R, "54.9k 0.1%"),   # ADR-0023 step 3 = both switches on; 54.9 k Yageo AT (owner decision 2026-11-24, option A of analysis-ilim-drift.md)
     "R_ILIM1": (*R, "47.0k 0.1%"),
-    "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TPS3840DL40"),
-    "R6": (*R, "150k"), "C1": (*C1206, "100n C0G 5% 50V"), "C27": (*C1206, "100n C0G 5% 50V"),
-    "C28": (*C1206, "100n C0G 5% 50V"), "C29": (*C1206, "100n C0G 5% 50V"),
-    "C30": (*C1206, "100n C0G 5% 50V"), "C31": (*C1206, "100n C0G 5% 50V"),   # six 100 nF, owner decision 2026-11-06
+    "U5": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS3808G01"),   # ADR-0025 option B (owner decision 2026-11-24)
+    "R26": (*R0402, "910k 1%"), "R27": (*R0402, "100k"),   # SENSE divider from VBUS_IC: 910 k / 100 k (931 k is not stocked, see ADR-0025)
+    "R6": (*R0402, "100k"),   # HOLD_OK pull-up to VDD_U1 (ADR-0024, ADR-0025; owner 2026-11-24: 100 k, high level 2.77 V at the 4.399 V release maximum, RV-019 G9)
+    "C33": (*C0402, "100n"), "C34": (*C0402, "1n"),   # TPS3808 bypass (SBVS050N 7.3.1 and table 5-1): 100 nF close to VDD, 1 nF on SENSE (owner 2026-11-24)
+    "U10": (*G08, "74LVC1G08"),   # ADR-0024 (ADR-0018 option E): GATE_OK_RB = HOLD_OK AND FAULT_N, output to GPIO6 only
+    # ADR-0024: GPIO0 series resistor (owner decision 2) and CC protection (owner decision 4, P3): ESD diode at the connector,
+    # 100 ohm in series to the CC IC
+    "R23": (*R0402, "10k"), "R24": (*R0402, "100"), "R25": (*R0402, "100"),
+    "TVS3": (*TVS, "TVS"), "TVS4": (*TVS, "TVS"),
+    "C1": (*C1206, "68n C0G 5% 50V"),   # ADR-0025: one 68 nF C0G on CT replaces the six 100 nF (hold-off 221.8 to 572.7 ms)
     "U7": (None, None, "Package_TO_SOT_SMD:SOT-23-6", "TPS2553"),
-    "C2": (*C, "4.7u 16V X5R"), "C3": (*C0805, "10u 25V X5R"), "R8": (*R, "100k"),
+    "C2": (*C, "4.7u 16V X5R"), "C3": (*C0805, "10u 25V X5R"), "R8": (*R0402, "100k"),   # ADR-0024: pull-up of the open-drain FAULT_N of U7 (3V3)
     "U8": (None, None, "Package_TO_SOT_SMD:SOT-23-5", "TLV75733PDBV"),   # ADR-0019 option A
     "C5": (*C, "2.2u 16V X5R"), "C6": (*C, "10u 10V X5R"),
     "U9": (None, None, "CUSTOM:ESP32-C3-MINI-1", "ESP32-C3-MINI-1"),    # no such footprint in the KiCad libraries; pcb_full.derive_u9_footprint writes it
-    "R9": (*R, "10k"), "C7": (*C, "1u"),
+    "R9": (*R0402, "10k"), "C7": (*C0402, "1u"),
     "SW1": ("Switch", "SW_Push", "Button_Switch_SMD:SW_SPST_TL3342", "Button"),
-    "R12": (*R, "1k"), "R13": (*R, "10k"), "TVS2": (*TVS, "ESD diode"),
-    "U10": (*G08, "74LVC1G08"), "U11": (*AHCT125, "74AHCT1G125"),
-    "R10": (*R, "330"), "R11": (*R, "10k"), "C4": (*C1206, "DNP spare"), "C32": (*C1206, "DNP spare"),   # HW-016: two spare 1206 on +5V
+    "R12": (*R0402, "1k"), "TVS2": (*TVS, "ESD diode"),
+    "U11": (*AHCT125, "74AHCT1G125"),
+    "R10": (*R0402, "330"), "R11": (*R0402, "10k"), "C4": (*C1206, "DNP spare"), "C32": (*C1206, "DNP spare"),   # HW-016: two spare 1206 footprints on +5V (P1: bottom side, not fitted)
+    "R22": ("Device", "R", "Resistor_SMD:R_1206_3216Metric", "5m 1% 1W"),   # HW-017 amendment 2026-11-22: 1206 current-sense link VBUS -> VBUS_IC
    
     # supply-pin protection (HW-010 amendment, owner 2026-11-07): series resistor, 100 nF and 5.1 V zener per 6 V pin
-    "R_SU1": (*R, "470"), "R_SU14": (*R, "1k"), "R_SU15": (*R, "1k"),
-    "C26": (*C, "100n"),
-    "DZ1": (*ZENER, "BZX84C5V1"), "DZ14": (*ZENER, "BZX84C5V1"), "DZ15": (*ZENER, "BZX84C5V1"),
+    "R_SU1": (*R0402, "470"), "R_SU14": (*R0402, "1k"), "R_SU15": (*R0402, "1k"),
+    "C26": (*C0402, "100n"),
+    "DZ1": (*ZENER, "BZT52C5V1S"), "DZ14": (*ZENER, "BZT52C5V1S"), "DZ15": (*ZENER, "BZT52C5V1S"),
 }
 for i in range(1, 17):
     PARTS[f"D{i}"] = (*LED, "WS2812B")
     PARTS[f"C{7 + i}"] = (*C, "100n")
-for i, n in enumerate(("TP_5V", "TP_3V3", "TP_GND", "TP_LED", "TP_EN", "TP_BOOT"), 1):
+for i, n in enumerate(("TP_5V", "TP_3V3", "TP_GND", "TP_LED", "TP_EN", "TP_BOOT", "TP_FAULT"), 1):
     PARTS[f"TP{i}"] = (*TP, n)
-PARTS["R16"] = (*R, "10k")
-PARTS["R17"] = (*R, "10k")
-PARTS["R14"] = (*R, "100k")
-PARTS["R15"] = (*R, "100k")
+PARTS["R16"] = (*R0402, "10k")
+PARTS["R17"] = (*R0402, "10k")
+PARTS["R14"] = (*R0402, "100k")
+PARTS["R15"] = (*R0402, "100k")
 
 S = L.SIZE
 # Pad numbers of the pins that the layout code names (the box symbols carry these numbers, so the schematic and the
@@ -138,7 +145,11 @@ BOXES = {
         ("7", "OUT1_N", "right", 5.08, "open_collector"), ("8", "OUT2_N", "right", 0, "open_collector"),
         ("3", "CURRENT_MODE", "right", -5.08, "passive"), ("6", "VCONN_FAULT", "right", -7.62, "open_collector"),
         ("9", "ID", "right", -10.16, "open_collector"), ("11", "DIR", "right", -12.7, "open_collector")]), half_h=15.24),
-    "U5": L.SUPERVISOR,
+    # TPS3808G01DBV (SBVS050N table 5-1, SOT-23): 1 RESET, 2 GND, 3 MR (90 kohm pull-up inside), 4 CT, 5 SENSE, 6 VDD
+    "U5": L.box_symbol("TPS3808G01", [
+        ("6", "VDD", "top", 0, "power_in"), ("2", "GND", "bottom", 0, "power_in"),
+        ("1", "RESET", "right", 2.54, "open_collector"), ("4", "CT", "right", -5.08, "passive"),
+        ("5", "SENSE", "left", 2.54, "passive"), ("3", "MR", "left", -2.54, "passive")]),
     "U14": L.TMUX1101, "U15": L.TMUX1101,
     "U7": L.box_symbol("TPS2553_BOX", [
         ("1", "IN", "top", -2.54, "power_in"), ("3", "EN", "top", 2.54, "input"),
@@ -163,53 +174,54 @@ BOXES = {
         ("GPIO6", "GPIO6", "right", -12.7, "bidirectional"), ("GPIO7", "GPIO7", "right", -17.78, "bidirectional")]),
         half_w=22.86, half_h=33.02, hide_numbers=True),
 }
-BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "SUPERVISOR", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
+BOX_LIB = {"U1": "CC_IC_TUSB321", "U5": "TPS3808G01", "U14": "TMUX1101", "U15": "TMUX1101", "U7": "TPS2553_BOX", "U8": "TLV75733P_DBV",
            "U9": "ESP32_C3_MINI_1"}
 
 LED_X0, LED_PITCH, LED_Y = 218.0, 22.86, (190.0, 232.0)
 PLACE = {
     "J1": (30, 78.74, 0), "TVS1": (57.15, 63.5, 0), "U6": (68, 118, 0),
     "U1": (gx(50.8), 71.12, 0), "R21": (gx(50.8) + 2.54, 49.53, 0), "R1": (gx(76.2), 62.23, 0),
-    "U2": (gx(104.14), 66.04, 0), "U13": (gx(121.92), 40.64, 0),
+    "U2": (gx(104.14), 66.04, 0),
     "U3": (gx(162.56), 50.8, 0), "R4": (gx(137.16), 59.69, 0), "R2": (gx(198.12), 54.61, 0),
     "U14": (gx(223.52), 50.8, 0), "R18": (gx(208.28), 54.61, 0), "C24": (gx(228.6), 38.1, 0),
     "R_ILIM2": (gx(250.19), 50.8, 90),
     "U4": (gx(162.56), 91.44, 0), "R5": (gx(137.16), 100.33, 0), "R3": (gx(198.12), 95.25, 0),
     "U15": (gx(223.52), 91.44, 0), "R19": (gx(208.28), 95.25, 0), "C25": (gx(228.6), 78.74, 0),
-    "R20": (gx(241.3), 91.44, 90), "R_ILIM3": (gx(250.19), 91.44, 90),
-    "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0), "C27": (gx(86.36), 146.05, 0),
-    "C28": (gx(93.98), 146.05, 0), "C29": (gx(101.6), 146.05, 0), "C30": (gx(109.22), 146.05, 0),
-    "C31": (gx(116.84), 146.05, 0),
+    "R_ILIM3": (gx(250.19), 91.44, 90),
+    "U5": (gx(50.8), 137.16, 0), "R6": (gx(76.2), 130.81, 0), "C1": (gx(78.74), 146.05, 0),
+    "R26": (gx(26.67), 126.0, 0), "R27": (gx(26.67), 146.05, 0),
+    "C33": (gx(63.5), 124.46, 0), "C34": (gx(15.24), 136.0, 0),
     "U7": (330.0, 38.1, 0), "R_ILIM1": (BUSX_FULL, 25.4, 180), "C2": (296.0, 20.0, 0),
     "C3": (350.5, 24.0, 0), "R8": (364.0, 36.83, 0),
     "U8": (335.0, 100.0, 0), "C5": (317.0, 103.81, 0), "C6": (353.0, 103.81, 0),
     "U9": (85.0, 222.0, 0), "R9": (48.0, 225.81, 0), "C7": (43.0, 233.43, 0),
-    "R13": (148.0, 186.19, 0), "TVS2": (148.0, 193.81, 90), "R12": (158.0, 190.0, 90),
+    "TVS2": (148.0, 193.81, 90), "R12": (158.0, 190.0, 90),
     "SW1": (174.0, 190.0, 0),
     "U10": (158.0, 232.0, 0), "U11": (158.0, 266.0, 0), "R11": (138.0, 269.81, 0),
     "R10": (203.0, 190.0, 90), "C4": (206.0, 205.0, 0), "C32": (218.0, 205.0, 0),
     "R_SU1": (290.0, 143.0, 90), "C26": (306.0, 149.0, 0), "DZ1": (316.0, 149.0, 270),
     "R_SU14": (330.0, 143.0, 90), "DZ14": (346.0, 149.0, 270),
     "R_SU15": (356.0, 143.0, 90), "DZ15": (372.0, 149.0, 270),
+    "R22": (385.0, 143.0, 90),   # HW-017 damping link
 }
 TEXT = {
     "J1": (-7.62, 26.0, "left"), "TVS1": (-3.81, -5.5, "left"), "U6": (6.0, 8.0, "left"),
     "U1": (-7.62, 20.5, "left"), "U5": (-5.08, 19.5, "left"), "U7": (-7.62, 17.0, "left"),
     "U8": (-7.62, 15.0, "left"), "U9": (-22.86, -40.0, "left"),
-    "U2": (3.81, 7.62, "left"), "U13": (7.62, -6.35, "left"), "U3": (3.81, 8.89, "left"),
+    "U2": (3.81, 7.62, "left"), "U3": (3.81, 8.89, "left"),
     "U4": (3.81, 8.89, "left"), "U10": (3.81, 8.89, "left"), "U11": (3.81, 8.89, "left"),
     "U14": (-6.35, -8.89, "right"), "U15": (-6.35, -8.89, "right"),
-    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"), "R20": (-2.54, 2.54, "left"),
+    "R_ILIM2": (-2.54, -5.08, "left"), "R_ILIM3": (-2.54, -5.08, "left"),
     "R_ILIM1": (-2.54, -1.27, "right"),
     "R12": (-3.81, -4.5, "left"), "TVS2": (2.54, 3.0, "left"), "SW1": (-5.08, -7.5, "left"),
-    "R10": (-3.81, -4.5, "left"), "R13": (-2.54, -1.27, "right"),
+    "R10": (-3.81, -4.5, "left"),
 }
 DNP = {"C4", "C32"}
 HIDE_VALUE = {f"D{i}" for i in range(1, 17)} | {f"C{7 + i}" for i in range(1, 17)}
 for i in range(1, 17):
     TEXT[f"D{i}"] = (2.54, -10.5, "left")
     TEXT[f"C{7 + i}"] = (-1.9, -1.27, "right")
-for i in range(1, 7):
+for i in range(1, 8):
     TEXT[f"TP{i}"] = (1.5, 1.0, "left")
 for i in (5, 6):
     TEXT[f"TP{i}"] = (-2.5, -1.0, "right")
@@ -262,11 +274,12 @@ class Full(L.Sheet):
             for p in self.syms[-1].properties:
                 if p.key in ("Reference", "Value"):
                     p.position.angle = (-rot) % 360
-        if ref in DNP:                  # HW-016: spare footprints, not fitted
+        if ref in DNP:                  # HW-016: spare footprints, not fitted and not in the BOM (DRC parity with the P1 footprint)
             self.syms[-1].dnp = True
+            self.syms[-1].inBom = False
         sym = self.syms[-1]             # hidden BOM fields from the sourcing table (empty when the part has no recorded source)
         sym.properties.extend(w.prop(k, v, sym.position.X, sym.position.Y, 4 + n, True)
-                              for n, (k, v) in enumerate(sourcing_fields(PARTS[ref][3]).items()))
+                              for n, (k, v) in enumerate(sourcing_fields(PARTS[ref][3], PARTS[ref][2]).items()))
         if ref.startswith("TP"):        # bare test pads: the footprint is excluded from the BOM, so is the symbol
             self.syms[-1].inBom = False
         if ref in HIDE_VALUE:
@@ -375,7 +388,7 @@ def _build():
     # ------------------------------------------------------------ captions
     s.caption("USB-C input (HW-003)", 18, 12)
     s.caption("CC detection and gate (ADR-0016): OUT1_N low = 1.5 A or more advertised", gx(38.1), 27.0)
-    s.caption("Gate: step enable = select AND CC OK AND hold-off done; step 2 also AND NOT step 3 enable (U13)", gx(128.27), 20.0)
+    s.caption("Gate: step enable = select AND CC OK AND hold-off done; step 3 = both switches on (ADR-0023, ADR-0024)", gx(128.27), 20.0)
     s.caption("Hold-off after VBUS returns (HW-010: 200 to 600 ms)", gx(38.1), 111.76)
     s.caption("Current limit: TPS2553 (ADR-0010 option A); pins per SLVS841G", 262, 8)
     s.caption("3.3 V regulator (part not chosen)", 305, 78)
@@ -383,24 +396,24 @@ def _build():
     s.caption("TPS3840DL40 is a candidate, not chosen", gx(38.1), 164.0, 1.27)
     s.caption("ESP32-C3-MINI-1 module (box uses GPIO names, module pin numbers not drawn)", 15, 172)
     s.caption("Button (HW-007; GPIO5 is not a strapping pin)", 128, 172)
-    s.caption("GATE_OK_RB = HOLD_OK AND FAULT_N (ADR-0018 option E); 3.3 V gate, inputs accept 5 V", 128, 211)
+    s.caption("GATE_OK_RB = HOLD_OK AND FAULT_N (ADR-0018 option E, ADR-0024); 3.3 V gate, inputs accept 5 V", 128, 211)
     s.caption("OE tied to GND (symbol drawn pointing up)", 160.0, 249.5, 1.0)
     s.caption("LED data: 5 V buffer (HW-002)", 128, 246)
     s.caption("16 LEDs as a chain; the ring geometry is a PCB matter (HW-001)", 200, 172)
     s.caption("Rails (sources are in this sheet):", 18, 20, 1.27)
 
     # ------------------------------------------------------------ rails with power flags
-    for k, net in enumerate(("VBUS_IC", "+5V", "+3V3", "GND")):
+    for k, net in enumerate(("VBUS_IC", "+5V", "+3V3", "GND", "VBUS")):
         s.rail(net, 20, 28 + 7 * k)
 
     # ------------------------------------------------------------ USB-C
     for pin in ("A4", "B4", "A9", "B9"):
-        s.bind("VBUS_IC", "J1", pin)
+        s.bind("VBUS", "J1", pin)     # HW-017: connector side, R22 joins it to VBUS_IC
     vb = P("J1", "A4")
     s.wire(vb, (53.34, vb[1]))
-    s.pw("VBUS_IC", (48.26, vb[1]), True)
+    s.pw("VBUS", (48.26, vb[1]), True)
     s.junction(48.26, vb[1])
-    s.bind("VBUS_IC", "TVS1", 1)
+    s.bind("VBUS", "TVS1", 1)
     s.bind("GND", "TVS1", 2)
     s.pw("GND", ("TVS1", "2"), True)
     for pin in ("A1", "B1", "A12", "B12"):
@@ -410,10 +423,32 @@ def _build():
     s.nc(P("J1", "A8"))
     s.nc(P("J1", "B8"))
     s.caption("Shield to GND (shield network not drawn)", 14, 113, 1.27)
-    # CC lines straight to the CC IC, labelled
-    for jp, up, net in (("A5", "CC1", "CC1"), ("B5", "CC2", "CC2")):
-        s.ends(net, ("J1", jp), ("U1", up))
-        s.label(net, 70, P("J1", jp)[1])
+    # CC lines (owner decision 4 of 2026-11-22, P3, ADR-0024): bidirectional ESD diode on the connector side, 100 ohm in series
+    # to the CC IC. The two lines are 2.54 mm apart: the series resistors are staggered, the diodes sit above and below.
+    for jp, up, net, ic_net, rs, tv, rx, tdy, rot_tv, gnd_up in (
+            ("A5", "CC1", "CC1", "CC1_IC", "R24", "TVS3", 74.93, -7.62, 90, True),
+            ("B5", "CC2", "CC2", "CC2_IC", "R25", "TVS4", 85.09, 7.62, 90, False)):
+        y = P("J1", jp)[1]
+        PLACE[rs] = (rx, y, 90)
+        s.put(rs)
+        near, far = sorted(("1", "2"), key=lambda k: P(rs, k)[0])
+        s.bind(net, rs, near)
+        s.bind(ic_net, rs, far)
+        s.wire(P("J1", jp), P(rs, near))
+        s.bind(net, "J1", jp)
+        s.wire(P(rs, far), P("U1", up))
+        s.bind(ic_net, "U1", up)
+        PLACE[tv] = (66.04, y + tdy, rot_tv)
+        s.put(tv)
+        top, bottom = sorted(("1", "2"), key=lambda k: P(tv, k)[1])
+        wire_pin, gnd_pin = (bottom, top) if gnd_up else (top, bottom)
+        s.bind(net, tv, wire_pin)
+        s.bind("GND", tv, gnd_pin)
+        s.wire(P(tv, wire_pin), (P(tv, wire_pin)[0], y))
+        s.junction(P(tv, wire_pin)[0], y)
+        s.pw("GND", (tv, gnd_pin), True, 180 if gnd_up else 0)
+        s.label(net, 58.42, y)
+        s.label(ic_net, P(rs, far)[0] + 1.27, y)
     # data lines: tie both receptacle pins, then to the ESD part
     for pins, net, up, tx in ((("A7", "B7"), "USB_DN_RAW", "1", 55.4), (("A6", "B6"), "USB_DP_RAW", "3", 50.32)):
         a, b = P("J1", pins[0]), P("J1", pins[1])
@@ -430,7 +465,7 @@ def _build():
     ydp = P("J1", "B6")[1]
     s.wire((50.32, ydn), (55.4, ydn), (55.4, P("U6", "1")[1]), P("U6", "1"))
     s.wire((50.32, ydp), (50.32, P("U6", "3")[1]), P("U6", "3"))
-    s.pw("VBUS_IC", ("U6", "5"), True)
+    s.pw("VBUS", ("U6", "5"), True)
     s.pw("GND", ("U6", "2"), True)
     s.stub("USB_DN", ("U6", "6"), 6.6, 0, 0)
     s.stub("USB_DP", ("U6", "4"), 6.6, 0, 0)
@@ -445,7 +480,7 @@ def _build():
     s.pw("VBUS_IC", ("R21", "1"))
     o1 = P("U1", "7")
     s.ends("CC_OUT1_N", ("U1", "7"), ("U2", "2"))
-    s.label("CC_OUT1_N", *P("U2", "2"), 180)   # the same net also feeds U13 (exclusive steps)
+    s.label("CC_OUT1_N", *P("U2", "2"), 180)
     s.pw("VBUS_IC", ("R1", "1"))
     s.bind("CC_OUT1_N", "R1", 2)
     s.j(("R1", "2"))
@@ -463,7 +498,7 @@ def _build():
     for g, rsel, ren, sw, rpd, cap, sel, en in (("U3", "R4", "R2", "U14", "R18", "C24", "SEL_STEP2_GPIO", "ILIM_STEP2_EN"),
                                                 ("U4", "R5", "R3", "U15", "R19", "C25", "SEL_STEP3_GPIO", "ILIM_STEP3_EN")):
         a, b, c, yo = P(g, 1), P(g, 3), P(g, 6), P(g, 4)
-        okn = "CC_OK_1A5" if g == "U4" else "CC_OK_NOT_S3"   # step 2 sees CC OK AND NOT step 3 enable
+        okn = "CC_OK_1A5"   # ADR-0023: step 3 = both switches on, so no exclusivity term (U13 removed)
         s.wire(a, (a[0] - 7.62, a[1]))
         s.bind(okn, g, 1)
         s.label(okn, a[0] - 7.62, a[1], 180)
@@ -502,8 +537,8 @@ def _build():
         s.bind("GND", sw, 2)
         s.pw("GND", (sw, "3"), True)
         s.wire(P(sw, 2), P(sw, 3))
-    # step 2: switch - 56.2 k - ILIM; step 3: switch - 301 ohm - 27.4 k - ILIM (decision (b))
-    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R20", "R_ILIM3"), "ILIM_D_U15")):
+    # step 2: switch - 56.2 k - ILIM; step 3: switch - 27.7 k - ILIM (plan 08 trim T1; was 301 ohm + 27.4 k)
+    for sw, chain, tag in (("U14", ("R_ILIM2",), "ILIM_D_U14"), ("U15", ("R_ILIM3",), "ILIM_D_U15")):
         prev, prev_pin = P(sw, 1), (sw, 1)
         for k, rl in enumerate(chain):
             (lo_pin, lo), (hi_pin, hi) = sorted((("1", P(rl, 1)), ("2", P(rl, 2))), key=lambda e: e[1][0])
@@ -514,14 +549,6 @@ def _build():
             prev, prev_pin = hi, (rl, hi_pin)
         s.bind("ILIM", *prev_pin)
         s.wire(prev, (BUSX_FULL, prev[1]))
-    # exclusive steps (owner decision 2026-11-05): U13 = NOR(CC_OUT1_N, ILIM_STEP3_EN) = CC OK AND NOT step 3
-    # enable; it replaces CC OK on the step 2 AND, so step 3 on forces step 2 off. Unpowered -> low -> step 2 off.
-    a, b, y = P("U13", 1), P("U13", 2), P("U13", 4)
-    s.stub("CC_OUT1_N", ("U13", 1), -5.08, 0, 180)
-    s.stub("ILIM_STEP3_EN", ("U13", 2), -5.08, 0, 180)
-    s.stub("CC_OK_NOT_S3", ("U13", 4), 5.08, 0, 0)
-    s.pw("+3V3", ("U13", "5"), True)
-    s.pw("GND", ("U13", "3"), True)
     # ILIM bus: both switched resistor chains meet on a vertical bus that runs up to the TPS2553 ILIM pin
     y2, y3 = P("R_ILIM2", 1)[1], P("R_ILIM3", 1)[1]
     il = P("U7", "5")
@@ -534,30 +561,35 @@ def _build():
     s.junction(BUSX_FULL, il[1])
     s.pw("GND", ("R_ILIM1", "2"), True, 180)
 
-    # ------------------------------------------------------------ hold-off supervisor
-    s.pw("VBUS_IC", ("U5", "2"), True)
-    s.pw("GND", ("U5", "3"))
-    s.nc(P("U5", "4"))
+    # ------------------------------------------------------------ hold-off supervisor (ADR-0025 option B)
+    s.stub("VDD_U1", ("U5", "6"), 0, -5.08, 90)   # VDD from the protected TUSB321 supply node (6 V pin, ADR-0021)
+    s.pw("GND", ("U5", "2"))
+    s.nc(P("U5", "3"))                            # MR: 90 kohm pull-up to VDD inside the part, left open
     rs = P("U5", "1")
-    s.bind("HOLD_OK", "U5", 1)
+    s.bind("HOLD_OK", "U5", 1)   # open drain, pull-up R6 to VDD_U1 (ADR-0024 structure, ADR-0025 supply node)
     s.wire(rs, (gx(101.6), rs[1]))
     s.bind("HOLD_OK", "R6", 2)
     s.junction(*P("R6", "2"))
-    s.pw("VBUS_IC", ("R6", "1"))
+    s.stub("VDD_U1", ("R6", "1"), 0, -5.08, 90)
+    s.stub("VDD_U1", ("C33", "1"), 0, -5.08, 90)   # 100 nF at the supply pin of U5 (placement rule: close to U5)
+    s.pw("GND", ("C33", "2"), True)
     s.label("HOLD_OK", gx(101.6), rs[1])
-    ct = P("U5", "5")
-    s.bind("SUP_CT", "U5", 5)
+    ct = P("U5", "4")
+    s.bind("SUP_CT", "U5", 4)
     s.bind("SUP_CT", "C1", 1)
     s.wire(ct, P("C1", 1))
-    s.bind("SUP_CT", "C27", 1)
-    for a_, b_ in (("C1", "C27"), ("C27", "C28"), ("C28", "C29"), ("C29", "C30"), ("C30", "C31")):   # parallel C0G set, one rail wire
-        s.bind("SUP_CT", b_, 1)
-        s.wire(P(a_, 1), P(b_, 1))
-    for r_ in ("C1", "C27", "C28", "C29", "C30"):
-        s.junction(*P(r_, 1))
+    s.junction(*P("C1", 1))
     s.label("SUP_CT", gx(68.58), ct[1])
-    for r_ in ("C1", "C27", "C28", "C29", "C30", "C31"):
-        s.pw("GND", (r_, "2"), True)
+    s.pw("GND", ("C1", "2"), True)
+    # SENSE divider: VBUS_IC - R26 (910 k) - SENSE - R27 (100 k) - GND; falling threshold 3.915 to 4.271 V, release up to 4.399 V
+    s.pw("VBUS_IC", ("R26", "1"), True)
+    s.ends("SUP_SENSE", ("R26", "2"), ("R27", "1"))
+    s.stub("SUP_SENSE", ("R27", "1"), 2.54, 0, 0)
+    s.j(("R27", "1"))
+    s.pw("GND", ("R27", "2"), True)
+    s.stub("SUP_SENSE", ("U5", "5"), -7.62, 0, 180)
+    s.stub("SUP_SENSE", ("C34", "1"), 0, -5.08, 90)   # 1 nF SENSE bypass (SBVS050N 7.3.1)
+    s.pw("GND", ("C34", "2"), True)
 
     # ------------------------------------------------------------ TPS2553 and 5 V output
     uin, uen = P("U7", "1"), P("U7", "3")
@@ -578,12 +610,16 @@ def _build():
     s.pw("+5V", ("C3", "1"), True)
     s.pw("GND", ("C3", "2"), True)
     fl = P("U7", "4")
-    s.bind("FAULT_N", "U7", 4)
+    s.bind("FAULT_N", "U7", 4)   # open drain FAULT, own net again (ADR-0024); read through U10 on GPIO6
     s.wire(fl, (372.0, fl[1]))
     s.label("FAULT_N", 372.0, fl[1])
     s.bind("FAULT_N", "R8", 2)
     s.junction(*P("R8", "2"))
     s.pw("+3V3", ("R8", "1"))
+    s.wire((372.0, fl[1]), (379.62, fl[1]))     # test pad for FAULT_N (ADR-0018 condition 1, HW-006)
+    PLACE["TP7"] = (379.62, fl[1], 0)
+    s.put("TP7")
+    s.bind("FAULT_N", "TP7", 1)
 
     # ------------------------------------------------------------ 3.3 V regulator
     rin = P("U8", "1")
@@ -618,11 +654,23 @@ def _build():
     # ------------------------------------------------------------ MCU
     s.pw("+3V3", ("U9", "3V3"))
     s.pw("GND", ("U9", "GND"))
-    for pin, net in (("GPIO0", "CC_OK_1A5"), ("GPIO3", "SEL_STEP2_GPIO"),
+    for pin, net in (("GPIO3", "SEL_STEP2_GPIO"),
                      ("GPIO10", "SEL_STEP3_GPIO"), ("GPIO5", "BUTTON"),
                      ("GPIO6", "GATE_OK_RB"), ("GPIO7", "LED_DATA")):
         s.stub(net, ("U9", pin), 5.08, 0, 0)
-    s.nc(P("U9", "GPIO4"))   # reserved for the orientation sensor (HW-011); FAULT_N is read through U10
+    # GPIO0 reads CC_OK_1A5 through R23 (owner decision 2 of 2026-11-22, ADR-0024): a GPIO0 driven high cannot hold the gate open
+    a = P("U9", "GPIO0")
+    s.bind("CC_OK_RB", "U9", "GPIO0")
+    PLACE["R23"] = (a[0] + 8.89, a[1], 90)
+    s.put("R23")
+    near, far = sorted(("1", "2"), key=lambda k: P("R23", k)[0])
+    s.bind("CC_OK_RB", "R23", near)
+    s.wire(a, P("R23", near))
+    s.bind("CC_OK_1A5", "R23", far)
+    e = (P("R23", far)[0] + 5.08, a[1])
+    s.wire(P("R23", far), e)
+    s.label("CC_OK_1A5", e[0], e[1])
+    s.nc(P("U9", "GPIO4"))   # reserved for the orientation sensor (HW-011); FAULT_N is read through U10 on GPIO6
     s.nc(P("U9", "GPIO1"))   # was CC_OK_3A: OUT2 reading deleted (owner decision 2026-11-07)
     s.stub("USB_DN", ("U9", "GPIO18"), -5.08, 0, 180)
     s.stub("USB_DP", ("U9", "GPIO19"), -5.08, 0, 180)
@@ -684,9 +732,7 @@ def _build():
     s.bind("BUTTON", "R12", 1)
     s.wire((134.0, 190.0), P("R12", 1))
     s.label("BUTTON", 134.0, 190.0, 180)
-    s.bind("BUTTON", "R13", 2)
-    s.junction(148.0, 190.0)
-    s.pw("+3V3", ("R13", "1"))
+    s.junction(148.0, 190.0)   # ADR-0023: no external pull-up; the firmware enables the GPIO5 internal pull-up (HW-007)
     s.bind("BUTTON", "TVS2", 2)
     s.bind("GND", "TVS2", 1)
     s.pw("GND", ("TVS2", "1"), True)
@@ -699,7 +745,7 @@ def _build():
     s.pw("GND", (sw2[0] + 4.0, sw2[1]))
 
     # ------------------------------------------------------------ gate OK readback: AND of HOLD_OK and FAULT_N
-    # ADR-0018 option E: one input pin on GPIO6 reports "hold-off done AND no load-switch fault"
+    # ADR-0018 option E (restored by ADR-0024): one input pin on GPIO6 reports "hold-off done AND no load-switch fault"
     a1 = P("U10", 1)
     s.bind("FAULT_N", "U10", 1)
     s.wire(a1, (a1[0] - 6.0, a1[1]))
@@ -722,13 +768,18 @@ def _build():
         s.pw("VBUS_IC", (rs, "1"), True)
         away = _away(s, rs, "2", "1")
         s.stub(vnet, (rs, "2"), *away, 0)
-        s.pw("GND", (dz, "1"), True)
-        e = s.stub(vnet, (dz, "3"), 0, -5.08, 90)
+        s.pw("GND", (dz, "2"), True)          # anode (D_Zener pin 2)
+        e = s.stub(vnet, (dz, "1"), 0, -5.08, 90)   # cathode (D_Zener pin 1)
         s.flags += 1
         s.flag(e[0], e[1], s.flags)   # the resistor is passive: the node needs a power flag
         if cap:
             s.stub(vnet, (cap, "1"), 0, -5.08, 90)
             s.pw("GND", (cap, "2"), True)
+
+    # ------------------------------------------------------------ HW-017 damping link (plan 08)
+    s.caption("HW-017: 0 ohm link, VBUS (connector, TVS1, U6) to VBUS_IC", 380, 132, 1.27)
+    s.pw("VBUS", ("R22", "1"), False)
+    s.pw("VBUS_IC", ("R22", "2"), False, 180)
 
     # ------------------------------------------------------------ LED data buffer
     a = P("U11", 2)

@@ -16,6 +16,7 @@ import sys
 import pcbnew
 
 import pcb_full as P
+import pcb_rules
 
 
 def expected_pad_nets(comps, nets):
@@ -53,10 +54,6 @@ def compare(netlist, pcb):
     return out, b
 
 
-SEG = re.compile(r'\(segment\s+\(start ([-\d.]+) ([-\d.]+)\)\s+\(end ([-\d.]+) ([-\d.]+)\)\s+\(width ([\d.]+)\)\s+'
-                 r'\(layer "([^"]+)"\)\s+\(net "([^"]*)"\)')
-
-
 def layout_rules(pcb_path):
     """Measurements of the layout rules from the earlier reports (report them; do not claim compliance).
     Tracks are read from the board text because the SWIG track iterator is broken in this Python."""
@@ -64,11 +61,10 @@ def layout_rules(pcb_path):
     res = {}
     lens = collections.defaultdict(float)
     widths = collections.defaultdict(list)
-    for m in SEG.finditer(text):
-        x0, y0, x1, y1, w = (float(m.group(i)) for i in range(1, 6))
+    for x0, y0, x1, y1, w, _layer, net in pcb_rules.read_segments(text):     # locked tracks too (batch p1b5)
         l = math.hypot(x1 - x0, y1 - y0)
-        lens[m.group(7)] += l
-        widths[m.group(7)].append((w, l))
+        lens[net] += l
+        widths[net].append((w, l))
     res["track_length_mm"] = {k: round(v, 1) for k, v in sorted(lens.items())}
     res["via_count"] = len(re.findall(r"\(via\b", text))
     for name in ("VBUS_IC", "+5V", "+3V3"):

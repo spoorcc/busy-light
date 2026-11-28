@@ -3,7 +3,7 @@
 
 Usage: python3 pcb_pick.py <out dir> <run dir> [<run dir> ...]
 Each run dir holds a/final.kicad_pcb and a/drc_final.json (written by run_pcb.sh). The score of a run is
-(unconnected items, FAIL lines of the strict gate, hard findings, power nets over target, then the tidiness key of pcb_quality.py); the lowest wins, the first listed run on a tie. The files of the
+(unconnected items, FAIL lines of the strict gate, hard findings, placement-rule misses (RV-019 G6), power nets over target, then the tidiness key of pcb_quality.py); the lowest wins, the first listed run on a tie. The files of the
 winner are copied to <out dir>/best/ and a table of all runs is printed. Exit 0 when the winner has no unconnected item
 and no hard finding, else 1.
 """
@@ -34,10 +34,13 @@ def strict_fails(board: Path, profile: str = "stitched-4l") -> int:
 
 
 def power_fails_from(text: str) -> int:
-    """Number of power nets over their drop target in the output of pcb_power_check.py (an infinite drop counts); 99 when unreadable."""
+    """Number of power nets over their drop target in the output of pcb_power_check.py (an infinite drop counts), or whose
+    current needs a track narrower than the full-width rule (`full_width_path` false, batch p1b7), or whose main path has a track narrower than
+    the net's width (`nominal_width_path` false, VBUS and VBUS_IC, plan 08 R4 (e)); 99 when unreadable."""
     try:
         d = json.loads(text[text.index("{"):text.rindex("}") + 1])
-        return sum(1 for v in d["nets"].values() if not v["within_50mv"])
+        return sum(1 for v in d["nets"].values()
+                   if not v["within_50mv"] or v.get("full_width_path") is False or v.get("nominal_width_path") is False)
     except (ValueError, KeyError, TypeError):
         return 99
 
@@ -53,13 +56,32 @@ def power_fails(board: Path) -> int:
     return n
 
 
-def pick(runs: list[Path], gate=None, tidy=None, power=None) -> tuple[Path | None, list[tuple[Path, tuple[int, int, int] | None]]]:
+def layout_misses(board: Path) -> int:
+    """Placement rules missed or not measurable on one board (pcb_layout_check.py): a routed board that breaks a rule must not beat one
+    that meets it (RV-019 G6: the picker ignored the rules, and run_pcb.sh routes a placement that missed them); 99 when unreadable."""
+    import subprocess
+    import tempfile
+    with tempfile.TemporaryDirectory() as t:
+        js = Path(t) / "rules.json"
+        subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "pcb_layout_check.py"), str(board), "--json", str(js)],
+                       capture_output=True, text=True, check=False)
+        try:
+            d = json.loads(js.read_text(encoding="utf-8"))
+            return int(d["missed"]) + int(d["missing"])
+        except (OSError, ValueError, KeyError):
+            print("placement rules not measured for %s" % board, file=sys.stderr)
+            return 99
+
+
+def pick(runs: list[Path], gate=None, tidy=None, power=None, layout=None) -> tuple[Path | None, list[tuple[Path, tuple[int, int, int] | None]]]:
     rows = []
     for r in runs:
         f = r / "a" / "drc_final.json"
         sc = score(json.loads(f.read_text(encoding="utf-8"))) if f.exists() and (r / "a" / "final.kicad_pcb").exists() else None
         if sc is not None and gate is not None:                  # the strict gate decides between runs with the same open items
             sc = (sc[0], gate(r / "a" / "final.kicad_pcb"), sc[1])
+        if sc is not None and layout is not None:                # a missed placement rule ranks after the gate and before the power nets
+            sc = sc + (layout(r / "a" / "final.kicad_pcb"),)
         if sc is not None and power is not None:                 # a net over the drop target or without a path ranks after the gate
             sc = sc + (power(r / "a" / "final.kicad_pcb"),)
         if sc is not None and tidy is not None:                  # tidiness (pcb_quality.rank_key) breaks the remaining ties
@@ -81,9 +103,9 @@ def tidiness(board: Path) -> tuple:
 
 def main(argv: list[str]) -> int:
     out, runs = Path(argv[1]), [Path(a) for a in argv[2:]]
-    best, rows = pick(runs, gate=strict_fails, tidy=tidiness, power=power_fails)
+    best, rows = pick(runs, gate=strict_fails, tidy=tidiness, power=power_fails, layout=layout_misses)
     for r, s in rows:
-        print("%-40s %s" % (r.name, "no result" if s is None else "unconnected %d, strict FAIL %d, hard %d, power FAIL %d" % s[:4] + (", tidy %s" % (s[4:],) if len(s) > 4 else "")))
+        print("%-40s %s" % (r.name, "no result" if s is None else "unconnected %d, strict FAIL %d, hard %d, rule misses %d, power FAIL %d" % s[:5] + (", tidy %s" % (s[5:],) if len(s) > 5 else "")))
     if best is None:
         print("no run finished")
         return 1
@@ -99,8 +121,9 @@ def main(argv: list[str]) -> int:
     for d in (best / "a").glob("*.pretty"):
         shutil.copytree(d, dst / d.name)
     (dst / "chosen_run.txt").write_text(best.name + "\n", encoding="utf-8")
+    (dst / "chosen_path.txt").write_text(str(best) + "\n", encoding="utf-8")        # the run folder as given: batches reuse run1 to run4
     s = dict(rows)[best]
-    print("best:", best.name, "->", dst)
+    print("best:", best, "->", dst)
     return 0 if s[0] == 0 and s[1] == 0 and s[2] == 0 else 1
 
 

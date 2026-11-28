@@ -1,6 +1,7 @@
 # ADR-0018: FAULT_N input of the current limiter and the pins of the orientation sensor
 
 - **Status:** Accepted (by the owner, Ben Spoor, 2026-11-07, in the working session; option E, the AND gate, proposed by the owner's question and written up by the assistant; recorded by the assistant). Open conditions: the AND gate part and its 5 V input tolerance are not read; the SW-009, HW-010 and TC text amendments are Proposed until the owner approves them.
+- **Restored by:** ADR-0024 (2026-11-22, Proposed): ADR-0023 decision 2 had replaced option E by a wired node; ADR-0024 brings option E back (U10, R6, R8) and applies condition (1) with a FAULT_N test pad (TP7).
 - **Date:** 2026-11-07
 - **Deciders / reviewers:** Ben Spoor (owner); goldfish review RV-011 (findings 1 and 15) raised the open points
 - **Related:** SYS-020, SYS-047, HW-010, HW-011, SW-009, ADR-0010, ADR-0016, RV-010, RV-011, RISK-029

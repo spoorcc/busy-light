@@ -486,7 +486,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Effect:** An IC output glitch before its first debounce (RISK-042) can switch on the high current step for a source that advertises the default current
 - **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
 - **Mitigated by:** HW-010 (hold-off at least [200] ms, at most [600] ms), SW-005 (firmware waits for equal reads), `docs/verification/reports/datasheet-evidence-supervisor.md` on branch `spike/hw-gate` (candidate part TPS3840DL40; C0G or film capacitor at 5 % or better is needed for a 200 to 600 ms window)
-- **Residual risk (after mitigation):** Not assessed. Part not chosen (owner decision). Dip restart is not guaranteed by the datasheets and needs a bench or simulation check; a stuck-high output is a single fault that removes the hold-off, not covered by the gate itself; with the CC IC output pulled up to VBUS_IC, a supervisor stuck high is the only barrier left when VBUS is gone and 3V3 is still up (goldfish v3a H1); a dip to 4.1 to 4.4 V (between the supervisor threshold and the 4.5 V of the CC IC) gives no restart; faults of C1, R6 and the inverter are silent; the firmware cannot see the gate state (SW-009, Draft)
+- **Residual risk (after mitigation):** Not assessed. Part not chosen (owner decision). Dip restart is not guaranteed by the datasheets and needs a bench or simulation check; a stuck-high output is a single fault that removes the hold-off, not covered by the gate itself; with the CC IC output pulled up to VBUS_IC, a supervisor stuck high is the only barrier left when VBUS is gone and 3V3 is still up (goldfish v3a H1); a dip to 4.1 to 4.4 V (between the supervisor threshold and the 4.5 V of the CC IC) gives no restart; faults of C1, R6 and the inverter are silent; the firmware cannot see the gate state (SW-009, Draft). Update 2026-11-22 (RV-016 row 8): after ADR-0023 the inverter and R6 are gone (R8 10 kohm to 3V3 pulls the node up); a supervisor that is missing or not soldered now leaves the gate open (RISK-047)
 - **Verified by:** TC-210 (dip and repeated plug-in), TC-203
 - **Status:** Open
 
@@ -512,3 +512,90 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Verified by:** TC-217
 - **Status:** Open
 
+### RISK-047 Gate fails open when the hold-off supervisor U5 is missing or not soldered (P1)
+
+- **Hazard / failure mode:** The HW-010 hold-off is lost without a visible symptom: U5 is not fitted (no LCSC or JLCPCB listing), its RESET joint is open, or a push-pull variant replaces it
+- **Cause:** ADR-0023 wires the TPS3840 RESET and the TPS2553 FAULT on one node with one pull-up (R8, 10 kohm to 3V3); without U5 the pull-up holds the node "OK"
+- **Effect:** A source that advertises the default current can be loaded above its limit at plug-in (RISK-042, RISK-044)
+- **Severity (1-5):** 4  **Likelihood (1-5):** 3  **Initial risk:** 12
+- **Mitigated by:** HW-010 (hold-off), `scripts/fab_check.py` MUST_PLACE (an order package without U5 fails unless the owner waives it, 2026-11-22), RV-016 row 1, RV-017 rows 2 and 15 (open-drain output required)
+- **Residual risk (after mitigation):** Not assessed. A hand-fitted U5 or an open joint is not checked by any test; a firmware plausibility check (GATE_OK_RB high much earlier than the hold-off) is proposed, not written
+- **Verified by:** TC-210 (to extend), bring-up inspection O7 (to rewrite)
+- **Status:** Open
+
+### RISK-048 Firmware holds the current-limit gate open through GPIO6 (P1)
+
+- **Hazard / failure mode:** GPIO6 configured as an output and driven high overrides the open-drain RESET and FAULT on GATE_OK_RB, so neither the hold-off nor a limiter fault closes the gate; both outputs are overstressed
+- **Cause:** ADR-0023 put GPIO6 directly on the gate node (no series resistor); no requirement keeps GPIO6 (or GPIO0 on CC_OK_1A5) an input
+- **Effect:** The hardware independence of the gate from the firmware (ADR-0016) is lost for a pin-control bug or a stray register write
+- **Severity (1-5):** 4  **Likelihood (1-5):** 2  **Initial risk:** 8
+- **Mitigated by:** ADR-0024 (Proposed; schematic drawn, board not yet re-placed): GPIO6 behind the AND gate U10, GPIO0 behind R23 (10 kohm), both off the gate input nets (`tests/test_gate_logic_full.py`); SW-009 proposal: GPIO0 and GPIO6 inputs only, register test
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-210 rows "GPIO6 and GPIO0 driven high" (to add)
+- **Status:** Open
+
+### RISK-049 Gate node reads "OK" with VBUS gone and 3V3 up (P1)
+
+- **Hazard / failure mode:** With VBUS_IC below the TPS3840 VPOR and 3V3 still up, RESET is undefined and FAULT unpowered; R8 to 3V3 pulls GATE_OK_RB high while CC_OK_1A5 reads high, so the SW-009 rule "CC_OK valid only while GATE_OK_RB is high" does not hold
+- **Cause:** ADR-0023 moved the pull-up from VBUS_IC (150 kohm) to 3V3 (10 kohm) against the rule derived in `datasheet-evidence-supervisor.md` (at least 134 kohm to VBUS for a valid low near VPOR)
+- **Effect:** The firmware may select a higher step while the source is unknown (warm re-plug, bench feed on TP1, a slowly discharging source)
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** ADR-0024 (Proposed; schematic drawn, board not yet re-placed): R6 150 kohm pull-up on VBUS_IC again, so HOLD_OK is low with VBUS gone (`test_gate_logic_full.py`, `sim/gate_rework_levels.py`: 2.04 V high level at 4.3 V); SW-009 rule on CC_OK
+- **Residual risk (after mitigation):** Not assessed. The TPS2553 UVLO minimum is not in the evidence
+- **Verified by:** TC-210 row "+5V on TP1 only, VBUS_IC below 1 V" (to add)
+- **Status:** Open
+
+### RISK-050 Reset loop under a persistent overload after ADR-0023
+
+- **Hazard / failure mode:** A limiter fault closes the gate (step 1) under full load; +5V collapses and the MCU browns out; the reset is not counted because the gate flag is set (`gate.c`), so the firmware raises the step again after the start-up and the overload repeats; with the overload still present the gate latches at step 1 with +5V collapsed, the LED driver may be below its 4.5 V minimum and the TPS2553 cycles in thermal shutdown
+- **Cause:** ADR-0023 decision 2 (FAULT closes the gate) together with the SW-007 counting rule; no analysis of the trip sequence
+- **Effect:** SYS-020 (Approved) "At a constant advertised value and a constant load the device does not reset" not met; repeated thermal stress of the TPS2553
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** ADR-0024 (Proposed): a limiter fault no longer closes the gate (FAULT_N goes to U10 only), so no hardware fall to step 1 and no reset loop from it; the TPS2553 trip behaviour at a persistent overload is still not simulated (TC-107, TC-210 case)
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-107 and TC-210 case "persistent overload at step 2" (to add)
+- **Status:** Open
+
+### RISK-051 Solder defects at the 0.4 mm-pitch TUSB321 (U1) with HASL finish (P1)
+
+- **Hazard / failure mode:** Bridges or opens at the X2QFN-12 of U1 on a HASL lead-free board; with the CC IC wrong the gate input CC_OK is wrong or floating
+- **Cause:** Owner answer 10 (HASL lead-free); uneven HASL surface on fine pitch; one top fiducial, none near U1
+- **Effect:** A board that does not detect the source current, or a CC_OK stuck high (gate independence lost, RV-017 row 13)
+- **Severity (1-5):** 3  **Likelihood (1-5):** 3  **Initial risk:** 9
+- **Mitigated by:** ENIG as the order-time fallback (plan 08 R2); visual and X-ray inspection at bring-up (to add to O7, TC-208)
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-208, bring-up O7
+- **Status:** Open
+
+### RISK-052 Damping link R22 above the HW-017 resistance or not placed (P1)
+
+- **Hazard / failure mode:** The 0 ohm link R22 in the only path from VBUS to VBUS_IC has more resistance than HW-017's [10] mohm (the candidate: up to 20 mohm), or JLCPCB does not place it (no LCSC number)
+- **Cause:** No 1206 jumper with a recorded part meets [10] mohm; the drop J1 to U7 is 68.0 mV in copper plus up to 30 mV in the jumper at 1.5 A, and no tool checks the sum (RV-016 row 14)
+- **Effect:** A lower VBUS_IC at step 3 (towards the TPS3840 threshold and the TUSB321 4.5 V minimum); without R22 the board has no power
+- **Severity (1-5):** 2  **Likelihood (1-5):** 3  **Initial risk:** 6
+- **Mitigated by:** HW-017 (resistance criterion and the 100 mV J1 to U7 budget, owner 2026-11-22), part chosen 2026-11-22 (TA-I Tech RLM12FTCMR005 5 mohm, LCSC C316225, 125,869 at JLCPCB; worst case 5.14 mohm; `hw/evidence/parts/rlm12.yaml`; the owner confirms), `fab_check.py` MUST_PLACE (R22)
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-217, power check
+- **Status:** Open
+
+### RISK-053 Parts not available or not recommended at order time (P1)
+
+- **Hazard / failure mode:** A BOM line cannot be placed: 21 of 32 part types are extended or of unknown JLCPCB class (reviewer count, RV-016 row 35); TUSB321 and C19702 are marked "not recommended for new designs" by LCSC; the 887 k, 10 uF 25 V and J1 listings showed 0 stock; U5 and R22 have no LCSC number
+- **Cause:** Parts chosen from datasheets and library mirrors, stock not read at order time (jlcpcb.com not reachable from the work container)
+- **Effect:** A higher price than the EUR 100 budget, a hand-fit, or a part swap that needs a re-route (and an ADR for gate parts)
+- **Severity (1-5):** 2  **Likelihood (1-5):** 4  **Initial risk:** 8
+- **Mitigated by:** order step O2 (the owner checks every BOM line, TC-208), `scripts/fab_missing_lcsc.txt`, `fab_check.py` (HW-008). 2026-11-22 (jlcpcb.com and lcsc.com readable from the work container): the FH ILIM resistors C667109 and C667119 had 0 stock (the BOM now names the Yageo RT parts of the approved HW-010 table, C326725 and C705784, `analysis-ilim-drift.md`); R22 has a part (C316225); U5 has no listing, replacement proposed in ADR-0025
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-208 step 6, order step O2
+- **Status:** Open
+
+### RISK-054 Light edges of the split ring are not sharp (ADR-0027)
+
+- **Hazard / failure mode:** The four arc ends of the split ring look soft, faded or leaky: light through the printed walls, a dim end (50 % at an absorbing wall), light at the seam between insert and cap, or light guided sideways under a translucent plate
+- **Cause:** FDM walls of [1.2] mm are not opaque (optical density not measured), a printed white face reflects less than the ideal mirror of the model, the seam tolerance is 0.30 mm, the printer and filaments are not known
+- **Effect:** The look is not Apple grade (plan 09 D8) and the owner's request of 2026-11-28 is not met
+- **Severity (1-5):** 2  **Likelihood (1-5):** 3  **Initial risk:** 6
+- **Mitigated by:** MECH-015 and TC-317 (coupons before the lid), the white wall faces and the per-LED gain table of ADR-0027, fallbacks C and D on the same board
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-317
+- **Status:** Open

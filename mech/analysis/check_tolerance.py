@@ -9,6 +9,7 @@ Exit code 1 when a check fails.
 
 import math
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -94,6 +95,62 @@ def hooks() -> dict[str, float]:
     """Snap hooks: board edge to hook lip, and the wall left outside the hook."""
     r_in = (p.D_OUT - 2 * p.WALL) / 2
     return {"lip_vs_gap": pcb_gap()["wc"] - p.HOOK_LIP, "r_in": r_in}
+
+
+# Centre button chains (plan 09 section 3.4). Informational: run() does not call them and they are
+# not a CI gate until step 2 approves the numbers. Every value is a plus-minus half-width in mm.
+# Datum of the vertical chain: the PCB top (Z 6.6) up to the contact plane of the plunger on the
+# switch actuator; each term is taken in its unfavourable direction.
+BUTTON_VERTICAL_KEYS = (
+    "pcb_post",
+    "lid_ledge",
+    "lid_plate",
+    "disc_plunger",
+    "switch_height",
+    "switch_actuation",
+)
+BUTTON_VERTICAL = {
+    "pcb_post": p.TOL_FDM_FINE + p.TOL_PCB_T,  # post seat plus board thickness
+    "lid_ledge": p.TOL_FDM,  # lid ledge height
+    "lid_plate": p.TOL_FDM_FINE,  # lid plate and band thickness
+    "disc_plunger": p.TOL_FDM_FINE,  # plunger length under the disc
+    "switch_height": 0.15,  # ASSUMPTION: no datasheet gives it
+    "switch_actuation": 0.20,  # click point spread, the larger side of the B3U +0.2/-0.1 mm
+}
+# Lateral chain: where the plunger tip lands relative to the switch actuator.
+BUTTON_LATERAL_KEYS = ("pcb_wall_gap", "spigot_play", "tilt_walk", "plunger_tip")
+BUTTON_LATERAL = {
+    "pcb_wall_gap": (p.D_OUT - 2 * p.WALL - p.D_PCB) / 2.0,  # nominal radial gap, board to one side
+    "spigot_play": p.SPIGOT_CLEAR + p.TOL_FDM,  # lid spigot play
+    "tilt_walk": 0.20,  # ASSUMPTION: disc tilt of 0.1 rad over a 2 mm plunger length
+    "plunger_tip": p.TOL_PLACE,  # plunger tip placement on the disc underside
+}
+
+
+def _chain(tolerances: Mapping[str, float], keys: tuple[str, ...]) -> dict[str, float]:
+    vals = [tolerances[k] for k in keys]
+    return {"wc": sum(vals), "rss": rss(vals)}
+
+
+def button_vertical_chain(tolerances: Mapping[str, float]) -> dict[str, float]:
+    """Worst case (sum) and RSS of the six vertical terms, mm plus-minus."""
+    return _chain(tolerances, BUTTON_VERTICAL_KEYS)
+
+
+def button_lateral_chain(tolerances: Mapping[str, float]) -> dict[str, float]:
+    """Worst case (sum) and RSS of the four lateral terms, mm plus-minus."""
+    return _chain(tolerances, BUTTON_LATERAL_KEYS)
+
+
+def recess_worst_case(nominal_recess_mm: float, tolerances: Mapping[str, float]) -> float:
+    """Disc top below the band top at the worst case (placeholder formula, see below).
+
+    Disc and band are one print, so the ledge height moves both and does not change the step between
+    them; only the plate thickness term (lid_plate) is taken as the independent spread of that step.
+    A negative value means the disc can stand proud of the band. The formula is an assumption
+    until a coupon measures the step.
+    """
+    return nominal_recess_mm - tolerances["lid_plate"]
 
 
 def run() -> tuple[list[str], list[str]]:

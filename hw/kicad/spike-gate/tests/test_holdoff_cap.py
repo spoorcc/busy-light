@@ -61,3 +61,23 @@ class HoldoffCap(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Tps3808Option(unittest.TestCase):
+    """ADR-0025 option B: TPS3808G01 with one 68 nF C0G 5 % on CT (SBVS050N section 6.6 and figure 7-2)."""
+
+    def test_ratios_from_the_180nf_row(self):
+        self.assertAlmostEqual(hc.TPS3808_RATIO[0], 0.6019, places=4)
+        self.assertAlmostEqual(hc.TPS3808_RATIO[1], 1.3981, places=4)
+
+    def test_68nf_fits_the_window(self):
+        a, b = hc.tps3808_window(68.0, 0.05)
+        self.assertAlmostEqual(a * 1e3, 221.8, delta=0.2)   # 5 % and 0.3 % C0G temperature term
+        self.assertAlmostEqual(b * 1e3, 572.7, delta=0.2)
+        self.assertGreater(a, hc.T_MIN)
+        self.assertLess(b, hc.T_MAX)
+
+    def test_neighbouring_values_do_not(self):
+        self.assertLess(hc.tps3808_window(56.0, 0.05)[0], hc.T_MIN)     # too short at the minimum
+        self.assertGreater(hc.tps3808_window(82.0, 0.05)[1], hc.T_MAX)  # too long at the maximum
+        self.assertGreater(hc.tps3808_window(100.0, 0.05)[1], hc.T_MAX)  # the 100 nF part on the BOM does not fit alone

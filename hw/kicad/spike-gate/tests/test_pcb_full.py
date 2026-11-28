@@ -41,6 +41,67 @@ class Rules(unittest.TestCase):
         self.assertGreaterEqual(pcb_rules.NET_WIDTH["+5V"], need)
 
 
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class RuleMisses(unittest.TestCase):
+    """RV-016 row 11: the placer keeps its best seed when no seed meets the rules; pcb_full records the misses."""
+    def test_a_miss_is_listed_with_its_distance(self):
+        st = {"C1": (0.0, 0.0, 0, "F"), "U5": (6.0, 8.0, 0, "F"), "R2": (0.0, 0.0, 0, "F"), "U14": (3.0, 0.0, 0, "F")}
+        self.assertEqual(pcb_full.rule_misses(st, (("C1", "U5", 8.0), ("R2", "U14", 6.0), ("X9", "U5", 1.0))),
+                         [["C1", "U5", 8.0, 10.0]])
+
+    def test_a_fixed_partner_counts_its_nearest_point(self):
+        st = {"TVS1": (5.0, 3.0, 0, "F")}
+        pts = ((0.0, 0.0), (20.0, 0.0))
+        self.assertEqual(pcb_full.rule_misses(st, (("TVS1", pts, 6.0),)), [])
+        self.assertEqual(pcb_full.rule_misses(st, (("TVS1", pts, 5.0),)), [["TVS1", "fixed", 5.0, 5.83]])
+
+    def test_input_path_rules_resolve_to_the_j1_vbus_pads(self):
+        """RV-016 row 12: the plan 08 input-path rules reach the placer; "J1:VBUS" becomes J1's VBUS pad points."""
+        nets = {"VBUS": [("J1", "A4"), ("J1", "B9"), ("TVS1", "1"), ("R22", "1")], "GND": [("J1", "A1")]}
+        fixed_pins = {("J1", "A4"): (1.0, 2.0), ("J1", "B9"): (3.0, 4.0), ("J1", "A1"): (9.0, 9.0)}
+        comps = {r: None for r in ("J1", "TVS1", "U6", "R22", "U7")}
+        rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, comps)
+        self.assertIn(("TVS1", ((1.0, 2.0), (3.0, 4.0)), 6.0), rules)
+        self.assertIn(("R22", "U7", 6.0), rules)
+        self.assertEqual(len(rules), 4)
+        self.assertEqual(pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, {"J1": None}), [])
+
+    def test_cc_protection_rules_resolve_to_the_j1_cc_pads(self):
+        """ADR-0024 (owner decision 4, P3): the CC ESD diodes sit within 6 mm of the connector pad of their line."""
+        nets = {"/CC1": [("J1", "A5"), ("TVS3", "1"), ("R24", "1")], "/CC2": [("J1", "B5"), ("TVS4", "1"), ("R25", "1")]}
+        fixed_pins = {("J1", "A5"): (1.0, 2.0), ("J1", "B5"): (1.0, 4.5)}
+        comps = {r: None for r in ("J1", "TVS3", "TVS4")}
+        rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed_pins, comps)
+        self.assertIn(("TVS3", ((1.0, 2.0),), 6.0), rules)
+        self.assertIn(("TVS4", ((1.0, 4.5),), 6.0), rules)
+        self.assertEqual(len(rules), 2)
+
+    def test_every_input_path_partner_net_exists_in_the_real_netlist(self):
+        """RV-019 G1: the CC rules named "J1:CC1" while the netlist net is "/CC1": the placer dropped TVS3 and TVS4 silently and
+        pcb_layout_check could not measure them (exit 2). Every "REF:NET" partner must name a net of the real netlist that
+        has a pad of REF."""
+        _, nets = pcb_full.read_netlist(NETLIST)
+        for a, b, _lim in pcb_full.INPUT_PATH_RULES:
+            if ":" not in b:
+                continue
+            ref, net = b.split(":", 1)
+            self.assertIn(net, nets, "%s: net %s is not in the netlist" % (a, net))
+            self.assertTrue([r for r, _ in nets[net] if r == ref], "%s has no pad on %s" % (ref, net))
+
+    def test_all_input_path_rules_resolve_on_the_real_netlist(self):
+        """Six rules (TVS1, U6, R22 to J1:VBUS, R22 to U7, TVS3, TVS4) must all reach the placer."""
+        comps, nets = pcb_full.read_netlist(NETLIST)
+        fixed = {(r, p): (1.0, 2.0) for r, p in sum((v for v in nets.values()), []) if r == "J1"}
+        rules = pcb_full.resolve_rules(pcb_full.INPUT_PATH_RULES, nets, fixed, comps)
+        self.assertEqual(len(rules), len(pcb_full.INPUT_PATH_RULES))
+
+    def test_hw016_rule_keeps_the_spare_pads_within_10_mm(self):
+        """7.0 mm part centres + 1.48 mm (U7 pad 6 from its origin) + 1.475 mm (1206 pad centre) <= 10 mm (HW-016)."""
+        lim = {(a, b): v for a, b, v in pcb_full.LAYOUT_RULES}
+        for ref in ("C4", "C32"):
+            self.assertLessEqual(lim[(ref, "U7")] + 1.48 + 1.475, 10.0)
+
+
 class PlacementWeights(unittest.TestCase):
     """The gate and bypass rules are enforced by weights in the annealer, not left to chance."""
 
@@ -49,7 +110,10 @@ class PlacementWeights(unittest.TestCase):
         bypass = {"tie:C24-U14", "tie:C25-U15"}
         regulator = {"tie:C5-U8", "tie:C6-U8"}              # TLV757P: input capacitor at pin 1, output capacitor at pin 5
         paths = {"tie:J1A4-U7", "tie:J1B9-U7", "tie:C2-U7", "tie:U8-U9"}      # current paths of the power check
-        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | regulator | paths)
+        spares = {"tie:C4-U7", "tie:C32-U7"}                                    # HW-016: spares at U7 pin 6
+        self.assertEqual(set(pcb_rules.PIN_TIES), bypass | regulator | paths | spares)
+        for name in spares:
+            self.assertEqual(pcb_rules.PIN_TIES[name][1], ("U7", "6"))
         for name, (a, b, w) in pcb_rules.PIN_TIES.items():
             if name in bypass:
                 self.assertEqual(b[1], "5")          # TMUX1101 pin 5 = VDD
@@ -87,11 +151,11 @@ class PlacementWeights(unittest.TestCase):
         ics = pcb_full.ic_families(comps, fixed)
         self.assertTrue(ics)
         self.assertTrue(all(r.startswith("U") for f in ics for r in f))
-        self.assertIn(("U14", "U15"), [f for f in ics if "U14" in f and len(f) == 2] or [()])
+        self.assertTrue(any({"U14", "U15"} <= set(f) for f in ics))     # same footprint family (U11 joins it in SC-70, ADR-0023)
         self.assertTrue(all(len({comps[r][1] for r in f}) == 1 for f in ics))
         row = pcb_full.test_point_row(comps, fixed)
         self.assertEqual(len(row), 1)
-        self.assertEqual(len(row[0]), 6)                      # TP1 to TP6
+        self.assertEqual(len(row[0]), 7)                      # TP1 to TP7 (TP7 = FAULT_N, ADR-0024)
         self.assertEqual(pcb_full.test_point_row({"TP1": ("", "")}), [])
 
     def test_strict_ic_rule_is_a_switch_and_ics_stay_in_the_soft_families_without_it(self):
@@ -132,11 +196,14 @@ class Board(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_netlist_facts(self):
-        self.assertEqual(len(self.comps), 100)
-        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 55)
-        for ref in ("U13", "C27", "C28", "C29", "C30", "C31", "U14", "U15", "R20", "R18", "R19", "C24", "C25", "R3", "R15"):
+        self.assertEqual(len(self.comps), 104)     # ADR-0024: +U10, R6, R23, R24, R25, TVS3, TVS4, TP7 (97 after ADR-0023); ADR-0025: -C27 to C31, +R26, R27, C33, C34
+        self.assertEqual(len([n for n in self.nets if not n.startswith("unconnected-")]), 58)
+        for ref in ("R26", "R27", "U14", "U15", "R22", "R18", "R19", "C24", "C25", "R3", "R15",
+                    "C32"):
             self.assertIn(ref, self.comps)
-        for ref in ("Q2", "Q3"):
+        for ref in ("U10", "R6", "R23", "R24", "R25", "TVS3", "TVS4", "TP7"):    # ADR-0024
+            self.assertIn(ref, self.comps)
+        for ref in ("Q2", "Q3", "R20", "U13", "R13"):
             self.assertNotIn(ref, self.comps)
 
     def test_board_matches_netlist(self):
@@ -145,7 +212,7 @@ class Board(unittest.TestCase):
         self.assertEqual(res["extra_refs"], [])
         self.assertEqual(res["pad_net_differences"], [])
         self.assertEqual(res["netlist_pins_without_pad"], [])
-        self.assertEqual(res["nets_named"], 55)
+        self.assertEqual(res["nets_named"], 58)        # ADR-0024: 52 after ADR-0023, +HOLD_OK, FAULT_N, CC_OK_RB, CC1_IC, CC2_IC; ADR-0025: +SUP_SENSE
 
     def test_two_builds_are_identical(self):
         again = pcb_full.build(str(NETLIST), self.tmp.name + "/b")
@@ -231,12 +298,12 @@ class Board(unittest.TestCase):
         self.assertEqual(bad, [])
 
     def test_t12_largest_dim_is_computed_and_limited(self):
-        """T12: the housing size comes from the board and must not exceed the old 59.8 mm."""
+        """T12: the housing size comes from the board and must not exceed the guard (MECH-001 66 mm since 2026-11-28, minus 0.2 mm)."""
         self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
         mouth = pcbnew.ToMM(self.fps["J1"].GetBoundingBox(False).GetRight()) - pcb_full.CX
         self.assertAlmostEqual(mech_outline.largest_dim_mm(mouth), self.info["largest_dim_mm"], places=1)
         with self.assertRaises(ValueError):
-            mech_outline.check_largest_dim(32.3)                 # 59.9 mm
+            mech_outline.check_largest_dim(38.3)                 # 65.9 mm, guard 65.8 mm
 
     def test_usb_c_on_the_tab_facing_plus_x(self):
         b = self.fps["J1"].GetBoundingBox(False)
@@ -245,7 +312,7 @@ class Board(unittest.TestCase):
         self.assertGreaterEqual(self.info["j1_mouth_r"], pcb_full.J1_MOUTH_R)
 
     def test_mouth_against_the_mech_limit_is_recorded(self):
-        """Plan 06 D2: the limit MAX_DIM_MECH001 (58 mm) is reported; the spike limit is the old 59.8 mm."""
+        """Plan 06 D2: the limit MAX_DIM_MECH001 (66 mm since 2026-11-28, 65 mm from 2026-11-27) is reported; the generator guard is 0.2 mm below it."""
         self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.MAX_DIM_SPIKE_MM)
 
     def test_antenna_strip_is_free(self):
@@ -307,11 +374,19 @@ class Board(unittest.TestCase):
         for r1, r2, lim in pcb_full.LAYOUT_RULES:
             self.assertLessEqual(dist(r1, r2), lim, "%s %s" % (r1, r2))
 
+    def test_without_p1_the_two_sided_rules_stay(self):
+        """Plan 08 step 5: P1 unset keeps the old sides and move radius, and no part is marked do-not-populate."""
+        self.assertIs(self.info["p1"], False)
+        self.assertEqual(self.info["r_move"], pcb_full.R_MOVE)
+        self.assertNotIn("led_caps", self.info)
+        self.assertTrue(any(f.GetLayer() == pcbnew.B_Cu for r, f in self.fps.items() if not r.startswith("TP")))
+        self.assertFalse(self.fps["C4"].IsDNP() or self.fps["C32"].IsDNP())
+
     def test_star_net_is_the_q3_gate(self):
         net = self.nets["/ILIM_STEP3_EN"]
         self.assertIn(("U15", "4"), net)
         self.assertEqual(pcb_full.STAR["/ILIM_STEP3_EN"], ("U15", "4"))
-        for ref in ("U13", "R3", "R15", "U4"):
+        for ref in ("R3", "R15", "U4"):     # U13 removed by ADR-0023
             self.assertIn(ref, [r for r, _ in net])
 
 
@@ -331,6 +406,171 @@ class Stitch(unittest.TestCase):
                 {"items": [{"description": "PTH pad A5 [/CC1] of J1"}, {"description": "Pad 1 [+5V] of C8 on B.Cu"}]}]}))
             got = pcb_stitch.unconnected_pads(str(f), ("GND", "+5V"))
         self.assertEqual(got, {("U11", "3"): ("GND", "F.Cu"), ("C8", "1"): ("+5V", "B.Cu")})
+
+
+class P1Switch(unittest.TestCase):
+    """Plan 08 section 4.2 (HW-008): the P1 switch and the pure geometry of the LED capacitor search."""
+
+    def test_switch_is_read_from_the_environment_and_off_by_default(self):
+        self.assertFalse(pcb_full.p1_enabled({}))
+        self.assertFalse(pcb_full.p1_enabled({"P1": "0"}))
+        self.assertTrue(pcb_full.p1_enabled({"P1": "1"}))
+
+    def test_sides_of_movable_parts(self):
+        self.assertEqual(pcb_full.part_sides("TP1", True), "B")
+        self.assertEqual(pcb_full.part_sides("TP1", False), "B")
+        self.assertEqual(pcb_full.part_sides("R1", True), "F")
+        self.assertEqual(pcb_full.part_sides("R1", False), "FB")
+        self.assertAlmostEqual(pcb_full.R_MOVE_P1, 18.4)
+
+    def test_convex_clear(self):
+        a = pcb_full.rect_poly(0, 0, 1, 1)
+        self.assertTrue(pcb_full.convex_clear(a, pcb_full.rect_poly(1.1, 0, 2, 1), 0.05))
+        self.assertFalse(pcb_full.convex_clear(a, pcb_full.rect_poly(1.03, 0, 2, 1), 0.05))   # closer than the gap
+        self.assertFalse(pcb_full.convex_clear(a, pcb_full.rect_poly(0.5, 0.5, 2, 2)))       # overlap
+        diamond = [(2.0, 0.5), (2.5, 1.0), (2.0, 1.5), (1.5, 1.0)]                         # rotated square, 0.5 mm away
+        self.assertTrue(pcb_full.convex_clear(a, diamond, 0.4))
+        self.assertFalse(pcb_full.convex_clear(a, diamond, 0.6))
+
+
+@unittest.skipIf(pcbnew is None, "pcbnew (KiCad Python) not available")
+class P1Board(unittest.TestCase):
+    """Plan 08 step 5 (HW-008, HW-016, RV-014 readiness B1 and B3): a board built with P1=1 in a subprocess (the switch is
+    read at build time), with a reduced annealing run. The placement is not asserted overlap-free: one side on 46 mm is
+    known not to fit (plan 08 A3, R1); the placement gate of section 4.3 is a separate step."""
+
+    SA_ITERS = 4000
+
+    @classmethod
+    def setUpClass(cls):
+        import os
+        import subprocess
+        cls.tmp = tempfile.TemporaryDirectory()
+        out = cls.tmp.name + "/p1"
+        code = ("import sys; sys.path.insert(0, %r); import pcb_full; pcb_full.build(%r, %r, sa_iters=%d, layers=4)"
+                % (str(HERE.parent / "src"), str(NETLIST), out, cls.SA_ITERS))
+        subprocess.run([sys.executable, "-c", code], env=dict(os.environ, P1="1"), check=True, capture_output=True)
+        cls.pcb = out + "/busy_light_spike.kicad_pcb"
+        cls.board = pcbnew.LoadBoard(cls.pcb)
+        cls.fps = {f.GetReference(): f for f in cls.board.GetFootprints()}
+        cls.info = json.loads(Path(cls.pcb).with_suffix(".placement.json").read_text())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_no_movable_part_touches_the_u9_courtyard(self):
+        """Owner decision 2026-11-18 (ADR-0023): with P1 the full U9 courtyard is an obstacle for movable parts. The fixed ring
+        parts (LEDs, their capacitors), J1, SW1, fiducials and test points are placed by rule and are not checked here."""
+        import re
+        u9 = self.fps["U9"].GetCourtyard(pcbnew.F_CrtYd)
+        fixed = re.compile(r"^(U9|J1|SW1|FID\d+|TP\d+|D\d+|C(8|9|1\d|2[0-3]))$")
+        hits = [r for r, f in self.fps.items() if not fixed.match(r) and f.GetLayer() == pcbnew.F_Cu
+                and f.GetCourtyard(pcbnew.F_CrtYd).OutlineCount() and f.GetCourtyard(pcbnew.F_CrtYd).Collide(u9)]
+        self.assertEqual(hits, [])
+
+    def centre(self, ref):
+        p = self.fps[ref].GetPosition()
+        return pcbnew.ToMM(p.x), pcbnew.ToMM(p.y)
+
+    def overlap_mm2(self, a, b):
+        ca, cb = self.fps[a].GetCourtyard(pcbnew.F_CrtYd), self.fps[b].GetCourtyard(pcbnew.F_CrtYd)
+        self.assertTrue(ca.OutlineCount() and cb.OutlineCount(), (a, b))
+        inter = pcbnew.SHAPE_POLY_SET(ca)
+        inter.BooleanIntersection(cb)
+        return inter.Area() / 1e12
+
+    def test_every_assembled_footprint_is_on_top(self):
+        """HW-008 one side: the test points and the do-not-populate HW-016 spares (not assembled) are on the bottom."""
+        self.assertIn("J1", self.fps)
+        bottom = lambda r: r.startswith("TP") or r in pcb_full.DNP_REFS_P1      # noqa: E731
+        bad = [r for r, f in self.fps.items() if f.GetLayer() != (pcbnew.B_Cu if bottom(r) else pcbnew.F_Cu)]
+        self.assertEqual(bad, [])
+        self.assertEqual(len([r for r in self.fps if r.startswith("TP")]), 7)
+        self.assertTrue(all(self.fps[r].IsDNP() for r in pcb_full.DNP_REFS_P1))
+
+    def test_dnp_spares_have_no_solder_paste(self):
+        """RV-016 row 17: paste on the DNP spares on the bottom made the bottom paste Gerber non-empty (HW-008)."""
+        for ref in pcb_full.DNP_REFS_P1:
+            for pad in self.fps[ref].Pads():
+                layers = pad.GetLayerSet()
+                self.assertFalse(layers.Contains(pcbnew.B_Paste) or layers.Contains(pcbnew.F_Paste), (ref, pad.GetNumber()))
+                self.assertTrue(layers.Contains(pcbnew.B_Cu), (ref, pad.GetNumber()))
+
+    def test_spares_are_1206_on_the_rule_that_keeps_them_at_u7(self):
+        """HW-016 (Approved): two 1206 footprints; the placer rule keeps their centres within 7.0 mm of U7 (pad centres
+        then within [10] mm of pin 6; RV-016 row 19). The reduced annealing run of this test is not asserted to meet the
+        rule; the batch board is (tests/test_board_p1.py)."""
+        for ref in pcb_full.DNP_REFS_P1:
+            self.assertEqual(str(self.fps[ref].GetFPID().GetLibItemName()), "C_1206_3216Metric", ref)
+            self.assertIn((ref, "U7", 7.0), pcb_full.LAYOUT_RULES)
+
+    def test_led_capacitors_keep_out_of_the_tab_boxes(self):
+        """Plan 08 section 4.5: no LED capacitor courtyard meets the box around a P1 panel tab cut."""
+        boxes = pcb_full.tab_keepouts()
+        self.assertEqual(len(boxes), len(pcb_full.pcb_rules.P1_TAB_AZIMUTHS))
+        bad = [(c, name) for _, c, _ in pcb_full.led_ring_refs() for name, box in boxes
+               if not pcb_full.convex_clear(pcb_full.court_poly_mm(self.fps[c]), box, pcb_full.LED_CAP_GAP)]
+        self.assertEqual(bad, [])
+
+    def test_tab_azimuths_equal_the_order_script_default(self):
+        import re
+        txt = (HERE.parents[3] / "scripts" / "fab_p1.sh").read_text(encoding="utf-8")
+        got = re.search(r'TAB_AZIMUTHS="\$\{TAB_AZIMUTHS:-([0-9.,]+)\}"', txt).group(1)
+        self.assertEqual(tuple(float(a) for a in got.split(",")), pcb_full.pcb_rules.P1_TAB_AZIMUTHS)
+
+    def test_led_capacitors_sit_beside_their_led_on_top(self):
+        for d, c, _ in pcb_full.led_ring_refs():
+            self.assertEqual(self.fps[c].GetLayer(), pcbnew.F_Cu, c)
+            self.assertLessEqual(math.dist(self.centre(c), self.centre(d)), 3.5, c)
+            self.assertIn(c, self.info["led_caps"])
+
+    def test_led_capacitor_long_axis_is_radial(self):
+        for d, c, _ in pcb_full.led_ring_refs():
+            pads = {p.GetNumber(): p.GetPosition() for p in self.fps[c].Pads()}
+            vx, vy = pcbnew.ToMM(pads["1"].x - pads["2"].x), pcbnew.ToMM(pads["1"].y - pads["2"].y)
+            rx, ry = self.centre(d)[0] - pcb_full.CX, self.centre(d)[1] - pcb_full.CY
+            self.assertGreater(abs(vx * rx + vy * ry) / (math.hypot(vx, vy) * math.hypot(rx, ry)), 0.99, c)
+
+    def test_led_capacitors_clear_j1_the_leds_and_each_other(self):
+        """RV-014 readiness B3: no capacitor courtyard meets J1 (courtyard or pad extent), an LED or another capacitor."""
+        caps = [c for _, c, _ in pcb_full.led_ring_refs()]
+        leds = [d for d, _, _ in pcb_full.led_ring_refs()]
+        jx0, jy0, jx1, jy1 = pcb_full.pad_extent_mm(self.fps["J1"], 0.0)
+        bad = []
+        for c in caps:
+            bad += [(c, o) for o in leds + ["J1"] + [x for x in caps if x > c] if self.overlap_mm2(c, o) > 0.0]
+            poly = pcb_full.court_poly_mm(self.fps[c])
+            if not pcb_full.convex_clear(poly, pcb_full.rect_poly(jx0, jy0, jx1, jy1)):
+                bad.append((c, "J1 pads"))
+        self.assertEqual(bad, [])
+
+    def test_placement_json_records_the_switch(self):
+        self.assertIs(self.info["p1"], True)
+        self.assertAlmostEqual(self.info["r_move"], 18.4)
+        self.assertEqual(self.info["sa_iters"], self.SA_ITERS)
+
+    def test_sourcing_fields_on_every_footprint(self):
+        import sourcing
+        self.assertEqual(self.fps["U7"].GetField("LCSC").GetText(), "C55266")
+        self.assertEqual(sourcing.sourcing_fields(self.fps["U7"].GetValue())["LCSC"], "C55266")
+        for ref, f in self.fps.items():
+            want = sourcing.sourcing_fields(f.GetValue(), str(f.GetFPID().GetLibItemName()))
+            for k in sourcing.FIELDS:
+                fld = f.GetField(k)
+                self.assertIsNotNone(fld, (ref, k))
+                self.assertEqual(fld.GetText(), want[k], (ref, k))
+                self.assertFalse(fld.IsVisible(), (ref, k))
+
+    def test_spare_capacitors_are_dnp_and_out_of_the_bom(self):
+        for ref in ("C4", "C32"):
+            self.assertTrue(self.fps[ref].IsDNP(), ref)
+            self.assertTrue(self.fps[ref].IsExcludedFromBOM(), ref)
+        self.assertFalse(self.fps["C2"].IsDNP() or self.fps["C2"].IsExcludedFromBOM())
+
+    def test_ring_links_follow_the_capacitor_layer(self):
+        import pcb_ring
+        self.assertEqual({pcb_ring.cap_link_layer(self.board, c) for _, c in pcb_ring.cells()}, {"F.Cu"})
 
 
 if __name__ == "__main__":

@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for R22, the HW-017 link in the VBUS path: TA-I Tech RLM12FTCMR005, 5 mohm 1 % 1 W metal-alloy current-sense resistor,
+# 1206 (HW-017 approved amendment of 2026-11-22: a 1206 current-sense resistor of 2 to 5 mohm rated for at least 3 A). See README.md.
+# Source: the TA-I RLM series specification hosted by LCSC, linked from the product page of C316225, read 2026-11-22.
+schema_version: 1
+part:
+  key: RLM12
+  mpn: RLM12FTCMR005
+  manufacturer: TA-I Technology
+  description: Current-sense resistor, metal alloy, 5 mohm, 1 percent, 1 W, 1206
+  selection: candidate
+  package:
+    code: '1206'
+    name: R_1206_3216Metric
+    pin_count: 2
+  used_in:
+  - R22
+  schematic_symbol: Device:R
+documents:
+- id: rlm-ds
+  title: Current Sensing Resistors RLM Series (Halogen-Free), AEC-Q200 Ver D qualified
+  doc_number: TRLM-120S032E
+  revision_date: 2020/01/13
+  origin: manufacturer
+  url: https://datasheet.lcsc.com/datasheet/pdf/a7dac5091d02b191b43074db769ad646.pdf
+  file: ta-i-rlm-series-trlm-120s032e-2020-01-13.pdf
+  sha256: 6f3e3568fbc984eff0e33b56bd7b67a29b05c0c06751f6b6058e31d32f5043d5
+  pages: 6
+  retrieved_on: '2026-11-22'
+  notes: Copy hosted by LCSC. The LCSC listing text gives +-100 ppm/degC; the datasheet gives +-50 ppm/degC (the datasheet is used).
+defaults:
+  source_document: rlm-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-opus-5.5/extractor}
+  extracted_on: '2026-11-22'
+  status: unverified
+  package: '1206'
+claims:
+- id: RLM12.code_c_1w
+  parameter: Power rating of the ordering code letter C (RLM12FTC...)
+  category: electrical
+  max: 1
+  unit: W
+  notes: 'Feature table note: 1 W with a total solder pad and trace size of 300 mm2. At 1/4 W the rated current of 5 mohm is still 7.07 A.'
+  source: {page: 1, locator: Type designation, quote: 'C=1W'}
+- id: RLM12.tolerance_code_f
+  parameter: Tolerance of the ordering code letter F
+  category: electrical
+  max: 1
+  unit: percent
+  source: {page: 1, locator: Type designation, quote: 'F:±1%'}
+- id: RLM12.tcr
+  parameter: Temperature coefficient of resistance
+  category: electrical
+  max: 50
+  unit: ppm/degC
+  source: {page: 2, locator: 4. Features, quote: 'Temperature Coefficient of Resistance ±50ppm/°C'}
+- id: RLM12.operating_temperature
+  parameter: Operation temperature range
+  category: recommended
+  min: -55
+  max: 170
+  unit: degC
+  source: {page: 2, locator: 4. Features, quote: 'Operation Temperature Range -55°C~+170°C'}
+- id: RLM12.operation_life
+  parameter: Resistance change after operation life, 70 degC, 1000 h
+  category: electrical
+  max: 1
+  unit: percent
+  source: {page: 2, locator: 5. Reliability tests, quote: '1000 h at +70 °C, 1.5 h “ON”, 0.5 h “OFF” < ±1%'}
+- id: RLM12.soldering_heat
+  parameter: Resistance change after resistance to soldering heat
+  category: electrical
+  max: 0.5
+  unit: percent
+  source: {page: 2, locator: 5. Reliability tests, quote: 'T=260+/-5°C solder,10+/-1 sec dwell < ±0.5%'}
+- id: RLM12.short_time_overload
+  parameter: Resistance change after 5 times rated power for 5 s
+  category: electrical
+  max: 0.5
+  unit: percent
+  source: {page: 2, locator: 5. Reliability tests, quote: '5 X rated power for 5s < ±0.5%'}
+- id: RLM12.pads_2m_50m
+  parameter: Recommended solder pad a, b, L for 2 to 50 mohm
+  category: mechanical
+  statement: a 1.8 mm, b 1.7 mm, L 1.6 mm (pad width, pad length and gap of the drawing). The KiCad R_1206_3216Metric pads differ; the footprint is not changed for P1 (not a Kelvin connection).
+  source: {page: 3, locator: 6. Recommended solder pad dimension, quote: '0.002~0.050 1.8 1.7 1.6'}

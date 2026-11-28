@@ -1,0 +1,111 @@
+{
+ "cx": 40.0,
+ "cy": 40.0,
+ "hpwl_mm": 997.9,
+ "j1_mouth_r": 31.64,
+ "largest_dim_mm": 59.24,
+ "led_caps": {
+  "C10": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 228.75,
+   "side": "ccw"
+  },
+  "C11": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 251.25,
+   "side": "ccw"
+  },
+  "C12": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 273.75,
+   "side": "cw"
+  },
+  "C13": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 296.25,
+   "side": "ccw"
+  },
+  "C14": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 318.75,
+   "side": "ccw"
+  },
+  "C15": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 341.25,
+   "side": "ccw"
+  },
+  "C16": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 3.75,
+   "side": "ccw"
+  },
+  "C17": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 26.25,
+   "side": "cw"
+  },
+  "C18": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 48.75,
+   "side": "ccw"
+  },
+  "C19": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 71.25,
+   "side": "ccw"
+  },
+  "C20": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 93.75,
+   "side": "cw"
+  },
+  "C21": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 116.25,
+   "side": "ccw"
+  },
+  "C22": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 138.75,
+   "side": "cw"
+  },
+  "C23": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 161.25,
+   "side": "ccw"
+  },
+  "C8": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 183.75,
+   "side": "ccw"
+  },
+  "C9": {
+   "offset_mm": 2.3,
+   "pad_cost_mm": 4.626,
+   "rot": 206.25,
+   "side": "ccw"
+  }
+ },
+ "overlap_mm2": 0.0,
+ "p1": true,
+ "r_move": 18.4,
+ "sa_iters": 160000,
+ "seed": 47,
+ "tab_r": 30.79
+}

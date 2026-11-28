@@ -1,0 +1,157 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Evidence for the TPS3808G01 supervisor, candidate for U5 (ADR-0025 option B, owner decision 5 of 2026-11-22: a stocked
+# supervisor with the same function). Adjustable threshold (SENSE 0.405 V), open-drain RESET, capacitor-set delay. See README.md.
+schema_version: 1
+part:
+  key: TPS3808G01
+  mpn: TPS3808G01DBVR
+  manufacturer: Texas Instruments
+  description: Low-quiescent-current programmable-delay supervisory circuit, adjustable threshold, open-drain RESET, SOT-23-6
+  selection: candidate
+  package:
+    code: DBV
+    name: SOT-23-6
+    pin_count: 6
+  used_in:
+  - U5
+documents:
+- id: tps3808-ds
+  title: TPS3808 Low-Quiescent-Current, Programmable-Delay Supervisory Circuit
+  doc_number: SBVS050N
+  revision_date: May 2004, revised August 2026
+  origin: manufacturer
+  url: https://www.ti.com/lit/ds/symlink/tps3808.pdf
+  file: tps3808-sbvs050n.pdf
+  sha256: b25476cfb25be6ec75733b5a468123cc01a57996e4d75981cef11523876b0c83
+  pages: 39
+  retrieved_on: '2026-11-22'
+defaults:
+  source_document: tps3808-ds
+  method: extracted
+  extracted_by: {kind: ai, name: claude-opus-5.5/extractor}
+  extracted_on: '2026-11-22'
+  status: unverified
+  package: DBV
+claims:
+- id: TPS3808G01.vit_ref
+  parameter: SENSE threshold of the adjustable version
+  category: electrical
+  typ: 0.405
+  unit: V
+  source: {page: 3, locator: Device comparison table, quote: TPS3808G01 Adjustable 0.405V}
+- id: TPS3808G01.abs_max_vdd
+  parameter: VDD
+  category: abs_max
+  min: -0.3
+  max: 7
+  unit: V
+  notes: Below the hot-plug clamp of TVS1 (8 to 14 V, ADR-0021); VDD and the RESET pull-up need the protected node VDD_U1.
+  source: {page: 5, locator: 6.1 Absolute maximum ratings, quote: VDD –0.3 7 V}
+- id: TPS3808G01.abs_max_reset_sense
+  parameter: RESET, MR and SENSE
+  category: abs_max
+  min: -0.3
+  max: 7
+  unit: V
+  source: {page: 5, locator: 6.1 Absolute maximum ratings, quote: 'VRESET, VMR, VSENSE –0.3 7 V'}
+- id: TPS3808G01.rec_vdd
+  parameter: Input supply range
+  category: recommended
+  min: 1.7
+  max: 6.5
+  unit: V
+  source: {page: 5, locator: 6.3 Recommended operating conditions, quote: VDD Input supply range 1.7 6.5 V}
+- id: TPS3808G01.vit_accuracy
+  parameter: Negative-going input threshold accuracy, TPS3808G01
+  category: electrical
+  min: -2
+  typ: 1
+  max: 2
+  unit: percent
+  source: {page: 6, locator: 6.5 Electrical characteristics, quote: TPS3808G01 –2% ±1% 2%}
+- id: TPS3808G01.vhys
+  parameter: Hysteresis on VIT, TPS3808G01
+  category: electrical
+  typ: 1.5
+  max: 3
+  unit: percent
+  source: {page: 6, locator: 6.5 Electrical characteristics, quote: VHYS Hysteresis on VIT pin TPS3808G01 1.5% 3%}
+- id: TPS3808G01.isense
+  parameter: Input current at the SENSE pin, VSENSE = VIT
+  category: electrical
+  min: -25
+  max: 25
+  unit: nA
+  source: {page: 6, locator: 6.5 Electrical characteristics, quote: TPS3808G01 VSENSE = VIT –25 25 nA}
+- id: TPS3808G01.vpor
+  parameter: Power-up reset voltage (lowest VDD at which RESET becomes active)
+  category: electrical
+  max: 0.8
+  unit: V
+  source: {page: 6, locator: 6.5 Electrical characteristics, quote: 'VOL (max) = 0.2V, I RESET = 15μA 0.8'}
+- id: TPS3808G01.td_ct_vdd
+  parameter: RESET delay time, CT tied to VDD
+  category: timing
+  min: 180
+  typ: 300
+  max: 420
+  unit: ms
+  notes: The minimum is below the [200] ms of HW-010, so the fixed option is not used.
+  source: {page: 7, locator: 6.6 Switching characteristics, quote: CT = VDD 180 300 420 ms}
+- id: TPS3808G01.td_ct_180n
+  parameter: RESET delay time, CT = 180 nF
+  category: timing
+  min: 0.62
+  typ: 1.03
+  max: 1.44
+  unit: s
+  notes: TJ -40 to 125 degC. sim/holdoff_cap.py scales the min/typ and max/typ ratios of this row to other CT values (assumption).
+  source: {page: 7, locator: 6.6 Switching characteristics, quote: CT = 180nF 0.62 1.03 1.44 s}
+- id: TPS3808G01.open_drain
+  parameter: RESET output type
+  category: function
+  statement: RESET is an open-drain output, driven low while asserted; it needs a pull-up resistor.
+  source: {page: 4, locator: Pin functions, quote: RESET is an open-drain output that is driven to a low-impedance state when RESET is asserted}
+- id: TPS3808G01.pins_1_6
+  parameter: SOT-23 DBV pins 1 and 6
+  category: function
+  statement: Pin 1 is RESET and pin 6 is VDD.
+  source: {page: 4, locator: Figure 5-1 DBV package top view, quote: RESET 1 6 VDD}
+- id: TPS3808G01.pins_2_5
+  parameter: SOT-23 DBV pins 2 and 5
+  category: function
+  statement: Pin 2 is GND and pin 5 is SENSE.
+  source: {page: 4, locator: Figure 5-1 DBV package top view, quote: GND 2 5 SENSE}
+- id: TPS3808G01.pin_3
+  parameter: SOT-23 DBV pin 3
+  category: function
+  statement: Pin 3 is MR.
+  source: {page: 4, locator: Figure 5-1 DBV package top view, quote: MR 3 4}
+- id: TPS3808G01.pin_4
+  parameter: SOT-23 DBV pin 4
+  category: function
+  statement: Pin 4 is CT.
+  source: {page: 4, locator: Table 5-1 pin functions, quote: CT 4 3 I}
+- id: TPS3808G01.mr_pullup
+  parameter: Manual reset input MR
+  category: function
+  statement: MR is tied to VDD inside the part by a 90 kohm pull-up resistor, so it may be left open (ADR-0025 leaves it open).
+  source: {page: 4, locator: Table 5-1 pin functions, quote: MR is internally tied to VDD by a}
+- id: TPS3808G01.ioh_reset
+  parameter: RESET leakage current when not asserted
+  category: electrical
+  condition: {v_reset: {value: 6.5, unit: V}}
+  max: 300
+  unit: nA
+  notes: Used for the HOLD_OK high level with the pull-up R6 (sim/gate_rework_levels.py, RV-019 G9); the TPS3840 value is 90 nA.
+  source: {page: 6, locator: 6.5 Electrical characteristics, quote: 'IOH RESET leakage current V RESET = 6.5V, RESET not asserted 300 nA'}
+- id: TPS3808G01.vdd_bypass
+  parameter: Bypass capacitor at VDD
+  category: function
+  statement: Good practice is a 0.1 uF ceramic capacitor close to VDD (C33 of the schematic, owner decision 2026-11-24).
+  source: {page: 4, locator: Table 5-1 pin functions, quote: It is good analog design practice to place a 0.1μF ceramic capacitor close}
+- id: TPS3808G01.sense_bypass
+  parameter: Bypass capacitor on SENSE
+  category: function
+  statement: Good practice is 1 nF to 10 nF on SENSE to reduce sensitivity to transients and layout parasitics (C34 of the schematic, owner decision 2026-11-24).
+  source: {page: 10, locator: 7.3.1 SENSE input, quote: Good analog design practice is to put a from 1nF to 10nF bypass capacitor on the}

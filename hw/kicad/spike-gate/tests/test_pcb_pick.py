@@ -48,6 +48,26 @@ class Power(unittest.TestCase):
         self.assertEqual(K.power_fails_from(out), 1)
         self.assertEqual(K.power_fails_from("no json"), 99)       # not measured: ranks last among equals
 
+    def test_power_fails_counts_a_path_through_thin_track(self):
+        """Batch p1b7: the drop was within target at a fine grid but the current ran through 0.15 mm track."""
+        out = '{"nets": {"a": {"within_50mv": true, "full_width_path": false}, "b": {"within_50mv": true}}}'
+        self.assertEqual(K.power_fails_from(out), 1)
+
+
+class Layout(unittest.TestCase):
+    def test_placement_rule_misses_rank_after_the_gate_and_before_power_and_tidiness(self):
+        """RV-019 G6: the picker ignored the placement rules."""
+        with tempfile.TemporaryDirectory() as t:
+            runs = [make(t, "r1", drc(0)), make(t, "r2", drc(0)), make(t, "r3", drc(1))]
+            miss = {"r1": 2, "r2": 0, "r3": 0}                  # r1 is tidier and has no power failure, but misses two rules
+            best, rows = K.pick(runs, gate=lambda b: 0, layout=lambda b: miss[b.parent.parent.name], power=lambda b: 0,
+                                tidy=lambda b: (0,) if b.parent.parent.name == "r1" else (9,))
+            self.assertEqual(best.name, "r2")                   # r3 meets the rules but has an open item
+            self.assertEqual(dict(rows)[runs[1]], (0, 0, 0, 0, 0, 9))   # unconnected, strict, hard, rule misses, power, tidy
+
+    def test_layout_misses_counts_missed_and_unmeasurable_rules_and_is_99_when_unreadable(self):
+        self.assertEqual(K.layout_misses(Path("/nonexistent/board.kicad_pcb")), 99)
+
 
 class Pick(unittest.TestCase):
     def test_score_counts_kinds(self):
@@ -73,6 +93,20 @@ class Pick(unittest.TestCase):
             K.main(["x", t] + [str(r) for r in runs])
             self.assertTrue(Path(t, "best", "CUSTOM.pretty", "x.kicad_mod").exists())
             self.assertTrue(Path(t, "best", "fp-lib-table").exists())
+
+    def test_nominal_width_path_failure_counts_as_a_power_failure(self):
+        out = json.dumps({"nets": {"VBUS": {"within_50mv": True, "full_width_path": True, "nominal_width_path": False},
+                                   "+5V": {"within_50mv": True, "full_width_path": True}}})
+        self.assertEqual(K.power_fails_from(out), 1)      # RV-019 pass 3, S5: the 0.6 mm criterion of plan 08 R4 (e)
+
+    def test_chosen_path_is_the_run_folder_so_two_batches_do_not_clash(self):
+        with tempfile.TemporaryDirectory() as t:
+            c1, c2 = Path(t, "c1"), Path(t, "c2")
+            c1.mkdir()
+            c2.mkdir()
+            runs = [make(str(c1), "run1", drc(3)), make(str(c2), "run1", drc(0))]
+            K.main(["x", t] + [str(r) for r in runs])
+            self.assertEqual(Path(t, "best", "chosen_path.txt").read_text().strip(), str(runs[1]))
 
     def test_main_fails_when_every_run_has_open_items(self):
         with tempfile.TemporaryDirectory() as t:

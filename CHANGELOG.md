@@ -10,7 +10,88 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 
 ## [Unreleased]
 
+- READMEs refreshed (2026-11-28): counts from `scripts/readme_facts.py` (106 requirements, 22 approved; 27 ADRs, 22 accepted; 20 review records), the round 58.5 mm successor board (ADR-0027) stated as planned with no board, the stored P1 board and all images unchanged (board file sha256 equals the one the images came from; not re-rendered), `board-p1/README.md` notes that ADR-0024 and ADR-0025 are in the generator but not in the stored board.
+- Plan 08 section S (revision 7: round 58.5 mm board, split ring, 36 LEDs) reviewed in RV-020 (comprehension and three antagonistic goldfish passes); redrafted with computed geometry (caps radially inside the ring, wall feet 7.76 mm centre line, centre LEDs at 6.4 mm, J1 mouth by the body front, movable land about 1008 mm2); owner decision of 2026-11-28: the module U9 keeps its library courtyard on the round board (a first answer, body courtyard DEV-009, rested on a wrong calculation and is withdrawn; DEV-004 note); HW-001 and HW-005 amendment texts drafted (Draft, owner approves). No board, placement or routing change; readiness pass 3e (RV-020, 2026-11-28): GO for S1 and S2, nine text gaps corrected in the plan (placement json name, ring power cases per profile, panel bounding-box helper, CI scope, `r46` profile values); no code written yet.
+- Owner decisions of 2026-11-28 (`docs/journal/2026-11-28-owner-decisions-adr-0027-accepted.md`): ADR-0027 (split ring) accepted; MECH-015 (sharp light edges) approved; 32 ring LEDs plus 4 LEDs under a smaller round centre button (radius about 11 mm, bright centre); LED current budget unchanged; MECH-001 upper limit 66 mm (amendment); SYS-001, SYS-028, SYS-032 and NEED-003 texts updated (Draft). ADR-0003, ADR-0011 and ADR-0023 are superseded in part. No hardware or mechanical file changed.
 ### Added
+- Plan 09 (Draft): the centre of the LED ring as the button (owner decision 9 of 2026-11-22, interview of 2026-11-23): separate
+  centre disc, switch place and disc support still open (S1 off-centre switch against S2 moved module; guided disc against
+  three switches in parallel), first-order checks, test plan TC-310 to TC-313; journal `2026-11-23-centre-button-interview.md`.
+  No requirement, ADR or CAD changed yet. Revision 2 after the goldfish review RV-018: the antenna baseline is corrected to 5.06 mm (revision 1 said 7.6 mm), a switch-by-support feasibility matrix replaces the "lean S1" (one off-centre switch on soft supports fails; centred switch with bridges passes only in a narrow band; three switches work), the stuck-press rule is redone, requirement texts MECH-010 to MECH-013 are drafted, and a pre-order gate is added. Revision 3 after the readiness NO-GO: the TL3342 body is 6.4 x 5.2 mm (not 4.5 x 3.5 mm), so with the real switch the module-moved option keeps only 50 to 60 % of the antenna margin; step 0 (switch evidence and a smaller-switch search) and step 1 (tested analysis scripts) are specified to the signature. Revision 4 after the second readiness NO-GO: the three-switch concept does not fit around the stored module at r = 11 with the real switch, the M3 maximum force is 4.8 N at the centre, step 0 gets a recording rule for the one-page datasheet.
+- Plan 09 step 0 (revision 5): switch datasheets and stock for the centre button. Evidence `hw/evidence/parts/sw-tl3342.yaml` (updated), new `sw-b3u-1000p.yaml` and `sw-ksc221.yaml`
+  (`check_part_evidence.py` on the three files: 3 hashes, 15 quotes, 0 errors; dimensions are drawing-only and not text-checked), report `docs/verification/reports/stock-check-button-switches.md`.
+  Finding: no listed part meets all criteria and none publishes a force-travel curve; the Omron B3U-1000P (3.0 x 2.5 mm, 1.50 +- 0.49 N, pre-travel 0.15 mm) keeps 77 % of the antenna margin in option S2
+  on the assistant's scratch search; the TL3342F160QG has LCSC stock 1 and no published travel. No requirement, ADR, CAD or board file changed. Licence map allows the two new evidence files.
+- Plan 09 revision 6: owner decisions D1 to D3 of 2026-11-24 ("Do your recommendations"): direction S2 with the Omron B3U-1000P, S3 as fallback, no scissor study; steps 0 and 1 as analysis; step 1 rescoped
+  to the B3U values (`s2_click_force`, `click_force_extremes`, `bridge_band` in `button_disc.py`, B3U cases in the pose search). No requirement, ADR, CAD or board file changed.
+- Plan 09 step 1 (revision 7): analysis scripts with tests: `mech/analysis/button_disc.py` (rigid disc on springs and switches, S2 click force, bridge stiffness bands, beam, plate and guide formulas), `button_light.py`
+  (ring spill onto the disc), `check_tolerance.py` (informational vertical and lateral button chains), `hw/kicad/spike-gate/src/button_zone.py` (outlines from the stored board text, S2 pose search, S3 scan, fill) and their
+  tests; report `docs/verification/reports/analysis-button-disc.md`; ADR-0026 (Proposed): S2 with the Omron B3U-1000P recommended (weighted sum 96 against 89 for S3 and 73 for S2 with the TL3342),
+  S3 as fallback; RV-018 records the third readiness NO-GO and the review of plan and code (NOT READY, resolved in revision 8). After the review ADR-0026 scores S2 84, S3 87 and S2 with the TL3342 66 (S2 and S3 within noise; both go to the coupon gate). Results: S2 with the B3U keeps 3.64 mm (72 %) of the 5.06 mm antenna margin with the antenna end away from the switch (3.90 mm at the best pose, 1.35 mm from the switch); the bridge band is 2.20 to 6.69 N/mm (B3U) against 2.83 to 3.92 N/mm
+  (TL3342); over the B3U pre-travel tolerance no bridge stiffness holds the 2 to 5 N window, so the click travel must be measured; three switches in parallel miss the window at both ends. No requirement, CAD or board file changed.
+- Plan 09 revision 9: owner answers of 2026-11-24 (D4 to D8): both S2 and S3 go to the coupon gate, the force window is good enough to start, the button is used very rarely (life [2 000] presses derived), the light comes
+  from the ring and rim and the disc stays dark, the product looks Apple-grade. The disc becomes a separate opaque part with a [0.4] mm gap and a light-tight lip; proposals MECH-014 (appearance) and a MECH-002 change (disc dark),
+  TC-302 and TC-316 rows; open questions 10 (process for the look) and 11 (disc material and finish). `button_light.required_transmission`: the disc transmission must be at most 4.5 % at r = 15 mm for 3 % of the ring luminance
+  (optical density 1.35). ADR-0026 gains the criteria "look and feel" and "disc dark"; the assistant's scores are S2 94, S3 107, S2 with the TL3342 71 (S3 leads on look); the decision is to build both in the gate. No requirement, CAD or board file changed.
+- Owner decisions of 2026-11-24 applied: ADR-0024 Accepted; ADR-0025 option B Accepted (TPS3808G01DBVR, divider 910 k / 100 k because no 931 k is stocked, one 68 nF C0G on CT, supply on VDD_U1); R_ILIM3 54.9 k (option A). Schematic generator
+  (`layout_full.py`: U5 SOT-23-6 box symbol, R26, R27, C27 to C31 removed, strict ERC 0 findings, 102 parts, 58 nets), sourcing, placement rules (`pcb_full.LAYOUT_RULES`, `pcb_rules.BLOCKS`), `fab_check` (ILIM value, must-place set), `sim/ilim_steps.py`
+  (54.9 k window 1379.1 to 1564.3 mA), `sim/supervisor_options.py` (910 k row), `sim/gate_rework_levels.py` (HOLD_OK high level 2.03 V with the pull-up on VDD_U1), `tests/data/full.net`, the missing-LCSC list (empty), HW-010 amendment text for the owner
+  to confirm, ADR-0025 amendment. Plan 08 revision 6 (section R) and its readiness review RV-019 prepare the re-placement that closes the `fab-release` failure. After the first readiness NO-GO (RV-019): the CC input-path rules now name the netlist nets `J1:/CC1` and `J1:/CC2` (they could not be measured; test first), the run picker ranks placement-rule misses, R6 is 100 k, C33 (100 nF) and C34 (1 nF) are added with owner confirmation, TPS3808 evidence claims (pins, MR, RESET leakage, bypass), and the repository scripts `run_in_kicad.sh`, `run_finish.sh`, `store_p1.sh`, `src/merge_drc.py` with tests replace the scratch scripts.
+- Readiness pass 2 of plan 08 section R (RV-019, 2026-11-27): NO-GO, resolved with tests first. `run_in_kicad.sh` mounts the `/etc` directories that the JDK config symlinks need (the JVM stopped at start-up without them); `run_pcb.sh` and `run_repass.sh` keep the `PYTHONPATH` of the wrapper (numpy and scipy were not found); `run_finish.sh` stops on a crashed finishing pass or a strict DRC that did not run, and copies `repass_meta.json` only when the second router pass was taken; `.kicad_prl` is optional; a new board test checks the identification text and the fiducials (expected failure until the re-placed board is stored). Plan 08 gains step R0 (environment), the batch rule and the R4 and R5 commands.
+- LED configuration chosen by the owner on 2026-11-28 from the mock-up (`docs/journal/2026-11-28-owner-decision-led-config-centre-leds.md`): [32] ring LEDs in two arcs on a [52] mm ring, [3] mm clearance, white wall faces, plus [4] LEDs under a translucent centre button (36 LEDs, 540 mA at full white). Reverses plan 09 D7 (dark disc): plan 09 D10, note in ADR-0026, section "Centre light" in ADR-0027, MECH-015 covers the button border. Open: module collision with the button wall ring (inner end 11.9 mm, wall ring 14.6 mm), evenness of a disc lit by 4 LEDs (+-62 % at 6 mm radius, model), SYS-001 brightness at 36 LEDs (HW-017, MECH-002, MECH-015, SYS-001, SYS-032).
+- Split ring decided by the owner on 2026-11-28 ("Do a split ring ensure by the mechanical design that the edges are sharp", `docs/journal/2026-11-28-owner-decision-split-ring.md`): two LED arcs, J1 in one gap and the module at the board edge with the antenna outside the base board. ADR-0027 (Proposed: layout alternatives and five constructions for sharp ends, working concept A with an opaque cap, two diffuser inserts and white-faced light walls), MECH-015 (Draft, sharp ends and borders of the light with luminance criteria; owner: "Of the light I mean"), TC-317 (stub), RISK-054, approved amendment of MECH-002 (two arcs, not a closed band). `mech/analysis/light_edge.py` with tests: an absorbing wall gives 50 % luminance at the arc end and reaches 90 % only 7 mm inside, a white wall face stays at 100 % (model, not measured). The LED count and ring diameter are open; MECH-001, the generator and the housing follow after acceptance (HW-017, MECH-001, MECH-002, MECH-003, SYS-001).
+- Owner decision of 2026-11-28 recorded (`docs/journal/2026-11-28-owner-decision-round-58-5-disc.md`): round board of 58.5 mm without a nose, J1 on the board, housing about 65.5 mm; replaces the droplet nose of 2026-11-27. MECH-001 (to 66 mm) and the generator follow with the ADR after the owner chooses the LED count and ring diameter. LED ring mock-up with the trade-offs (connector gap, antenna keep-out, pitch, current) published as an artifact (HW-017, MECH-001, SYS-001, SYS-028).
+- MECH-001 and SYS-028: upper limit of the largest housing dimension 65 mm (owner, 2026-11-27, "Raise to 65mm"; 60 mm since 2026-11-22; SYS-028 still said 58 mm and stays Draft). `mech_outline.MAX_DIM_MECH001` is 65.0 and the generator guard `MAX_DIM_SPIKE_MM` follows it minus 0.2 mm (it was a separate 59.8 mm that would have stopped a longer nose). Journal `2026-11-27-owner-decision-housing-limit-65.md`. No outline, housing or board file changed yet.
+- Readiness pass 3 of plan 08 section R (RV-019, 2026-11-27): NO-GO. Tools, with tests first: the container wrapper creates `HOME` and mounts only `/etc/java*`; the picker stores the full run folder (`best/chosen_path.txt`) and counts the 0.6 mm main path (`nominal_width_path` of `pcb_power_check.py`); the placer keeps the seed with the fewest rule misses instead of the shortest wire, `PLACE_RULE_PEN` sets the rule cost for one batch; new `run_place_best.sh` and `place_table.py` (placement-only runs; only a clean placement is routed). `docs/verification/reports/p1-placement-feasibility.md`: with the rules as written no placement meets all 22 (the four input-path rules next to J1 compete for about 35 mm2 of legal area); the owner decides: grow the board with a droplet nose; a 20 mm wide nose (today 12 mm) gives clean placements in the placer region at `PLACE_RULE_PEN` 3000 (sizing only, no outline or housing change yet). Plan 08 section R rewritten (R0, R2a, R3, R4, R5).
+- Plan 09: owner agreement D9 of 2026-11-24 to the recommendations for questions 10 and 11 (appearance sample in a finer process, FDM for function; matt opaque disc in the lid colour family). Disc size (question 7) stays open at 30 mm.
+- ADR-0024 (Proposed): gate rework after RV-017 (owner decisions 1, 2 and 4 of 2026-11-22): the hold-off AND gate U10 with R6 on VBUS_IC and R8 on FAULT_N is restored (ADR-0018 option E), GPIO0 gets a 10 kohm resistor (R23), each CC line gets an ESD diode and a 100 ohm resistor (TVS3, TVS4, R24, R25), FAULT_N gets a test pad (TP7). The schematic generator draws it (57 nets, strict ERC 0 findings); the stored board-p1 is stale until the re-placement (plan 08 revision 6). New tests: `test_gate_logic_full.py` (truth table and single faults on the generated netlist), `test_gate_rework_levels.py`, layout tests for the gate and the CC protection (HW-010, HW-003, HW-006, SW-009 proposals in the requirement files).
+- ADR-0025 (Proposed): stocked replacement for the supervisor U5; recommended TPS3808G01 with a 931 k / 100 k divider and one 68 nF C0G (hold-off 221.8 to 572.7 ms); `sim/supervisor_options.py`, `holdoff_cap.py` TPS3808 window, evidence `tps3808g01.yaml`.
+- `docs/verification/reports/analysis-ilim-drift.md` and `sim/ilim_steps.py`: SLVS841G table anchor and resistor TCR, soldering and life drift; with step 3 = both switches R_ILIM3 = 56.2 k has a drift budget of 0.17 % (below tolerance + TCR 0.25 %), 54.9 k has 0.91 %; the owner decides the value. Evidence `ilim-resistors.yaml` (Yageo RT and AT, Vishay MCT).
+- HW-017: R22 is the TA-I Tech RLM12FTCMR005 5 mohm 1206 current-sense resistor (LCSC C316225, evidence `rlm12.yaml`); the owner confirms.
+- Skill `readme-refresh` (`.claude/skills/readme-refresh/SKILL.md`): order of work to bring the READMEs and their images
+  up to date (count, decide what to re-render, P1 renders with the panel of the same board, look at each image, edit,
+  check), wording rules and lessons. New `scripts/readme_facts.py` prints the counts the README quotes (requirements and
+  approvals, ADRs per status, reviews, plan statuses, host test cases), images that no page shows, and the READMEs with
+  the commits to its folder since its last change; test `scripts/tests/test_readme_facts.py` (fixture tree; the
+  own-Status rule checked by mutation). Goldfish readiness review RV-015 (NO-GO on the first pass, findings resolved).
+- README images of the P1 board and its order panel (plan 08, HW-008, HW-009): new
+  `hw/kicad/spike-gate/render_p1_images.sh` exports the schematic in two crops, the four copper layers, top and bottom 3D
+  renders of `board-p1/` and a 3D render of the KiKit panel from `scripts/fab_p1.sh` into
+  `docs/verification/reports/images/p1-*.png`. Test `scripts/tests/test_readme_images.py`: every image a README shows
+  exists, and the six P1 images are committed and shown.
+- Stored P1 board `hw/kicad/spike-gate/board-p1/` (plan 08 section 5 step 8, ADR-0023): batch p1b8 run 3 completed by the
+  second router pass; every assembled part on the top. Strict ERC 0 findings, strict DRC only the tolerated U9 classes
+  (DEV-004), no unconnected item, no via in a pad, power check within 50 mV with full-width paths, `tests/test_board_p1.py`
+  6 passed, `scripts/fab_p1.sh` all gates passed. Not reviewed or approved; not ready to order (U5 source, R22 part, owner
+  review). README in the folder (HW-008, HW-010, HW-016, HW-017).
+- Spike routing flow: `run_repass.sh`, a second Freerouting pass over the cleaned-up board with every track and via locked,
+  then stitch, clean-up and strict DRC again; it replaces `final.*` only when fewer connections stay open. `run_pcb.sh` runs
+  it when the clean-up leaves an unconnected item (`REPASS=1`, the default). On p1b8 run 3 it closed the last open
+  connection (1 to 0). Tests `tests/test_run_repass.py` (HW-008).
+- `scripts/ci_hw.sh` runs `pcb_fabcheck --no-via-in-pad` and the power check on `board-p1/` (plan 08 asked for the fab
+  check; it was not there). The CI `hardware` job installs pip from apt and the pinned numpy and scipy for it. Test
+  `scripts/tests/test_ci_hw_script.py` (HW-008, HW-010).
+- Spike power check: `full_width_path` per supply case, the case solved again without tracks narrower than 0.75 x the net's
+  current-based width; the board picker counts a failing case like a drop over target. It fails batch p1b7 run3 and the
+  p1b3 board (+5V current through 0.15 mm clean-up track) and passes batch p1b8 run3. Tests `FullWidthPath` and
+  `test_power_fails_counts_a_path_through_thin_track` (HW-008, HW-010).
+- CI workflow `.github/workflows/fab-release.yml` (plan 08 section 4.6, owner answer 17): test, build and publish jobs; on a push
+  to `main` it refreshes the draft release `fab-latest` with the P1 order package, on a published release it attaches the files;
+  without a stored `board-p1/` it reports NOT RUN. Hash-pinned test tools `scripts/requirements-fab-test.txt`; structure test
+  `scripts/tests/test_fab_release_workflow.py`; proposed DEV-007 (release instead of a committed `hw/fabrication/<rev>/`). Not
+  run on GitHub yet (HW-008, HW-009).
+- Spike routing flow: `run_pcb.sh` switch `PRESTITCH=1` (default off) gives the plane pads their via before the router runs and
+  locks it (fan-out first); `pcb_stitch.py --reuse-max` limits the track to an existing via; the stitcher tries a track with one
+  corner when every straight escape is blocked (P1 batch of 2026-11-18; plan 08, HW-008).
+- P1 placement keeps the full ESP32-C3-MINI-1 courtyard (antenna keep-out included) free of movable parts (owner decision 2026-11-18), the module moves 5 mm towards the antenna-side edge (MOD_OFF -4.0 mm, owner decision 2026-11-18), and C7, C24, C25, C26, R_SU1, R_SU14, R_SU15, R8 are 0402 (JLCPCB basic parts by web lookup); surge test uses the 0402 power rating (ADR-0023, HW-005, HW-010).
+- Simplified schematic for one-sided placement (ADR-0023, owner decisions 2026-11-18): step 3 = both ILIM switches on with R_ILIM3 = 56.2 k (no switch state above the step 3 maximum; NOR gate U13 removed; replaces trim T1), TPS3840 RESET and TPS2553 FAULT wired on GATE_OK_RB with one 3V3 pull-up (U10 and R6 removed; a limiter fault now closes the gate), SOD-323 zeners, SC-70 logic, eleven 0402 resistors, button on the GPIO internal pull-up (R13 removed), 0805 spare footprints; package-aware sourcing with web-looked-up LCSC numbers; 97 parts instead of 101; strict ERC 0 findings (HW-010, HW-016, HW-007, SW-009).
+- Proposed ADR-0022 (how P1 gets its parts onto the board): the measured one-sided placement does not fit on 46 mm; proposed two-sided Standard PCBA for P1 and part reduction (switch with selectable current limit, fixed-delay supervisor) for the next revision; the owner decides (HW-008, MECH-001, HW-010).
+- Order package scripts for P1 (plan 08 section 4.5; not yet run on a P1 board): `scripts/fab_p1.sh`, `scripts/fab_package.py`, `scripts/fab_check.py` (BOM/CPL checks, missing-LCSC list policy, reproducibility compare), `scripts/panel_tabs.py` and `scripts/panel_p1.json` (KiKit 1 x 1 panel, tabs at chosen azimuths), `scripts/fab_missing_lcsc.txt`, hash-pinned `scripts/requirements-fab.txt`; 38 tests. The CI release workflow (plan 08 section 4.6) is not written yet (HW-008, HW-009).
+- Spike generator switch `P1=1` (off by default): every assembled part on the top side, LED capacitors beside their LEDs, movable radius 18.4 mm, top-side tab region, ring links on the capacitor's layer, sourcing fields and DNP marks on the board; 16 tests (plan 08 step 5, HW-008).
+- Power check of the spike board follows the HW-017 split: cases VBUS (J1 to R22) and VBUS_IC (R22 to the TPS2553 input), with a test (HW-010, HW-017, plan 08 step 3).
+- Evidence report `sw-target-build-2026-11-18.md`: `sw/app` builds for `esp32c3_devkitm` with Zephyr v4.5.0 and SDK 1.0.1 (FLASH 134 884 B, 3.22 %, 0 warnings; simple boot, no MCUboot); host tests 20 of 20 pass on `native_sim/native/64`. The gate logic is not linked into the target image; nothing flashed or run on hardware (plan 07, SW-005, SW-009).
+- Spike generator for the P1 board (plan 08): HW-017 damping link R22 (0 ohm 1206) between the connector-side net VBUS (J1, TVS1, U6) and VBUS_IC, with per-net main-path routing rules; trim T1 under the owner rule (R_ILIM3 27.7 k 0.1 % 0805 replaces 27.4 k + R20 301 ohm, windows recalculated). The stored two-sided board is not regenerated (HW-010, HW-017).
+- Owner decisions of 2026-11-17 for the prototype board P1 (journal `2026-11-17-p1-order-owner-decisions.md`): one-sided SMD assembly at JLCPCB Economic PCBA, 0.15 mm tracks, 4 layers HASL lead-free, own KiKit panel, CI draft release of the order files. HW-008 (amended: hand-soldered through-hole J1 allowed), HW-016 (spares within [10] mm), HW-017 and ADR-0021 approved or accepted by the owner; HW-010 gets an owner rule for part trims; ADR-0020 option B not accepted (HW-008, HW-010, HW-016, HW-017, ADR-0020, ADR-0021).
 - Spike board: real capacitor parts for C2 (4.7 uF 16 V), C3 (10 uF 25 V), C5 (2.2 uF 16 V), C6 (10 uF 10 V) with MPN and LCSC numbers, and a DC-bias bound script `hw/sim/scripts/dc_bias_caps.py` (Samsung DC-bias curves read for each part; HW-014, HW-015, HW-010). BOM references without MPN: 2 (J1, TVS2; closed by a later entry).
 - DC-bias analysis extended to the 100 nF X7R capacitors (CL10B104KB8NNN, retention 0.998 at 5.6 V) and to the room for the spares C4 and C32 (65 uF nominal together); protection-part capacitance bounded at 1 nF against 3.67 uF of room on VBUS_IC (snippets); a real spare value still open (HW-014, HW-015).
 - Spike board TVS1 chosen by the owner under surge option S1 (measure the real hot-plug surge first, RV-013 finding 9): Nexperia PESD5V0S1BA,115 (LCSC C19224) in the sourcing table; a plain 5 V TVS clamps at 10 to 14 V, so the 6 V and 7 V parts rely on the supply-pin resistors and zeners and on the TC-210 step 4 measurement (HW-010).
@@ -27,12 +108,139 @@ Hardware and mechanical revisions are named in the entries (for example "hardwar
 - HW-014 redrafted after the owner decision of 2026-11-08 (lower bound = part makers' minimum, upper bound [100] uF); draft requirement HW-016 (spare capacitor footprints on +5V) with TC-216; bound script with a sensitivity table.
 
 ### Changed
+- The BOM names the Yageo RT0603BRD0747KL (C326725) and RT0603BRD0756K2L (C705784) for the ILIM resistors of the approved HW-010 table; the FH TD03G parts had 0 stock on 2026-11-22. `scripts/fab_missing_lcsc.txt` no longer lists R22. `tests/data/full.net` refreshed (105 components).
+- Owner decisions of 2026-11-22 on the P1 rework (journal `2026-11-22-owner-decisions-p1-rework.md`): restore U10 and R6
+  in the gate, a 10 k resistor on GPIO0, add the P3 CC-pin protection, another supervisor part instead of U5, keep R_ILIM3
+  at 56.2 k until the model includes drift and ageing, R22 as a 1206 shunt of 2 to 5 mohm, the whole centre of the ring as
+  the button, enforce the input-path rules. Recorded now: MECH-001 upper limit 60 mm (approved amendment; placer limit
+  `MAX_DIM_MECH001` 60.0; board test against it, board-p1 59.24 mm); HW-017 amendment: J1 to U7 at most [100] mV at
+  1.5 A with the link at [10] mohm, gated by `pcb_power_check.py` `input_path.within_budget`, `fab_p1.sh` and
+  `test_board_p1.py` (board-p1: 83.0 mV); ADR-0022 Superseded; DEV-004 approved for the spike and P1; DEV-007 approved;
+  DEV-008 accepted as a record (HW-017, MECH-001, ADR-0022, DEV-004, DEV-007, DEV-008).
+- Placement and finishing tools for the next P1 board (RV-016 rows 12, 14, 15, 18). The placer enforces the plan 08
+  input-path rules with P1 (TVS1, U6 and R22 to the nearest J1 VBUS pad; R22 to U7): a rule to a fixed part costs per mm
+  beyond the limit to the nearest of its points (`pcb_place.Placer`, `pcb_full.resolve_rules`); the two-sided default
+  build keeps its old rules. `pcb_power_check.py` reports the J1-to-U7 drop (`input_path`: board-p1 68.0 mV in copper,
+  83.0 mV with R22 at 10 mohm, 98.0 mV at 20 mohm, at 1.5 A); report only, the budget is an owner decision; `fab_p1.sh`
+  prints it. `pcb_finish.py` writes the bottom silkscreen map of owner answer 13 (each top part's reference mirrored on
+  B.SilkS, moved up to 2 mm to clear bottom pads, vias, the edge and other texts; a later pass replaces the earlier texts)
+  and an identification text "busy-light P1 <commit>", or "P1 <commit>" at 0.8 mm when that is all that fits (two passes on
+  a copy of board-p1: 65 of 89 top parts mapped, "P1 5550e96" placed, no silkscreen finding from the new texts; board-p1
+  itself is unchanged). Tests:
+  `test_pcb_place.py::FixedPartnerRules`, `test_pcb_full.py::RuleMisses`, `test_pcb_power_check.py`,
+  `test_pcb_finish.py` (HW-003, HW-008, HW-017, RV-016).
+- Records after RV-016 and RV-017: RISK-047 to RISK-053 (U5 missing makes the gate fail open; firmware can hold the gate
+  open through GPIO6; gate node reads "OK" with VBUS gone and 3V3 up; reset loop under overload; HASL at the 0.4 mm-pitch
+  U1; R22 resistance or not placed; part availability) and RISK-044 updated; DEV-008 (Proposed: P1 built before the
+  readiness GO and partly before the requirement texts were approved); DEV-007 updated (no `--clobber` on a published
+  release); journal `2026-11-22-reviews-and-gates-board-p1.md` with the CI run IDs and results. The P1 placer gives the DNP
+  spares no solder paste, so the bottom paste layer of the next board is empty (test `test_dnp_spares_have_no_solder_paste`,
+  failed before) (HW-008, HW-010, HW-017, SW-007, SW-009, SYS-020, RV-016, RV-017).
+- Goldfish review RV-017 of ADR-0023 (asked for by RV-016 row 6): **rejected as written**. Decision 1 (step 3 = both
+  switches) holds up, but its 2.8 mA lower margin is inside the model error; decision 2 (FAULT and RESET on one node pulled
+  up to 3V3) puts GPIO6 directly on the gate node, breaks the read TPS3840 pull-up rule, gives a reset loop that SW-007 does
+  not count and latches at step 1 under overload; the firmware maps select 3 alone to the top step, which is the step-2
+  current on P1; no test models the as-built gate (`test_gate_logic.py` models the old one). ADR-0023 gets a review line,
+  its status is unchanged; the owner decides rows 1, 2, 6 and 12 (HW-010, SW-005, SW-007, SW-009, SYS-020, ADR-0018,
+  ADR-0023, RV-017).
+- Order package and release workflow after review RV-016 (rows 1, 16, 27). `scripts/fab_package.py full-bom --schematic`
+  adds the schematic symbols that kicad-cli 10 leaves out of the BOM: the full BOM of board-p1 now lists C4 and C32 as DNP
+  (HW-016, TC-216) and the test points as "excluded from BOM". `fab-release.yml`: runs test and build on pull requests
+  (never publish); the build job fails after the upload when a gate failed (before: green, publish skipped silently); new
+  `scripts/fab_release_notes.sh` writes the fab_check result, the missing-LCSC list and the owner waivers into the job
+  summary and the release notes (plan 08 4.5 promised the list; the notes were a fixed text); the notes are made in the
+  build job, so the publish job still runs only `gh`; a published release that already has files is not overwritten (no
+  `--clobber`). The pin test of `requirements-fab.txt` counts only imports that run at load time (an import inside a
+  function, kiutils in `lib_tables.py`, is not needed; `pcb_layout_check.py` ran without kiutils) and still fails without
+  scipy. Tests: `test_fab_check.py::test_full_bom_keeps_the_dnp_spares_of_the_schematic` (real board-p1 schematic),
+  `test_fab_release_workflow.py` (HW-008, HW-009, HW-016, RV-016).
+- Order and board gates after review RV-016 (rows 1, 11, 12, 13, 17, 19, 20, 26, 28, 41, 43). `scripts/fab_check.py`: the
+  ILIM resistors must have exactly the ADR-0023 values (`ILIM_VALUES`; "27.7k 0.1%" passed the old "0.1%" test); a
+  must-place part (the HW-010 gate parts and the HW-017 link R22, `MUST_PLACE`) without an LCSC number fails even when
+  `fab_missing_lcsc.txt` lists it, unless the new owner file `scripts/fab_owner_waivers.txt` names it (no waiver given);
+  the bottom paste Gerber must be empty. New `hw/kicad/spike-gate/src/pcb_layout_check.py` measures the ADR-0016
+  proximity rules and the plan 08 input-path rules on a board file (board-p1: 9 rules missed); `scripts/fab_p1.sh` runs it
+  as a gate, so the order script now fails on board-p1 (placement rules, and fab_check on U5 and R22). The placer records
+  the rules it misses in `placement.json` and prints them (`pcb_full.rule_misses`); the HW-016 rule is 7.0 mm (7.5 mm
+  allowed 10.455 mm). `tests/test_board_p1.py`: the U9 courtyard overlaps must be exactly the 14 fixed ring parts; only
+  C4 and C32 may be DNP parts on the bottom; two tests record the known defects of board-p1 as expected failures (the
+  placement rules; the main path at 0.6 mm, which has 0.45 mm segments). The `ci.yml` hardware job runs the 430 spike-gate
+  tests on every push and pull request (before: only `fab-release.yml` on `main`), with ngspice, in the image pinned by the
+  digest that `fab-release.yml` uses. Tests: `test_pcb_layout_check.py`, `test_fab_check.py`, `test_fab_p1_script.py`,
+  `test_ci_workflow.py`, `test_pcb_full.py::RuleMisses` (each new test failed on the old code where it checks a change)
+  (HW-008, HW-010, HW-016, HW-017, ADR-0016, ADR-0023, RV-016).
+- Plan 08 revision 5 (section 0: the state after the build) and goldfish review RV-016 of the plan and the stored P1 board:
+  **not ready to order** (45 findings; readiness pass not run). Blocking: a missing U5 makes the gate fail open and the order
+  check allows it; GPIO6 sits directly on the gate node; the hold-off pull-up moved to 3V3 against the TPS3840 evidence; the
+  CC-pin protection chosen on 2026-11-07 is not on the board; 5 of 15 placement rules and the 4 input-path rules are missed;
+  the main path has 0.45 mm segments; the full BOM leaves out C4 and C32; MECH-001 is exceeded; PR CI does not run the
+  spike-gate tests. The README and `board-p1/README.md` now say "not ready to order" (HW-003, HW-008, HW-009, HW-010,
+  HW-016, HW-017, MECH-001, ADR-0023, RV-016).
+- The default `pytest` run (and so the `ci.yml` python-tools job) includes the 54 analysis tests of `hw/sim/scripts`;
+  before, only the fab-release workflow on `main` ran them. The job installs ngspice: without it the 16 surge tests
+  skip (CI run 44904291971: 167 passed, 16 skipped). Test `scripts/tests/test_ci_workflow.py` (HW-010, HW-013, HW-014).
+- Images without a page (found by `scripts/readme_facts.py`): the four spike-board images are shown in the frozen board's
+  `hw/kicad/spike-gate/board/README.md`, the pipeline report links its render, and the housing concept image of
+  2026-11-04 (replaced in the README by the generated housing model on 2026-11-07, named nowhere) is deleted; git keeps
+  it. Test `test_every_report_image_is_shown_somewhere` fails for an image that no Markdown file shows.
+- README updated to the state of 2026-11-21: P1 board, panel and checks in the gallery instead of the frozen spike board;
+  status table with 105 requirements (21 approved), 23 ADRs (19 accepted, 2 proposed, 2 superseded), 15 reviews, the target
+  build of `sw/app` and the checks of `scripts/ci_hw.sh`; how to build the P1 order package. `board-p1/README.md` shows the
+  renders. `hw/sim/`, `mech/analysis/` and `sw/app/tests/` READMEs list their files and how to run them.
+- P1 placement (plan 08, HW-016, HW-008): the do-not-populate spares C4 and C32 go on the bottom side (not assembled, so the
+  assembly stays one-sided) in 1206 again, held within 7.5 mm of U7 by a hard layout rule and pin ties (batch p1b3 put C4 24.8 mm
+  from U7 pin 6, against HW-016's [10] mm); the LED capacitors keep out of boxes around four panel tabs at 105, 217.5, 285 and
+  330 deg (`pcb_rules.P1_TAB_AZIMUTHS`, new `scripts/fab_p1.sh` default), so the 3 mm capacitor-to-tab rule can hold (it could
+  not before: best 2.42 mm). `run_meta.json` records the real router thread count. `scripts/ci_hw.sh` gates `board-p1/` with
+  the strict wrapper. New `src/pcb_sourcing.py` copies sourcing fields from the schematic to a stored board.
+- Sourcing: U6 USBLC6-2P6 has LCSC C15999 (web search 2026-11-18); `scripts/fab_missing_lcsc.txt` now lists only R22 (candidate
+  C190124, 20 mohm max against HW-017's [10] mohm) and U5 (no listing found) (HW-008, HW-017, HW-010).
+- Spike board tooling, no via-in-pad (plan 08 step 4, HW-008, RV-014): one rule `pcb_rules.via_hits_smd_pad` (any net, pad box grown by 0.05 mm) used by the stitcher (the U9 via-in-pad shortcut is removed; the via goes beside the pad with a short track) and by the grid router of `pcb_fix.py` (and so the LED ring cells of `pcb_ring.py`); `pcb_fabcheck.py` reports `via_in_smd_pad` and fails on it with `--no-via-in-pad`. The stored board `board/` has 35 such vias (32 in the LED ring cells, 2 at DZ15, 1 at C32; none at U9) and is not regenerated.
 - Strict waiver limits of the spike profile `stitched-4l` lowered to the observed counts (owner decision 2026-11-08): `net_conflict` 0, `footprint_symbol_mismatch` 2 (C3, C4 only), `courtyards_overlap` 14 (U9 only); test added (DEV-002, DEV-004).
 - Spike board: U1 and U9 schematic symbols carry the datasheet pad numbers (`layout_full.PAD`), `pcb_full.PADMAP` deleted, test points out of the BOM in the schematic; batch ring7 removes all 77 `net_conflict` findings (98 to 16 findings), no run passes the strict gate (HW-010, DEV-002).
 - README images and captions of the hardware spike regenerated from the best of 12 runs (HW-010).
 - Hardware spike PCB placement: soft ties pull the VBUS_IC and +3V3 current paths together (weights 1.5 and 3.0; in one 12-run batch two boards pass the strict gate and all power drops are under the 50 mV assumption); clean-up re-routes `connection_width` findings (HW-010).
 
 ### Fixed
+- ADR-0026 lost its criteria, alternatives and comparison sections in the revision 8 commit (`7064a1f`) through a slicing error in an edit script; restored in full with the revision 9 content (plan 09 revision 9, RV-018 note).
+- CI regressions of the follow-up commit f7850ce: `scripts/check_license_map.py` now lists the evidence files `ilim-resistors.yaml`, `rlm12.yaml` and `tps3808g01.yaml` (the check failed for them), and a docstring in `scripts/tests/test_fab_check.py` is wrapped to the line limit (two E501 findings and a format finding). `ruff check .`, `ruff format --check .`, `check_license_map.py` and the root pytest (197 passed) pass.
+- `scripts/requirements-fab.txt` now pins scipy (moved from `requirements-fab-test.txt`): the power check of
+  `scripts/fab_p1.sh` imports it, and the fab-release build job installs only `requirements-fab.txt`, so that job would
+  have stopped at the power check. Found by RV-015. Test `test_fab_requirements_cover_what_fab_p1_runs` (fails before);
+  `fab_p1.sh` run on 2026-11-21 with only `requirements-fab.txt`: exit 0 (HW-008).
+- Spike finishing (`pcb_finish.py`): fiducials are placed before the reference designators, and the designators avoid them.
+  Placed after the texts, a fiducial took a designator's spot in each of three passes on the p1b13 board
+  (`silk_over_copper`). Test `OnABoard.test_no_designator_on_a_fiducial` (HW-010).
+- CI workflows: the `kicad/kicad:10.0` image has no pip; the jobs of `fab-release.yml` and the `hardware` job of `ci.yml`
+  install `python3-pip` with apt before `pip install`, and install the pins with `--ignore-installed` (CI run 44827760397:
+  pip could not uninstall Debian's `typing_extensions`). Found 2026-11-20; `fab-release.yml` has not run on GitHub yet.
+  Tests `test_pip_comes_from_apt_before_it_is_used`, `test_pip_leaves_the_debian_packages_alone` (HW-008, HW-009).
+- Spike clean-up grid router (`pcb_fix.py`, also used by the LED ring generator): grid points, and so its vias, sit on the
+  0.1 um Specctra grid like the stitch vias. Batch p1b10: ring vias at y = ...8913 mm came back from the router with
+  off-centre track ends and the clean-up broke ring stubs it could not lay again. Test
+  `test_grid_points_sit_on_the_session_grid` (HW-008).
+- Order script `scripts/fab_p1.sh`: `pcb_fabcheck` now runs with `--no-via-in-pad` (owner answer 9; before, a via in a pad
+  was reported but did not fail the package), and the power check (drop and full-width path) is a gate. The stored-board
+  test runs the power check too. Tests `scripts/tests/test_fab_p1_script.py` (fail on the old script),
+  `test_supply_drops_and_full_width_paths` (HW-008, HW-010).
+- Spike LED ring generator (`pcb_ring.py`): the data chain is laid before the power and ground stubs. With the stubs first,
+  the capacitors turned away from the panel tabs closed four data gaps; the router then left D14 to D15 open in all four
+  routings of one placement. Data first completes all 47 ring links on the four P1 placements. Test
+  `test_data_chain_is_laid_before_the_power_stubs` (plan 08 section 4.5, HW-008).
+- Spike clean-up (`pcb_fix.py`): pieces of the supply nets re-routed by the clean-up took the 0.15 mm default width; on batch
+  p1b7 run3 the TPS2553 output current ran through 0.15 mm track to the regulator. Supply nets now keep their current-based
+  width (`NET_WIDTH`); +5V pieces at LED ring cell pads keep the 0.25 mm ring stub width. Tests `CleanupWidths` (HW-008,
+  HW-010). Boards cleaned up before this change are not checked for thin supply tracks.
+- Spike stitcher: new stitch vias sit on the 0.1 um Specctra grid, so router tracks end on their centre (batch p1b6: 18 to 28
+  `track_not_centered_on_via` per run made the clean-up rip up good pre-route vias, among them the +5V via of U7 pin 6); a
+  plane net without a current rating (GND) is retried at the 0.15 mm default width, so the 0.4 mm-pitch GND pads of U1
+  (TUSB321) can be stitched. Regression tests `StitcherViaOnTheSessionGrid`, `StitcherFinePitchGround` (plan 08, HW-008).
+- Spike routing flow: the copper reader of the stitcher and of `pcb_check.layout_rules` skipped every locked track (KiCad 10
+  writes `(locked yes)` between `width` and `layer`). With `PRESTITCH=1` the pre-route stitch therefore put vias on locked LED
+  ring tracks (batch p1b5: shorts and crossing tracks). One reader `pcb_rules.read_segments` for both; regression tests
+  `StitcherSeesLockedTracks` and `ReadSegments` (plan 08 section 4.3, HW-008).
+- Spike schematic: the DNP spare capacitors C4 and C32 are excluded from the BOM on the symbol too, as on the P1 footprint
+  (strict DRC `footprint_symbol_mismatch`, HW-016).
 - Hardware spike PCB gate: wires under 0.15 mm (default track now 0.15 mm), dangling vias (removed), hole-to-hole of stitch vias, silk findings (waiver DEV-006, declined by the owner 2026-11-08, off by default); the stitcher joins pads to existing ground vias, layer by layer, in retry passes; 6 new tests. Antenna strip set to the 4.6 mm of the ESP32-C3-MINI-1 datasheet and the module pad area placed outside it (the 21 unconnected module ground pads are gone); 1 mm slot beside the antenna end with a copper keep-out. Placement: VBUS_IC weight and movable-part radius 17.3 mm; +3V3 track 0.3 mm; optional two-pass routing (`KEYFIRST`, `FR_THREADS` in `run_pcb.sh`). VBUS_IC main path (J1, TPS2553 input, C2, TVS1) routed first at 0.6 mm and locked, branches at 0.2 mm (`KEYFIRST=1`); via removal keeps layer changes. Post-route clean-up `src/pcb_fix.py` (grid router for the leftover connections, rip-up of clearance findings, stub removal), 6 tests: on run pl8 the final board has 1 unconnected item (/ILIM) and only the tolerated known findings; the Freerouting step still varies between runs, so the board is not complete and the full flow is not proven repeatable (HW-010, HW-005, ADR-0003, ADR-0012).
 - Hardware spike gate: ERC and DRC project files switch on the default-ignored checks (ignored-check maxima now 0); ERC has 0 findings; six repeat routing runs gave 2 complete boards (0 open items) and 4 with 1 to 3 open items; the LED stand-in footprint-filter finding is waived under DEV-002 (HW-010, ADR-0012, DEV-002).
 - Hardware spike board uses datasheet-based footprints: ESP32-C3-MINI-1 (figure 11-1 numbers tested), TUSB321 X2QFN-12 redrawn from the TI drawing (the old pattern was wrong), TLV75733P SOT-23-5 for the 3.3 V regulator (ADR-0019, enable tied to input), WS2812B-2020 LED symbol with matching pin numbers (the old pairing mismatched the pins). New: `run_best.sh` (best of N routing runs), `pcb_power_check.py` (voltage drop and plane cuts), router rule to keep VBUS_IC and +3V3 off the plane layers (`OUTER_ONLY`). With the real footprints no run passes the strict gate yet (best: 1 open item); the VBUS_IC path drops 85 mV at 1.5 A in the best run (HW-010, ADR-0004, ADR-0019, DEV-002).

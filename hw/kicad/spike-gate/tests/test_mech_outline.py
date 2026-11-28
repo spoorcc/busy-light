@@ -20,7 +20,7 @@ class Table(unittest.TestCase):
         self.assertEqual(MO.m("N_LED"), 16)
         self.assertEqual(MO.m("D_RING"), 40.0)
         self.assertEqual(MO.m("POST_AZ"), (30.0, 150.0, 270.0))
-        self.assertEqual(MO.m("MOD_OFF"), 1.0)
+        self.assertEqual(MO.m("MOD_OFF"), -4.0)   # ADR-0023, owner 2026-11-18
 
     def test_antenna_strip_is_the_datasheet_length(self):
         """ESP32-C3-MINI-1 datasheet fig 11-1: 16.6 mm - 11.2 mm pad area - 0.8 mm = 4.6 mm."""
@@ -57,6 +57,16 @@ class Table(unittest.TestCase):
         self.assertAlmostEqual(MO.largest_dim_mm(MO.USB_MOUTH_R), 57.45, places=2)   # report 4.1: 57.43
         self.assertLess(MO.largest_dim_mm(MO.USB_MOUTH_R), MO.m("MAX_DIM_MECH001"))
 
+    def test_housing_limit_is_66_mm_since_2026_11_28(self):
+        """Owner decision 2026-11-28 (ADR-0027 accepted, MECH-001 amendment): upper limit 66 mm (was 65 mm on 2026-11-27, 60 mm
+        on 2026-11-22). The generator guard sits 0.2 mm below it and rejects a longer housing; one under the guard is accepted."""
+        self.assertEqual(MO.m("MAX_DIM_MECH001"), 66.0)
+        self.assertAlmostEqual(MO.MAX_DIM_SPIKE_MM, 65.8, places=6)
+        self.assertAlmostEqual(MO.check_largest_dim(37.0), 64.6, places=6)
+        self.assertAlmostEqual(MO.check_largest_dim(38.1), 65.7, places=6)
+        with self.assertRaises(ValueError):
+            MO.check_largest_dim(38.3)                          # 65.9 mm
+
     def test_led_azimuths(self):
         az = MO.led_azimuths()
         self.assertEqual(len(az), 16)
@@ -81,9 +91,20 @@ class Table(unittest.TestCase):
 
     def test_region_excludes_module_and_antenna(self):
         self.assertFalse(MO.region_rect_ok("F", 0, -1, 2, 1))
-        self.assertFalse(MO.region_rect_ok("B", -5, -1, -3, 1))
+        ax0, ay0, ax1, ay1 = MO.antenna_strip()          # the strip moves with MOD_OFF (ADR-0023)
+        mx = (ax0 + ax1) / 2
+        self.assertFalse(MO.region_rect_ok("B", mx - 1, -1, mx + 1, 1))
         self.assertTrue(MO.region_rect_ok("B", 5, -1, 7, 1))
         self.assertFalse(MO.region_rect_ok("F", 18, 0, 20, 1))       # beyond the move radius
+
+    def test_top_side_tab_only_with_p1(self):
+        """Plan 08 section 4.2: with P1 the top side may use the tab as well (default off, the old rule)."""
+        tab = (24.0, -1.0, 26.0, 1.0)
+        self.assertTrue(MO.region_rect_ok("B", *tab, r_move=17.3, tab_r=29.0))
+        self.assertFalse(MO.region_rect_ok("F", *tab, r_move=17.3, tab_r=29.0))
+        self.assertTrue(MO.region_rect_ok("F", *tab, r_move=18.4, tab_r=29.0, top_tab=True))
+        self.assertFalse(MO.region_rect_ok("F", 24.0, -1.0, 28.9, 1.0, r_move=18.4, tab_r=29.0, top_tab=True))   # tab end
+        self.assertFalse(MO.region_rect_ok("F", 0, -1, 2, 1, r_move=18.4, top_tab=True))      # still not on the module
 
 
 class Placer(unittest.TestCase):

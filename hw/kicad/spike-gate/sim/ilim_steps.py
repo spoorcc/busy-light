@@ -7,6 +7,7 @@ Usage: python3 ilim_steps.py   (prints the table; exit 1 if a requirement check 
 Source labels: [DS] TPS2553 datasheet SLVS841G eq. (1)-(3), recommended RILIM 15..232 kohm;
 [ADR] ADR-0010; [HW] HW-010; [ASSUME] assumption, not read from a source in this repository.
 """
+import math
 import sys
 
 # ---- [DS] limit equations, mA, R in kohm. They include temperature and process, not the resistor tolerance.
@@ -15,6 +16,33 @@ def ios_nom(r_k): return 23950.0 / r_k ** 0.977
 def ios_min(r_k): return 25230.0 / r_k ** 1.016
 
 R_MIN_K, R_MAX_K = 15.0, 232.0          # [DS] recommended range for the total RILIM
+
+# ---- [DS] SLVS841G section 6.5 table points (R kohm, min, nom, max mA); evidence TPS2553.ios.rilim_* in hw/evidence/parts/tps2553.yaml.
+# The 15 k row is specified for TJ -40 to 105 degC, the 20 k and 49.9 k rows for -40 to 125 degC, the 210 k row without a range.
+IOS_TABLE = ((15.0, 1610.0, 1700.0, 1800.0), (20.0, 1200.0, 1295.0, 1375.0), (49.9, 475.0, 520.0, 565.0),
+             (210.0, 110.0, 130.0, 150.0))
+
+
+def table_interp(r_k, col):
+    """Log-log interpolation of a table column (1 = min, 2 = nom, 3 = max) between the two neighbouring points, or None
+    outside 15 to 210 kohm. A local power law between measured points; not a datasheet statement."""
+    for a, b in zip(IOS_TABLE, IOS_TABLE[1:]):
+        if a[0] <= r_k <= b[0]:
+            f = (math.log(r_k) - math.log(a[0])) / (math.log(b[0]) - math.log(a[0]))
+            return math.exp(math.log(a[col]) + f * (math.log(b[col]) - math.log(a[col])))
+    return None
+
+
+def ios_min_anchored(r_k):
+    """The lower of the equation minimum and the table interpolation (the equation lies above the table at 15 and 20 k)."""
+    t = table_interp(r_k, 1)
+    return ios_min(r_k) if t is None else min(ios_min(r_k), t)
+
+
+def ios_max_anchored(r_k):
+    """The higher of the equation maximum and the table interpolation."""
+    t = table_interp(r_k, 3)
+    return ios_max(r_k) if t is None else max(ios_max(r_k), t)
 
 # ---- [HW]/[ADR] requirement numbers
 STEP1_MAX_MA = 623.0                     # [HW] HW-010: at most 623 mA at step 1
@@ -70,16 +98,18 @@ def r_total_k(r1_k, tol, branch_k=(), rds=RDS_ON_MAX_OHM, sign=+1):
     return 1.0 / g
 
 
-def limits(r1_k, tol, branches=(), n_off=0, leak_a=I_LEAK_A, v_ilim=V_ILIM_V, rds_max=RDS_ON_MAX_OHM):
+def limits(r1_k, tol, branches=(), n_off=0, leak_a=I_LEAK_A, v_ilim=V_ILIM_V, rds_max=RDS_ON_MAX_OHM, anchored=False):
     """(min, nom, max, (R_hi, R_nom, R_lo_eff)) in mA / kohm.
     branches: kohm values of the branches switched ON (each with its series Rds). n_off: off MOSFETs that leak.
-    Leakage is a current sink from ILIM to GND of leak_a at v_ilim, which only raises the limit."""
+    Leakage is a current sink from ILIM to GND of leak_a at v_ilim, which only raises the limit.
+    anchored: use the lower of the equation and the datasheet table for the minimum, the higher for the maximum (RV-017 row 6)."""
     r_hi = r_total_k(r1_k, tol, branches, rds_max, +1)
     r_lo = r_total_k(r1_k, tol, branches, RDS_ON_MIN_OHM, -1)
     r_nom = r_total_k(r1_k, 0.0, branches, 0.5 * rds_max, +1)
     g_lo = 1.0 / (r_lo * 1e3) + n_off * leak_a / v_ilim
     r_lo_eff = 1e-3 / g_lo
-    return ios_min(r_hi), ios_nom(r_nom), ios_max(r_lo_eff), (r_hi, r_nom, r_lo_eff)
+    f_min, f_max = (ios_min_anchored, ios_max_anchored) if anchored else (ios_min, ios_max)
+    return f_min(r_hi), ios_nom(r_nom), f_max(r_lo_eff), (r_hi, r_nom, r_lo_eff)
 
 
 def three_steps(r1, r2, r3, tol, **kw):
@@ -166,6 +196,78 @@ def candidate_c():
     return 47.0, 56.2, round(sum(R3_PARTS_K), 6)
 
 
+def candidate_p1():
+    """Plan 08 trim T1 (2026-11-17): one E192 0.1 % part, 27.7 k, replaces the 27.4 k + 301 ohm series pair."""
+    return 47.0, 56.2, 27.7
+
+
+def candidate_both_on():
+    """ADR-0023 (owner 2026-11-18): step 3 = both switches on. R_ILIM3 is 54.9 k since the owner decision of 2026-11-24
+    (option A of analysis-ilim-drift.md: the only value whose step 3 margin survives tolerance and TCR)."""
+    return 47.0, 56.2, 54.9
+
+
+def both_on_windows(r1, r2, r3, tol, **kw):
+    """{state: (min mA, max mA)} for the non-exclusive gate of ADR-0023: step 1 (both off, two switches leak), step 2
+    (switch 2 on), en3_only (switch 3 on alone, a legal state), step 3 (both on, no off switch)."""
+    s = {"1": limits(r1, tol, (), 2, **kw), "2": limits(r1, tol, (r2,), 1, **kw),
+         "en3_only": limits(r1, tol, (r3,), 1, **kw), "3": limits(r1, tol, (r2, r3), 0, **kw)}
+    return {k: (v[0], v[2]) for k, v in s.items()}
+
+
+# ---- Owner decision 3 of 2026-11-22 (RV-017 row 6): resistor drift after assembly and over life, and a drift budget.
+# Each term is a fractional change of every ILIM resistor, added linearly in the worst direction to the initial tolerance (the
+# conservative stack; an RSS sum is not used because the terms are not shown to be independent). The absolute terms of the
+# datasheet limits (0.01 to 0.05 ohm) are below 1e-6 of 47 kohm and are left out.
+T_REF_C = 25.0                           # [DS] TCR reference temperature (Yageo RT table 4; Vishay MCT clause 4.8 uses 20 degC)
+T_RESISTOR_C = (-20.0, 85.0)             # [ASSUME] resistor temperature range; no system operating-temperature requirement exists
+DRIFT_SETS = {
+    # [DS] Yageo RT series, product specification V.16 of 2025-05-06 (RT0603BRD07 = 0.1 %, 25 ppm/degC): tables 2 and 4.
+    # Guaranteed limits, not typical values: resistance to soldering heat and life/endurance 1000 h at 70 degC each +-(0.5 % + 0.05 ohm).
+    "yageo_rt_guaranteed": {"tol": 0.001, "tcr_ppm": 25.0, "solder": 0.005, "life": 0.005},
+    # [DS] Vishay Beyschlag MCT 0603 precision, document 28700 rev. 16-Aug-16: stability class 0.25 applies above 10 kohm;
+    # soldering heat +-(0.05 % R + 0.01 ohm), endurance 70 degC 1000 h standard mode +-(0.1 % R + 0.02 ohm). Not on the BOM.
+    "vishay_mct_class025": {"tol": 0.001, "tcr_ppm": 25.0, "solder": 0.0005, "life": 0.001},
+    # the analysis of record before 2026-11-22: initial tolerance only (ADR-0023 numbers)
+    "tolerance_only": {"tol": 0.001, "tcr_ppm": 0.0, "solder": 0.0, "life": 0.0},
+}
+
+
+def tol_eff(tol, tcr_ppm, solder, life, t_range=T_RESISTOR_C):
+    """Worst-case fractional deviation of one resistor: tolerance + TCR over the largest excursion from T_REF_C + drift terms."""
+    dt = max(abs(t - T_REF_C) for t in t_range)
+    return tol + tcr_ppm * 1e-6 * dt + solder + life
+
+
+def both_on_margins(r1, r2, r3, tol, **kw):
+    """Margins in mA of the ADR-0023 gate to the HW-010 numbers; s3_max also covers the legal state 'switch 3 alone'."""
+    w = both_on_windows(r1, r2, r3, tol, **kw)
+    return {"s1_min": w["1"][0] - STEP1_MIN_MA, "s1_max": STEP1_MAX_MA - w["1"][1],
+            "s3_min": w["3"][0] - STEP3_MIN_MA, "s3_max": STEP3_MAX_MA - max(v[1] for v in w.values())}
+
+
+def drift_budget(r1, r2, r3, keys=("s1_min", "s1_max", "s3_min", "s3_max"), **kw):
+    """Largest common fractional resistor deviation (tolerance included) for which the named margins all stay >= 0
+    (bisection to 1e-7). The figure to compare with tol_eff() of a part."""
+    lo, hi = 0.0, 0.05
+    if any(both_on_margins(r1, r2, r3, lo, **kw)[k] < 0 for k in keys):
+        return 0.0
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        if all(both_on_margins(r1, r2, r3, mid, **kw)[k] >= 0 for k in keys):
+            lo = mid
+        else:
+            hi = mid
+    return lo
+
+
+def best_r3_for_budget(r1, r2, series=None, **kw):
+    """E192 value of R_ILIM3 (40 to 70 k) with the largest step-3 drift budget; returns (r3, budget)."""
+    series = series or e192
+    return max(((r3, drift_budget(r1, r2, r3, keys=("s3_min", "s3_max"), **kw)) for r3 in series(40.0, 70.0)),
+               key=lambda x: x[1])
+
+
 def candidate_b():
     r1 = min(r for r in e96(44.0, 50.0) if limits(r, TOL_1PCT, (), 2, leak_a=0.0)[2] <= STEP1_MAX_MA)
     r3 = max(r for r in e96(10.0, 232.0) if limits(r1, TOL_1PCT, (r,), 1, leak_a=0.0)[0] >= STEP3_MIN_MA)
@@ -231,7 +333,28 @@ def main():
           + " / ".join(f"{leakage_budget_a(*cc, TOL_01PCT, v_ilim=v)*1e9:.0f} nA" for v in (1.0, 0.8, 1.2)))
     okc = all(v >= 0 for v in margins(*cc, TOL_01PCT, **kw).values())
     print("candidate C meets all four HW-010 numbers with the TMUX1101 limits:", okc)
+    print_drift_report()
     return 0 if ok and okc else 1
+
+
+def print_drift_report():
+    """Owner decision 3 of 2026-11-22: R_ILIM3 56.2 k or 54.9 k with the table anchor and the resistor drift terms."""
+    kw = dict(leak_a=TMUX_LEAK_A, rds_max=TMUX_RDS_ON_MAX_OHM, anchored=True)
+    print("\n-- step 3 = both switches (ADR-0023), equation limits anchored to the SLVS841G table, TMUX1101 limits")
+    print(f"  table interpolation at 17.61 k: min {table_interp(17.61, 1):.1f} mA (equation {ios_min(17.61):.1f})")
+    print("  stack per resistor (tolerance + TCR over %g..%g degC + soldering + life):" % T_RESISTOR_C)
+    for name, d in DRIFT_SETS.items():
+        print(f"    {name:22s} {tol_eff(**d) * 100:.3f} %")
+    print(f"    {'tolerance + TCR':22s} {tol_eff(0.001, 25.0, 0.0, 0.0) * 100:.3f} %")
+    for r3 in (56.2, 54.9):
+        m = both_on_margins(47.0, 56.2, r3, TOL_01PCT, **kw)
+        b = drift_budget(47.0, 56.2, r3, **kw)
+        b3 = drift_budget(47.0, 56.2, r3, keys=("s3_min", "s3_max"), **kw)
+        b1 = drift_budget(47.0, 56.2, r3, keys=("s1_min", "s1_max"), **kw)
+        print(f"  R_ILIM3 {r3:g} k: margins at 0.1 % " + ", ".join(f"{k} {v:.1f}" for k, v in m.items())
+              + f" mA; drift budget {b * 100:.3f} % (step 3 {b3 * 100:.3f} %, step 1 {b1 * 100:.3f} %)")
+    r3, b = best_r3_for_budget(47.0, 56.2, **kw)
+    print(f"  E192 value with the largest step 3 budget: {r3:g} k ({b * 100:.3f} %)")
 
 
 if __name__ == "__main__":

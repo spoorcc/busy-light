@@ -26,7 +26,8 @@ def snap(v, grid=None):
 OVERLAP_PEN_FLOOR = 2000.0
 # Cost per mm of centre distance beyond a proximity rule (ADR-0016 layout rules); the floor above leaves the annealer
 # too stiff to meet the rules by chance, so the rules are part of the cost as well as the seed accept check.
-RULE_PEN = 40.0
+# PLACE_RULE_PEN overrides it for one experiment batch (RV-019 pass 3, S4); unset it is the ADR-0016 value 40.
+RULE_PEN = float(os.environ.get("PLACE_RULE_PEN", "40"))
 # Layout experiment ring12 (default 0 = off, one change per batch): BLOCK_W is the cost per mm that a member of a functional
 # block sits beyond its radius from the block anchor; ORIENT_W is the cost per like part (same family) that points along
 # the other axis; twins (mirror-image parts of the two switch circuits) must match in rotation and side, at double weight.
@@ -58,7 +59,7 @@ class Placer:
         self.parts, self.nets, self.fixed_pins = parts, nets, fixed_pins
         self.fixed_rects, self.region_ok, self.margin = fixed_rects, region_ok, margin
         self.rng = random.Random(seed)
-        self.rules = tuple(rules)       # (ref, ref, limit mm): cost RULE_PEN per mm of centre distance beyond the limit
+        self.rules = tuple(rules)       # (ref, ref or ((x, y), ...) of a fixed part, limit mm): cost RULE_PEN per mm beyond
         self.weights = weights or {}     # net name -> factor on the half-perimeter wire length (default 1)
         self.blocks = tuple(blocks)     # (anchor, member, radius mm)
         self.families = tuple(tuple(f) for f in families)      # tuples of refs that should share one orientation
@@ -134,6 +135,10 @@ class Placer:
         for n in self.net_of.get(ref, ()):
             c += self.weights.get(n, 1.0) * self.net_hpwl(n)
         for a, b, lim in self.rules:
+            if isinstance(b, tuple):                # fixed partner: the nearest of its points (plan 08 input path)
+                if ref == a:
+                    c += RULE_PEN * max(0.0, min(math.hypot(st[0] - px, st[1] - py) for px, py in b) - lim)
+                continue
             if ref not in (a, b):
                 continue
             o = self.state.get(b if ref == a else a)
@@ -220,9 +225,10 @@ class Placer:
 
 
 def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), iters=200000, margin=0.3, accept=None,
-          weights=None, rules=(), blocks=(), families=(), twins=(), strict_families=(), rows=()):
+          weights=None, rules=(), blocks=(), families=(), twins=(), strict_families=(), rows=(), misses=None):
     """Run the annealer for successive seeds; return the first overlap-free result that accept(state) allows
-    (else the best), with (state, seed, hpwl, overlap)."""
+    (else the best), with (state, seed, hpwl, overlap). The best is the one with the least overlap, then (when `misses`, a
+    function state -> number of missed rules, is given) the fewest rule misses, then the shortest wire (RV-019 pass 3, S4)."""
     best = None
     for s in seeds:
         pl = Placer(parts, nets, fixed_pins, fixed_rects, region_ok, margin=margin, seed=s, weights=weights, rules=rules,
@@ -230,8 +236,9 @@ def place(parts, nets, fixed_pins, fixed_rects, region_ok, seeds=range(1, 9), it
                     strict_families=strict_families, rows=rows)
         pl.run(iters=iters)
         ov, wl = pl.total_overlap(), pl.total_hpwl()
-        if best is None or (ov, wl) < (best[3], best[2]):
-            best = (dict(pl.state), s, wl, ov)
+        key = (0.0 if ov < 1e-9 else ov, misses(pl.state) if misses else 0, wl)
+        if best is None or key < best[4]:
+            best = (dict(pl.state), s, wl, ov, key)
         if ov < 1e-9 and (accept is None or accept(pl.state)):
             return dict(pl.state), s, wl, ov
-    return best
+    return best[:4]
