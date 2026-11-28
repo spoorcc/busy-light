@@ -74,7 +74,7 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** RED Art. 3(2) *(verify)*
 - **Priority:** Must
 - **Status:** Draft
-- **Amendment (draft, 2026-11-28; ADR-0027, plan 08 revision 7, DEV-009; the owner approves the text):** the module sits at the board edge with the antenna end flush with the edge; the vendor keep-out lies off the board. The antenna strip of the module (4.6 mm) is free of copper, components and wire on every layer (rule area). The end ring LEDs are 2.40 mm (courtyard) to 2.95 mm (body) from the strip and are inside the vendor's 15 mm area, so the statement "no LED inside that area" is not met by them; the range test decides (RISK-011, TC-205).
+- **Amendment (draft, 2026-11-28; ADR-0027, plan 08 revision 7, DEV-004; the owner approves the text):** the module sits at the board edge with the antenna end flush with the edge; the vendor keep-out lies off the board. The antenna strip of the module (4.6 mm) is free of copper, components and wire on every layer (rule area). The end ring LEDs are 2.40 mm (courtyard) to 2.95 mm (body) from the strip and are inside the vendor's 15 mm area, so the statement "no LED inside that area" is not met by them; the range test decides (RISK-011, TC-205).
 - **Note (owner decisions of 2026-11-18, ADR-0023 update):** for P1 the module moves 5 mm towards the antenna-side board edge and the full library courtyard of the module (antenna keep-out included) is kept free of movable parts; the LED ring parts D6 to D12 and their capacitors stay inside the vendor keep-out as before (DEV-004). Not measured: range (TC-205).
 
 ### HW-006 Test points and programming access
