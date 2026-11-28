@@ -57,14 +57,15 @@ class Table(unittest.TestCase):
         self.assertAlmostEqual(MO.largest_dim_mm(MO.USB_MOUTH_R), 57.45, places=2)   # report 4.1: 57.43
         self.assertLess(MO.largest_dim_mm(MO.USB_MOUTH_R), MO.m("MAX_DIM_MECH001"))
 
-    def test_housing_limit_is_65_mm_since_2026_11_27(self):
-        """Owner decision 2026-11-27 (journal 2026-11-27): MECH-001 upper limit 65 mm (was 60 mm). The generator guard sits 0.2 mm
-        below it and rejects a longer nose; a nose that keeps the housing under the guard is accepted."""
-        self.assertEqual(MO.m("MAX_DIM_MECH001"), 65.0)
-        self.assertAlmostEqual(MO.MAX_DIM_SPIKE_MM, 64.8, places=6)
+    def test_housing_limit_is_66_mm_since_2026_11_28(self):
+        """Owner decision 2026-11-28 (ADR-0027 accepted, MECH-001 amendment): upper limit 66 mm (was 65 mm on 2026-11-27, 60 mm
+        on 2026-11-22). The generator guard sits 0.2 mm below it and rejects a longer housing; one under the guard is accepted."""
+        self.assertEqual(MO.m("MAX_DIM_MECH001"), 66.0)
+        self.assertAlmostEqual(MO.MAX_DIM_SPIKE_MM, 65.8, places=6)
         self.assertAlmostEqual(MO.check_largest_dim(37.0), 64.6, places=6)
+        self.assertAlmostEqual(MO.check_largest_dim(38.1), 65.7, places=6)
         with self.assertRaises(ValueError):
-            MO.check_largest_dim(37.3)                          # 64.9 mm
+            MO.check_largest_dim(38.3)                          # 65.9 mm
 
     def test_led_azimuths(self):
         az = MO.led_azimuths()

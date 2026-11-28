@@ -62,7 +62,7 @@ MECH = {
     "USB_L": (7.35, "script P['USB_L'] PLACEHOLDER typical mid-mount receptacle length"),
     "USB_W": (8.94, "script P['USB_W'] PLACEHOLDER"),
     "USB_H": (3.26, "script P['USB_H'] PLACEHOLDER"),
-    "MAX_DIM_MECH001": (65.0, "MECH-001 as amended by the owner 2026-11-27 (60.0 from 2026-11-22, 58.0 before; script P['MAX_DIM_MECH001'], report 4.1)"),
+    "MAX_DIM_MECH001": (66.0, "MECH-001 as amended by the owner 2026-11-28 (ADR-0027; 65.0 from 2026-11-27, 60.0 from 2026-11-22, 58.0 before; script P['MAX_DIM_MECH001'], report 4.1)"),
     "T_WALL": (1.6, "script P['T_WALL']"),
     "V1_MOUTH_IN": (0.5, "script P['V1_MOUTH_IN']: mouth protrudes 0.5 mm into the window"),
     "BTN_AZ": (240.0, "script P['BTN_AZ']: side-actuated button at the PCB edge"),
@@ -86,7 +86,7 @@ R_OUT = 26.5                                               # script P['D_OUT'] /
 
 def largest_dim_mm(mouth_r):
     """Housing largest dimension in V1 for a receptacle mouth at radius mouth_r: end wall outer face plus R_OUT.
-    The script gives 57.43 mm for mouth 29.85 (report 4.1); the limit is MAX_DIM_MECH001 = 65 mm (MECH-001, 2026-11-27)."""
+    The script gives 57.43 mm for mouth 29.85 (report 4.1); the limit is MAX_DIM_MECH001 = 66 mm (MECH-001, 2026-11-28)."""
     return (mouth_r - m("V1_MOUTH_IN") + m("T_WALL")) + R_OUT
 
 

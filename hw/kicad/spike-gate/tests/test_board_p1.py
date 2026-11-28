@@ -90,10 +90,10 @@ class BoardP1(unittest.TestCase):
         self.assertEqual((res.returncode, doc["failures"]), (0, []))
 
     def test_housing_size_within_mech001(self):
-        """MECH-001 (amended 2026-11-22 to 60 mm, 2026-11-27 to 65 mm; RV-016 row 22: the 59.24 mm was not reported against the limit)."""
+        """MECH-001 (amended 2026-11-22 to 60 mm, 2026-11-27 to 65 mm, 2026-11-28 to 66 mm; RV-016 row 22: the 59.24 mm was not reported against the limit)."""
         import mech_outline
         self.assertLessEqual(self.info["largest_dim_mm"], mech_outline.m("MAX_DIM_MECH001"))
-        self.assertEqual(mech_outline.m("MAX_DIM_MECH001"), 65.0)
+        self.assertEqual(mech_outline.m("MAX_DIM_MECH001"), 66.0)
 
     def test_known_u9_courtyard_overlaps_only(self):
         """The strict DRC tolerates 14 courtyard overlaps with U9 (DEV-004) and checks only that U9 takes part. The owner
