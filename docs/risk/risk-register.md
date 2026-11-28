@@ -588,3 +588,14 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Residual risk (after mitigation):** Not assessed
 - **Verified by:** TC-208 step 6, order step O2
 - **Status:** Open
+
+### RISK-054 Light edges of the split ring are not sharp (ADR-0027)
+
+- **Hazard / failure mode:** The four arc ends of the split ring look soft, faded or leaky: light through the printed walls, a dim end (50 % at an absorbing wall), light at the seam between insert and cap, or light guided sideways under a translucent plate
+- **Cause:** FDM walls of [1.2] mm are not opaque (optical density not measured), a printed white face reflects less than the ideal mirror of the model, the seam tolerance is 0.30 mm, the printer and filaments are not known
+- **Effect:** The look is not Apple grade (plan 09 D8) and the owner's request of 2026-11-28 is not met
+- **Severity (1-5):** 2  **Likelihood (1-5):** 3  **Initial risk:** 6
+- **Mitigated by:** MECH-014 and TC-317 (coupons before the lid), the white wall faces and the per-LED gain table of ADR-0027, fallbacks C and D on the same board
+- **Residual risk (after mitigation):** Not assessed
+- **Verified by:** TC-317
+- **Status:** Open

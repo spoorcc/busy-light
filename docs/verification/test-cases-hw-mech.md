@@ -265,3 +265,12 @@
 - **Expected result / pass criteria:** see acceptance criteria of MECH-009
 - **Automated:** TBD
 - **Evidence:** TBD
+
+### TC-317 Sharp ends of the light arcs
+
+- **Verifies:** MECH-014
+- **Level:** Prototype
+- **Procedure:** TBD
+- **Expected result / pass criteria:** see acceptance criteria of MECH-014
+- **Automated:** TBD (the model in `mech/analysis/light_edge.py` has unit tests; the measurement is manual)
+- **Evidence:** TBD

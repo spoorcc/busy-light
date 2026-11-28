@@ -1,6 +1,6 @@
 # Mechanical Requirements
 
-- **Status:** Approved (MECH-001 to MECH-009, owner, 2026-11-07, in two steps; bracketed values stay open)
+- **Status:** Approved (MECH-001 to MECH-009, owner, 2026-11-07, in two steps; bracketed values stay open); MECH-014 is Draft (proposed 2026-11-28, not approved)
 - **Version:** 0.2 (2026-11-07, assistant redraft after ADR-0003 and ADR-0011 Accepted, ADR-0014 Proposed, RV-004, RV-007; all entries stay Draft; only the owner approves)
 - **Owner:**
 
@@ -33,6 +33,7 @@ Process rules: `docs/process/README.md`.
 - **Category:** Functional
 - **Regulatory:** none
 - **Priority:** Should
+- **Approved amendment (owner, Ben Spoor, 2026-11-28, in the working session: "Do a split ring ensure by the mechanical design that the edges are sharp"; recorded by the assistant, `docs/journal/2026-11-28-owner-decision-split-ring.md`):** the ring is two arcs separated by two gaps (the USB-C connector in one, the antenna at the board edge in the other), not a closed band, and the ends of the arcs are sharp (MECH-014). The count of LEDs (16 in the statement) is open until the owner chooses it ([24] is the working value of ADR-0027, Proposed). The decision of 2026-11-07 (wide glow along the band, concept B) is read as still valid along each arc; the construction that makes the ends sharp is ADR-0027 (Proposed) and may replace concept B.
 - **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
 
 ### MECH-003 Antenna clearance
@@ -125,3 +126,16 @@ Process rules: `docs/process/README.md`.
 - **Regulatory:** none
 - **Priority:** Should
 - **Status:** Approved (owner, Ben Spoor, 2026-11-07, in the working session; recorded by the assistant; values in square brackets stay open until measured)
+
+### MECH-014 Sharp ends of the light arcs
+
+- **Statement:** The housing shall confine the light of each LED arc to its window, so that at each of the four arc ends the luminance 1 mm inside the end is at least [90] % of the mean luminance of the arc, the luminance 3 mm outside the end is at most [2] % of it, and the transition from 10 % to 90 % takes at most [1.5] mm.
+- **Rationale:** Owner request 2026-11-28 ("ensure by the mechanical design that the edges are sharp") for the split ring (ADR-0027, Proposed). A hard cut alone is not sharp: with an absorbing wall at the end the luminance at the wall is 50 % of the arc mean and reaches 90 % only about 7 mm inside (`mech/analysis/light_edge.py`, model), so the criterion is on the luminance profile and not on the geometry of the cut. A translucent plate over the gap guides light sideways, so the end cannot be sharp under one plate. Proposed by the assistant; the values in square brackets are working values.
+- **Parent:** SYS-001
+- **Acceptance criteria:** Coupon test first: a sector coupon of [3] LEDs at the working pitch with light walls of [0.8], [1.2] and [1.6] mm, black and white-faced, measures the optical density of each wall and the luminance profile at the end (camera with fixed settings at [0.5] m, raw image, profile along the arc). Then the finished lid: all four ends meet the three numbers of the statement at the status brightness, and no light is visible in a gap at 1 m in a dark room. Wall and cap materials are non-conductive and non-metallic (MECH-003); the black filament is checked for conductivity.
+- **Verification method:** Test
+- **Verified by:** TC-317
+- **Category:** Performance
+- **Regulatory:** none
+- **Priority:** Should
+- **Status:** Draft (proposed by the assistant, 2026-11-28; not approved; values in square brackets are working values until measured)
