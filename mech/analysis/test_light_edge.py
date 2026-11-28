@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Tests of the arc-end luminance model (ADR-0027, MECH-014 proposal)."""
+"""Tests of the arc-end luminance model (ADR-0027, MECH-015 proposal)."""
 
 import light_edge as le
 import pytest

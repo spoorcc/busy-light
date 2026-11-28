@@ -595,7 +595,7 @@ Source: goldfish review RV-001 and the "new risks" lists of ADR-0003 to ADR-0008
 - **Cause:** FDM walls of [1.2] mm are not opaque (optical density not measured), a printed white face reflects less than the ideal mirror of the model, the seam tolerance is 0.30 mm, the printer and filaments are not known
 - **Effect:** The look is not Apple grade (plan 09 D8) and the owner's request of 2026-11-28 is not met
 - **Severity (1-5):** 2  **Likelihood (1-5):** 3  **Initial risk:** 6
-- **Mitigated by:** MECH-014 and TC-317 (coupons before the lid), the white wall faces and the per-LED gain table of ADR-0027, fallbacks C and D on the same board
+- **Mitigated by:** MECH-015 and TC-317 (coupons before the lid), the white wall faces and the per-LED gain table of ADR-0027, fallbacks C and D on the same board
 - **Residual risk (after mitigation):** Not assessed
 - **Verified by:** TC-317
 - **Status:** Open

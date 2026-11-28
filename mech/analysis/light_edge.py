@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Luminance at the end of an LED arc behind a light wall (ADR-0027, MECH-014 proposal).
+"""Luminance at the end of an LED arc behind a light wall (ADR-0027, MECH-015 proposal).
 
 Model: the LEDs of one arc are point sources with a Lambertian pattern at the height d above the
 LED plane (the diffuser underside). A source at the lateral distance x from a point of the diffuser

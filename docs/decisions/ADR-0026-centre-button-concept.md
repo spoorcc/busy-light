@@ -1,6 +1,7 @@
 # ADR-0026: Centre-of-ring button: switch place, disc support and switch part
 
 - **Status:** Proposed (owner directions D1 and D4 of 2026-11-24 in plan 09: S2 with the Omron B3U-1000P as the working direction and S3 as the second candidate, both to the coupon gate; the owner has not accepted this ADR)
+- **Note 2026-11-28:** the owner reversed D7 (disc dark): the disc is translucent and lit by 4 LEDs (ADR-0027, plan 09 D10). The criterion "light from the ring only, disc dark" and the opaque-disc transmission limit no longer apply; the switch and support comparison stays. Proposed ADR, text otherwise unchanged.
 - **Date:** 2026-11-24
 - **Deciders / reviewers:** owner (Ben Spoor); written by the assistant; reviewed by a fresh goldfish against the code on 2026-11-24 (RV-018 rows R29 to R45); this version is not yet reviewed
 - **Related:** MECH-004, MECH-002, MECH-003, MECH-001, HW-008, HW-007, SYS-017, ADR-0003, ADR-0006, ADR-0023, DEV-004, RV-018
